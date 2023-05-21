@@ -1,0 +1,96 @@
+﻿@import url('https://fonts.googleapis.com/css?family=Poppins:100,300,400,500,600,700,800, 800i, 900&display=swap');
+@import url(https://fonts.googleapis.com/css?family=Satisfy);
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Courgette&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Parisienne&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Ms+Madi&display=swap');
+
+.box-wrapper {
+	background-color: lightgray;
+	background-color: #cac5c552;
+	overflow: hidden;
+	max-width: 320px;
+	/*	border: 1px solid #a7b1ab;*/
+	padding: 0;
+	text-align: center;
+	transition: box-shadow 0.3s ease;
+	position: relative;
+}
+
+.box-wrapper:hover {
+	box-shadow: 0px 3px 10px rgb(0 0 0 / 40%);
+}
+
+.box-wrapper img {
+	max-width: 100%;
+	height: 225px;
+	object-fit: cover;
+}
+
+.title {
+	font-size: 2em;
+	font-weight: 600;
+	font-family: 'Courgette', cursive;
+	width: fit-content;
+	margin: auto;
+}
+
+.desc {
+	font-family: 'Satisfy', cursive;
+	font-size: 1.2em;
+}
+
+.box-content {
+	position: relative;
+	z-index: 1;
+}
+
+	.box-content:before {
+		content: '';
+		width: 200%;
+		height: 100px;
+		position: absolute;
+		display: block;
+		background-color: #fff;
+		transform: rotate(-8deg);
+		top: -50px;
+		left: -10%;
+		z-index: -1;
+	}
+
+.box-content .price {
+	font-size: 2em;
+	font-weight: 900;
+	display: block;
+	width: 100px;
+	margin: 20px auto 0;
+	position: relative;
+	font-family: 'Satisfy', cursive;
+}
+
+
+.box-content .footer ul {
+	list-style: none;
+	padding: 0;
+	margin: 1em 0;
+}
+
+	.box-content .footer ul li {
+		color: #efd829;
+	}
+
+.expanded .success {
+	opacity: 1;
+	transition: opacity 0.3s 0.6s;
+}
+/* Responsiveness */
+
+.go-row {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+}
+
+.checked .success {
+
+}

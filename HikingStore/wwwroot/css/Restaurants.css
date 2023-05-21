@@ -1,0 +1,15 @@
+﻿.restaurant-links {
+    margin-bottom: 25px;
+}
+
+.restaurant-links a {
+    background: #F5F5F5;
+    font-family: 'Poppins', sans-serif;
+    line-height: 27px;
+    font-weight: 700;
+    padding: 0 9px;
+    margin: 5px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+

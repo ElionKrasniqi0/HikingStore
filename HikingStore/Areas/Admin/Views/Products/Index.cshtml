@@ -1,0 +1,65 @@
+﻿@model List<Product>
+
+<section class="content">
+    <div class="container-fluid">
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+
+
+                        <div class="card-tools">
+                            <div class="input-group input-group-sm" style="width: 150px;">
+                                <a asp-action="Create" asp-controller="Products" asp-area="Admin"
+                                   class="btn btn-outline-success"> Add Product</a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body table-responsive p-0" style="height: 300px;">
+                        <table class="table table-head-fixed">
+                            <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>Category </th>
+                                    <th>Descreption</th>
+                                    <th>Price</th>
+                                    <th>Image</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@item.ProName</td>
+                                        <td>@item.Category.CatName</td>
+                                        <td>@item.Descreption</td>
+                                        <td>@item.Price</td>
+                                        <td>
+                                            <img src="~/Product/@item.ProImage" style="width:150px; height:150px;" />
+                                        </td>
+                                        <td>
+                                            <a asp-action="Edit" asp-controller="Products" asp-route-id="@item.ProId" class="btn btn-outline-primary">
+                                                Edit Product
+                                            </a>
+                                            <a asp-action="Delete" asp-controller="Products" asp-route-id="@item.ProId" class="btn btn-outline-danger">
+                                                Delete Product
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</section>
