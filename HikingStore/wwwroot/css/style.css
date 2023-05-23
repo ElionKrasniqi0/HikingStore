@@ -1119,20 +1119,26 @@ label.custom-checkbox .checkmark:after {
     }
 .btn-danger {
     color: #fff;
-    background: #ff0018;
-    border-color: #ff0018;
+    background: olivedrab;
+    border-color: olivedrab;
 }
-span.circle-tag {
-    height: 36px;
-    width: 36px;
-    background: #fff;
-    border-radius: 50%;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-}
+
+    .btn-danger
+    color: #fff;
+    background: olivedrab;
+    border-color: olivedrab;
+    }
+    .span.circle-tag {
+        height: 36px;
+        width: 36px;
+        background: #fff;
+        border-radius: 50%;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
 span.square-tag > img,
 span.rectangle-tag > img,
 span.circle-tag > img {
