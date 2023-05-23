@@ -70,7 +70,7 @@
 </div>*@
 <!-- Cart End -->
             <div class="col-md-12">
-                <form asp-action="Create">
+                <form asp-area=""  asp-controller="Order" asp-action="Index">
                     <div class="form-row">
                         <div class="form-group col-md-4">
                             <label>Street</label>
@@ -89,7 +89,7 @@
                         <label>Additional Comment</label>
                         <textarea @*asp-for="Comment"*@ class="form-control"></textarea>
                     </div>
-                    <button type="submit" onsubmit="checkCity" class="btn btn-primary float-right" style="margin-bottom: 30px">Confirm Order</button>
+                    <button type="submit" onsubmit="checkCity" class="btn btn-primary float-right" style="margin-bottom: 30px">Pay with Cash</button>
                 </form>
             </div>
         </div>

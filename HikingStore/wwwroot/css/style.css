@@ -1073,16 +1073,16 @@ label.custom-checkbox .checkmark:after {
   height: 22px;
 }
 .btn-submit {
-  color: #fff;
-  background: #ff0018;
-  border-color: #ff0018;
+    color: #fff;
+    background: olivedrab;
+    border-color: olivedrab;
 }
-.btn-submit:hover,
-.btn-submit:focus {
-  border-color: #bc2634;
-  background: #bc2634;
-  color: #fff;
-}
+    .btn-submit:hover,
+    .btn-submit:focus {
+        border-color: olivedrab;
+        background: olivedrab;
+        color: #fff;
+    }
 .btn-facebook {
   color: #fff;
   background: #3b5998;
@@ -1106,6 +1106,17 @@ label.custom-checkbox .checkmark:after {
   color: #fff;
 }
 
+.btn-primary {
+    color: #fff;
+    background-color: olivedrab;
+    border-color: olivedrab;
+}
+
+    .btn-primary:hover {
+        color: #fff;
+        background-color: olivedrab;
+        border-color: olivedrab;
+    }
 .btn-danger {
     color: #fff;
     background: #ff0018;
@@ -2399,6 +2410,13 @@ footer .footer-links .appimg {
   background: #f5f5f5;
   font-weight: 500;
   color: #000000de;
+}
+
+.container-fluid {
+    padding-right: 5px;
+    padding-left: 100px;
+    margin-right: auto;
+    margin-left: auto;
 }
 .side-bar .trending-blog-cat li {
   display: flex;
