@@ -1,4 +1,4 @@
-﻿@model List<ShoppingCart>
+﻿@model ShoppingCartDetails
 <!-- Cart Start -->
  <h3 class="text-center" style="padding-top: 20px">Shopping Cart</h3>
 <div class="container-fluid">
@@ -16,7 +16,7 @@
                     </tr>
                 </thead>
                 <tbody class="align-middle">
-                    @foreach (var item in Model)
+                    @foreach (var item in Model.Carts)
                     {
                         <tr>
                             <td class="align-middle"><img src="~/Product/@item.Product.ProImage" alt="" style="width: 50px;"> </td>
@@ -42,6 +42,12 @@
 
                 </tbody>
             </table>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <h5 class="float-left">Total:</h5> <h5 class="float-right">@Model.TotalAmount.ToString("c")</h5>
+            </div>
         </div>
         @*<div class="col-lg-4">*@
 

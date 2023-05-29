@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HikingStore.Controllers
 {
+    
     public class CartsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -21,7 +22,15 @@ namespace HikingStore.Controllers
             var user = await _userManager.GetUserAsync(User);
             var result = _context.ShoppingCarts.Include(p => p.Product).Where(u => u.UserId == user.Id).ToList();
 
-            return View(result);
+            var total = result.Select(n => n.Product.Price * n.Qty).Sum();
+
+            var deatils = new ShoppingCartDetails()
+            {
+                TotalAmount = total,
+                Carts = result
+            };
+
+            return View(deatils);
         }
         [HttpPost]
         public async Task<IActionResult> AddToCart(ShoppingCart model, int qty)

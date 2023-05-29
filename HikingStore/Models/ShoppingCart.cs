@@ -21,4 +21,11 @@ namespace HikingStore.Models
 
         public virtual IdentityUser IdentityUser { get; set; }
     }
+
+    public class ShoppingCartDetails
+    {
+        public List<ShoppingCart> Carts { get; set; }
+        public decimal TotalAmount { get; set; }
+
+    }
 }

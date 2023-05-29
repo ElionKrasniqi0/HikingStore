@@ -4493,3 +4493,8 @@ btn-primary {
     background-color: #000000;
     border-color: #000000;
 }
+
+.card-primary:not(.card-outline) > .card-header {
+    background-color: olivedrab;
+    border-bottom: 0;
+}
