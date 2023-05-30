@@ -2,7 +2,7 @@
 
 <!-- Shop Detail Start -->
 <div class="container-fluid pb-5">
-    
+    <form asp-action="AddToCart" asp-controller="Carts" asp-route-ProId=@Model.ProId method="post">
 
         <div class="row px-xl-5">
             <div class="col-lg-5 mb-30">
@@ -26,7 +26,6 @@
                     </p>
 
                     <div class="d-flex align-items-center mb-4 pt-2">
-                    <form asp-action="AddToCart" asp-controller="Carts" asp-route-ProId=@Model.ProId method="post">
                         <div class="input-group quantity mr-3" style="width: 130px;">
                             <div class="input-group-btn">
                                 <a class="btn btn-primary btn-minus">
@@ -46,12 +45,13 @@
                             <i class="fa fa-shopping-cart mr-1"></i> Add To
                             Cart
                         </button>
-                    </form>
+                    
                     </div>
                 </div>
             </div>
-        </div>
     
+        </div>
+    </form>
 
 </div>
 <script>

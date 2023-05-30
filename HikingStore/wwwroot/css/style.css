@@ -44,31 +44,6 @@ nav {
     align-items: center;
 }
 
-.hover-animation, .navbar-brand {
-    position: relative;
-    display: block;
-    text-decoration: none;
-    transition: 0.5s;
-}
-
-.hover-animation::after, .navbar-brand::after {
-    position: absolute;
-    content: "";
-    top: 100%;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background: red;
-    transform: scaleX(0);
-    transform-origin: right;
-    transition: transform 0.25s;
-}
-
-.hover-animation:hover::after, .navbar-brand:hover::after {
-    transform: scaleX(1);
-    transform-origin: left;
-}
-
 .navbar-brand-responsive {
     margin-right: 1rem;
     font-size: 1.25rem;
@@ -1122,12 +1097,6 @@ label.custom-checkbox .checkmark:after {
     background: olivedrab;
     border-color: olivedrab;
 }
-
-    .btn-danger
-    color: #fff;
-    background: olivedrab;
-    border-color: olivedrab;
-    }
     .span.circle-tag {
         height: 36px;
         width: 36px;
