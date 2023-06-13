@@ -278,3 +278,14 @@ C:\Users\Admin\Desktop\HikingStore\HikingStore\HikingStore\obj\Debug\net6.0\refi
 C:\Users\Admin\Desktop\HikingStore\HikingStore\HikingStore\obj\Debug\net6.0\HikingStore.pdb
 C:\Users\Admin\Desktop\HikingStore\HikingStore\HikingStore\obj\Debug\net6.0\HikingStore.genruntimeconfig.cache
 C:\Users\Admin\Desktop\HikingStore\HikingStore\HikingStore\obj\Debug\net6.0\ref\HikingStore.dll
+C:\Users\Admin\Desktop\HikingStore\HikingStore\HikingStore\bin\Debug\net6.0\AspNetCoreHero.ToastNotification.Views.dll
+C:\Users\Admin\Desktop\HikingStore\HikingStore\HikingStore\bin\Debug\net6.0\AspNetCoreHero.ToastNotification.dll
+C:\Users\Admin\Desktop\HikingStore\HikingStore\HikingStore\bin\Debug\net6.0\IdentityModel.dll
+C:\Users\Admin\Desktop\HikingStore\HikingStore\HikingStore\bin\Debug\net6.0\IdentityServer4.dll
+C:\Users\Admin\Desktop\HikingStore\HikingStore\HikingStore\bin\Debug\net6.0\IdentityServer4.AspNetIdentity.dll
+C:\Users\Admin\Desktop\HikingStore\HikingStore\HikingStore\bin\Debug\net6.0\IdentityServer4.Storage.dll
+C:\Users\Admin\Desktop\HikingStore\HikingStore\HikingStore\bin\Debug\net6.0\System.Net.Http.Formatting.dll
+C:\Users\Admin\Desktop\HikingStore\HikingStore\HikingStore\bin\Debug\net6.0\System.Web.Http.dll
+C:\Users\Admin\Desktop\HikingStore\HikingStore\HikingStore\bin\Debug\net6.0\Microsoft.AspNetCore.Authentication.OpenIdConnect.dll
+C:\Users\Admin\Desktop\HikingStore\HikingStore\HikingStore\bin\Debug\net6.0\Newtonsoft.Json.Bson.dll
+C:\Users\Admin\Desktop\HikingStore\HikingStore\HikingStore\bin\Debug\net6.0\System.Linq.Dynamic.Core.dll

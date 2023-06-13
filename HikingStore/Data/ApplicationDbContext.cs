@@ -1,10 +1,21 @@
-﻿using HikingStore.Models;
+﻿using HikingStore.Enum;
+using HikingStore.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HikingStore.Data
 {
-    public class ApplicationDbContext : IdentityDbContext
+    public class ApplicationUser : IdentityUser
+    {
+        //public bool IsRoleResctricted { get; set; }
+        public UserStatus UserStatus { get; set; } = UserStatus.Client;
+
+        [ForeignKey("UserId")]
+        public virtual ICollection<Request> Requests { get; set; }
+    }
+        public class ApplicationDbContext : IdentityDbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)

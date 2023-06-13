@@ -1,0 +1,46 @@
+﻿@using HikingStore.Areas.Admin.ViewModel
+@model EditRoleViewModel
+
+@{
+    var roles = ViewBag.roles;
+}
+
+<div class="container-fluid" style="margin-top: 50px;">
+    <div class="small text-black" style="font-size:25px"><i class="fas fa-arrow-left"></i><a asp-action="Index" style="color:black"> Go back</a></div>
+    <form method="post" class="mb-5">
+        <h1 class="text-center">ADD USER ROLE</h1>
+        <div class="row d-flex justify-content-center">
+            <div class="col-md-3">
+                <select class="custom-select col-md-8" asp-for="@Model.RoleId" asp-items="@roles">
+                </select>
+                <input type="submit" class="btn btn-dark" name="name" value="ADD" />
+            </div>
+        </div>
+    </form>
+    <hr />
+
+    <div class="container my-5" style="width:50%">
+        <h1 class="text-center">MANAGE USER ROLES</h1>
+        <table class="table table-striped text-center">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Role Name</th>
+                    <th scope="col">Manage</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.UserRoles)
+                {
+                    <tr>
+                        <td>@item</td>
+                        <td>
+                            <form method="POST" asp-controller="RoleManager" asp-action="RemoveUserRole" asp-route-UserId="@Model.UserId" asp-route-roleName="@item">
+                                <button type="submit" class="btn btn-danger">Remove Role</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

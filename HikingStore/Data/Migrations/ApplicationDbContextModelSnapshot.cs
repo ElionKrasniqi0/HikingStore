@@ -39,7 +39,7 @@ namespace HikingStore.Data.Migrations
 
                     b.HasKey("CatId");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("HikingStore.Models.Contact", b =>
@@ -66,7 +66,7 @@ namespace HikingStore.Data.Migrations
 
                     b.HasKey("CoId");
 
-                    b.ToTable("Contacts");
+                    b.ToTable("Contacts", (string)null);
                 });
 
             modelBuilder.Entity("HikingStore.Models.Product", b =>
@@ -99,7 +99,7 @@ namespace HikingStore.Data.Migrations
 
                     b.HasIndex("CatId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("HikingStore.Models.ShoppingCart", b =>
@@ -125,7 +125,7 @@ namespace HikingStore.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ShoppingCarts");
+                    b.ToTable("ShoppingCarts", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
