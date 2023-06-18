@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "fYcIY6gwk8zFJCPSCOYscKejK9LNm9P94o+3gxXNwvk=",
+  "Hash": "5jeKAOADS3e9HjeE/OpuCH/VanpvajEKpyCLhL+zKxc=",
   "Source": "HikingStore",
   "BasePath": "_content/HikingStore",
   "Mode": "Default",
@@ -2684,6 +2684,23 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\category\\Cat5.jpg"
+    },
+    {
+      "Identity": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\category\\d0aef244-ef98-4b31-8bec-4e77f378dd38.jpg",
+      "SourceId": "HikingStore",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\",
+      "BasePath": "_content/HikingStore",
+      "RelativePath": "category/d0aef244-ef98-4b31-8bec-4e77f378dd38.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\category\\d0aef244-ef98-4b31-8bec-4e77f378dd38.jpg"
     },
     {
       "Identity": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\category\\e2c1b54d-6db8-472b-b4a9-e28dc2391629.jpg",
@@ -7633,6 +7650,23 @@
       "OriginalItemSpec": "wwwroot\\Product\\2ac8512e-59fc-40c7-a7a1-bc816ffa4543.jpg"
     },
     {
+      "Identity": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\Product\\2c512aaa-66aa-407c-ac23-58f8a1b33f04.jpg",
+      "SourceId": "HikingStore",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\",
+      "BasePath": "_content/HikingStore",
+      "RelativePath": "Product/2c512aaa-66aa-407c-ac23-58f8a1b33f04.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\Product\\2c512aaa-66aa-407c-ac23-58f8a1b33f04.jpg"
+    },
+    {
       "Identity": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\Product\\341cbe17-8a99-4cc1-a2dc-ff2e53a54cea.jpg",
       "SourceId": "HikingStore",
       "SourceType": "Discovered",
@@ -7716,6 +7750,23 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\Product\\74589cb6-986f-478d-955e-b81850f35480.jpg"
+    },
+    {
+      "Identity": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\Product\\9cc241cd-c0d4-44b1-89c7-68725b5fa1fd.jpg",
+      "SourceId": "HikingStore",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\",
+      "BasePath": "_content/HikingStore",
+      "RelativePath": "Product/9cc241cd-c0d4-44b1-89c7-68725b5fa1fd.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\Product\\9cc241cd-c0d4-44b1-89c7-68725b5fa1fd.jpg"
     },
     {
       "Identity": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\Product\\Category6.jpg",
