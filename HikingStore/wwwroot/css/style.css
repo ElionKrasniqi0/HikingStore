@@ -51,18 +51,18 @@ nav {
     transition: 0.5s;
 }
 
-.hover-animation::after, .navbar-brand::after {
-    position: absolute;
-    content: "";
-    top: 100%;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background: red;
-    transform: scaleX(0);
-    transform-origin: right;
-    transition: transform 0.25s;
-}
+    .hover-animation::after, .navbar-brand::after {
+        position: absolute;
+        content: "";
+        top: 100%;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: olivedrab;
+        transform: scaleX(0);
+        transform-origin: right;
+        transition: transform 0.25s;
+    }
 
 .hover-animation:hover::after, .navbar-brand:hover::after {
     transform: scaleX(1);
@@ -1073,15 +1073,21 @@ label.custom-checkbox .checkmark:after {
   height: 22px;
 }
 .btn-submit {
-  color: #fff;
-  background: #ff0018;
-  border-color: #ff0018;
+    color: #fff;
+    background: #6B8E23;
+    border-color: #6B8E23;
 }
-.btn-submit:hover,
-.btn-submit:focus {
-  border-color: #bc2634;
-  background: #bc2634;
-  color: #fff;
+    .btn-submit:hover,
+    .btn-submit:focus {
+        border-color: #6B8E23;
+        background: #6B8E23;
+        color: #fff;
+    }
+
+.btn-danger {
+    color: #fff;
+    background-color: #6B8E23;
+    border-color: #6B8E23;
 }
 .btn-facebook {
   color: #fff;

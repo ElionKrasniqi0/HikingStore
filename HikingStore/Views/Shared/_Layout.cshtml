@@ -37,7 +37,7 @@
     <header>
         <nav class="navbar navbar-expand-lg">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index"><span style="font-weight:700;"></span><span style="font-weight:800; color:olivedrab;"> Hiking </span><span style="font-weight:800; color:black;"> Store </span> </a>
+                <a class="navbar-brand " asp-area="" asp-controller="Home" asp-action="Index"><span style="font-weight:700;"></span><span style="font-weight:800; color:olivedrab;"> Hiking </span><span style="font-weight:800; color:black;"> Store </span> </a>
 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
@@ -46,13 +46,13 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-dark hover-animation" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Product">Product</a>
+                            <a class="nav-link text-dark hover-animation" asp-area="" asp-controller="Home" asp-action="Product">Product</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Contact">Contact</a>
+                            <a class="nav-link text-dark hover-animation" asp-area="" asp-controller="Home" asp-action="Contact">Contact</a>
                         </li>
                     </ul>
 
@@ -60,13 +60,13 @@
                     <div id="userNav" class="nav-links">
                         @if (SignInManager.IsSignedIn(User) && !User.IsInRole("Admin"))
                         {
-                            if (User.IsInRole("RestaurantOwner"))
+                            if (User.IsInRole("User"))
                             {
                                 <span class="nav-link hover-animation myTooltip">
                                     <a id="restaurantManager" asp-area="UserRestaurantManager" asp-controller="RestaurantManager" asp-action="Index">
                                         <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1.7em" height="1.7em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path d="M12.5 1.5c-1.77 0-3.33 1.17-3.83 2.87C8.14 4.13 7.58 4 7 4a4 4 0 0 0-4 4a4.01 4.01 0 0 0 3 3.87V19h13v-7.13c1.76-.46 3-2.05 3-3.87a4 4 0 0 0-4-4c-.58 0-1.14.13-1.67.37c-.5-1.7-2.06-2.87-3.83-2.87m-.5 9h1v7h-1v-7m-3 2h1v5H9v-5m6 0h1v5h-1v-5M6 20v1a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-1H6Z" /></svg>
                                     </a>
-                                    <span class="tooltiptext" style="margin: 0 0 -20px -95px; width: 180px;">Manage your <span style="/*color:red;*/ text-decoration:underline; text-decoration-thickness: 3px; text-decoration-color: red;">Restaurant</span></span>
+                                    <span class="tooltiptext" style="margin: 0 0 -20px -95px; width: 180px;">Manage your <span style="/*color:red;*/ text-decoration:underline; text-decoration-thickness: 3px; text-decoration-color: olivedrab;">Restaurant</span></span>
                                 </span>
                             }
 
@@ -159,14 +159,14 @@
                                 <a asp-area="Identity" asp-page="/Account/Manage/Index" class="text-light-white fw-600">Account Details</a>
                             </li>
                             <li>
-                                <a asp-area="" asp-controller="Reservations" asp-action="UserReservations" class="text-light-white fw-600">Reservations History</a>
+                                <a asp-area="" asp-controller="Reservations" asp-action="User" class="text-light-white fw-600">Order History</a>
                             </li>
                             <li>
-                                <a asp-area="" asp-controller="Restaurants" asp-action="Index" class="text-light-white fw-600">Find restaurant</a>
+                                <a asp-area="" asp-controller="Carts" asp-action="Index" class="text-light-white fw-600">Shopping Cart</a>
                             </li>
 
                             <li>
-                                <a asp-area="" asp-controller="Reservations" asp-action="UserReservations" class="text-light-white fw-600">Track Reservations</a>
+                                <a asp-area="" asp-controller="Categories" asp-action="Index" class="text-light-white fw-600">Categories Product</a>
                             </li>
                         </ul>
                     </div>
