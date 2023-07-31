@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "q5Y789Q+K8xGm7K5XBNx8WSfqe08D9qN9Ab4JYG8tVvGO5cv0v3tT0LFT37eJIlBpHAo5uPUYu/otsUJVFmjPA==",
+  "dgSpecHash": "ks2cSJqnA4OqThNjOjvl/V2QCXFMBUxXEzDrjpL+yZil5mb3NZ8GLHa1975PJqZm8N9Pk2fJVekULd0txvAczg==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\HikingStore.csproj",
+  "projectFilePath": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Admin\\.nuget\\packages\\aspnetcorehero.toastnotification\\1.1.0\\aspnetcorehero.toastnotification.1.1.0.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",

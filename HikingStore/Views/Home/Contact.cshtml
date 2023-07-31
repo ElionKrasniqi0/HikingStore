@@ -59,53 +59,57 @@
         <div class="row justify-content-center">
             <div class="col-md-10">
 
-                <div class="row align-items-center">
-                    <div class="col-lg-7 mb-5 mb-lg-0">
+                <div class="row align-items-center" >
+                    <div class="col-lg-7 mb-5 mb-lg-0" style="padding-top: 20px">
 
-                        <h2 class="mb-5">Fill the form. <br> It's easy.</h2>
+                        <h2 class="mb-4">Contact us. <br> Here!</h2>
 
-                        <form class="border-right pr-5 mb-5" method="post" id="contactForm" name="contactForm">
+                        <form asp-action="Contact" class="border-right pr-5 mb-5" method="post">
+                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                             <div class="row">
-                                <div class="col-md-6 form-group">
-                                    <input type="text" class="form-control" name="fname" id="fname" placeholder="First name">
+                                <div class="col-md-6 control-group">
+                                        <input type="text" class="form-control" placeholder="Your Name"
+                                               asp-for="Name" />
+                                    <span asp-validation-for="Name" class="text-danger"></span>
                                 </div>
                                 <div class="col-md-6 form-group">
-                                    <input type="text" class="form-control" name="lname" id="lname" placeholder="Last name">
+                                    <input type="email" class="form-control" placeholder="Your Email" asp-for="Email" />
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-md-12 form-group">
-                                    <input type="text" class="form-control" name="email" id="email" placeholder="Email">
+                                <div class="col-md-12 control-group">
+                                    <input type="text" class="form-control" placeholder="Subject" asp-for="Subject" />
+                                    <span asp-validation-for="Subject" class="text-danger"></span>
                                 </div>
                             </div>
 
                             <div class="row">
-                                <div class="col-md-12 form-group">
-                                    <textarea class="form-control" name="message" id="message" cols="30" rows="7" placeholder="Write your message"></textarea>
+                                <div class="col-md-12 control-group">
+                                    <textarea class="form-control" rows="8" id="message" placeholder="Message" asp-for="Message"></textarea>
+                                    <span asp-validation-for="Message" class="text-danger"></span>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
-                                    <input type="submit" value="Send Message" class="btn btn-primary rounded-0 py-2 px-4">
-                                    <span class="submitting"></span>
+                                    <button class="btn-second  btn-submit   btn btn-success py-2 px-4" type="submit">
+                                        Send
+                                        Message
+                                    </button>
                                 </div>
                             </div>
                         </form>
 
-                        <div id="form-message-warning mt-4"></div>
-                        <div id="form-message-success">
-                            Your message was sent, thank you!
-                        </div>
 
                     </div>
                     <div class="col-lg-4 ml-auto">
-                        <h3 class="mb-4">Let's talk about everything.</h3>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nihil deleniti itaque similique magni. Magni, laboriosam perferendis maxime!</p>
-                        <p><a href="#">Read more</a></p>
+                        <p class="mb-2"><i class="fa fa-map-marker-alt text-secondary mr-3"></i>Meto Bajraktari,Prishtina</p>
+                        <p class="mb-2"><i class="fa fa-envelope text-secondary mr-3"></i>hikingstore@outlook.com</p>
+                        <p class="mb-2"><i class="fa fa-phone-alt text-secondary mr-3"></i>+(383) 045 804 555</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-

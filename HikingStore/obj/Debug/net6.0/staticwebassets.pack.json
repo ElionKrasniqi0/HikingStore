@@ -1,1635 +1,1651 @@
 {
   "Files": [
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\obj\\Debug\\net6.0\\scopedcss\\projectbundle\\HikingStore.bundle.scp.css",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\obj\\Debug\\net6.0\\scopedcss\\projectbundle\\HikingStore.bundle.scp.css",
       "PackagePath": "staticwebassets\\HikingStore.bundle.scp.css"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\401.html",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\401.html",
       "PackagePath": "staticwebassets\\AdminTheme\\dist\\401.html"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\404.html",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\404.html",
       "PackagePath": "staticwebassets\\AdminTheme\\dist\\404.html"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\500.html",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\500.html",
       "PackagePath": "staticwebassets\\AdminTheme\\dist\\500.html"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\assets\\demo\\chart-area-demo.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\assets\\demo\\chart-area-demo.js",
       "PackagePath": "staticwebassets\\AdminTheme\\dist\\assets\\demo\\chart-area-demo.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\assets\\demo\\chart-bar-demo.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\assets\\demo\\chart-bar-demo.js",
       "PackagePath": "staticwebassets\\AdminTheme\\dist\\assets\\demo\\chart-bar-demo.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\assets\\demo\\chart-pie-demo.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\assets\\demo\\chart-pie-demo.js",
       "PackagePath": "staticwebassets\\AdminTheme\\dist\\assets\\demo\\chart-pie-demo.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\assets\\demo\\datatables-demo.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\assets\\demo\\datatables-demo.js",
       "PackagePath": "staticwebassets\\AdminTheme\\dist\\assets\\demo\\datatables-demo.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\assets\\img\\error-404-monochrome.svg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\assets\\img\\error-404-monochrome.svg",
       "PackagePath": "staticwebassets\\AdminTheme\\dist\\assets\\img\\error-404-monochrome.svg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\charts.html",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\charts.html",
       "PackagePath": "staticwebassets\\AdminTheme\\dist\\charts.html"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\css\\form.css",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\css\\form.css",
       "PackagePath": "staticwebassets\\AdminTheme\\dist\\css\\form.css"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\css\\styles.css",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\css\\styles.css",
       "PackagePath": "staticwebassets\\AdminTheme\\dist\\css\\styles.css"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\index.html",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\index.html",
       "PackagePath": "staticwebassets\\AdminTheme\\dist\\index.html"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\js\\scripts.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\js\\scripts.js",
       "PackagePath": "staticwebassets\\AdminTheme\\dist\\js\\scripts.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\layout-sidenav-light.html",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\layout-sidenav-light.html",
       "PackagePath": "staticwebassets\\AdminTheme\\dist\\layout-sidenav-light.html"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\layout-static.html",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\layout-static.html",
       "PackagePath": "staticwebassets\\AdminTheme\\dist\\layout-static.html"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\login.html",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\login.html",
       "PackagePath": "staticwebassets\\AdminTheme\\dist\\login.html"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\password.html",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\password.html",
       "PackagePath": "staticwebassets\\AdminTheme\\dist\\password.html"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\register.html",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\register.html",
       "PackagePath": "staticwebassets\\AdminTheme\\dist\\register.html"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\tables.html",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\dist\\tables.html",
       "PackagePath": "staticwebassets\\AdminTheme\\dist\\tables.html"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\scripts\\build-assets.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\scripts\\build-assets.js",
       "PackagePath": "staticwebassets\\AdminTheme\\scripts\\build-assets.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\scripts\\build-pug.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\scripts\\build-pug.js",
       "PackagePath": "staticwebassets\\AdminTheme\\scripts\\build-pug.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\scripts\\build-scripts.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\scripts\\build-scripts.js",
       "PackagePath": "staticwebassets\\AdminTheme\\scripts\\build-scripts.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\scripts\\build-scss.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\scripts\\build-scss.js",
       "PackagePath": "staticwebassets\\AdminTheme\\scripts\\build-scss.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\scripts\\clean.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\scripts\\clean.js",
       "PackagePath": "staticwebassets\\AdminTheme\\scripts\\clean.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\scripts\\render-assets.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\scripts\\render-assets.js",
       "PackagePath": "staticwebassets\\AdminTheme\\scripts\\render-assets.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\scripts\\render-pug.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\scripts\\render-pug.js",
       "PackagePath": "staticwebassets\\AdminTheme\\scripts\\render-pug.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\scripts\\render-scripts.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\scripts\\render-scripts.js",
       "PackagePath": "staticwebassets\\AdminTheme\\scripts\\render-scripts.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\scripts\\render-scss.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\scripts\\render-scss.js",
       "PackagePath": "staticwebassets\\AdminTheme\\scripts\\render-scss.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\scripts\\sb-watch.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\scripts\\sb-watch.js",
       "PackagePath": "staticwebassets\\AdminTheme\\scripts\\sb-watch.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\scripts\\start-debug.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\scripts\\start-debug.js",
       "PackagePath": "staticwebassets\\AdminTheme\\scripts\\start-debug.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\scripts\\start.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\scripts\\start.js",
       "PackagePath": "staticwebassets\\AdminTheme\\scripts\\start.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\assets\\demo\\chart-area-demo.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\assets\\demo\\chart-area-demo.js",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\assets\\demo\\chart-area-demo.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\assets\\demo\\chart-bar-demo.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\assets\\demo\\chart-bar-demo.js",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\assets\\demo\\chart-bar-demo.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\assets\\demo\\chart-pie-demo.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\assets\\demo\\chart-pie-demo.js",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\assets\\demo\\chart-pie-demo.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\assets\\demo\\datatables-demo.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\assets\\demo\\datatables-demo.js",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\assets\\demo\\datatables-demo.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\assets\\img\\error-404-monochrome.svg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\assets\\img\\error-404-monochrome.svg",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\assets\\img\\error-404-monochrome.svg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\js\\scripts.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\js\\scripts.js",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\js\\scripts.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\layouts\\authentication.pug",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\layouts\\authentication.pug",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\pug\\layouts\\authentication.pug"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\layouts\\dashboard.pug",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\layouts\\dashboard.pug",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\pug\\layouts\\dashboard.pug"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\layouts\\error.pug",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\layouts\\error.pug",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\pug\\layouts\\error.pug"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\layouts\\includes\\footer.pug",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\layouts\\includes\\footer.pug",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\pug\\layouts\\includes\\footer.pug"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\layouts\\includes\\head\\css.pug",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\layouts\\includes\\head\\css.pug",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\pug\\layouts\\includes\\head\\css.pug"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\layouts\\includes\\head\\icons.pug",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\layouts\\includes\\head\\icons.pug",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\pug\\layouts\\includes\\head\\icons.pug"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\layouts\\includes\\head\\meta.pug",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\layouts\\includes\\head\\meta.pug",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\pug\\layouts\\includes\\head\\meta.pug"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\layouts\\includes\\head\\title.pug",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\layouts\\includes\\head\\title.pug",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\pug\\layouts\\includes\\head\\title.pug"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\layouts\\includes\\navigation\\sidenav.pug",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\layouts\\includes\\navigation\\sidenav.pug",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\pug\\layouts\\includes\\navigation\\sidenav.pug"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\layouts\\includes\\navigation\\topnav.pug",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\layouts\\includes\\navigation\\topnav.pug",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\pug\\layouts\\includes\\navigation\\topnav.pug"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\layouts\\includes\\scripts.pug",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\layouts\\includes\\scripts.pug",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\pug\\layouts\\includes\\scripts.pug"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\pages\\401.pug",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\pages\\401.pug",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\pug\\pages\\401.pug"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\pages\\404.pug",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\pages\\404.pug",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\pug\\pages\\404.pug"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\pages\\500.pug",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\pages\\500.pug",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\pug\\pages\\500.pug"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\pages\\charts.pug",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\pages\\charts.pug",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\pug\\pages\\charts.pug"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\pages\\includes\\datatable.pug",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\pages\\includes\\datatable.pug",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\pug\\pages\\includes\\datatable.pug"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\pages\\includes\\page-header.pug",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\pages\\includes\\page-header.pug",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\pug\\pages\\includes\\page-header.pug"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\pages\\index.pug",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\pages\\index.pug",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\pug\\pages\\index.pug"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\pages\\layout-sidenav-light.pug",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\pages\\layout-sidenav-light.pug",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\pug\\pages\\layout-sidenav-light.pug"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\pages\\layout-static.pug",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\pages\\layout-static.pug",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\pug\\pages\\layout-static.pug"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\pages\\login.pug",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\pages\\login.pug",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\pug\\pages\\login.pug"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\pages\\password.pug",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\pages\\password.pug",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\pug\\pages\\password.pug"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\pages\\register.pug",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\pages\\register.pug",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\pug\\pages\\register.pug"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\pages\\tables.pug",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\pug\\pages\\tables.pug",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\pug\\pages\\tables.pug"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\_global.scss",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\_global.scss",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\scss\\_global.scss"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\_variables.scss",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\_variables.scss",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\scss\\_variables.scss"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\layout\\_authentication.scss",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\layout\\_authentication.scss",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\scss\\layout\\_authentication.scss"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\layout\\_dashboard-default.scss",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\layout\\_dashboard-default.scss",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\scss\\layout\\_dashboard-default.scss"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\layout\\_dashboard-fixed.scss",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\layout\\_dashboard-fixed.scss",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\scss\\layout\\_dashboard-fixed.scss"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\layout\\_error.scss",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\layout\\_error.scss",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\scss\\layout\\_error.scss"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\navigation\\_nav.scss",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\navigation\\_nav.scss",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\scss\\navigation\\_nav.scss"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\navigation\\_topnav.scss",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\navigation\\_topnav.scss",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\scss\\navigation\\_topnav.scss"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\navigation\\sidenav\\_sidenav-dark.scss",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\navigation\\sidenav\\_sidenav-dark.scss",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\scss\\navigation\\sidenav\\_sidenav-dark.scss"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\navigation\\sidenav\\_sidenav-light.scss",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\navigation\\sidenav\\_sidenav-light.scss",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\scss\\navigation\\sidenav\\_sidenav-light.scss"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\navigation\\sidenav\\_sidenav.scss",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\navigation\\sidenav\\_sidenav.scss",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\scss\\navigation\\sidenav\\_sidenav.scss"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\styles.scss",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\styles.scss",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\scss\\styles.scss"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\variables\\_navigation.scss",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\variables\\_navigation.scss",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\scss\\variables\\_navigation.scss"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\variables\\_spacing.scss",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\AdminTheme\\src\\scss\\variables\\_spacing.scss",
       "PackagePath": "staticwebassets\\AdminTheme\\src\\scss\\variables\\_spacing.scss"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\Product\\055b7e18-70d5-47ba-8d07-fe0ba0e0d634.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\055b7e18-70d5-47ba-8d07-fe0ba0e0d634.jpg",
       "PackagePath": "staticwebassets\\Product\\055b7e18-70d5-47ba-8d07-fe0ba0e0d634.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\Product\\09a01415-8384-473f-8036-e6c0f8a23f59.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\09a01415-8384-473f-8036-e6c0f8a23f59.jpg",
       "PackagePath": "staticwebassets\\Product\\09a01415-8384-473f-8036-e6c0f8a23f59.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\Product\\170643ca-9701-4345-9c3e-b6559df322c6.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\170643ca-9701-4345-9c3e-b6559df322c6.jpg",
       "PackagePath": "staticwebassets\\Product\\170643ca-9701-4345-9c3e-b6559df322c6.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\Product\\293fe499-b572-497a-bca2-5eb6a9133096.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\293fe499-b572-497a-bca2-5eb6a9133096.jpg",
       "PackagePath": "staticwebassets\\Product\\293fe499-b572-497a-bca2-5eb6a9133096.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\Product\\2ac8512e-59fc-40c7-a7a1-bc816ffa4543.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\2ac8512e-59fc-40c7-a7a1-bc816ffa4543.jpg",
       "PackagePath": "staticwebassets\\Product\\2ac8512e-59fc-40c7-a7a1-bc816ffa4543.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\Product\\2c512aaa-66aa-407c-ac23-58f8a1b33f04.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\2c512aaa-66aa-407c-ac23-58f8a1b33f04.jpg",
       "PackagePath": "staticwebassets\\Product\\2c512aaa-66aa-407c-ac23-58f8a1b33f04.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\Product\\341cbe17-8a99-4cc1-a2dc-ff2e53a54cea.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\32addbc1-d97b-4f92-a9e4-82b1b8c993b5.jpg",
+      "PackagePath": "staticwebassets\\Product\\32addbc1-d97b-4f92-a9e4-82b1b8c993b5.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\341cbe17-8a99-4cc1-a2dc-ff2e53a54cea.jpg",
       "PackagePath": "staticwebassets\\Product\\341cbe17-8a99-4cc1-a2dc-ff2e53a54cea.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\Product\\3691008c-ea0b-4350-9a05-ef85a0844eb6.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\3691008c-ea0b-4350-9a05-ef85a0844eb6.jpg",
       "PackagePath": "staticwebassets\\Product\\3691008c-ea0b-4350-9a05-ef85a0844eb6.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\Product\\544265d1-6d32-4918-9a3c-5c60935b156a.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\544265d1-6d32-4918-9a3c-5c60935b156a.jpg",
       "PackagePath": "staticwebassets\\Product\\544265d1-6d32-4918-9a3c-5c60935b156a.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\Product\\5e988e54-9906-4afd-a7ff-5c0ecd9ebdc0.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\5e988e54-9906-4afd-a7ff-5c0ecd9ebdc0.jpg",
       "PackagePath": "staticwebassets\\Product\\5e988e54-9906-4afd-a7ff-5c0ecd9ebdc0.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\Product\\6a47c241-4306-4911-b168-891995cf86e0.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\6a47c241-4306-4911-b168-891995cf86e0.jpg",
       "PackagePath": "staticwebassets\\Product\\6a47c241-4306-4911-b168-891995cf86e0.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\Product\\6c9e3885-781a-49c8-806a-8ad6c519bea7.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\6c9e3885-781a-49c8-806a-8ad6c519bea7.jpg",
       "PackagePath": "staticwebassets\\Product\\6c9e3885-781a-49c8-806a-8ad6c519bea7.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\Product\\74589cb6-986f-478d-955e-b81850f35480.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\74589cb6-986f-478d-955e-b81850f35480.jpg",
       "PackagePath": "staticwebassets\\Product\\74589cb6-986f-478d-955e-b81850f35480.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\Product\\9cc241cd-c0d4-44b1-89c7-68725b5fa1fd.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\7f36980f-205a-4f50-9e0d-c711fbaf01e7.jpg",
+      "PackagePath": "staticwebassets\\Product\\7f36980f-205a-4f50-9e0d-c711fbaf01e7.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\9cc241cd-c0d4-44b1-89c7-68725b5fa1fd.jpg",
       "PackagePath": "staticwebassets\\Product\\9cc241cd-c0d4-44b1-89c7-68725b5fa1fd.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\Product\\Category6.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\Category6.jpg",
       "PackagePath": "staticwebassets\\Product\\Category6.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\Product\\Product1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\Product1.jpg",
       "PackagePath": "staticwebassets\\Product\\Product1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\Product\\Product2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\Product2.jpg",
       "PackagePath": "staticwebassets\\Product\\Product2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\Product\\Product3.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\Product3.jpg",
       "PackagePath": "staticwebassets\\Product\\Product3.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\Product\\Product4.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\Product4.jpg",
       "PackagePath": "staticwebassets\\Product\\Product4.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\Product\\Product5.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\Product5.jpg",
       "PackagePath": "staticwebassets\\Product\\Product5.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\Product\\ProductShoes1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\ProductShoes1.jpg",
       "PackagePath": "staticwebassets\\Product\\ProductShoes1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\Product\\ProductWomen1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\ProductWomen1.jpg",
       "PackagePath": "staticwebassets\\Product\\ProductWomen1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\Product\\e054f1fc-689a-48e6-99d4-447c0dfe0b7f.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\e054f1fc-689a-48e6-99d4-447c0dfe0b7f.jpg",
       "PackagePath": "staticwebassets\\Product\\e054f1fc-689a-48e6-99d4-447c0dfe0b7f.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\category\\001b4025-c923-4d73-b867-2bf0a149e307.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\001b4025-c923-4d73-b867-2bf0a149e307.jpg",
       "PackagePath": "staticwebassets\\category\\001b4025-c923-4d73-b867-2bf0a149e307.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\category\\1980ef90-2824-420f-b52f-5b680d79d48a.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\14cbbb49-c650-4477-8e3c-f3b8171574dc.jpg",
+      "PackagePath": "staticwebassets\\category\\14cbbb49-c650-4477-8e3c-f3b8171574dc.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\1980ef90-2824-420f-b52f-5b680d79d48a.jpg",
       "PackagePath": "staticwebassets\\category\\1980ef90-2824-420f-b52f-5b680d79d48a.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\category\\2ebc0f58-5ee6-4a7c-8479-9d84b6e7a821.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\2ebc0f58-5ee6-4a7c-8479-9d84b6e7a821.jpg",
       "PackagePath": "staticwebassets\\category\\2ebc0f58-5ee6-4a7c-8479-9d84b6e7a821.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\category\\366b76b4-6fd3-4544-982d-38d4b021c53e.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\366b76b4-6fd3-4544-982d-38d4b021c53e.jpg",
       "PackagePath": "staticwebassets\\category\\366b76b4-6fd3-4544-982d-38d4b021c53e.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\category\\3f4638fc-7ff0-4fca-974b-de8d1089d684.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\3f4638fc-7ff0-4fca-974b-de8d1089d684.jpg",
       "PackagePath": "staticwebassets\\category\\3f4638fc-7ff0-4fca-974b-de8d1089d684.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\category\\4b4ffd1a-aa9d-4f5c-b128-cc14273bea57.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\4b4ffd1a-aa9d-4f5c-b128-cc14273bea57.jpg",
       "PackagePath": "staticwebassets\\category\\4b4ffd1a-aa9d-4f5c-b128-cc14273bea57.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\category\\6e4a1030-8455-4c7a-abc1-7e1bab416edf.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\6e4a1030-8455-4c7a-abc1-7e1bab416edf.jpg",
       "PackagePath": "staticwebassets\\category\\6e4a1030-8455-4c7a-abc1-7e1bab416edf.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\category\\7d5c6687-9b38-48c0-afc7-4a35c355fd51.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\7d5c6687-9b38-48c0-afc7-4a35c355fd51.jpg",
       "PackagePath": "staticwebassets\\category\\7d5c6687-9b38-48c0-afc7-4a35c355fd51.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\category\\81a1ab7f-483a-4be0-a3cc-a78e51ec2b52.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\81a1ab7f-483a-4be0-a3cc-a78e51ec2b52.jpg",
       "PackagePath": "staticwebassets\\category\\81a1ab7f-483a-4be0-a3cc-a78e51ec2b52.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\category\\8fcb5053-c45c-4fde-ac92-5830e0d34801.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\8fcb5053-c45c-4fde-ac92-5830e0d34801.jpg",
       "PackagePath": "staticwebassets\\category\\8fcb5053-c45c-4fde-ac92-5830e0d34801.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\category\\994fb0fe-eeaa-4e0e-ae27-1447012361cc.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\994fb0fe-eeaa-4e0e-ae27-1447012361cc.jpg",
       "PackagePath": "staticwebassets\\category\\994fb0fe-eeaa-4e0e-ae27-1447012361cc.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\category\\Cat1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\Cat1.jpg",
       "PackagePath": "staticwebassets\\category\\Cat1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\category\\Cat2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\Cat2.jpg",
       "PackagePath": "staticwebassets\\category\\Cat2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\category\\Cat3.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\Cat3.jpg",
       "PackagePath": "staticwebassets\\category\\Cat3.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\category\\Cat4.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\Cat4.jpg",
       "PackagePath": "staticwebassets\\category\\Cat4.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\category\\Cat5.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\Cat5.jpg",
       "PackagePath": "staticwebassets\\category\\Cat5.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\category\\a6b72b4c-5d57-4719-af60-abe1a2890dec.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\a6b72b4c-5d57-4719-af60-abe1a2890dec.jpg",
       "PackagePath": "staticwebassets\\category\\a6b72b4c-5d57-4719-af60-abe1a2890dec.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\category\\d0aef244-ef98-4b31-8bec-4e77f378dd38.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\cd7a9912-9466-47f1-9da2-56133cf2715a.jpg",
+      "PackagePath": "staticwebassets\\category\\cd7a9912-9466-47f1-9da2-56133cf2715a.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\d0aef244-ef98-4b31-8bec-4e77f378dd38.jpg",
       "PackagePath": "staticwebassets\\category\\d0aef244-ef98-4b31-8bec-4e77f378dd38.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\category\\dd3305e2-a1eb-459b-8b73-49a8e60ad219.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\dd3305e2-a1eb-459b-8b73-49a8e60ad219.jpg",
       "PackagePath": "staticwebassets\\category\\dd3305e2-a1eb-459b-8b73-49a8e60ad219.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\category\\e2c1b54d-6db8-472b-b4a9-e28dc2391629.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\e2c1b54d-6db8-472b-b4a9-e28dc2391629.jpg",
       "PackagePath": "staticwebassets\\category\\e2c1b54d-6db8-472b-b4a9-e28dc2391629.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\category\\f3f0ea6b-fb29-4cfa-a155-f4b952be2972.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\f3f0ea6b-fb29-4cfa-a155-f4b952be2972.jpg",
       "PackagePath": "staticwebassets\\category\\f3f0ea6b-fb29-4cfa-a155-f4b952be2972.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\css\\404.css",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\css\\404.css",
       "PackagePath": "staticwebassets\\css\\404.css"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\css\\Restaurants.css",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\css\\Restaurants.css",
       "PackagePath": "staticwebassets\\css\\Restaurants.css"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\css\\bootstrap.min.css",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\css\\bootstrap.min.css",
       "PackagePath": "staticwebassets\\css\\bootstrap.min.css"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\css\\font-awesome.css",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\css\\font-awesome.css",
       "PackagePath": "staticwebassets\\css\\font-awesome.css"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\css\\font\\Flaticon.eot",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\css\\font\\Flaticon.eot",
       "PackagePath": "staticwebassets\\css\\font\\Flaticon.eot"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\css\\font\\Flaticon.svg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\css\\font\\Flaticon.svg",
       "PackagePath": "staticwebassets\\css\\font\\Flaticon.svg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\css\\font\\Flaticon.ttf",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\css\\font\\Flaticon.ttf",
       "PackagePath": "staticwebassets\\css\\font\\Flaticon.ttf"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\css\\font\\Flaticon.woff",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\css\\font\\Flaticon.woff",
       "PackagePath": "staticwebassets\\css\\font\\Flaticon.woff"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\css\\font\\Flaticon.woff2",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\css\\font\\Flaticon.woff2",
       "PackagePath": "staticwebassets\\css\\font\\Flaticon.woff2"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\css\\font\\Flaticond41d.eot",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\css\\font\\Flaticond41d.eot",
       "PackagePath": "staticwebassets\\css\\font\\Flaticond41d.eot"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\css\\font\\bootstrap - Copy.min.css",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\css\\font\\bootstrap - Copy.min.css",
       "PackagePath": "staticwebassets\\css\\font\\bootstrap - Copy.min.css"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\css\\font\\bootstrap.min.css",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\css\\font\\bootstrap.min.css",
       "PackagePath": "staticwebassets\\css\\font\\bootstrap.min.css"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\css\\font\\flaticon.css",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\css\\font\\flaticon.css",
       "PackagePath": "staticwebassets\\css\\font\\flaticon.css"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\css\\index.css",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\css\\index.css",
       "PackagePath": "staticwebassets\\css\\index.css"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\css\\ion.rangeSlider.min.css",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\css\\ion.rangeSlider.min.css",
       "PackagePath": "staticwebassets\\css\\ion.rangeSlider.min.css"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\css\\magnific-popup.css",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\css\\magnific-popup.css",
       "PackagePath": "staticwebassets\\css\\magnific-popup.css"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\css\\nice-select.css",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\css\\nice-select.css",
       "PackagePath": "staticwebassets\\css\\nice-select.css"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\css\\responsive.css",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\css\\responsive.css",
       "PackagePath": "staticwebassets\\css\\responsive.css"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\css\\searchResults.css",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\css\\searchResults.css",
       "PackagePath": "staticwebassets\\css\\searchResults.css"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\css\\site.css",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\css\\site.css",
       "PackagePath": "staticwebassets\\css\\site.css"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\css\\style.css",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\css\\style.css",
       "PackagePath": "staticwebassets\\css\\style.css"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\css\\swiper.min.css",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\css\\swiper.min.css",
       "PackagePath": "staticwebassets\\css\\swiper.min.css"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\favicon.ico",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\favicon.ico",
       "PackagePath": "staticwebassets\\favicon.ico"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\font\\Flaticon.eot",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\font\\Flaticon.eot",
       "PackagePath": "staticwebassets\\font\\Flaticon.eot"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\font\\Flaticon.svg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\font\\Flaticon.svg",
       "PackagePath": "staticwebassets\\font\\Flaticon.svg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\font\\Flaticon.ttf",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\font\\Flaticon.ttf",
       "PackagePath": "staticwebassets\\font\\Flaticon.ttf"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\font\\Flaticon.woff",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\font\\Flaticon.woff",
       "PackagePath": "staticwebassets\\font\\Flaticon.woff"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\font\\Flaticon.woff2",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\font\\Flaticon.woff2",
       "PackagePath": "staticwebassets\\font\\Flaticon.woff2"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\font\\Flaticond41d.eot",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\font\\Flaticond41d.eot",
       "PackagePath": "staticwebassets\\font\\Flaticond41d.eot"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\font\\flaticon.css",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\font\\flaticon.css",
       "PackagePath": "staticwebassets\\font\\flaticon.css"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-brands-400.eot",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-brands-400.eot",
       "PackagePath": "staticwebassets\\fonts\\fa-brands-400.eot"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-brands-400.svg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-brands-400.svg",
       "PackagePath": "staticwebassets\\fonts\\fa-brands-400.svg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-brands-400.ttf",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-brands-400.ttf",
       "PackagePath": "staticwebassets\\fonts\\fa-brands-400.ttf"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-brands-400.woff",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-brands-400.woff",
       "PackagePath": "staticwebassets\\fonts\\fa-brands-400.woff"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-brands-400.woff2",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-brands-400.woff2",
       "PackagePath": "staticwebassets\\fonts\\fa-brands-400.woff2"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-brands-400d41d.eot",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-brands-400d41d.eot",
       "PackagePath": "staticwebassets\\fonts\\fa-brands-400d41d.eot"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-regular-400.eot",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-regular-400.eot",
       "PackagePath": "staticwebassets\\fonts\\fa-regular-400.eot"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-regular-400.svg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-regular-400.svg",
       "PackagePath": "staticwebassets\\fonts\\fa-regular-400.svg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-regular-400.woff",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-regular-400.woff",
       "PackagePath": "staticwebassets\\fonts\\fa-regular-400.woff"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-regular-400.woff2",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-regular-400.woff2",
       "PackagePath": "staticwebassets\\fonts\\fa-regular-400.woff2"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-regular-400d41d.eot",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-regular-400d41d.eot",
       "PackagePath": "staticwebassets\\fonts\\fa-regular-400d41d.eot"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-solid-900.eot",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-solid-900.eot",
       "PackagePath": "staticwebassets\\fonts\\fa-solid-900.eot"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-solid-900.svg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-solid-900.svg",
       "PackagePath": "staticwebassets\\fonts\\fa-solid-900.svg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-solid-900.ttf",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-solid-900.ttf",
       "PackagePath": "staticwebassets\\fonts\\fa-solid-900.ttf"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-solid-900.woff2",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-solid-900.woff2",
       "PackagePath": "staticwebassets\\fonts\\fa-solid-900.woff2"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-solid-900d41d.eot",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\fonts\\fa-solid-900d41d.eot",
       "PackagePath": "staticwebassets\\fonts\\fa-solid-900d41d.eot"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\img\\Cat1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\img\\Cat1.jpg",
       "PackagePath": "staticwebassets\\img\\Cat1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\img\\Cat2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\img\\Cat2.jpg",
       "PackagePath": "staticwebassets\\img\\Cat2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\img\\Cat3.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\img\\Cat3.jpg",
       "PackagePath": "staticwebassets\\img\\Cat3.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\img\\Cat4.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\img\\Cat4.jpg",
       "PackagePath": "staticwebassets\\img\\Cat4.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\img\\Cat5.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\img\\Cat5.jpg",
       "PackagePath": "staticwebassets\\img\\Cat5.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\bootstrap.min.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\bootstrap.min.js",
       "PackagePath": "staticwebassets\\js\\bootstrap.min.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\001-search.png",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\001-search.png",
       "PackagePath": "staticwebassets\\js\\img\\001-search.png"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\002-stopwatch.png",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\002-stopwatch.png",
       "PackagePath": "staticwebassets\\js\\img\\002-stopwatch.png"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\003-placeholder.png",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\003-placeholder.png",
       "PackagePath": "staticwebassets\\js\\img\\003-placeholder.png"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\004-shopping-bag.png",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\004-shopping-bag.png",
       "PackagePath": "staticwebassets\\js\\img\\004-shopping-bag.png"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\M.png",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\M.png",
       "PackagePath": "staticwebassets\\js\\img\\M.png"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\about\\72x72\\user-1.png",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\about\\72x72\\user-1.png",
       "PackagePath": "staticwebassets\\js\\img\\about\\72x72\\user-1.png"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\about\\blog\\1110x350\\hbanner-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\about\\blog\\1110x350\\hbanner-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\about\\blog\\1110x350\\hbanner-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\about\\blog\\1110x350\\hbanner-2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\about\\blog\\1110x350\\hbanner-2.jpg",
       "PackagePath": "staticwebassets\\js\\img\\about\\blog\\1110x350\\hbanner-2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\about\\blog\\1920x700\\banner-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\about\\blog\\1920x700\\banner-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\about\\blog\\1920x700\\banner-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\about\\blog\\1920x700\\banner-2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\about\\blog\\1920x700\\banner-2.jpg",
       "PackagePath": "staticwebassets\\js\\img\\about\\blog\\1920x700\\banner-2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\about\\blog\\1920x700\\banner-3.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\about\\blog\\1920x700\\banner-3.jpg",
       "PackagePath": "staticwebassets\\js\\img\\about\\blog\\1920x700\\banner-3.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\about\\blog\\255x200\\about-section-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\about\\blog\\255x200\\about-section-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\about\\blog\\255x200\\about-section-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\about\\blog\\255x200\\about-section-2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\about\\blog\\255x200\\about-section-2.jpg",
       "PackagePath": "staticwebassets\\js\\img\\about\\blog\\255x200\\about-section-2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\about\\blog\\255x200\\about-section-3.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\about\\blog\\255x200\\about-section-3.jpg",
       "PackagePath": "staticwebassets\\js\\img\\about\\blog\\255x200\\about-section-3.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\about\\blog\\740x442\\blog-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\about\\blog\\740x442\\blog-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\about\\blog\\740x442\\blog-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\about\\blog\\740x442\\blog-2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\about\\blog\\740x442\\blog-2.jpg",
       "PackagePath": "staticwebassets\\js\\img\\about\\blog\\740x442\\blog-2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\arrow-2.svg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\arrow-2.svg",
       "PackagePath": "staticwebassets\\js\\img\\arrow-2.svg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\arrow-3.svg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\arrow-3.svg",
       "PackagePath": "staticwebassets\\js\\img\\arrow-3.svg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\banner-2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\banner-2.jpg",
       "PackagePath": "staticwebassets\\js\\img\\banner-2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\banner.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\banner.jpg",
       "PackagePath": "staticwebassets\\js\\img\\banner.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\banner\\banner-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\banner\\banner-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\banner\\banner-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\banner\\banner-2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\banner\\banner-2.jpg",
       "PackagePath": "staticwebassets\\js\\img\\banner\\banner-2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\banner\\banner-3.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\banner\\banner-3.jpg",
       "PackagePath": "staticwebassets\\js\\img\\banner\\banner-3.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\banner\\banner-4.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\banner\\banner-4.jpg",
       "PackagePath": "staticwebassets\\js\\img\\banner\\banner-4.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\banner\\banner-5.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\banner\\banner-5.jpg",
       "PackagePath": "staticwebassets\\js\\img\\banner\\banner-5.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\banner\\burger.png",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\banner\\burger.png",
       "PackagePath": "staticwebassets\\js\\img\\banner\\burger.png"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog-details\\40x40\\user-1.png",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog-details\\40x40\\user-1.png",
       "PackagePath": "staticwebassets\\js\\img\\blog-details\\40x40\\user-1.png"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog-details\\40x40\\user-2.png",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog-details\\40x40\\user-2.png",
       "PackagePath": "staticwebassets\\js\\img\\blog-details\\40x40\\user-2.png"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog-details\\40x40\\user-3.png",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog-details\\40x40\\user-3.png",
       "PackagePath": "staticwebassets\\js\\img\\blog-details\\40x40\\user-3.png"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog-details\\40x40\\user-4.png",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog-details\\40x40\\user-4.png",
       "PackagePath": "staticwebassets\\js\\img\\blog-details\\40x40\\user-4.png"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog-details\\822x337\\image-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog-details\\822x337\\image-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\blog-details\\822x337\\image-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\100x100\\popularpost-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\100x100\\popularpost-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\blog\\100x100\\popularpost-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\100x100\\popularpost-2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\100x100\\popularpost-2.jpg",
       "PackagePath": "staticwebassets\\js\\img\\blog\\100x100\\popularpost-2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\100x100\\popularpost-3.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\100x100\\popularpost-3.jpg",
       "PackagePath": "staticwebassets\\js\\img\\blog\\100x100\\popularpost-3.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\100x100\\popularpost-4.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\100x100\\popularpost-4.jpg",
       "PackagePath": "staticwebassets\\js\\img\\blog\\100x100\\popularpost-4.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\100x100\\popularpost-6.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\100x100\\popularpost-6.jpg",
       "PackagePath": "staticwebassets\\js\\img\\blog\\100x100\\popularpost-6.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\406x239\\shop-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\406x239\\shop-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\blog\\406x239\\shop-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\406x239\\shop-2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\406x239\\shop-2.jpg",
       "PackagePath": "staticwebassets\\js\\img\\blog\\406x239\\shop-2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\426x311\\blog-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\426x311\\blog-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\blog\\426x311\\blog-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\426x311\\blog-10.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\426x311\\blog-10.jpg",
       "PackagePath": "staticwebassets\\js\\img\\blog\\426x311\\blog-10.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\426x311\\blog-2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\426x311\\blog-2.jpg",
       "PackagePath": "staticwebassets\\js\\img\\blog\\426x311\\blog-2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\426x311\\blog-3.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\426x311\\blog-3.jpg",
       "PackagePath": "staticwebassets\\js\\img\\blog\\426x311\\blog-3.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\426x311\\blog-4.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\426x311\\blog-4.jpg",
       "PackagePath": "staticwebassets\\js\\img\\blog\\426x311\\blog-4.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\426x311\\blog-5.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\426x311\\blog-5.jpg",
       "PackagePath": "staticwebassets\\js\\img\\blog\\426x311\\blog-5.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\426x311\\blog-6.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\426x311\\blog-6.jpg",
       "PackagePath": "staticwebassets\\js\\img\\blog\\426x311\\blog-6.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\426x311\\blog-7.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\426x311\\blog-7.jpg",
       "PackagePath": "staticwebassets\\js\\img\\blog\\426x311\\blog-7.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\426x311\\blog-8.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\426x311\\blog-8.jpg",
       "PackagePath": "staticwebassets\\js\\img\\blog\\426x311\\blog-8.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\426x311\\blog-9.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\426x311\\blog-9.jpg",
       "PackagePath": "staticwebassets\\js\\img\\blog\\426x311\\blog-9.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\438x180\\shop-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\438x180\\shop-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\blog\\438x180\\shop-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\438x180\\shop-2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\438x180\\shop-2.jpg",
       "PackagePath": "staticwebassets\\js\\img\\blog\\438x180\\shop-2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\438x180\\shop-3.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\438x180\\shop-3.jpg",
       "PackagePath": "staticwebassets\\js\\img\\blog\\438x180\\shop-3.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\446x1025\\ad-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\446x1025\\ad-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\blog\\446x1025\\ad-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\446x501\\ff-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\446x501\\ff-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\blog\\446x501\\ff-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\ad-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\ad-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\blog\\ad-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\optin-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\blog\\optin-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\blog\\optin-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\checkout.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\checkout.jpg",
       "PackagePath": "staticwebassets\\js\\img\\checkout.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\facebook-logo.svg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\facebook-logo.svg",
       "PackagePath": "staticwebassets\\js\\img\\facebook-logo.svg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\gallery\\img-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\gallery\\img-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\gallery\\img-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\gallery\\img-2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\gallery\\img-2.jpg",
       "PackagePath": "staticwebassets\\js\\img\\gallery\\img-2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\gallery\\img-3.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\gallery\\img-3.jpg",
       "PackagePath": "staticwebassets\\js\\img\\gallery\\img-3.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\gallery\\img-4.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\gallery\\img-4.jpg",
       "PackagePath": "staticwebassets\\js\\img\\gallery\\img-4.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\gallery\\img-5.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\gallery\\img-5.jpg",
       "PackagePath": "staticwebassets\\js\\img\\gallery\\img-5.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\gallery\\img-6.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\gallery\\img-6.jpg",
       "PackagePath": "staticwebassets\\js\\img\\gallery\\img-6.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\gallery\\virtual-waiter-2.png",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\gallery\\virtual-waiter-2.png",
       "PackagePath": "staticwebassets\\js\\img\\gallery\\virtual-waiter-2.png"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\gallery\\virtual-waiter.png",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\gallery\\virtual-waiter.png",
       "PackagePath": "staticwebassets\\js\\img\\gallery\\virtual-waiter.png"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\logo-7.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\logo-7.jpg",
       "PackagePath": "staticwebassets\\js\\img\\logo-7.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\nav-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\nav-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\nav-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\offer.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\offer.jpg",
       "PackagePath": "staticwebassets\\js\\img\\offer.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\package\\package-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\package\\package-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\package\\package-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\package\\package-2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\package\\package-2.jpg",
       "PackagePath": "staticwebassets\\js\\img\\package\\package-2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\package\\shop-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\package\\shop-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\package\\shop-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\package\\shop-2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\package\\shop-2.jpg",
       "PackagePath": "staticwebassets\\js\\img\\package\\shop-2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\1110x100\\vbanner-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\1110x100\\vbanner-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\1110x100\\vbanner-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\1110x100\\vbanner-2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\1110x100\\vbanner-2.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\1110x100\\vbanner-2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\1110x100\\vbanner-3.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\1110x100\\vbanner-3.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\1110x100\\vbanner-3.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\125x125\\cuisine-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\125x125\\cuisine-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\125x125\\cuisine-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\125x125\\cuisine-10.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\125x125\\cuisine-10.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\125x125\\cuisine-10.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\125x125\\cuisine-11.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\125x125\\cuisine-11.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\125x125\\cuisine-11.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\125x125\\cuisine-2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\125x125\\cuisine-2.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\125x125\\cuisine-2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\125x125\\cuisine-3.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\125x125\\cuisine-3.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\125x125\\cuisine-3.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\125x125\\cuisine-4.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\125x125\\cuisine-4.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\125x125\\cuisine-4.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\125x125\\cuisine-5.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\125x125\\cuisine-5.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\125x125\\cuisine-5.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\125x125\\cuisine-6.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\125x125\\cuisine-6.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\125x125\\cuisine-6.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\125x125\\cuisine-7.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\125x125\\cuisine-7.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\125x125\\cuisine-7.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\125x125\\cuisine-8.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\125x125\\cuisine-8.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\125x125\\cuisine-8.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\125x125\\cuisine-9.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\125x125\\cuisine-9.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\125x125\\cuisine-9.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\160x160\\bcuisine-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\160x160\\bcuisine-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\160x160\\bcuisine-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\160x160\\bcuisine-2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\160x160\\bcuisine-2.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\160x160\\bcuisine-2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\160x160\\bcuisine-3.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\160x160\\bcuisine-3.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\160x160\\bcuisine-3.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\160x160\\bcuisine-4.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\160x160\\bcuisine-4.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\160x160\\bcuisine-4.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\160x160\\bcuisine-5.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\160x160\\bcuisine-5.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\160x160\\bcuisine-5.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\160x160\\bcuisine-8.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\160x160\\bcuisine-8.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\160x160\\bcuisine-8.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\220x220\\nearme-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\220x220\\nearme-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\220x220\\nearme-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\220x220\\nearme-2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\220x220\\nearme-2.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\220x220\\nearme-2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\220x220\\nearme-3.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\220x220\\nearme-3.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\220x220\\nearme-3.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\220x220\\nearme-4.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\220x220\\nearme-4.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\220x220\\nearme-4.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\220x220\\nearme-5.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\220x220\\nearme-5.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\220x220\\nearme-5.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\220x220\\nearme-6.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\220x220\\nearme-6.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\220x220\\nearme-6.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\220x220\\nearme-7.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\220x220\\nearme-7.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\220x220\\nearme-7.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\220x220\\nearme-8.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\220x220\\nearme-8.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\220x220\\nearme-8.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\250x200\\insta-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\250x200\\insta-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\250x200\\insta-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\250x200\\insta-2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\250x200\\insta-2.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\250x200\\insta-2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\250x200\\insta-3.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\250x200\\insta-3.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\250x200\\insta-3.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\250x200\\insta-4.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\250x200\\insta-4.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\250x200\\insta-4.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\250x200\\insta-5.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\250x200\\insta-5.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\250x200\\insta-5.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\250x200\\insta-6.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\250x200\\insta-6.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\250x200\\insta-6.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\250x200\\insta-7.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\250x200\\insta-7.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\250x200\\insta-7.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\250x200\\insta-8.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\250x200\\insta-8.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\250x200\\insta-8.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x104\\order-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x104\\order-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x104\\order-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x104\\order-2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x104\\order-2.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x104\\order-2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x104\\order-3.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x104\\order-3.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x104\\order-3.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x104\\order-4.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x104\\order-4.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x104\\order-4.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-10.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-10.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-10.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-11.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-11.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-11.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-12.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-12.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-12.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-13.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-13.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-13.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-14.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-14.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-14.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-15.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-15.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-15.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-16.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-16.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-16.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-17.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-17.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-17.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-18.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-18.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-18.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-19.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-19.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-19.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-2.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-20.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-20.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-20.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-21.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-21.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-21.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-22.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-22.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-22.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-23.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-23.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-23.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-24.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-24.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-24.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-25.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-25.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-25.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-26.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-26.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-26.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-27.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-27.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-27.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-28.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-28.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-28.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-29.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-29.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-29.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-3.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-3.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-3.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-30.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-30.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-30.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-31.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-31.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-31.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-32.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-32.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-32.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-33.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-33.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-33.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-34.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-34.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-34.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-35.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-35.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-35.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-36.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-36.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-36.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-37.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-37.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-37.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-38.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-38.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-38.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-39.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-39.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-39.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-4.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-4.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-4.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-40.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-40.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-40.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-5.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-5.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-5.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-6.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-6.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-6.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-7.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-7.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-7.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-8.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-8.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-8.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-9.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x150\\shop-9.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x150\\shop-9.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x587\\Banner-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x587\\Banner-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x587\\Banner-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x587\\Banner-10.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x587\\Banner-10.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x587\\Banner-10.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x587\\Banner-11.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x587\\Banner-11.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x587\\Banner-11.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x587\\Banner-12.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x587\\Banner-12.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x587\\Banner-12.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x587\\Banner-2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x587\\Banner-2.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x587\\Banner-2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x587\\Banner-3.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\255x587\\Banner-3.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\255x587\\Banner-3.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\287x702\\ad-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\287x702\\ad-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\287x702\\ad-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\540x300\\collection-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\540x300\\collection-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\540x300\\collection-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\540x300\\collection-2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\540x300\\collection-2.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\540x300\\collection-2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\540x300\\collection-3.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\540x300\\collection-3.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\540x300\\collection-3.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\540x300\\collection-4.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\540x300\\collection-4.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\540x300\\collection-4.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\540x300\\collection-5.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\540x300\\collection-5.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\540x300\\collection-5.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\540x300\\collection-6.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\540x300\\collection-6.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\540x300\\collection-6.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\604x240\\shop-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\604x240\\shop-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\604x240\\shop-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\604x240\\shop-10.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\604x240\\shop-10.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\604x240\\shop-10.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\604x240\\shop-2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\604x240\\shop-2.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\604x240\\shop-2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\604x240\\shop-3.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\604x240\\shop-3.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\604x240\\shop-3.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\604x240\\shop-4.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\604x240\\shop-4.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\604x240\\shop-4.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\604x240\\shop-5.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\604x240\\shop-5.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\604x240\\shop-5.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\604x240\\shop-6.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\604x240\\shop-6.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\604x240\\shop-6.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\604x240\\shop-7.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\604x240\\shop-7.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\604x240\\shop-7.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\604x240\\shop-8.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\604x240\\shop-8.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\604x240\\shop-8.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\604x240\\shop-9.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\604x240\\shop-9.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\604x240\\shop-9.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\604x336\\collection-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\604x336\\collection-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\604x336\\collection-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\604x336\\collection-2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\604x336\\collection-2.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\604x336\\collection-2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\90x90\\shop-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\90x90\\shop-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\90x90\\shop-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\90x90\\shop-2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\90x90\\shop-2.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\90x90\\shop-2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\90x90\\shop-3.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\90x90\\shop-3.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\90x90\\shop-3.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\90x90\\shop-5.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\90x90\\shop-5.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\90x90\\shop-5.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\90x90\\shop-6.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\90x90\\shop-6.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\90x90\\shop-6.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\90x90\\shop-8.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\90x90\\shop-8.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\90x90\\shop-8.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\inner-pop.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\restaurants\\inner-pop.jpg",
       "PackagePath": "staticwebassets\\js\\img\\restaurants\\inner-pop.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\review-footer.png",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\review-footer.png",
       "PackagePath": "staticwebassets\\js\\img\\review-footer.png"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\shop-1.png",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\shop-1.png",
       "PackagePath": "staticwebassets\\js\\img\\shop-1.png"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\sidebanner-1.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\sidebanner-1.jpg",
       "PackagePath": "staticwebassets\\js\\img\\sidebanner-1.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\sidebanner-2.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\sidebanner-2.jpg",
       "PackagePath": "staticwebassets\\js\\img\\sidebanner-2.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\sidebanner-3.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\sidebanner-3.jpg",
       "PackagePath": "staticwebassets\\js\\img\\sidebanner-3.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\tag.jpg",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\tag.jpg",
       "PackagePath": "staticwebassets\\js\\img\\tag.jpg"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\img\\virtual-waiter-2.png",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\virtual-waiter-2.png",
       "PackagePath": "staticwebassets\\js\\img\\virtual-waiter-2.png"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\ion.rangeSlider.min.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\ion.rangeSlider.min.js",
       "PackagePath": "staticwebassets\\js\\ion.rangeSlider.min.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\jquery.magnific-popup.min.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\jquery.magnific-popup.min.js",
       "PackagePath": "staticwebassets\\js\\jquery.magnific-popup.min.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\jquery.min.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\jquery.min.js",
       "PackagePath": "staticwebassets\\js\\jquery.min.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\jquery.nice-select.min.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\jquery.nice-select.min.js",
       "PackagePath": "staticwebassets\\js\\jquery.nice-select.min.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\map.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\map.js",
       "PackagePath": "staticwebassets\\js\\map.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\munchbox.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\munchbox.js",
       "PackagePath": "staticwebassets\\js\\munchbox.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\popper.min.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\popper.min.js",
       "PackagePath": "staticwebassets\\js\\popper.min.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\site.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\site.js",
       "PackagePath": "staticwebassets\\js\\site.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\sticksy.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\sticksy.js",
       "PackagePath": "staticwebassets\\js\\sticksy.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\js\\swiper.min.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\swiper.min.js",
       "PackagePath": "staticwebassets\\js\\swiper.min.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\LICENSE",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\LICENSE",
       "PackagePath": "staticwebassets\\lib\\bootstrap"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css.map",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css.map"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css.map",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css.map"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css.map",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css.map"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css.map",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css.map"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.css"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css.map",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.css.map"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.min.css"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css.map",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.min.css.map"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js.map",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js.map"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js.map",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js.map"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.js",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.js.map",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.js.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.js.map"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.min.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.min.js",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.min.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.min.js.map",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.min.js.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.min.js.map"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\jquery-validation-unobtrusive\\LICENSE.txt",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\jquery-validation-unobtrusive\\LICENSE.txt",
       "PackagePath": "staticwebassets\\lib\\jquery-validation-unobtrusive\\LICENSE.txt"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.js",
       "PackagePath": "staticwebassets\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.min.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.min.js",
       "PackagePath": "staticwebassets\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.min.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\jquery-validation\\LICENSE.md",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\jquery-validation\\LICENSE.md",
       "PackagePath": "staticwebassets\\lib\\jquery-validation\\LICENSE.md"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\jquery-validation\\dist\\additional-methods.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\jquery-validation\\dist\\additional-methods.js",
       "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\additional-methods.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\jquery-validation\\dist\\additional-methods.min.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\jquery-validation\\dist\\additional-methods.min.js",
       "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\additional-methods.min.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\jquery-validation\\dist\\jquery.validate.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\jquery-validation\\dist\\jquery.validate.js",
       "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\jquery.validate.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\jquery-validation\\dist\\jquery.validate.min.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\jquery-validation\\dist\\jquery.validate.min.js",
       "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\jquery.validate.min.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\jquery\\LICENSE.txt",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\jquery\\LICENSE.txt",
       "PackagePath": "staticwebassets\\lib\\jquery\\LICENSE.txt"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\jquery\\dist\\jquery.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\jquery\\dist\\jquery.js",
       "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\jquery\\dist\\jquery.min.js",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\jquery\\dist\\jquery.min.js",
       "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.min.js"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\lib\\jquery\\dist\\jquery.min.map",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\lib\\jquery\\dist\\jquery.min.map",
       "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.min.map"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\webfonts\\fa-regular-400.html",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\webfonts\\fa-regular-400.html",
       "PackagePath": "staticwebassets\\webfonts\\fa-regular-400.html"
     },
     {
-      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\HikingStore\\wwwroot\\webfonts\\fa-solid-900.html",
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\webfonts\\fa-solid-900.html",
       "PackagePath": "staticwebassets\\webfonts\\fa-solid-900.html"
     },
     {
