@@ -519,13 +519,12 @@ label {
   top: 52%;
   transform: translate(0%, -48%);
 }
-.swiper-button-next:after,
-.swiper-button-prev:after {
-  font-size: 14px;
-  font-weight: 900;
-  color: #ff0018;
-
-}
+    .swiper-button-next:after,
+    .swiper-button-prev:after {
+        font-size: 14px;
+        font-weight: 900;
+        color: #6B8E23;
+    }
 .swiper-button-next {
   right: 10px;
 }

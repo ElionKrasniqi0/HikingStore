@@ -701,6 +701,18 @@
       "PackagePath": "staticwebassets\\img\\Cat5.jpg"
     },
     {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\img\\banner-1.jpg",
+      "PackagePath": "staticwebassets\\img\\banner-1.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\img\\banner-2.jpg",
+      "PackagePath": "staticwebassets\\img\\banner-2.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\img\\banner-3.jpg",
+      "PackagePath": "staticwebassets\\img\\banner-3.jpg"
+    },
+    {
       "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\bootstrap.min.js",
       "PackagePath": "staticwebassets\\js\\bootstrap.min.js"
     },
