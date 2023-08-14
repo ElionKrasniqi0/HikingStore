@@ -5,6 +5,7 @@
     ViewData["ActivePage"] = ManageNavPages.TwoFactorAuthentication;
 }
 
+<div class="min-vh-100 text-center">
 <partial name="_StatusMessage" for="StatusMessage" />
 <h3>@ViewData["Title"]</h3>
 
@@ -22,4 +23,5 @@
     <form method="post">
         <button class="btn btn-danger" type="submit">Disable 2FA</button>
     </form>
+</div>
 </div>
