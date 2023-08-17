@@ -59,7 +59,7 @@ namespace HikingStore.Controllers
 
             _context.SaveChanges();
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Cart", "Carts");
         }
 
         [HttpPost]

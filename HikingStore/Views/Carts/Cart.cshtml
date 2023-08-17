@@ -21,13 +21,13 @@
                         <tr>
                             <td class="align-middle"><img src="~/Product/@item.Product.ProImage" alt="" style="width: 50px;"> </td>
                             <td class="align-middle"> @item.Product.ProName</td>
-                            <td class="align-middle">$@item.Product.Price</td>
+                            <td class="align-middle">€@item.Product.Price</td>
                             <td class="align-middle">
                                 <input type="text" readonly class="form-control form-control-sm  border-0 text-center" value="@item.Qty">
 
 
                             </td>
-                            <td class="align-middle">$@(item.Product.Price * item.Qty)</td>
+                            <td class="align-middle">€@(item.Product.Price * item.Qty)</td>
                             <td class="align-middle">
                                 <form asp-action="RemoveItem" asp-controller="Carts" asp-route-id="@item.CartId" method="post">
                                     <button type="submit" class="btn btn-sm btn-danger">

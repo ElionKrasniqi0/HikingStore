@@ -5,7 +5,7 @@
     <form asp-action="AddToCart" asp-controller="Carts" asp-route-ProId=@Model.ProId method="post">
 
         <div class="row px-xl-5">
-            <div class="col-lg-5 mb-30">
+            <div class="col-lg-4 mb-30">
                 <div id="product-carousel" class="carousel slide" data-ride="carousel">
                     <div class="carousel-inner ">
                         <div class="carousel-item active">
@@ -16,11 +16,11 @@
                 </div>
             </div>
 
-            <div class="col-lg-7 h-auto mb-30">
+            <div class="col-lg-4 h-auto mb-30">
                 <div class="h-100  p-30">
                     <h3>@Model.ProName</h3>
 
-                    <h3 class="font-weight-semi-bold mb-4">$@Model.Price</h3>
+                    <h3 class="font-weight-semi-bold mb-4">€@Model.Price</h3>
                     <p class="mb-4">
                         @Model.Descreption
                     </p>
