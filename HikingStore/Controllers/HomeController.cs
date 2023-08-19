@@ -20,7 +20,7 @@ namespace HikingStore.Controllers
 
         public async Task<List<Product>> GetPage(IQueryable<Product> result, int pagenumber)
         {
-            const int Pagesize = 2;
+            const int Pagesize = 100;
             decimal rowCount = await _context.Products.CountAsync();
             var pagecount = Math.Ceiling(rowCount / Pagesize);
             if (pagenumber > pagecount)
@@ -46,7 +46,7 @@ namespace HikingStore.Controllers
             var model = new IndexVM
             {
                 Categories = _context.Categories.ToList(),
-                Products = _context.Products.Take(5).ToList()
+                Products = _context.Products.Take(100).ToList()
             };
             return View(model);
         }

@@ -313,6 +313,10 @@
       "PackagePath": "staticwebassets\\Product\\09a01415-8384-473f-8036-e6c0f8a23f59.jpg"
     },
     {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\0aacdd0c-e3d2-419c-832b-55c3386f1893.jpg",
+      "PackagePath": "staticwebassets\\Product\\0aacdd0c-e3d2-419c-832b-55c3386f1893.jpg"
+    },
+    {
       "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\0d475e47-5149-4bb1-9668-ee7dd9500c97.jpg",
       "PackagePath": "staticwebassets\\Product\\0d475e47-5149-4bb1-9668-ee7dd9500c97.jpg"
     },
@@ -321,8 +325,20 @@
       "PackagePath": "staticwebassets\\Product\\0ea566a5-2459-462d-8ea0-36bf50e42bd7.jpg"
     },
     {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\12276.jpg",
+      "PackagePath": "staticwebassets\\Product\\12276.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\14406.jpg",
+      "PackagePath": "staticwebassets\\Product\\14406.jpg"
+    },
+    {
       "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\170643ca-9701-4345-9c3e-b6559df322c6.jpg",
       "PackagePath": "staticwebassets\\Product\\170643ca-9701-4345-9c3e-b6559df322c6.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\1963361_NAUTICALSANDBLAST_ALT_9_rsz__99941.1681241343.1280.1280__81441.jpg",
+      "PackagePath": "staticwebassets\\Product\\1963361_NAUTICALSANDBLAST_ALT_9_rsz__99941.1681241343.1280.1280__81441.jpg"
     },
     {
       "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\293fe499-b572-497a-bca2-5eb6a9133096.jpg",
@@ -349,6 +365,14 @@
       "PackagePath": "staticwebassets\\Product\\3691008c-ea0b-4350-9a05-ef85a0844eb6.jpg"
     },
     {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\38948d94-c5d7-4a1b-baac-e77883fa4830.jpg",
+      "PackagePath": "staticwebassets\\Product\\38948d94-c5d7-4a1b-baac-e77883fa4830.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\42af4ff5-b7de-4500-ba6e-a88de22321f0.jpg",
+      "PackagePath": "staticwebassets\\Product\\42af4ff5-b7de-4500-ba6e-a88de22321f0.jpg"
+    },
+    {
       "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\544265d1-6d32-4918-9a3c-5c60935b156a.jpg",
       "PackagePath": "staticwebassets\\Product\\544265d1-6d32-4918-9a3c-5c60935b156a.jpg"
     },
@@ -359,6 +383,10 @@
     {
       "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\651f29cf-f320-4997-81b9-46fae1fb6b58.jpg",
       "PackagePath": "staticwebassets\\Product\\651f29cf-f320-4997-81b9-46fae1fb6b58.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\6777bd3d-256d-454a-866e-15ccafc4e569.jpg",
+      "PackagePath": "staticwebassets\\Product\\6777bd3d-256d-454a-866e-15ccafc4e569.jpg"
     },
     {
       "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\6a47c241-4306-4911-b168-891995cf86e0.jpg",
@@ -373,8 +401,20 @@
       "PackagePath": "staticwebassets\\Product\\74589cb6-986f-478d-955e-b81850f35480.jpg"
     },
     {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\7ee40d1c-4bbb-422c-8e8a-3278f39afd33.jpg",
+      "PackagePath": "staticwebassets\\Product\\7ee40d1c-4bbb-422c-8e8a-3278f39afd33.jpg"
+    },
+    {
       "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\7f36980f-205a-4f50-9e0d-c711fbaf01e7.jpg",
       "PackagePath": "staticwebassets\\Product\\7f36980f-205a-4f50-9e0d-c711fbaf01e7.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\811fdacc-2c0e-47c6-ac16-d6638e8d19e9.jpg",
+      "PackagePath": "staticwebassets\\Product\\811fdacc-2c0e-47c6-ac16-d6638e8d19e9.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\85023682-f839-4dd9-8ccf-9759d4767c9c.jpg",
+      "PackagePath": "staticwebassets\\Product\\85023682-f839-4dd9-8ccf-9759d4767c9c.jpg"
     },
     {
       "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\9cc241cd-c0d4-44b1-89c7-68725b5fa1fd.jpg",
@@ -413,16 +453,88 @@
       "PackagePath": "staticwebassets\\Product\\ProductWomen1.jpg"
     },
     {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\adidas-terrex-ax4-goretex-hiking-shoes.jpg",
+      "PackagePath": "staticwebassets\\Product\\adidas-terrex-ax4-goretex-hiking-shoes.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\adidas-terrex-swift-r2-mid-goretex-hiking-boots.jpg",
+      "PackagePath": "staticwebassets\\Product\\adidas-terrex-swift-r2-mid-goretex-hiking-boots.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\ae546d09-8dbd-4f7e-b69c-3a3d41a38e88.jpg",
+      "PackagePath": "staticwebassets\\Product\\ae546d09-8dbd-4f7e-b69c-3a3d41a38e88.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\af0f601a-1929-4b5c-b64f-04e6c6fde73d.jpg",
+      "PackagePath": "staticwebassets\\Product\\af0f601a-1929-4b5c-b64f-04e6c6fde73d.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\altus-kauri-shorts.jpg",
+      "PackagePath": "staticwebassets\\Product\\altus-kauri-shorts.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\b83397ab-088a-4862-887d-c903a0518fba.jpg",
+      "PackagePath": "staticwebassets\\Product\\b83397ab-088a-4862-887d-c903a0518fba.jpg"
+    },
+    {
       "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\bf771f5c-89fe-4b95-8532-f9571f00321a.jpg",
       "PackagePath": "staticwebassets\\Product\\bf771f5c-89fe-4b95-8532-f9571f00321a.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\columbia-silver-ridge-ii-cargo-shorts.jpg",
+      "PackagePath": "staticwebassets\\Product\\columbia-silver-ridge-ii-cargo-shorts.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\craghoppers-nosilife-adventure-ii-long-sleeve-shirt.jpg",
+      "PackagePath": "staticwebassets\\Product\\craghoppers-nosilife-adventure-ii-long-sleeve-shirt.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\dfdf0dc1-ad05-47d8-b069-a7276b54a79a.jpg",
+      "PackagePath": "staticwebassets\\Product\\dfdf0dc1-ad05-47d8-b069-a7276b54a79a.jpg"
     },
     {
       "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\e054f1fc-689a-48e6-99d4-447c0dfe0b7f.jpg",
       "PackagePath": "staticwebassets\\Product\\e054f1fc-689a-48e6-99d4-447c0dfe0b7f.jpg"
     },
     {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\e15b1985-1762-47e3-beb3-7b461db04d65.jpg",
+      "PackagePath": "staticwebassets\\Product\\e15b1985-1762-47e3-beb3-7b461db04d65.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\ed428e88-af3f-4439-a62a-e45698b756f9.jpg",
+      "PackagePath": "staticwebassets\\Product\\ed428e88-af3f-4439-a62a-e45698b756f9.jpg"
+    },
+    {
       "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\f20a296c-0408-4cfb-931d-96eebf7ec489.jpg",
       "PackagePath": "staticwebassets\\Product\\f20a296c-0408-4cfb-931d-96eebf7ec489.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\fed70ce1-60b5-4ef9-8915-73c5da2bb3e3.jpg",
+      "PackagePath": "staticwebassets\\Product\\fed70ce1-60b5-4ef9-8915-73c5da2bb3e3.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\h-cat-img2.jpg",
+      "PackagePath": "staticwebassets\\Product\\h-cat-img2.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\icebreaker-tech-lite-ii-merino-short-sleeve-polo.jpg",
+      "PackagePath": "staticwebassets\\Product\\icebreaker-tech-lite-ii-merino-short-sleeve-polo.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\motorola-tlkr-t82-walkie-talkie.jpg",
+      "PackagePath": "staticwebassets\\Product\\motorola-tlkr-t82-walkie-talkie.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\nalgene-cantene-soft-flask-1l.jpg",
+      "PackagePath": "staticwebassets\\Product\\nalgene-cantene-soft-flask-1l.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\salomon-x-ward-leather-goretex-hiking-shoes.jpg",
+      "PackagePath": "staticwebassets\\Product\\salomon-x-ward-leather-goretex-hiking-shoes.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\Product\\timberland-chocorua-trail-goretex-hiking-boots.jpg",
+      "PackagePath": "staticwebassets\\Product\\timberland-chocorua-trail-goretex-hiking-boots.jpg"
     },
     {
       "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\001b4025-c923-4d73-b867-2bf0a149e307.jpg",
@@ -445,8 +557,20 @@
       "PackagePath": "staticwebassets\\category\\2ebc0f58-5ee6-4a7c-8479-9d84b6e7a821.jpg"
     },
     {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\33b27cba-e0b2-43fa-8ecf-26a48e3f2f4e.jpg",
+      "PackagePath": "staticwebassets\\category\\33b27cba-e0b2-43fa-8ecf-26a48e3f2f4e.jpg"
+    },
+    {
       "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\366b76b4-6fd3-4544-982d-38d4b021c53e.jpg",
       "PackagePath": "staticwebassets\\category\\366b76b4-6fd3-4544-982d-38d4b021c53e.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\3aa80d33-7c61-4151-8c4e-06a62579759a.jpg",
+      "PackagePath": "staticwebassets\\category\\3aa80d33-7c61-4151-8c4e-06a62579759a.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\3e4a7fba-01cb-43a5-85f9-6ee9aa5d78b8.jpg",
+      "PackagePath": "staticwebassets\\category\\3e4a7fba-01cb-43a5-85f9-6ee9aa5d78b8.jpg"
     },
     {
       "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\3f4638fc-7ff0-4fca-974b-de8d1089d684.jpg",
@@ -459,6 +583,14 @@
     {
       "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\6e4a1030-8455-4c7a-abc1-7e1bab416edf.jpg",
       "PackagePath": "staticwebassets\\category\\6e4a1030-8455-4c7a-abc1-7e1bab416edf.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\6ecbf1f1-c955-4334-b566-e822fc461f0d.jpg",
+      "PackagePath": "staticwebassets\\category\\6ecbf1f1-c955-4334-b566-e822fc461f0d.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\71391c6d-02ab-4813-8fd4-30da54d4fe33.jpg",
+      "PackagePath": "staticwebassets\\category\\71391c6d-02ab-4813-8fd4-30da54d4fe33.jpg"
     },
     {
       "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\7d5c6687-9b38-48c0-afc7-4a35c355fd51.jpg",
@@ -475,6 +607,10 @@
     {
       "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\905f9bf5-fae8-4a5a-8ab4-004af9c749a6.jpg",
       "PackagePath": "staticwebassets\\category\\905f9bf5-fae8-4a5a-8ab4-004af9c749a6.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\90c3b3e0-2286-477c-8380-713efccd8d17.jpg",
+      "PackagePath": "staticwebassets\\category\\90c3b3e0-2286-477c-8380-713efccd8d17.jpg"
     },
     {
       "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\994fb0fe-eeaa-4e0e-ae27-1447012361cc.jpg",
@@ -501,8 +637,20 @@
       "PackagePath": "staticwebassets\\category\\Cat5.jpg"
     },
     {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\a58511c0-382b-4471-be49-046c3251b822.jpg",
+      "PackagePath": "staticwebassets\\category\\a58511c0-382b-4471-be49-046c3251b822.jpg"
+    },
+    {
       "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\a6b72b4c-5d57-4719-af60-abe1a2890dec.jpg",
       "PackagePath": "staticwebassets\\category\\a6b72b4c-5d57-4719-af60-abe1a2890dec.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\c6166849-494b-44f8-a41f-fa9b7fb61ddc.jpg",
+      "PackagePath": "staticwebassets\\category\\c6166849-494b-44f8-a41f-fa9b7fb61ddc.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\ca3210d3-71c9-4805-bc43-22e003b5d0a6.jpg",
+      "PackagePath": "staticwebassets\\category\\ca3210d3-71c9-4805-bc43-22e003b5d0a6.jpg"
     },
     {
       "Id": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\category\\cd7a9912-9466-47f1-9da2-56133cf2715a.jpg",
