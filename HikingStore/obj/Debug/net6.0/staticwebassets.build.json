@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "N/N11/z23NXWbemMtClZt1/S4gYEjQmKZSGpQWPN86Q=",
+  "Hash": "rJCbLzk4ffOiACR8KgZwEx46WGG3yhmwOVNPiqOYerA=",
   "Source": "HikingStore",
   "BasePath": "_content/HikingStore",
   "Mode": "Default",
@@ -7174,6 +7174,23 @@
       "OriginalItemSpec": "wwwroot\\js\\img\\review-footer.png"
     },
     {
+      "Identity": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\shop-1.png",
+      "SourceId": "HikingStore",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\",
+      "BasePath": "_content/HikingStore",
+      "RelativePath": "js/img/shop-1.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\js\\img\\shop-1.png"
+    },
+    {
       "Identity": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\sidebanner-1.jpg",
       "SourceId": "HikingStore",
       "SourceType": "Discovered",
@@ -7223,23 +7240,6 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\js\\img\\sidebanner-3.jpg"
-    },
-    {
-      "Identity": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\shop-1.png",
-      "SourceId": "HikingStore",
-      "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\",
-      "BasePath": "_content/HikingStore",
-      "RelativePath": "js/img/shop-1.png",
-      "AssetKind": "All",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "RelatedAsset": "",
-      "AssetTraitName": "",
-      "AssetTraitValue": "",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\js\\img\\shop-1.png"
     },
     {
       "Identity": "C:\\Users\\Admin\\Desktop\\HikingStore\\HikingStore\\wwwroot\\js\\img\\tag.jpg",
