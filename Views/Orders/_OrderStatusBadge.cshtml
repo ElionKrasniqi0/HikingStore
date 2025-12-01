@@ -1,0 +1,141 @@
+﻿@model HikingStore.Enum.OrderStatus
+
+@{
+    var statusSteps = new[]
+    {
+        (HikingStore.Enum.OrderStatus.Received, "Received", "fas fa-inbox"),
+        (HikingStore.Enum.OrderStatus.Verified, "Verified", "fas fa-check-circle"),
+        (HikingStore.Enum.OrderStatus.Processing, "Processing", "fas fa-cog"),
+        (HikingStore.Enum.OrderStatus.Shipped, "Shipped", "fas fa-shipping-fast"),
+        (HikingStore.Enum.OrderStatus.Completed, "Completed", "fas fa-check")
+    };
+
+    var currentStatusIndex = Array.FindIndex(statusSteps, s => s.Item1 == Model);
+}
+
+<div class="order-status-progress">
+    @for (int i = 0; i < statusSteps.Length; i++)
+    {
+        var (status, displayName, icon) = statusSteps[i];
+        var isCompleted = i < currentStatusIndex;
+        var isCurrent = i == currentStatusIndex;
+        var isPending = i > currentStatusIndex;
+
+        <div class="status-step @(isCompleted ? "completed" : "") @(isCurrent ? "current" : "") @(isPending ? "pending" : "")">
+            <div class="status-icon">
+                @if (isCompleted)
+                {
+                    <i class="fas fa-check"></i>
+                }
+                else
+                {
+                    <i class="@icon"></i>
+                }
+            </div>
+            <div class="status-label">@displayName</div>
+            @if (i < statusSteps.Length - 1)
+            {
+                <div class="status-connector"></div>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .order-status-progress {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .status-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        position: relative;
+    }
+
+    .status-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        margin-bottom: 5px;
+        z-index: 2;
+    }
+
+    .status-step.completed .status-icon {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .status-step.current .status-icon {
+        background-color: #007bff;
+        color: white;
+        border: 2px solid #007bff;
+    }
+
+    .status-step.pending .status-icon {
+        background-color: #e9ecef;
+        color: #6c757d;
+        border: 2px solid #e9ecef;
+    }
+
+    .status-label {
+        font-size: 11px;
+        font-weight: 500;
+        text-align: center;
+        line-height: 1.2;
+    }
+
+    .status-step.completed .status-label {
+        color: #28a745;
+        font-weight: 600;
+    }
+
+    .status-step.current .status-label {
+        color: #007bff;
+        font-weight: 600;
+    }
+
+    .status-step.pending .status-label {
+        color: #6c757d;
+    }
+
+    .status-connector {
+        position: absolute;
+        top: 16px;
+        left: 60%;
+        width: 100%;
+        height: 2px;
+        background-color: #e9ecef;
+        z-index: 1;
+    }
+
+    .status-step.completed .status-connector {
+        background-color: #28a745;
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        .order-status-progress {
+            max-width: 300px;
+        }
+
+        .status-icon {
+            width: 28px;
+            height: 28px;
+            font-size: 12px;
+        }
+
+        .status-label {
+            font-size: 10px;
+        }
+    }
+</style>

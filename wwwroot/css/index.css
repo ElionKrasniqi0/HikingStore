@@ -1,0 +1,17 @@
+﻿.badge {
+    width: 33px;
+}
+
+.restaurant-badge {
+    margin: 0 0 0 5px;
+}
+
+.desc {
+    font-family: inherit !important;
+    text-overflow: ellipsis !important;
+    width: 80%;
+    overflow: hidden;
+    white-space: nowrap;
+    margin: auto;
+}
+

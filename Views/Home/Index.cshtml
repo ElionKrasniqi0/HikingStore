@@ -1,8 +1,196 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model HikingStore.ViewModels.IndexVM
+
+@{
+    // Helper function for truncation
+    string Truncate(string input, int length)
+    {
+        if (string.IsNullOrEmpty(input)) return input;
+        return input.Length <= length ? input : input.Substring(0, length) + "...";
+    }
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Explore the Great Outdoors</h1>
+                <p class="lead mb-4">Premium hiking gear and outdoor equipment for your next adventure</p>
+                <a href="/Home/Shop" class="btn btn-light btn-lg me-3">Shop Now</a>
+                <a href="/Home/Product" class="btn btn-outline-light btn-lg">View Products</a>
+            </div>
+            <div class="col-lg-6">
+                <img src="~/images/hero-hiking.png" alt="Hiking Adventure" class="img-fluid rounded-3">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Search Bar -->
+<section class="py-4 bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="input-group input-group-lg">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search for hiking gear, camping equipment...">
+                    <button class="btn btn-primary" type="button" onclick="searchProducts()">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-12 text-center">
+                <h2 class="fw-bold">Shop by Category</h2>
+                <p class="text-muted">Find the perfect gear for your adventure</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            @foreach (var cat in Model.Categories)
+            {
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="card card-hover border-0 shadow-sm h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="category-icon mb-3">
+                                <img src="~/category/@cat.CatPhoto" alt="@cat.CatName" class="img-fluid rounded" style="height: 120px; object-fit: cover;">
+                            </div>
+                            <h5 class="card-title">@cat.CatName</h5>
+                            <a href="/Home/ProductCategory/@cat.CatId" class="btn btn-outline-primary btn-sm mt-2">Explore</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-12 text-center">
+                <h2 class="fw-bold">Featured Products</h2>
+                <p class="text-muted">Top-rated gear for outdoor enthusiasts</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            @foreach (var product in Model.Products)
+            {
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="card card-hover border-0 shadow-sm h-100">
+                        <div class="position-relative">
+                            <img src="~/Product/@product.ProImage" class="card-img-top" alt="@product.ProName" style="height: 200px; object-fit: cover;">
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <span class="badge bg-primary">Featured</span>
+                            </div>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="card-title">@product.ProName</h6>
+                            <p class="card-text text-muted small flex-grow-1">@Truncate(product.Descreption, 60)</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="h5 text-primary mb-0">€@product.Price.ToString("N2")</span>
+                                <a href="/Home/ProductDetailes/@product.ProId" class="btn btn-primary btn-sm">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="row mt-5">
+            <div class="col-12 text-center">
+                <a href="/Home/Product" class="btn btn-outline-primary btn-lg">View All Products</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4 text-center">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-shipping-fast fa-3x text-primary"></i>
+                </div>
+                <h5>Free Shipping</h5>
+                <p class="text-muted">Free shipping on orders over €50</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-undo-alt fa-3x text-primary"></i>
+                </div>
+                <h5>Easy Returns</h5>
+                <p class="text-muted">30-day return policy</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-headset fa-3x text-primary"></i>
+                </div>
+                <h5>24/7 Support</h5>
+                <p class="text-muted">Expert customer support</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #3b5d50 0%, #2d473d 100%);
+        color: white;
+        padding: 100px 0;
+    }
+
+    .category-icon {
+        transition: transform 0.3s ease;
+    }
+
+    .card-hover:hover .category-icon {
+        transform: scale(1.1);
+    }
+
+    .card-hover {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+    .feature-icon {
+        color: #3b5d50;
+    }
+
+    .btn-primary {
+        background-color: #3b5d50;
+        border-color: #3b5d50;
+    }
+
+        .btn-primary:hover {
+            background-color: #2d473d;
+            border-color: #2d473d;
+        }
+</style>
+
+<script>
+    function searchProducts() {
+        const searchTerm = document.getElementById('searchInput').value;
+        if (searchTerm.trim() !== '') {
+            window.location.href = '/Home/SearchProduct?search=' + encodeURIComponent(searchTerm);
+        }
+    }
+
+    // Initialize tooltips if using Bootstrap
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>

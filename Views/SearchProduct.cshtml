@@ -1,0 +1,44 @@
+﻿@model List<Product>
+<!-- Shop Start -->
+<div class="container-fluid">
+    <div class="row px-xl-5">
+
+
+
+        <!-- Shop Product Start -->
+        <div class="col-lg-12 col-md-8">
+            <div class="row pb-3">
+                @foreach (var item in Model)
+                {
+                    <div class="col-lg-3 col-md-6 col-sm-6 pb-1">
+                        <div class="product-item mb-4">
+                            <div class="product-img position-relative overflow-hidden">
+                                <a href="/Home/ProductDetailes/@item.ProId">
+                                    <img class="img-fluid w-100" src="~/Product/@item.ProImage" alt="">
+                                </a>
+                                <div class="product-action">
+                                </div>
+                            </div>
+                            <div class="text-center py-4">
+                                <a class="h6 text-decoration-none text-truncate" href="">
+                                    @item.ProName
+                                </a>
+                                <div class="d-flex align-items-center justify-content-center mt-2">
+                                    <h5>€@item.Price</h5><h6 class="text-muted ml-2"></h6>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                }
+
+
+
+
+            </div>
+        </div>
+    </div>
+    <!-- Shop Product End -->
+</div>
+</div>
+<!-- Shop End -->

@@ -1,0 +1,460 @@
+﻿@page
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Log in";
+}
+
+<div class="min-vh-100 d-flex align-items-center justify-content-center bg-light py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-5 col-md-7">
+                <!-- Login Card -->
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                    <!-- Card Header -->
+                    <div class="card-header bg-gradient-primary text-white text-center py-4 border-0">
+                        <div class="icon-wrapper bg-opacity-20 rounded-circle p-3 mx-auto mb-3">
+                            <i class="fas fa-sign-in-alt fa-lg text-white"></i>
+                        </div>
+                        <h2 class="h4 fw-bold mb-2">Welcome Back</h2>
+                        <p class="mb-0 opacity-75">Sign in to your account to continue</p>
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="card-body p-4">
+                        <form id="account" method="post" class="needs-validation" novalidate>
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 rounded-2 mb-4 small"></div>
+
+                            <!-- Email Field -->
+                            <div class="form-group mb-3">
+                                <label asp-for="Input.Email" class="form-label fw-semibold text-dark mb-2">Email Address</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-envelope text-muted"></i>
+                                    </span>
+                                    <input asp-for="Input.Email" class="form-control border-start-0 py-3"
+                                           placeholder="Enter your email address" />
+                                </div>
+                                <span asp-validation-for="Input.Email" class="text-danger small mt-1 d-block"></span>
+                            </div>
+
+                            <!-- Password Field -->
+                            <div class="form-group mb-3">
+                                <label asp-for="Input.Password" class="form-label fw-semibold text-dark mb-2">Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-lock text-muted"></i>
+                                    </span>
+                                    <input asp-for="Input.Password" class="form-control border-start-0 py-3"
+                                           placeholder="Enter your password" />
+                                    <span class="input-group-text bg-light border-start-0">
+                                        <i class="fas fa-eye text-muted password-toggle" style="cursor: pointer;"></i>
+                                    </span>
+                                </div>
+                                <span asp-validation-for="Input.Password" class="text-danger small mt-1 d-block"></span>
+                            </div>
+
+                            <!-- Remember Me & Forgot Password -->
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" asp-for="Input.RememberMe" />
+                                    <label class="form-check-label text-dark small fw-medium" asp-for="Input.RememberMe">
+                                        Remember me
+                                    </label>
+                                </div>
+                                <a id="forgot-password" asp-page="./ForgotPassword" class="text-primary small fw-semibold text-decoration-none">
+                                    Forgot password?
+                                </a>
+                            </div>
+
+                            <!-- Login Button -->
+                            <button type="submit" class="btn btn-primary btn-lg w-100 py-3 fw-semibold mb-4 login-btn">
+                                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                            </button>
+                        </form>
+
+                        <!-- Divider -->
+                        <div class="divider d-flex align-items-center mb-4">
+                            <div class="border-top flex-grow-1"></div>
+                            <span class="px-3 text-muted small">or continue with</span>
+                            <div class="border-top flex-grow-1"></div>
+                        </div>
+
+                        <!-- External Login -->
+                        <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                            <div class="text-center">
+                                <p class="text-muted small mb-3">Sign in using your social account</p>
+                                <div class="d-flex justify-content-center gap-3">
+                                    @foreach (var provider in Model.ExternalLogins)
+                                    {
+                                        <button type="submit" class="btn btn-outline-danger btn-lg rounded-circle social-btn"
+                                                name="provider" value="@provider.Name"
+                                                title="Log in using your @provider.DisplayName account">
+                                            <i class="fab fa-google"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </form>
+
+                        <!-- Registration Links -->
+                        <div class="text-center mt-4 pt-3 border-top">
+                            <p class="text-muted mb-2 small">Don't have an account?</p>
+                            <div class="d-flex flex-column gap-2">
+                                <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="text-primary fw-semibold text-decoration-none">
+                                    Create new account
+                                </a>
+                                <a id="resend-confirmation" asp-page="./ResendEmailConfirmation" class="text-muted small text-decoration-none">
+                                    Resend email confirmation
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Badges -->
+                <div class="text-center mt-4">
+                    <div class="row g-3">
+                        <div class="col-4">
+                            <div class="security-item">
+                                <i class="fas fa-shield-alt text-primary mb-1 d-block"></i>
+                                <small class="text-muted">Secure Login</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="security-item">
+                                <i class="fas fa-user-lock text-primary mb-1 d-block"></i>
+                                <small class="text-muted">Data Protected</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="security-item">
+                                <i class="fas fa-clock text-primary mb-1 d-block"></i>
+                                <small class="text-muted">24/7 Access</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+<style>
+    /* Elegant Color Scheme */
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #2d473d 0%, #3b5d50 50%, #4a7565 100%);
+    }
+
+    /* Card Design */
+    .card {
+        border: 1px solid rgba(0,0,0,0.08);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.1) !important;
+        }
+
+    /* Icon Wrapper */
+    .icon-wrapper {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Form Enhancements */
+    .form-control {
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+        .form-control:focus {
+            border-color: #3b5d50;
+            box-shadow: 0 0 0 0.2rem rgba(59, 93, 80, 0.15);
+        }
+
+    .input-group-text {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus + .input-group-text,
+    .form-control:focus ~ .input-group-text {
+        border-color: #3b5d50;
+        background: #f8f9fa;
+    }
+
+    /* Checkbox Styling */
+    .form-check-input {
+        width: 1.1em;
+        height: 1.1em;
+        margin-top: 0.15em;
+        border: 2px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+
+        .form-check-input:checked {
+            background-color: #3b5d50;
+            border-color: #3b5d50;
+        }
+
+        .form-check-input:focus {
+            box-shadow: 0 0 0 0.2rem rgba(59, 93, 80, 0.25);
+        }
+
+    /* Button Enhancements */
+    .btn {
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-primary {
+        border: none;
+        box-shadow: 0 4px 15px rgba(59, 93, 80, 0.3);
+    }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2d473d, #1a2f26);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 93, 80, 0.4);
+        }
+
+    .social-btn {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #dc3545;
+        transition: all 0.3s ease;
+    }
+
+        .social-btn:hover {
+            background: #dc3545;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        }
+
+    /* Divider */
+    .divider .border-top {
+        border-color: #e9ecef !important;
+    }
+
+    /* Security Items */
+    .security-item {
+        padding: 0.5rem;
+    }
+
+        .security-item i {
+            font-size: 1.25rem;
+        }
+
+    /* Link Styling */
+    a.text-primary {
+        transition: all 0.3s ease;
+    }
+
+        a.text-primary:hover {
+            color: #2d473d !important;
+            text-decoration: underline !important;
+        }
+
+    a.text-muted:hover {
+        color: #3b5d50 !important;
+        text-decoration: underline !important;
+    }
+
+    /* Loading Animation */
+    .btn-loading {
+        position: relative;
+        color: transparent !important;
+    }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: button-spinner 0.8s linear infinite;
+        }
+
+    @@keyframes button-spinner {
+        from {
+            transform: rotate(0turn);
+        }
+
+        to {
+            transform: rotate(1turn);
+        }
+    }
+
+    /* Form Validation Styling */
+    .input-validation-error {
+        border-color: #dc3545 !important;
+    }
+
+    .field-validation-error {
+        font-size: 0.875rem;
+    }
+
+    /* Password Toggle */
+    .password-toggle:hover {
+        color: #3b5d50 !important;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .min-vh-100 {
+            min-height: auto;
+            padding: 2rem 0;
+        }
+
+        .card-body {
+            padding: 1.5rem !important;
+        }
+
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+        }
+
+        .social-btn {
+            width: 45px;
+            height: 45px;
+        }
+
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: start !important;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .container {
+            padding: 0 1rem;
+        }
+
+        .card-header {
+            padding: 1.5rem !important;
+        }
+
+        .icon-wrapper {
+            width: 50px;
+            height: 50px;
+        }
+
+        .h4 {
+            font-size: 1.25rem;
+        }
+
+        .security-item {
+            padding: 0.25rem;
+        }
+    }
+
+    /* Focus States */
+    .btn:focus,
+    .form-control:focus,
+    .social-btn:focus,
+    .form-check-input:focus {
+        box-shadow: 0 0 0 3px rgba(59, 93, 80, 0.25) !important;
+    }
+
+    /* Smooth Transitions */
+    * {
+        transition: all 0.2s ease;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const loginForm = document.getElementById('account');
+        const loginBtn = document.querySelector('.login-btn');
+        const passwordToggle = document.querySelector('.password-toggle');
+        const passwordField = document.getElementById('password-field');
+
+        // Password toggle functionality
+        passwordToggle?.addEventListener('click', function () {
+            const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        // Form submission handling
+        loginForm?.addEventListener('submit', function (e) {
+            // Show loading state
+            const originalText = loginBtn.innerHTML;
+            loginBtn.disabled = true;
+            loginBtn.classList.add('btn-loading');
+            loginBtn.innerHTML = 'Signing In...';
+
+            // Re-enable button after form submission (in case of validation errors)
+            setTimeout(() => {
+                if (!loginForm.checkValidity()) {
+                    loginBtn.disabled = false;
+                    loginBtn.classList.remove('btn-loading');
+                    loginBtn.innerHTML = originalText;
+                }
+            }, 2000);
+        });
+
+        // Enhanced input interactions
+        const inputs = document.querySelectorAll('.form-control');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function () {
+                this.parentElement.classList.add('focused');
+            });
+
+            input.addEventListener('blur', function () {
+                if (this.value === '') {
+                    this.parentElement.classList.remove('focused');
+                }
+            });
+        });
+
+        // Social button animations
+        const socialBtns = document.querySelectorAll('.social-btn');
+        socialBtns.forEach(btn => {
+            btn.addEventListener('mouseenter', function () {
+                this.style.transform = 'translateY(-2px) scale(1.05)';
+            });
+
+            btn.addEventListener('mouseleave', function () {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Remember me checkbox enhancement
+        const rememberCheckbox = document.querySelector('input[asp-for="Input.RememberMe"]');
+        rememberCheckbox?.addEventListener('change', function () {
+            if (this.checked) {
+                this.parentElement.classList.add('checked');
+            } else {
+                this.parentElement.classList.remove('checked');
+            }
+        });
+    });
+</script>

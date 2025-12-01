@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using HikingStore.Enum;
 
-namespace FurniCraft.Models
+namespace HikingStore.Models
 {
     public class Order
     {

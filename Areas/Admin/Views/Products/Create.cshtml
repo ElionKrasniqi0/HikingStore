@@ -1,0 +1,70 @@
+﻿@model Product
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+
+            <div class="col-md-6">
+
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Add Product</h3>
+                    </div>
+
+                    <form asp-action="Create" enctype="multipart/form-data" method="post">
+
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="exampleInputEmail1">Product Name</label>
+                                <input type="text" asp-for="ProName"
+                                       class="form-control"
+                                       placeholder="Enter Product Name">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="exampleInputEmail1">Category</label>
+                                <select type="text" asp-for="CatId"
+                                        class="form-control"
+                                        asp-items="ViewBag.CategoryId">
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="exampleInputEmail1">Descreption</label>
+                                <input type="text" asp-for="Descreption"
+                                       class="form-control"
+                                       placeholder="Enter Descreption">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="exampleInputEmail1">Price</label>
+                                <input type="text" asp-for="Price"
+                                       class="form-control"
+                                       placeholder="Enter Price">
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputFile">Choose Image</label>
+                                <div class="input-group">
+                                    <div class="custom-file">
+                                        <input type="file" name="File" asp-for="File" class="custom-file-input">
+                                        <label class="custom-file-label" for="exampleInputFile">Choose file</label>
+                                    </div>
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" id="">Upload</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</section>

@@ -1,26 +1,525 @@
-﻿@using Microsoft.AspNetCore.Identity
+﻿@using HikingStore.Data
+@using Microsoft.AspNetCore.Identity
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
 
-<ul class="navbar-nav">
-@if (SignInManager.IsSignedIn(User))
-{
-    <li class="nav-item">
-        <a  class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity?.Name!</a>
-    </li>
-    <li class="nav-item">
-        <form  class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-            <button  type="submit" class="nav-link btn btn-link text-dark">Logout</button>
-        </form>
-    </li>
-}
-else
-{
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
-    </li>
-}
-</ul>
+<div class="navbar-nav align-items-center">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <!-- User Dropdown for logged-in users -->
+        <div class="dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center text-decoration-none user-dropdown-toggle"
+               href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+               aria-haspopup="true" aria-label="User account menu">
+                <div class="user-avatar me-2">
+                    <div class="avatar-circle">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+                <div class="user-info d-none d-md-block">
+                    <div class="user-name">@UserManager.GetUserName(User)</div>
+                    <div class="user-role text-muted small">
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <span class="badge bg-primary">Administrator</span>
+                        }
+                        else
+                        {
+                            <span>Member</span>
+                        }
+                    </div>
+                </div>
+                <i class="fas fa-chevron-down dropdown-arrow ms-2 small"></i>
+            </a>
+
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 user-dropdown-menu"
+                aria-labelledby="userDropdown">
+                <!-- User Section -->
+                <li>
+                    <div class="dropdown-header user-welcome">
+                        <div class="welcome-text">Welcome back</div>
+                        <div class="user-email text-truncate">@UserManager.GetUserName(User)</div>
+                    </div>
+                </li>
+                <li><hr class="dropdown-divider my-2"></li>
+
+                <!-- User Links -->
+                <li>
+                    <a class="dropdown-item d-flex align-items-center"
+                       asp-area="Identity" asp-page="/Account/Manage/Index">
+                        <i class="fas fa-user-circle me-3 text-primary"></i>
+                        <div>
+                            <div class="dropdown-item-title">My Account</div>
+                            <small class="text-muted">Manage your profile & settings</small>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item d-flex align-items-center"
+                       asp-area="" asp-controller="Orders" asp-action="Index">
+                        <i class="fas fa-shopping-bag me-3 text-primary"></i>
+                        <div>
+                            <div class="dropdown-item-title">My Orders</div>
+                            <small class="text-muted">View order history & tracking</small>
+                        </div>
+                    </a>
+                </li>
+
+                <!-- Admin Section -->
+                @if (User.IsInRole("Admin"))
+                {
+                    <li><hr class="dropdown-divider my-2"></li>
+                    <li>
+                        <div class="dropdown-header admin-section">
+                            <i class="fas fa-shield-alt me-2 text-warning"></i>
+                            Administration
+                        </div>
+                    </li>
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center"
+                           asp-area="Admin" asp-controller="Orders" asp-action="Index">
+                            <i class="fas fa-clipboard-list me-3 text-warning"></i>
+                            <div>
+                                <div class="dropdown-item-title">Order Management</div>
+                                <small class="text-muted">Manage customer orders</small>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center"
+                           asp-area="Admin" asp-controller="Home" asp-action="Index">
+                            <i class="fas fa-tachometer-alt me-3 text-warning"></i>
+                            <div>
+                                <div class="dropdown-item-title">Admin Dashboard</div>
+                                <small class="text-muted">System administration</small>
+                            </div>
+                        </a>
+                    </li>
+                }
+
+                <!-- Logout Section -->
+                <li><hr class="dropdown-divider my-2"></li>
+                <li>
+                    <form class="form-inline logout-form"
+                          asp-area="Identity" asp-page="/Account/Logout"
+                          asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })"
+                          id="logoutForm">
+                        <button type="submit"
+                                class="dropdown-item d-flex align-items-center text-danger logout-button w-100"
+                                aria-label="Sign out of your account">
+                            <i class="fas fa-sign-out-alt me-3"></i>
+                            <div>
+                                <div class="dropdown-item-title">Sign Out</div>
+                                <small class="text-muted">End your current session</small>
+                            </div>
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    }
+    else
+    {
+        <!-- Professional Parallel Authentication Buttons -->
+        <div class="d-flex align-items-center auth-buttons-container">
+            <!-- Register Button -->
+            <a class="btn btn-outline-primary auth-btn register-btn me-2"
+               asp-area="Identity" asp-page="/Account/Register">
+                <i class="fas fa-user-plus me-2"></i>
+                <span class="auth-btn-text">Register</span>
+            </a>
+
+            <!-- Login Button -->
+            <a class="btn btn-primary auth-btn login-btn"
+               asp-area="Identity" asp-page="/Account/Login">
+                <i class="fas fa-sign-in-alt me-2"></i>
+                <span class="auth-btn-text">Login</span>
+            </a>
+        </div>
+    }
+</div>
+
+<style>
+    /* User Dropdown Styles */
+    .user-dropdown-toggle {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+        color: var(--dark-text) !important;
+    }
+
+        .user-dropdown-toggle:hover {
+            background: rgba(59, 93, 80, 0.08);
+            border-color: rgba(59, 93, 80, 0.2);
+        }
+
+        .user-dropdown-toggle[aria-expanded="true"] {
+            background: rgba(59, 93, 80, 0.12);
+            border-color: rgba(59, 93, 80, 0.3);
+        }
+
+    /* Avatar Circle */
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1rem;
+        box-shadow: 0 2px 8px rgba(59, 93, 80, 0.3);
+    }
+
+    /* User Info */
+    .user-info {
+        text-align: left;
+    }
+
+    .user-name {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--dark-text);
+        line-height: 1.2;
+    }
+
+    .user-role {
+        font-size: 0.75rem;
+        line-height: 1.2;
+    }
+
+        .user-role .badge {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+    /* Dropdown Menu */
+    .user-dropdown-menu {
+        min-width: 280px;
+        border-radius: 12px;
+        padding: 0.5rem;
+        margin-top: 0.5rem !important;
+        border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .dropdown-header {
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        color: var(--dark-text);
+    }
+
+    .user-welcome .welcome-text {
+        font-size: 0.8rem;
+        color: var(--gray-light);
+        font-weight: 500;
+    }
+
+    .user-welcome .user-email {
+        font-size: 0.9rem;
+        color: var(--dark-text);
+        font-weight: 600;
+        margin-top: 0.25rem;
+    }
+
+    .admin-section {
+        color: var(--primary-color);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Dropdown Items */
+    .dropdown-item {
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        margin: 0.125rem 0;
+        transition: all 0.2s ease;
+        color: var(--dark-text);
+        text-decoration: none;
+    }
+
+        .dropdown-item:hover {
+            background: rgba(59, 93, 80, 0.08);
+            transform: translateX(2px);
+        }
+
+    .dropdown-item-title {
+        font-weight: 500;
+        font-size: 0.9rem;
+        line-height: 1.2;
+    }
+
+    .dropdown-item small {
+        font-size: 0.75rem;
+        line-height: 1.2;
+    }
+
+    /* Logout Button */
+    .logout-button {
+        background: none;
+        border: none;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        padding: 0;
+    }
+
+        .logout-button:hover {
+            background: rgba(220, 53, 69, 0.08) !important;
+            color: var(--accent-color) !important;
+        }
+
+    /* Logout Form */
+    .logout-form {
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Professional Authentication Buttons */
+    .auth-buttons-container {
+        gap: 0.75rem;
+    }
+
+    .auth-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.625rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 2px solid;
+        position: relative;
+        overflow: hidden;
+        min-width: 100px;
+    }
+
+    /* Register Button - Outline Style */
+    .register-btn {
+        background: transparent;
+        border-color: var(--primary-light);
+        color: var(--primary-light);
+        box-shadow: 0 2px 8px rgba(59, 93, 80, 0.15);
+    }
+
+        .register-btn:hover {
+            background: var(--primary-light);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(59, 93, 80, 0.3);
+            border-color: var(--primary-light);
+        }
+
+        .register-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(59, 93, 80, 0.2);
+        }
+
+    /* Login Button - Solid Style */
+    .login-btn {
+        background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+        border-color: var(--primary-light);
+        color: white;
+        box-shadow: 0 2px 12px rgba(59, 93, 80, 0.25);
+    }
+
+        .login-btn:hover {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 93, 80, 0.4);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 12px rgba(59, 93, 80, 0.3);
+        }
+
+    .auth-btn-text {
+        font-weight: 600;
+        letter-spacing: 0.25px;
+    }
+
+    /* Button Icons */
+    .auth-btn i {
+        font-size: 0.8rem;
+        transition: transform 0.3s ease;
+    }
+
+    .auth-btn:hover i {
+        transform: scale(1.1);
+    }
+
+    /* Dropdown Arrow Animation */
+    .dropdown-arrow {
+        transition: transform 0.3s ease;
+    }
+
+    .user-dropdown-toggle[aria-expanded="true"] .dropdown-arrow {
+        transform: rotate(180deg);
+    }
+
+    /* Icons in Dropdown */
+    .dropdown-item i {
+        width: 16px;
+        text-align: center;
+    }
+
+
+    .auth-buttons-container {
+        gap: 0.5rem;
+    }
+
+    .auth-btn {
+        padding: 0.5rem 1.25rem;
+        font-size: 0.85rem;
+        min-width: 90px;
+    }
+
+    .user-info {
+        display: none !important;
+    }
+
+    .dropdown-arrow {
+        display: none;
+    }
+
+    }
+
+
+
+    .avatar-circle {
+        width: 32px;
+        height: 32px;
+        font-size: 0.875rem;
+    }
+
+    .auth-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+        min-width: 80px;
+    }
+
+        .auth-btn i {
+            margin-right: 0.25rem;
+        }
+
+    .auth-btn-text {
+        font-size: 0.8rem;
+    }
+
+    }
+
+
+
+    .auth-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    }
+
+    /* Focus States for Accessibility */
+    .user-dropdown-toggle:focus,
+    .auth-btn:focus,
+    .dropdown-item:focus,
+    .logout-button:focus {
+        outline: 2px solid var(--primary-light);
+        outline-offset: 2px;
+    }
+
+    /* Animation for Dropdown */
+    .dropdown-menu {
+        animation: dropdownFadeIn 0.2s ease-out;
+    }
+
+    @@keyframes dropdownFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Button Press Animation */
+    .auth-btn:active {
+        transition: transform 0.1s ease;
+    }
+
+    /* Loading State for Buttons (if needed later) */
+    .auth-btn.loading {
+        pointer-events: none;
+        opacity: 0.7;
+    }
+
+        .auth-btn.loading .auth-btn-text {
+            visibility: hidden;
+        }
+
+        .auth-btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: buttonSpin 1s linear infinite;
+        }
+
+    @@keyframes buttonSpin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+
+<script>
+    // Enhanced dropdown interactions
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropdownToggle = document.querySelector('.user-dropdown-toggle');
+        const dropdownMenu = document.querySelector('.user-dropdown-menu');
+
+        if (dropdownToggle && dropdownMenu) {
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!dropdownToggle.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                    const bootstrapDropdown = bootstrap.Dropdown.getInstance(dropdownToggle);
+                    if (bootstrapDropdown) {
+                        bootstrapDropdown.hide();
+                    }
+                }
+            });
+
+            // Enhanced keyboard navigation
+            dropdownToggle.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.click();
+                }
+            });
+        }
+
+        // INSTANT LOGOUT - No delays, no loading states
+        const logoutButtons = document.querySelectorAll('.logout-button');
+        logoutButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                // Let the form submit immediately
+                console.log('Logging out...');
+            });
+        });
+    });
+</script>

@@ -1,0 +1,43 @@
+﻿@{
+    ViewData["Title"] = "Create Role";
+    var roles = ViewBag.roles;
+}
+<div class="container">
+    <div class="container" style="width:70%">
+        <h1 class="title text-md-center">CREATE A NEW ROLE</h1>
+        <form style="display:flex; flex-direction:column;  align-items:center" asp-action="CreateRole" method="post">
+            <div class="form-group">
+                <label style="font-size:20px" for="formGroupExampleInput">Role Name</label>
+                <input class="form-control" style="width:400px; height:50px; border: 1px solid #202528" type="text" name="roleName" />
+            </div>
+            <div class="form-group">
+                <input class="btn btn-secondary" type="submit" name="submit" value="Add" />
+            </div>
+        </form>
+        <hr style="margin:0; " />
+
+    </div>
+    <div class="container" style="width:70%">
+        <h1 class="title">MANAGE ROLES</h1>
+        <table class="table table-striped text-center">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Remove</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var role in roles)
+                {
+                    <tr>
+                        <td>@role.Name</td>
+                        <td>
+                            <a class="btn btn-danger" asp-area="Admin" asp-controller="RoleManager" asp-action="RemoveRole" asp-route-Id="@role.Id">Remove</a>
+                            <a class="btn btn-primary" asp-area="Admin" asp-controller="RoleManager" asp-action="EditRole" asp-route-Id="@role.Id">Edit</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,520 @@
+﻿@model Contact
+
+<!-- Elegant Hero Section -->
+<section class="hero-section bg-gradient-primary py-4">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="hero-content">
+                    <span class="badge bg-opacity-2 text-white px-3 py-2 mb-3 fw-semibold border-0">Contact Us</span>
+                    <h1 class="display-5 fw-bold text-white mb-3">Let's Start a Conversation</h1>
+                    <p class="lead text-white-80 mb-0">We're here to assist you with premium outdoor gear and exceptional customer service.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section class="contact-section py-5">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Contact Form -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-lg rounded-3 overflow-hidden">
+                    <div class="card-header bg-white border-0 py-4 px-4">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-wrapper  bg-opacity-10 rounded-circle p-3 me-3">
+                                <i class="fas fa-envelope fa-lg text-primary"></i>
+                            </div>
+                            <div>
+                                <h3 class="h4 fw-bold text-dark mb-1">Send Us a Message</h3>
+                                <p class="text-muted mb-0 small">We typically respond within 24 hours</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <form asp-action="Contact" method="post" id="contactForm">
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 rounded-2 mb-4"></div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="Name" class="form-label fw-semibold text-dark mb-2">Full Name *</label>
+                                        <input asp-for="Name" class="form-control form-control-lg border-1 rounded-2 py-3"
+                                               placeholder="Enter your full name" />
+                                        <span asp-validation-for="Name" class="text-danger small mt-1 d-block"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="Email" class="form-label fw-semibold text-dark mb-2">Email Address *</label>
+                                        <input asp-for="Email" class="form-control form-control-lg border-1 rounded-2 py-3"
+                                               placeholder="your.email@example.com" />
+                                        <span asp-validation-for="Email" class="text-danger small mt-1 d-block"></span>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label asp-for="Subject" class="form-label fw-semibold text-dark mb-2">Subject *</label>
+                                        <input asp-for="Subject" class="form-control form-control-lg border-1 rounded-2 py-3"
+                                               placeholder="What is this regarding?" />
+                                        <span asp-validation-for="Subject" class="text-danger small mt-1 d-block"></span>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label asp-for="Message" class="form-label fw-semibold text-dark mb-2">Your Message *</label>
+                                        <textarea asp-for="Message" class="form-control border-1 rounded-2"
+                                                  placeholder="Please describe your inquiry in detail..."
+                                                  rows="6"></textarea>
+                                        <span asp-validation-for="Message" class="text-danger small mt-1 d-block"></span>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary btn-lg px-5 py-3 fw-semibold w-100">
+                                        <i class="fas fa-paper-plane me-2"></i>Send Message
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="col-lg-4">
+                <!-- Contact Card -->
+                <div class="card border-0 shadow-sm rounded-3 mb-4">
+                    <div class="card-body text-center p-4">
+                        <div class="icon-wrapper bg-opacity-10 rounded-circle p-3 mx-auto mb-3">
+                            <i class="fas fa-map-marker-alt fa-lg text-primary"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-2">Visit Our Store</h5>
+                        <p class="text-muted mb-2">Meto Bajraktari, Prishtina 10000</p>
+                        <a href="#" class="btn btn-outline-primary btn-sm mt-2">
+                            <i class="fas fa-directions me-1"></i>Get Directions
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Contact Card -->
+                <div class="card border-0 shadow-sm rounded-3 mb-4">
+                    <div class="card-body text-center p-4">
+                        <div class="icon-wrapper  bg-opacity-10 rounded-circle p-3 mx-auto mb-3">
+                            <i class="fas fa-envelope fa-lg text-primary"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-2">Email Us</h5>
+                        <p class="text-muted mb-2">hikingstore@outlook.com</p>
+                        <a href="mailto:hikingstore@outlook.com" class="btn btn-outline-primary btn-sm mt-2">
+                            <i class="fas fa-envelope me-1"></i>Send Email
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Contact Card -->
+                <div class="card border-0 shadow-sm rounded-3 mb-4">
+                    <div class="card-body text-center p-4">
+                        <div class="icon-wrapper bg-opacity-10 rounded-circle p-3 mx-auto mb-3">
+                            <i class="fas fa-phone fa-lg text-primary"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-2">Call Us</h5>
+                        <p class="text-muted mb-2">+(383) 045 804 555</p>
+                        <a href="tel:+383045804555" class="btn btn-outline-primary btn-sm mt-2">
+                            <i class="fas fa-phone me-1"></i>Call Now
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Business Hours -->
+                <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card-header bg-white border-0 py-3">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-wrapper bg-opacity-10 rounded-circle p-2 me-3">
+                                <i class="fas fa-clock text-primary"></i>
+                            </div>
+                            <h5 class="mb-0 fw-bold text-dark">Business Hours</h5>
+                        </div>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="business-hours">
+                            <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                <span class="text-muted small">Mon - Fri</span>
+                                <span class="fw-semibold small text-dark">9:00 AM - 6:00 PM</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                <span class="text-muted small">Saturday</span>
+                                <span class="fw-semibold small text-dark">10:00 AM - 4:00 PM</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center py-2">
+                                <span class="text-muted small">Sunday</span>
+                                <span class="fw-semibold small text-dark text-danger">Closed</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Map Section -->
+<section class="map-section py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+                    <div class="card-header bg-white border-0 py-4">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-wrapper bg-opacity-10 rounded-circle p-2 me-3">
+                                <i class="fas fa-map-marked-alt text-primary"></i>
+                            </div>
+                            <h3 class="h4 mb-0 fw-bold text-dark">Our Location</h3>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="map-container position-relative">
+                            <div class="map-placeholder bg-gradient-primary position-relative" style="height: 350px;">
+                                <div class="position-absolute top-50 start-50 translate-middle text-center text-white">
+                                    <i class="fas fa-map-marked-alt fa-3x mb-3 opacity-75"></i>
+                                    <h4 class="mb-2">Meto Bajraktari, Prishtina</h4>
+                                    <p class="mb-0 opacity-75">Visit our flagship store in the heart of the city</p>
+                                </div>
+                            </div>
+                            <div class="position-absolute bottom-0 start-0 end-0 bg-dark bg-opacity-75 text-white py-3 text-center">
+                                <small>📍 Interactive map integration available</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="faq-section py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 text-center mb-5">
+                <span class="badge bg-opacity-10 text-primary px-3 py-2 mb-3 fw-semibold">FAQ</span>
+                <h2 class="h1 fw-bold text-dark mb-3">Frequently Asked Questions</h2>
+                <p class="lead text-muted">Quick answers to common inquiries</p>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item border-0 shadow-sm mb-3 rounded-3 overflow-hidden">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button collapsed border-0 py-3 px-4 fw-semibold" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                <i class="fas fa-undo-alt text-primary me-3"></i>
+                                What is your return policy?
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne"
+                             data-bs-parent="#faqAccordion">
+                            <div class="accordion-body bg-light border-top">
+                                We offer a 30-day return policy for all unused items in their original packaging. Please contact our support team to initiate a return.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item border-0 shadow-sm mb-3 rounded-3 overflow-hidden">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed border-0 py-3 px-4 fw-semibold" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                <i class="fas fa-shipping-fast text-primary me-3"></i>
+                                Do you offer international shipping?
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                             data-bs-parent="#faqAccordion">
+                            <div class="accordion-body bg-light border-top">
+                                Currently, we ship within Kosovo and neighboring countries. Contact us for specific international shipping inquiries.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item border-0 shadow-sm rounded-3 overflow-hidden">
+                        <h2 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed border-0 py-3 px-4 fw-semibold" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                <i class="fas fa-box text-primary me-3"></i>
+                                How can I track my order?
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree"
+                             data-bs-parent="#faqAccordion">
+                            <div class="accordion-body bg-light border-top">
+                                Once your order ships, you'll receive a tracking number via email. You can also track your order from your account dashboard.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    /* Elegant Color Scheme */
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #2d473d 0%, #3b5d50 50%, #4a7565 100%);
+    }
+
+    .text-white-80 {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .text-white-60 {
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    /* Enhanced Card Design */
+    .card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.1) !important;
+        }
+
+    /* Icon Wrapper */
+    .icon-wrapper {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .card:hover .icon-wrapper {
+        background: linear-gradient(135deg, #3b5d50, #2d473d) !important;
+    }
+
+        .card:hover .icon-wrapper i {
+            color: white !important;
+        }
+
+    /* Form Enhancements */
+    .form-control {
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+        .form-control:focus {
+            border-color: #3b5d50;
+            box-shadow: 0 0 0 0.2rem rgba(59, 93, 80, 0.15);
+            transform: translateY(-1px);
+        }
+
+    .form-control-lg {
+        font-size: 1rem;
+    }
+
+    /* Button Enhancements */
+    .btn {
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #3b5d50, #2d473d);
+        border: none;
+        box-shadow: 0 4px 15px rgba(59, 93, 80, 0.3);
+    }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2d473d, #1a2f26);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 93, 80, 0.4);
+        }
+
+    .btn-outline-primary {
+        border: 2px solid #3b5d50;
+        color: #3b5d50;
+        background: transparent;
+    }
+
+        .btn-outline-primary:hover {
+            background: #3b5d50;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+    /* Accordion Enhancements */
+    .accordion-button {
+        background: white;
+        color: #2d473d;
+        border-radius: 8px !important;
+        margin-bottom: 0;
+    }
+
+        .accordion-button:not(.collapsed) {
+            background: linear-gradient(135deg, #3b5d50, #2d473d);
+            color: white;
+            box-shadow: none;
+        }
+
+        .accordion-button:focus {
+            box-shadow: 0 0 0 0.2rem rgba(59, 93, 80, 0.25);
+            border-color: #3b5d50;
+        }
+
+    .accordion-body {
+        background: #f8f9fa;
+        border-radius: 0 0 8px 8px;
+    }
+
+    /* Map Styling */
+    .map-container {
+        border-radius: 0 0 12px 12px;
+        overflow: hidden;
+    }
+
+    .map-placeholder {
+        background: linear-gradient(135deg, #2d473d 0%, #3b5d50 100%);
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+    }
+
+    .breadcrumb-item.active {
+        color: white;
+    }
+
+    /* Badge */
+    .badge {
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .hero-section {
+            text-align: center;
+            padding: 3rem 0;
+        }
+
+        .display-5 {
+            font-size: 2.5rem;
+        }
+
+        .icon-wrapper {
+            width: 45px;
+            height: 45px;
+        }
+
+        .form-control-lg {
+            font-size: 0.9rem;
+        }
+
+        .map-placeholder {
+            height: 250px !important;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .display-5 {
+            font-size: 2rem;
+        }
+
+        .h1 {
+            font-size: 2rem;
+        }
+
+        .card-body {
+            padding: 1.5rem !important;
+        }
+
+        .accordion-button {
+            padding: 1rem 1.25rem;
+            font-size: 0.9rem;
+        }
+    }
+
+    /* Loading Animation */
+    .btn-loading {
+        position: relative;
+        color: transparent !important;
+    }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: button-spinner 0.8s linear infinite;
+        }
+
+    @@keyframes button-spinner {
+        from {
+            transform: rotate(0turn);
+        }
+
+        to {
+            transform: rotate(1turn);
+        }
+    }
+</style>
+
+<script>
+    $(document).ready(function() {
+        // Enhanced form submission handling
+        $('#contactForm').on('submit', function(e) {
+            const button = $(this).find('button[type="submit"]');
+            const originalText = button.html();
+
+            button.prop('disabled', true).addClass('btn-loading').html('Sending...');
+
+            // Simulate form submission
+            setTimeout(() => {
+                button.removeClass('btn-loading').html('<i class="fas fa-check me-2"></i>Message Sent!');
+                setTimeout(() => {
+                    button.html(originalText).prop('disabled', false);
+                }, 3000);
+            }, 2000);
+        });
+
+        // Enhanced accordion interactions
+        $('.accordion-button').hover(
+            function() {
+                if (!$(this).hasClass('collapsed')) {
+                    $(this).css('transform', 'translateY(-1px)');
+                }
+            },
+            function() {
+                $(this).css('transform', 'translateY(0)');
+            }
+        );
+
+        // Add smooth scrolling for better UX
+        $('a[href^="#"]').on('click', function(e) {
+            e.preventDefault();
+            $('html, body').animate({
+                scrollTop: $($(this).attr('href')).offset().top - 80
+            }, 500);
+        });
+    });
+</script>
+                     

@@ -1,0 +1,246 @@
+﻿@model List<Order>
+@using HikingStore.Enum
+@using HikingStore.Models
+
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-0">My Orders</h1>
+            <p class="text-muted mb-0">Track your order history and status</p>
+        </div>
+        <a href="/Home/Product" class="btn btn-primary">
+            <i class="fas fa-shopping-bag me-2"></i>Continue Shopping
+        </a>
+    </div>
+
+    <!-- Status Filter -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-6">
+                    <label class="form-label">Filter by Status</label>
+                    <select class="form-select" id="statusFilter" onchange="filterOrders()">
+                        <option value="">All Orders</option>
+                        @foreach (var status in System.Enum.GetValues(typeof(OrderStatus)).Cast<OrderStatus>())
+                        {
+                            <option value="@status">@status</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <span class="text-muted">@Model.Count orders found</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders List -->
+    <div class="row">
+        @foreach (var order in Model)
+        {
+            <div class="col-12 mb-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0">Order #@order.OrderId</h5>
+                            <small class="text-muted">Placed on @order.OrderDate.ToString("MMMM dd, yyyy 'at' hh:mm tt")</small>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            @await Html.PartialAsync("_OrderStatusBadge", order.Status)
+                            <span class="fw-bold text-primary">@order.TotalAmount.ToString("C")</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="row">
+                                    @foreach (var item in order.OrderDetails.Take(3))
+                                    {
+                                        <div class="col-4 col-md-3 mb-3">
+                                            <div class="text-center">
+                                                <img src="~/Product/@item.Product.ProImage"
+                                                     alt="@item.Product.ProName"
+                                                     class="img-fluid rounded mb-2"
+                                                     style="height: 80px; object-fit: cover;">
+                                                <small class="d-block">@item.Product.ProName</small>
+                                                <small class="text-muted">Qty: @item.Quantity</small>
+                                            </div>
+                                        </div>
+                                    }
+                                    @if (order.OrderDetails.Count > 3)
+                                    {
+                                        <div class="col-4 col-md-3 mb-3">
+                                            <div class="text-center h-100 d-flex align-items-center justify-content-center">
+                                                <div>
+                                                    <span class="badge bg-light text-dark">
+                                                        +@(order.OrderDetails.Count - 3) more
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <div class="col-md-4 border-start">
+                                <div class="h-100 d-flex flex-column justify-content-between">
+                                    <div>
+                                        <h6>Shipping Address</h6>
+                                        <p class="small mb-2">@order.ShippingAddress</p>
+                                        <p class="small mb-0">@order.City</p>
+                                        <p class="small mb-3">@order.PhoneNumber</p>
+
+                                        @if (!string.IsNullOrEmpty(order.TrackingNumber))
+                                        {
+                                            <div class="mb-3">
+                                                <h6>Tracking Number</h6>
+                                                <code class="small">@order.TrackingNumber</code>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="d-grid gap-2">
+                                        <a asp-action="Details" asp-route-id="@order.OrderId"
+                                           class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-eye me-1"></i>View Details
+                                        </a>
+                                        @if (order.Status < OrderStatus.Shipped && order.Status != OrderStatus.Cancelled)
+                                        {
+                                            <div class="dropdown">
+                                                <button class="btn btn-outline-danger btn-sm dropdown-toggle w-100"
+                                                        type="button"
+                                                        id="cancelDropdown-@order.OrderId"
+                                                        data-bs-toggle="dropdown"
+                                                        data-bs-display="static"
+                                                        aria-expanded="false">
+                                                    <i class="fas fa-times me-1"></i>Cancel Order
+                                                </button>
+                                                <ul class="dropdown-menu w-100"
+                                                    aria-labelledby="cancelDropdown-@order.OrderId">
+                                                    <li>
+                                                        <a class="dropdown-item text-danger text-center" href="#"
+                                                           onclick="cancelOrder(@order.OrderId)">
+                                                            <i class="fas fa-check me-2"></i>Confirm Cancellation
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (!Model.Any())
+        {
+            <div class="col-12 text-center py-5">
+                <div class="empty-state-icon mb-3">
+                    <i class="fas fa-shopping-bag fa-4x text-muted"></i>
+                </div>
+                <h4 class="text-muted">No Orders Found</h4>
+                <p class="text-muted mb-4">You haven't placed any orders yet.</p>
+                <a href="/Home/Product" class="btn btn-primary">
+                    <i class="fas fa-shopping-bag me-2"></i>Start Shopping
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Inline styles to fix dropdown positioning -->
+<style>
+    .dropdown {
+        position: relative;
+    }
+
+    .dropdown-menu {
+        position: absolute;
+        z-index: 1000;
+        margin: 0;
+        border: 1px solid rgba(0,0,0,.15);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-group, .dropdown {
+        display: inline-block;
+    }
+
+    .card {
+        position: relative;
+    }
+
+    .card-body .dropdown-menu {
+        transform: translate3d(0px, 38px, 0px) !important;
+        top: 0px !important;
+        left: 0px !important;
+        will-change: transform;
+    }
+
+    @@media (max-width: 768px) {
+        .card-body .dropdown-menu {
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            width: 90%;
+            max-width: 300px;
+        }
+    }
+</style>
+
+<br />
+<br />
+<br />
+
+@section Scripts {
+    <script>
+        function filterOrders() {
+            const status = document.getElementById('statusFilter').value;
+            const url = new URL(window.location.href);
+
+            if (status) {
+                url.searchParams.set('status', status);
+            } else {
+                url.searchParams.delete('status');
+            }
+
+            window.location.href = url.toString();
+        }
+
+        function cancelOrder(orderId) {
+            if (confirm('Are you sure you want to cancel this order? This action cannot be undone.')) {
+                fetch('@Url.Action("CancelOrder", "Orders")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `id=${orderId}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('Error cancelling order');
+                });
+            }
+        }
+
+        // Initialize any existing filters from URL
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const statusFilter = urlParams.get('status');
+
+            if (statusFilter) {
+                document.getElementById('statusFilter').value = statusFilter;
+            }
+        });
+    </script>
+}
+

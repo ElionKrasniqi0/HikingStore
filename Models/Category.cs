@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using HikingStore.Models;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 public class Category
@@ -12,5 +13,4 @@ public class Category
     public IFormFile File { get; set; }
 
     public virtual ICollection<Product> Product { get; set; }
-}
-}                      
+}                     

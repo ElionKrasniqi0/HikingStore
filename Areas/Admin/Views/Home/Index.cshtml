@@ -1,0 +1,327 @@
+﻿@using HikingStore.Areas.Admin.ViewModel
+@using HikingStore.Enum
+@model IEnumerable<Users_In_Role_ViewModel>
+
+@{
+    ViewBag.Title = "Users With Roles";
+}
+
+<div class="container-fluid">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h1 class="box-title">
+                <b>Users with Roles</b>
+            </h1>
+        </div>
+        <!-- /.box-header -->
+        <div class="table-responsive-md">
+            <table class="table table-hover table-bordered " id="usersWithRoles">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Username</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Roles</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+                            <td scope="row">@user.UserName</td>
+                            <td>@user.Email</td>
+                            <td class="user-role-name-main">
+                                @foreach (var role in user.Roles)
+                                {
+                                    if (role != user.Roles.Last())
+                                    {
+                                        <span class="user-role-name"> @role, </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="user-role-name">@role</span>
+
+                                        break;
+                                    }
+                                }
+                            </td>
+                            <td>
+                                <a class="btn-primary btn py-1 px-2 m-1" asp-area="Admin" asp-controller="Home" asp-action="EditRole" asp-route-UserId="@user.UserId">Edit Role</a>
+                                <a class="btn-danger btn py-1 px-2 m-1" onclick="modalDeleteUser('@user.UserId', '@user.UserName')" data-toggle="modal" data-target="#deleteUser">Delete User</a>
+
+                                @if (!user.IsLocked)
+                                {
+                                    <a class="btn-warning btn py-1 px-2 m-1" onclick="modalLockUser('@user.UserId', '@user.UserName')" data-toggle="modal" data-target="#lockUser">Lock User</a>
+                                }
+                                else
+                                {
+                                    <a class="btn-warning btn py-1 px-2 m-1" onclick="modalUnlockUser('@user.UserId', '@user.UserName')" data-toggle="modal" data-target="#unlockUser">Unlock User</a>
+                                }
+
+                                @foreach (var role in user.Roles)
+                                {
+                                    if (role == "RestaurantOwner" && user.Status == UserStatus.User)
+                                    {
+                                        <a class="btn-warning btn py-1 px-2 m-1" onclick="modalRestrictRORole('@user.UserId', '@user.UserName', 'RestaurantOwner')" data-toggle="modal" data-target="#restrictRORole">Restrict RO Role</a>
+
+                                        break;
+                                    }
+                                    else if (role == "User" && user.Status == UserStatus.RO_RoleRestricted)
+                                    {
+                                        <a class="btn-warning btn py-1 px-2 m-1" onclick="modalUnrestrictRORole('@user.UserId', '@user.UserName', 'RestaurantOwner')" data-toggle="modal" data-target="#unrestrictRORole">Unrestrict RO Role</a>
+
+                                        break;
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Delete User Modal -->
+        <div class="modal fade" id="deleteUser" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalDeleteUserTitle"></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <b class="text-info" style="font-size:1.2em;">Warning: </b>
+                        You are about to <b>Delete</b> this User and all the Data associated, are you sure you want that?
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <form id="deleteUserFormLink" method="POST">
+                            <button type="submit" class="btn-danger btn">Confirm Procedure</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lock User Modal -->
+        <div class="modal fade" id="lockUser" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalLockUserTitle"></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <b class="text-info" style="font-size:1.2em;">Warning:</b>
+                        You are about to <b>Lock</b> this User. Locking this user may result in restricting the Restaurant from the page together with all the Data associated, are you sure you want that?
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <form id="lockUserFromLink" method="POST">
+                            <button type="submit" class="btn-danger btn">Confirm Procedure</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unlock User Modal -->
+        <div class="modal fade" id="unlockUser" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalUnlockUserTitle"></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <b class="text-info" style="font-size:1.2em;">Warning:</b>
+                        You are about to <b>Unlock</b> this User. Are you sure you want that?
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <form id="unlockUserFromLink" method="POST">
+                            <button type="submit" class="btn-danger btn">Confirm Procedure</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resctrict RestaurantOwner Role Modal -->
+        <div class="modal fade" id="restrictRORole" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalRestrictRORoleTitle"></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <b class="text-info" style="font-size:1.2em;">Warning:</b>
+                        You are about to <b>Restrict</b> the "RestaurantOwner" Role together with all The Restaurants, Products, Tables, Reservations and all Data associated, are you sure you want that?
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <form id="restrictRORoleFormLink" method="POST">
+                            <button type="submit" class="btn-danger btn">Confirm Procedure</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resctrict RestaurantOwner Role Modal -->
+        <div class="modal fade" id="unrestrictRORole" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalUnrestrictRORoleTitle"></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <b class="text-info" style="font-size:1.2em;">Warning:</b>
+                        You are about to <b>Restrict</b> the "RestaurantOwner" Role together with all The Restaurants, Products, Tables, Reservations and all Data associated, are you sure you want that?
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <form id="unrestrictRORoleFormLink" method="POST">
+                            <button type="submit" class="btn-danger btn">Confirm Procedure</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="panel-footer">
+            <p class="box-title"><b>Total Users till @String.Format("{0 : dddd, MMMM d, yyyy}", DateTime.Now): </b><span class="label label-primary">@Model.Count()</span></p>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .myTooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+            .myTooltip .tooltiptext {
+                /*visibility: hidden;*/
+                pointer-events: none;
+                opacity: 0%;
+                width: fit-content;
+                background-color: black;
+                color: #fff;
+                text-align: center;
+                border-radius: 6px;
+                padding: 5px;
+                transition-duration: 0.2s;
+                transition-timing-function: ease;
+                transition-property: opacity, bottom;
+                /* Position the tooltip */
+                position: absolute;
+                z-index: 1;
+                bottom: 100%;
+                left: 50%;
+                margin-left: -65px;
+            }
+
+            .myTooltip:hover .tooltiptext {
+                /*visibility: visible;*/
+                bottom: 110%;
+                opacity: 100%;
+            }
+
+        #usersWithRoles_wrapper > div:first-child {
+            justify-content: space-between;
+        }
+
+        #usersWithRoles_wrapper div:first-child > div {
+            flex: 0%;
+            width: min-content;
+        }
+
+        #usersWithRoles_wrapper .modal-dialog > div, #usersWithRoles_wrapper .modal-content > div {
+            width: -webkit-fill-available !important;
+        }
+
+        .table th, .table td {
+            vertical-align: middle;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        function modalDeleteUser(id, userName) {
+            //console.log(id, userName);
+
+            document.getElementById('modalDeleteUserTitle').innerText = 'Deleting: ' + userName;
+
+            document.getElementById('deleteUserFormLink').setAttribute('action', '/Admin/Home/DeleteUser?UserId=' + id);
+        }
+
+        function modalLockUser(id, userName) {
+            //console.log(id, userName);
+
+            document.getElementById('modalLockUserTitle').innerText = 'Locking: ' + userName
+
+            document.getElementById('lockUserFromLink').setAttribute('action', '/Admin/Home/LockUser?UserId=' + id);
+        }
+
+        function modalUnlockUser(id, userName) {
+            //console.log(id, userName);
+
+            document.getElementById('modalUnlockUserTitle').innerText = 'Unlocking: ' + userName;
+
+            document.getElementById('unlockUserFromLink').setAttribute('action', '/Admin/Home/UnlockUser?UserId=' + id);
+        }
+
+        function modalRestrictRORole(id, userName, roleName) {
+            //console.log(id, userName, roleName);
+
+            document.getElementById('modalRestrictRORoleTitle').innerText = 'Restricting "User" Role from: ' + userName;
+
+            $('#restrictRORoleFormLink').attr('action', '/Admin/Home/RestrictUserRORole?UserId=' + id + '&' + 'roleName=' + roleName)
+
+        }
+
+        function modalUnrestrictRORole(id, userName, roleName) {
+            //console.log(id, userName, roleName);
+
+            document.getElementById('modalUnrestrictRORoleTitle').innerText = 'Unrestricting "User" Role from: ' + userName;
+
+            $('#unrestrictRORoleFormLink').attr('action', '/Admin/Home/UnrestrictUserRORole?UserId=' + id + '&' + 'roleName=' + roleName)
+        }
+
+        $(function () {
+            $('#usersWithRoles').DataTable({
+                "paging": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false
+            });
+        });
+    </script>
+}

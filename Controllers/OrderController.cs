@@ -1,0 +1,99 @@
+﻿using HikingStore.Data;
+using HikingStore.Enum;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+namespace HikingStore.Controllers
+{
+    [Authorize]
+    public class OrdersController : Controller
+    {
+        private readonly ApplicationDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
+
+        public OrdersController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        {
+            _context = context;
+            _userManager = userManager;
+        }
+
+        public async Task<IActionResult> Index(string status = "")
+        {
+            var userId = _userManager.GetUserId(User);
+
+            var query = _context.Orders
+                .Include(o => o.User)
+                .Include(o => o.OrderDetails)
+                .ThenInclude(od => od.Product)
+                .Where(o => o.UserId == userId);
+
+            // Filter by status - FIXED: Use System.Enum explicitly
+            if (!string.IsNullOrEmpty(status))
+            {
+                if (System.Enum.TryParse<OrderStatus>(status, out var orderStatus))
+                {
+                    query = query.Where(o => o.Status == orderStatus);
+                }
+            }
+
+            var orders = await query
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+
+            ViewBag.CurrentStatus = status;
+
+            // FIXED: Use System.Enum explicitly
+            ViewBag.StatusList = System.Enum.GetValues(typeof(OrderStatus)).Cast<OrderStatus>();
+
+            return View(orders);
+        }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            var userId = _userManager.GetUserId(User);
+
+            var order = await _context.Orders
+                .Include(o => o.User)
+                .Include(o => o.OrderDetails)
+                .ThenInclude(od => od.Product)
+                .ThenInclude(p => p.Category)
+                .FirstOrDefaultAsync(o => o.OrderId == id && o.UserId == userId);
+
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            return View(order);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CancelOrder(int id)
+        {
+            var userId = _userManager.GetUserId(User);
+            var order = await _context.Orders
+                .FirstOrDefaultAsync(o => o.OrderId == id && o.UserId == userId);
+
+            if (order == null)
+            {
+                return Json(new { success = false, message = "Order not found." });
+            }
+
+            // Only allow cancellation for orders that haven't been shipped
+            if (order.Status >= OrderStatus.Shipped)
+            {
+                return Json(new { success = false, message = "Cannot cancel order that has already been shipped." });
+            }
+
+            order.Status = OrderStatus.Cancelled;
+            order.CancelledDate = DateTime.Now;
+
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Order cancelled successfully." });
+        }
+    }
+}
+

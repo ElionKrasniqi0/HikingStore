@@ -1,0 +1,153 @@
+﻿@model Order
+@{
+    ViewData["Title"] = "Checkout";
+}
+<div class="hero">
+    <div class="container">
+        <div class="row justify-content-between">
+            <div class="col-lg-5">
+                <div class="intro-excerpt">
+                    <h1>Checkout</h1>
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <!-- Empty column for layout purposes -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Hero Section -->
+
+<form asp-action="Checkout" method="post">
+    <div class="untree_co-section">
+        <div class="container">
+            <div class="row mb-5">
+                <div class="col-md-12">
+                    <div class="border p-4 rounded" role="alert">
+                        Returning customer? <a href="#">Click here</a> to login
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-5 mb-md-0">
+                    <h2 class="h3 mb-3 text-black">Billing Details</h2>
+                    <div class="p-3 p-lg-5 border bg-white">
+                        <div class="form-group row">
+                            <div class="col-md-6">
+                                <label asp-for="ShippingAddress">Shipping Address</label>
+                                <input asp-for="ShippingAddress" class="form-control" required />
+                                <span asp-validation-for="ShippingAddress" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="City">City</label>
+                                <input asp-for="City" class="form-control" required />
+                                <span asp-validation-for="City" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-md-12">
+                                <label asp-for="PhoneNumber">Phone Number</label>
+                                <input asp-for="PhoneNumber" class="form-control" required />
+                                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-md-12">
+                                <label asp-for="Comment">Comment</label>
+                                <textarea asp-for="Comment" class="form-control"></textarea>
+                                <span asp-validation-for="Comment" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="row mb-5">
+                        <div class="col-md-12">
+                            <h2 class="h3 mb-3 text-black">Your Order</h2>
+                            <div class="p-3 p-lg-5 border bg-white">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Quantity</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (ViewBag.Carts != null)
+                                        {
+                                            foreach (var item in ViewBag.Carts)
+                                            {
+                                                <tr>
+                                                    <td>@item.Product.ProName</td>
+                                                    <td>@item.Qty</td>
+                                                    <td>€@(item.Product.Price* item.Qty)</td>
+                                                </tr>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <tr>
+                                                <td colspan="3">No items in the cart.</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="2"><strong>Cart Subtotal</strong></td>
+                                            <td>€@ViewBag.TotalAmount</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2"><strong>Order Total</strong></td>
+                                            <td>€@ViewBag.TotalAmount</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-5">
+                        <div class="col-md-12">
+                            <h2 class="h3 mb-3 text-black">Payment Methods</h2>
+                            <div class="p-3 p-lg-5 border bg-white">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="PaymentMethod" id="bankTransfer" value="Bank Transfer" checked />
+                                    <label class="form-check-label" for="bankTransfer">
+                                        Direct Bank Transfer<br />
+                                        Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order won't be shipped until the funds have cleared in our account.
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="PaymentMethod" id="cheque" value="Cheque" />
+                                    <label class="form-check-label" for="cheque">
+                                        Cheque Payment<br />
+                                        Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order won't be shipped until the funds have cleared in our account.
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="PaymentMethod" id="paypal" value="PayPal" />
+                                    <label class="form-check-label" for="paypal">
+                                        PayPal<br />
+                                        Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order won't be shipped until the funds have cleared in our account.
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-primary btn-lg btn-block">Place Order</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

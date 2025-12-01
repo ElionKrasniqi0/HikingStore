@@ -1,0 +1,209 @@
+﻿@page
+@model ConfirmEmailModel
+@{
+    ViewData["Title"] = "Confirm Email";
+}
+
+<div class="min-vh-100 d-flex align-items-center justify-content-center bg-light py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                    <!-- Header -->
+                    <div class="card-header bg-gradient-primary text-white text-center py-4 border-0">
+                        <div class="icon-wrapper bg-opacity-20 rounded-circle p-3 mx-auto mb-3">
+                            @if (Model.StatusMessage.Contains("Thank you"))
+                            {
+                                <i class="fas fa-check-circle fa-lg text-white"></i>
+                            }
+                            else
+                            {
+                                <i class="fas fa-exclamation-circle fa-lg text-white"></i>
+                            }
+                        </div>
+                        <h2 class="h4 fw-bold mb-2">
+                            @(Model.StatusMessage.Contains("Thank you") ? "Email Confirmed! 🎉" : "Confirmation Issue")
+                        </h2>
+                        <p class="mb-0 opacity-75">
+                            @(Model.StatusMessage.Contains("Thank you") ? "Your account is now active" : "We encountered an issue")
+                        </p>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="card-body p-5 text-center">
+                        @if (Model.StatusMessage.Contains("Thank you"))
+                        {
+                            <div class="success-animation mb-4">
+                                <i class="fas fa-check-circle fa-4x text-success mb-4"></i>
+                            </div>
+                            <h3 class="h5 fw-bold text-dark mb-3">Welcome to HikingStore!</h3>
+                            <p class="text-muted mb-4">
+                                Your email has been successfully verified. We've sent a welcome message to your inbox with everything you need to get started.
+                            </p>
+
+                            <div class="alert alert-success border-0 rounded-2 mb-4">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-envelope me-3 text-success"></i>
+                                    <div class="text-start">
+                                        <small class="fw-semibold">Welcome Email Sent</small>
+                                        <br>
+                                        <small>Check your inbox for your welcome package</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2 mb-4">
+                                <a href="/Identity/Account/Login" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Sign In to Your Account
+                                </a>
+                                <a href="/Home/Product" class="btn btn-outline-primary">
+                                    <i class="fas fa-shopping-bag me-2"></i>Start Shopping
+                                </a>
+                            </div>
+
+                            <div class="mt-4 pt-3 border-top">
+                                <h6 class="text-muted mb-3">What's Next?</h6>
+                                <div class="row text-center g-3">
+                                    <div class="col-4">
+                                        <div class="text-primary">
+                                            <i class="fas fa-hiking fa-2x mb-2"></i>
+                                            <small class="d-block">Explore Gear</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="text-primary">
+                                            <i class="fas fa-tags fa-2x mb-2"></i>
+                                            <small class="d-block">Get Discounts</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="text-primary">
+                                            <i class="fas fa-shipping-fast fa-2x mb-2"></i>
+                                            <small class="d-block">Fast Shipping</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="error-animation mb-4">
+                                <i class="fas fa-exclamation-triangle fa-4x text-warning mb-4"></i>
+                            </div>
+                            <h3 class="h5 fw-bold text-dark mb-3">Confirmation Issue</h3>
+                            <p class="text-muted mb-4">
+                                @Model.StatusMessage
+                            </p>
+
+                            <div class="alert alert-warning border-0 rounded-2 mb-4">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-info-circle me-3 text-warning"></i>
+                                    <div class="text-start">
+                                        <small class="fw-semibold">Need Help?</small>
+                                        <br>
+                                        <small>Try registering again or contact our support team</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <a href="/Identity/Account/Register" class="btn btn-primary">
+                                    <i class="fas fa-user-plus me-2"></i>Try Registering Again
+                                </a>
+                                <a href="/Home/Contact" class="btn btn-outline-primary">
+                                    <i class="fas fa-headset me-2"></i>Contact Support
+                                </a>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="card-footer bg-transparent text-center py-3">
+                        <small class="text-muted">
+                            Need assistance? <a href="/Home/Contact" class="text-primary text-decoration-none">Contact our support team</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #2d473d 0%, #3b5d50 100%);
+    }
+
+    .icon-wrapper {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .success-animation {
+        animation: bounceIn 0.6s ease-in-out;
+    }
+
+    .error-animation {
+        animation: shake 0.5s ease-in-out;
+    }
+
+    @@keyframes bounceIn {
+        0% {
+            opacity: 0;
+            transform: scale(0.3);
+        }
+
+        50% {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        70% {
+            transform: scale(0.9);
+        }
+
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @@keyframes shake {
+        0%, 100% {
+            transform: translateX(0);
+        }
+
+        10%, 30%, 50%, 70%, 90% {
+            transform: translateX(-5px);
+        }
+
+        20%, 40%, 60%, 80% {
+            transform: translateX(5px);
+        }
+    }
+
+    .card {
+        border: 1px solid rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+    }
+
+    .btn {
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #3b5d50, #2d473d);
+        border: none;
+    }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2d473d, #1a2f26);
+            transform: translateY(-1px);
+        }
+</style>
+

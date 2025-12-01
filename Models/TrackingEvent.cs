@@ -1,10 +1,7 @@
-﻿namespace HikingStore.Models
-{
-    using global::FurniCraft.Models;
-    using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-    namespace FurniCraft.Models
+namespace HikingStore.Models
     {
         public class TrackingEvent
         {
@@ -31,4 +28,3 @@
             public bool IsMilestone { get; set; }
         }
     }
-}

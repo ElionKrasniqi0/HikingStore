@@ -1,0 +1,512 @@
+﻿@model List<Product>
+
+<!-- Hero Section -->
+<section class="hero-section bg-light py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-5 fw-bold text-dark mb-3">Category Products</h1>
+                <p class="lead text-muted">Discover our curated collection of premium products</p>
+            </div>
+            <div class="col-lg-6 text-lg-end">
+                <div class="category-stats">
+                    <span class="badge bg-primary fs-6 px-3 py-2">
+                        <i class="fas fa-box me-2"></i>@Model.Count Products
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Products Section -->
+<section class="products-section py-5">
+    <div class="container">
+        @if (Model.Any())
+        {
+            <!-- Products Grid -->
+            <div class="row g-4">
+                @foreach (var item in Model)
+                {
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                        <div class="card product-card h-100 border-0 shadow-sm">
+                            <!-- Product Image -->
+                            <div class="product-image-container position-relative">
+                                <a href="/Home/ProductDetailes/@item.ProId" class="text-decoration-none">
+                                    <img class="card-img-top product-image" src="~/Product/@item.ProImage"
+                                         alt="@item.ProName" loading="lazy">
+                                    <div class="product-overlay"></div>
+                                </a>
+
+                                <!-- Quick Actions -->
+                                <div class="product-actions position-absolute top-0 end-0 p-3">
+                                    <button class="btn btn-light btn-sm rounded-circle shadow-sm wishlist-btn"
+                                            data-bs-toggle="tooltip" data-bs-placement="left"
+                                            data-bs-title="Add to wishlist">
+                                        <i class="far fa-heart"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Category Badge -->
+                                <div class="position-absolute top-0 start-0 m-3">
+                                    <span class="badge bg-primary bg-opacity-90 text-white category-badge">
+                                        @item.Category?.CatName
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Product Body -->
+                            <div class="card-body d-flex flex-column p-4">
+                                <!-- Product Title -->
+                                <h5 class="card-title product-title mb-2">
+                                    <a href="/Home/ProductDetailes/@item.ProId"
+                                       class="text-dark text-decoration-none">
+                                        @item.ProName
+                                    </a>
+                                </h5>
+
+                                <!-- Product Description -->
+                                <p class="card-text product-description text-muted small mb-3 flex-grow-1">
+                                    @{
+                                        var description = item.Descreption ?? "Premium quality product designed for exceptional performance.";
+                                        var truncatedDescription = description.Length > 100
+                                        ? description.Substring(0, 100) + "..."
+                                        : description;
+                                    }
+                                    @truncatedDescription
+                                </p>
+
+                                <!-- Price and Rating -->
+                                <div class="product-meta mb-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="product-price">
+                                            <span class="h5 text-primary fw-bold mb-0">€@item.Price.ToString("N2")</span>
+                                        </div>
+                                        <div class="product-rating">
+                                            <div class="rating-stars">
+                                                <i class="fas fa-star text-warning small"></i>
+                                                <i class="fas fa-star text-warning small"></i>
+                                                <i class="fas fa-star text-warning small"></i>
+                                                <i class="fas fa-star text-warning small"></i>
+                                                <i class="far fa-star text-warning small"></i>
+                                            </div>
+                                            <small class="text-muted">(12)</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="product-actions-bottom mt-auto">
+                                    <div class="d-grid gap-2">
+                                        <a href="/Home/ProductDetailes/@item.ProId"
+                                           class="btn btn-primary btn-lg">
+                                            <i class="fas fa-eye me-2"></i>View Details
+                                        </a>
+                                        <button class="btn btn-outline-primary btn-sm quick-add-btn"
+                                                data-product-id="@item.ProId"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-title="Add to cart">
+                                            <i class="fas fa-shopping-cart me-2"></i>Quick Add
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Product Footer -->
+                            <div class="card-footer bg-transparent border-0 pt-0">
+                                <div class="product-features">
+                                    <div class="row text-center g-2">
+                                        <div class="col-4">
+                                            <small class="text-muted">
+                                                <i class="fas fa-shipping-fast me-1"></i>Free Shipping
+                                            </small>
+                                        </div>
+                                        <div class="col-4">
+                                            <small class="text-muted">
+                                                <i class="fas fa-undo me-1"></i>30-Day Return
+                                            </small>
+                                        </div>
+                                        <div class="col-4">
+                                            <small class="text-muted">
+                                                <i class="fas fa-shield-alt me-1"></i>2-Year Warranty
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Empty State (if no products) -->
+        }
+        else
+        {
+            <div class="text-center py-5 my-5">
+                <div class="empty-state-icon mb-4">
+                    <i class="fas fa-box-open fa-4x text-muted"></i>
+                </div>
+                <h3 class="text-muted mb-3">No Products Found</h3>
+                <p class="text-muted mb-4">We couldn't find any products in this category.</p>
+                <a href="/Home/Product" class="btn btn-primary btn-lg">
+                    <i class="fas fa-shopping-bag me-2"></i>Browse All Products
+                </a>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section bg-light py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4 text-center">
+                <div class="feature-card p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-shipping-fast fa-2x text-primary"></i>
+                    </div>
+                    <h5>Free Shipping</h5>
+                    <p class="text-muted mb-0">Free shipping on orders over €50</p>
+                </div>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="feature-card p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-undo-alt fa-2x text-primary"></i>
+                    </div>
+                    <h5>Easy Returns</h5>
+                    <p class="text-muted mb-0">30-day return policy for all items</p>
+                </div>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="feature-card p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-headset fa-2x text-primary"></i>
+                    </div>
+                    <h5>24/7 Support</h5>
+                    <p class="text-muted mb-0">Expert customer support team</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    /* Hero Section */
+    .hero-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+    }
+
+    .breadcrumb-item.active {
+        color: var(--primary-light);
+    }
+
+    .category-stats .badge {
+        border-radius: 12px;
+        font-weight: 600;
+    }
+
+    /* Product Cards */
+    .product-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 16px;
+        overflow: hidden;
+        background: var(--white);
+    }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+    /* Product Image */
+    .product-image-container {
+        overflow: hidden;
+        background: #f8f9fa;
+        position: relative;
+    }
+
+    .product-image {
+        height: 250px;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+        width: 100%;
+    }
+
+    .product-card:hover .product-image {
+        transform: scale(1.05);
+    }
+
+    .product-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.1) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .product-card:hover .product-overlay {
+        opacity: 1;
+    }
+
+    /* Product Actions */
+    .product-actions .btn {
+        opacity: 0;
+        transform: translateX(10px);
+        transition: all 0.3s ease;
+    }
+
+    .product-card:hover .product-actions .btn {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .wishlist-btn:hover {
+        background: #dc3545 !important;
+        color: white !important;
+    }
+
+    /* Category Badge */
+    .category-badge {
+        font-size: 0.7rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+
+    /* Product Title */
+    .product-title {
+        font-weight: 600;
+        line-height: 1.3;
+        transition: color 0.3s ease;
+    }
+
+        .product-title a:hover {
+            color: var(--primary-light) !important;
+        }
+
+    /* Product Description */
+    .product-description {
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* Price and Rating */
+    .product-price {
+        font-family: 'Inter', sans-serif;
+    }
+
+    .rating-stars {
+        display: inline-flex;
+        gap: 1px;
+    }
+
+    /* Action Buttons */
+    .product-actions-bottom .btn {
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .quick-add-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+
+        .quick-add-btn:hover {
+            background: var(--primary-light);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+    /* Product Features */
+    .product-features {
+        border-top: 1px solid rgba(0,0,0,0.08);
+        padding-top: 1rem;
+    }
+
+    /* Features Section */
+    .features-section {
+        border-top: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .feature-card {
+        transition: transform 0.3s ease;
+        border-radius: 12px;
+    }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+    .feature-icon {
+        width: 70px;
+        height: 70px;
+        background: rgba(59, 93, 80, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+
+    /* Empty State */
+    .empty-state-icon {
+        opacity: 0.7;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .hero-section {
+            padding: 3rem 0;
+        }
+
+        .display-5 {
+            font-size: 2rem;
+        }
+
+        .product-image {
+            height: 200px;
+        }
+
+        .product-actions .btn {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .card-body {
+            padding: 1.5rem !important;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .col-sm-6 {
+            margin-bottom: 1.5rem;
+        }
+
+        .product-card {
+            margin-bottom: 1rem;
+        }
+
+        .product-features .col-4 {
+            margin-bottom: 0.5rem;
+        }
+
+        .features-section .col-md-4 {
+            margin-bottom: 1.5rem;
+        }
+    }
+
+    /* Loading States */
+    .product-image {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+    }
+
+    @@keyframes loading {
+        0% {
+            background-position: 200% 0;
+        }
+
+        100% {
+            background-position: -200% 0;
+        }
+    }
+
+    /* Focus States for Accessibility */
+    .product-card:focus-within {
+        outline: 2px solid var(--primary-light);
+        outline-offset: 4px;
+    }
+
+    .btn:focus {
+        box-shadow: 0 0 0 3px rgba(59, 93, 80, 0.3);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Quick add to cart functionality
+        const quickAddButtons = document.querySelectorAll('.quick-add-btn');
+        quickAddButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const productId = this.getAttribute('data-product-id');
+
+                // Add loading state
+                const originalText = this.innerHTML;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Adding...';
+                this.disabled = true;
+
+                // Simulate API call
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-check me-2"></i>Added!';
+                    setTimeout(() => {
+                        this.innerHTML = originalText;
+                        this.disabled = false;
+                    }, 2000);
+                }, 1000);
+            });
+        });
+
+        // Wishlist functionality
+        const wishlistButtons = document.querySelectorAll('.wishlist-btn');
+        wishlistButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const icon = this.querySelector('i');
+
+                if (icon.classList.contains('far')) {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas', 'text-danger');
+                    this.setAttribute('data-bs-title', 'Remove from wishlist');
+                } else {
+                    icon.classList.remove('fas', 'text-danger');
+                    icon.classList.add('far');
+                    this.setAttribute('data-bs-title', 'Add to wishlist');
+                }
+
+                // Update tooltip
+                const tooltip = bootstrap.Tooltip.getInstance(this);
+                if (tooltip) {
+                    tooltip.hide();
+                    tooltip.setContent({ '.tooltip-inner': this.getAttribute('data-bs-title') });
+                }
+            });
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    });
+</script>

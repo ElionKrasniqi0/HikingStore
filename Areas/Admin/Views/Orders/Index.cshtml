@@ -1,0 +1,528 @@
+﻿@model List<Order>
+@using HikingStore.Enum
+@using HikingStore.ViewModels
+
+<br />
+<br />
+<br />
+<br />
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800">Order Management</h1>
+            <p class="text-muted">Manage and track customer orders</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary" onclick="exportOrders()">
+                <i class="fas fa-download me-2"></i>Export
+            </button>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        @{
+            var statusList = Enum.GetValues(typeof(OrderStatus)).Cast<OrderStatus>();
+        }
+        @foreach (var status in statusList)
+        {
+            var count = Model.Count(o => o.Status == status);
+            var bgClass = status switch
+            {
+                OrderStatus.Received => "bg-primary",
+                OrderStatus.Verified => "bg-info",
+                OrderStatus.Processing => "bg-warning",
+                OrderStatus.Shipped => "bg-secondary",
+                OrderStatus.Completed => "bg-success",
+                OrderStatus.Cancelled => "bg-danger",
+                _ => "bg-primary"
+            };
+
+            <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
+                <div class="card @bgClass text-white">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <h4 class="mb-0">@count</h4>
+                                <p class="mb-0">@status</p>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-shopping-bag fa-2x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Filters -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Filter by Status</label>
+                    <select class="form-select" id="statusFilter" onchange="filterOrders()">
+                        <option value="">All Orders</option>
+                        @foreach (var status in statusList)
+                        {
+                            <option value="@status">@status</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Search Orders</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="searchInput" placeholder="Search by order ID, customer, email, address...">
+                        <button class="btn btn-outline-secondary" type="button" onclick="searchOrders()">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
+                        <i class="fas fa-times me-2"></i>Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h5 class="mb-0">All Orders</h5>
+                </div>
+                <div class="col-md-6 text-end">
+                    <span class="text-muted">Showing @Model.Count orders</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="ordersTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="border-0">Order #</th>
+                            <th class="border-0">Customer</th>
+                            <th class="border-0">Date</th>
+                            <th class="border-0">Total</th>
+                            <th class="border-0">Status</th>
+                            <th class="border-0">Items</th>
+                            <th class="border-0 text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model)
+                        {
+                            <tr>
+                                <td class="fw-semibold">#@order.OrderId</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm bg-light rounded-circle d-flex align-items-center justify-content-center me-2">
+                                            <i class="fas fa-user text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-medium">@order.User?.UserName</div>
+                                            <small class="text-muted">@order.User?.Email</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>@order.OrderDate.ToString("MMM dd, yyyy")</div>
+                                    <small class="text-muted">@order.OrderDate.ToString("hh:mm tt")</small>
+                                </td>
+                                <td class="fw-bold text-success">@order.TotalAmount.ToString("C")</td>
+                                <td>
+                                    @await Html.PartialAsync("_OrderStatusBadge", order.Status)
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark">
+                                        @order.OrderDetails.Sum(od => od.Quantity) items
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="Details" asp-route-id="@order.OrderId"
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye me-1"></i>View
+                                        </a>
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
+                                                data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="fas fa-cog"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <a class="dropdown-item" href="#"
+                                                   onclick="showStatusModal(@order.OrderId, '@order.Status')">
+                                                    <i class="fas fa-sync me-2"></i>Update Status
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <a class="dropdown-item text-danger" href="#"
+                                                   onclick="confirmDelete(@order.OrderId)">
+                                                    <i class="fas fa-trash me-2"></i>Delete
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="statusModalLabel">
+                    <i class="fas fa-sync-alt me-2"></i>Update Order Status
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="statusForm">
+                    <input type="hidden" id="orderId">
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Status</label>
+                            <select class="form-select" id="orderStatus" required onchange="toggleTrackingFields()">
+                                <option value="Received">📥 Received (E Pranuar)</option>
+                                <option value="Verified">✅ Verified (E Verifikuar)</option>
+                                <option value="Processing">⚙️ Processing (Në Procesim)</option>
+                                <option value="Shipped">🚚 Shipped (E Nisur)</option>
+                                <option value="Completed">🎉 Completed (E Realizuar)</option>
+                                <option value="Cancelled">❌ Cancelled (E Anuluar)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Carrier</label>
+                            <select class="form-select" id="carrier">
+                                <option value="Standard Shipping">Standard Shipping</option>
+                                <option value="Express Shipping">Express Shipping</option>
+                                <option value="DHL">DHL</option>
+                                <option value="UPS">UPS</option>
+                                <option value="FedEx">FedEx</option>
+                                <option value="Custom">Custom Carrier</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3" id="trackingFields" style="display: none;">
+                        <label class="form-label fw-semibold">Tracking Number</label>
+                        <input type="text" class="form-control" id="trackingNumber"
+                               placeholder="Enter tracking number (will be sent to customer)">
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            This tracking number will be included in customer notifications
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Admin Notes (Internal)</label>
+                        <textarea class="form-control" id="adminNotes" rows="3"
+                                  placeholder="Add internal notes about this status change..."></textarea>
+                        <div class="form-text">
+                            <i class="fas fa-lock me-1"></i>
+                            These notes are for internal use only and won't be sent to the customer
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-envelope me-2"></i>
+                        <strong>Email Notifications:</strong>
+                        Both customer and admin will receive automatic email notifications about this status change.
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="updateOrderStatus()">
+                    <i class="fas fa-paper-plane me-2"></i>Update Status & Send Notifications
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+@section Styles {
+    <style>
+        .avatar-sm {
+            width: 32px;
+            height: 32px;
+            font-size: 0.875rem;
+        }
+
+        .table th {
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .order-status-received {
+            background-color: #0d6efd;
+        }
+
+        .order-status-verified {
+            background-color: #0dcaf0;
+        }
+
+        .order-status-processing {
+            background-color: #ffc107;
+            color: #000;
+        }
+
+        .order-status-shipped {
+            background-color: #6c757d;
+        }
+
+        .order-status-completed {
+            background-color: #198754;
+        }
+
+        .order-status-cancelled {
+            background-color: #dc3545;
+        }
+    </style>
+}
+
+@section Scripts {
+
+    <script>
+        function toggleTrackingFields() {
+            const status = document.getElementById('orderStatus').value;
+            const trackingFields = document.getElementById('trackingFields');
+
+            if (status === 'Shipped') {
+                trackingFields.style.display = 'block';
+            } else {
+                trackingFields.style.display = 'none';
+            }
+        }
+
+        function updateOrderStatus() {
+            const orderId = document.getElementById('orderId').value;
+            const status = document.getElementById('orderStatus').value;
+            const trackingNumber = document.getElementById('trackingNumber').value;
+            const adminNotes = document.getElementById('adminNotes').value;
+            const carrier = document.getElementById('carrier').value;
+
+            const updateButton = document.querySelector('#statusModal .btn-primary');
+            const originalText = updateButton.innerHTML;
+
+            // Show loading state
+            updateButton.disabled = true;
+            updateButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Updating...';
+
+            fetch('@Url.Action("UpdateStatus", "Orders", new { area = "Admin" })', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `id=${orderId}&status=${status}&trackingNumber=${encodeURIComponent(trackingNumber)}&adminNotes=${encodeURIComponent(adminNotes)}&carrier=${encodeURIComponent(carrier)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Order status updated successfully! Email notification sent to customer.', 'success');
+
+                    // Close modal and refresh page after a short delay
+                    setTimeout(() => {
+                        bootstrap.Modal.getInstance(document.getElementById('statusModal')).hide();
+                        location.reload();
+                    }, 1500);
+                } else {
+                    showNotification(data.message, 'error');
+                    updateButton.disabled = false;
+                    updateButton.innerHTML = originalText;
+                }
+            })
+            .catch(error => {
+                showNotification('Error updating order status', 'error');
+                updateButton.disabled = false;
+                updateButton.innerHTML = originalText;
+            });
+        }
+
+        function showNotification(message, type) {
+            // Create toast notification
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0 position-fixed top-0 end-0 m-3`;
+            toast.style.zIndex = '1060';
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            document.body.appendChild(toast);
+
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+
+            // Remove toast after hiding
+            toast.addEventListener('hidden.bs.toast', () => {
+                toast.remove();
+            });
+        }
+    </script>
+    <script>
+        function filterOrders() {
+            const status = document.getElementById('statusFilter').value;
+            const url = new URL(window.location.href);
+
+            if (status) {
+                url.searchParams.set('status', status);
+            } else {
+                url.searchParams.delete('status');
+            }
+
+            window.location.href = url.toString();
+        }
+
+        function searchOrders() {
+            const search = document.getElementById('searchInput').value;
+            const url = new URL(window.location.href);
+
+            if (search) {
+                url.searchParams.set('search', search);
+            } else {
+                url.searchParams.delete('search');
+            }
+
+            window.location.href = url.toString();
+        }
+
+        function clearFilters() {
+            window.location.href = '@Url.Action("Index")';
+        }
+
+        function showStatusModal(orderId, currentStatus) {
+            document.getElementById('orderId').value = orderId;
+            document.getElementById('orderStatus').value = currentStatus;
+
+            const modal = new bootstrap.Modal(document.getElementById('statusModal'));
+            modal.show();
+
+            // Show/hide tracking number field based on status
+            toggleTrackingField();
+
+            document.getElementById('orderStatus').addEventListener('change', toggleTrackingField);
+        }
+
+        function toggleTrackingField() {
+            const status = document.getElementById('orderStatus').value;
+            const trackingField = document.getElementById('trackingField');
+
+            if (status === 'Shipped') {
+                trackingField.style.display = 'block';
+            } else {
+                trackingField.style.display = 'none';
+            }
+        }
+
+              function updateOrderStatus() {
+            const orderId = document.getElementById('orderId').value;
+            const status = document.getElementById('orderStatus').value;
+            const trackingNumber = document.getElementById('trackingNumber').value;
+            const adminNotes = document.getElementById('adminNotes').value;
+
+            const updateButton = document.querySelector('#statusModal .btn-primary');
+            const originalText = updateButton.innerHTML;
+
+            // Show loading state
+            updateButton.disabled = true;
+            updateButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Updating...';
+
+            fetch('@Url.Action("UpdateStatus", "Orders", new { area = "Admin" })', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `id=${orderId}&status=${status}&trackingNumber=${encodeURIComponent(trackingNumber)}&adminNotes=${encodeURIComponent(adminNotes)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    showNotification('Order status updated successfully! Email notification sent to customer.', 'success');
+
+                    // Close modal and refresh page after a short delay
+                    setTimeout(() => {
+                        bootstrap.Modal.getInstance(document.getElementById('statusModal')).hide();
+                        location.reload();
+                    }, 1500);
+                } else {
+                    showNotification(data.message, 'error');
+                    updateButton.disabled = false;
+                    updateButton.innerHTML = originalText;
+                }
+            })
+            .catch(error => {
+                showNotification('Error updating order status', 'error');
+                updateButton.disabled = false;
+                updateButton.innerHTML = originalText;
+            });
+        }
+
+        // Add this helper function for notifications
+        function showNotification(message, type) {
+            // You can use Toastr or any other notification library
+            // For simplicity, using alert - replace with your preferred notification system
+            if (type === 'success') {
+                alert('✓ ' + message);
+            } else {
+                alert('✗ ' + message);
+            }
+        }
+
+        function confirmDelete(orderId) {
+            if (confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
+                fetch('@Url.Action("DeleteOrder", "Orders", new { area = "Admin" })', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `id=${orderId}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('Error deleting order');
+                });
+            }
+        }
+
+        function exportOrders() {
+            // Implement export functionality
+            alert('Export functionality would be implemented here');
+        }
+    </script>
+}
+
