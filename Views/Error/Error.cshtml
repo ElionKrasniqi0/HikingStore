@@ -1,0 +1,138 @@
+﻿@{
+    ViewData["Title"] = ViewBag.ErrorCode ?? "Error";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <div class="error-icon mb-4">
+                @if (ViewBag.ErrorCode != null && ViewBag.ErrorCode.Contains("404"))
+                {
+                    <i class="fas fa-exclamation-triangle fa-5x text-warning"></i>
+                }
+                else if (ViewBag.ErrorCode != null && ViewBag.ErrorCode.Contains("500"))
+                {
+                    <i class="fas fa-server fa-5x text-danger"></i>
+                }
+                else
+                {
+                    <i class="fas fa-exclamation-circle fa-5x text-primary"></i>
+                }
+            </div>
+
+            <h1 class="display-4 fw-bold text-primary mb-3">
+                @(ViewBag.ErrorCode?.Split('-')[0]?.Trim() ?? "Error")
+            </h1>
+
+            <h2 class="h4 fw-semibold text-dark mb-4">
+                @(ViewBag.ErrorMessage ?? "An error occurred while processing your request.")
+            </h2>
+
+            @if (ViewBag.OriginalPath != null)
+            {
+                <p class="text-muted small mb-4">
+                    Path: <code>@ViewBag.OriginalPath</code>
+                </p>
+            }
+
+            <div class="d-flex flex-wrap justify-content-center gap-3 mb-5">
+                <a href="/" class="btn btn-primary btn-lg">
+                    <i class="fas fa-home me-2"></i>Go Home
+                </a>
+                <a href="/Home/Product" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-shopping-bag me-2"></i>Browse Products
+                </a>
+                <button onclick="history.back()" class="btn btn-outline-secondary btn-lg">
+                    <i class="fas fa-arrow-left me-2"></i>Go Back
+                </button>
+            </div>
+
+            <!-- Development Error Details -->
+            @if (ViewBag.ExceptionMessage != null)
+            {
+                <div class="card mt-4 border-0 bg-light">
+                    <div class="card-header bg-transparent">
+                        <h5 class="mb-0">
+                            <i class="fas fa-bug me-2"></i>Error Details (Development Only)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        @if (ViewBag.ExceptionPath != null)
+                        {
+                            <div class="mb-2">
+                                <strong>Path:</strong>
+                                <code class="d-block mt-1 small">@ViewBag.ExceptionPath</code>
+                            </div>
+                        }
+
+                        @if (ViewBag.ExceptionType != null)
+                        {
+                            <div class="mb-2">
+                                <strong>Exception Type:</strong>
+                                <span class="d-block mt-1">@ViewBag.ExceptionType</span>
+                            </div>
+                        }
+
+                        @if (ViewBag.ExceptionMessage != null)
+                        {
+                            <div class="mb-2">
+                                <strong>Message:</strong>
+                                <p class="mt-1 mb-0">@ViewBag.ExceptionMessage</p>
+                            </div>
+                        }
+
+                        @if (ViewBag.StackTrace != null)
+                        {
+                            <div>
+                                <strong>Stack Trace:</strong>
+                                <pre class="mt-1 mb-0 small" style="max-height: 200px; overflow-y: auto;">@ViewBag.StackTrace</pre>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .error-icon {
+        animation: bounce 2s infinite;
+    }
+
+    @@keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
+        }
+
+        40% {
+            transform: translateY(-20px);
+        }
+
+        60% {
+            transform: translateY(-10px);
+        }
+    }
+
+    .display-4 {
+        font-size: 4.5rem;
+    }
+
+    pre {
+        background: #fff;
+        padding: 1rem;
+        border-radius: 0.25rem;
+        font-family: 'Courier New', monospace;
+    }
+
+    @@media (max-width: 768px) {
+        .display-4 {
+            font-size: 3rem;
+        }
+
+        .btn-lg {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+        }
+    }
+</style>

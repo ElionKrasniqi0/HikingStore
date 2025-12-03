@@ -1,5 +1,904 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+﻿@using HikingStore.ViewModels
+@model ShopViewModel
+
+<!-- Hero Section -->
+<section class="shop-hero-section py-4">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-5 fw-bold text-dark mb-3">Outdoor Gear Shop</h1>
+                <p class="lead text-muted mb-4">Premium hiking equipment and camping gear for every adventure</p>
+            </div>
+            <div class="col-lg-6 text-lg-end">
+                <div class="shop-stats d-flex gap-3 justify-content-lg-end">
+                    <div class="stat-item">
+                        <span class="stat-number h4 text-primary">@Model.Products.Count</span>
+                        <p class="stat-label text-muted mb-0 small">Products</p>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number h4 text-primary">@Model.Categories.Count</span>
+                        <p class="stat-label text-muted mb-0 small">Categories</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Shop Content -->
+<section class="shop-content py-4">
+    <div class="container">
+        <div class="row">
+            <!-- Sidebar Filters -->
+            <div class="col-lg-3 col-md-4 mb-4">
+                <div class="card border-0 shadow-sm sticky-top" style="top: 20px;">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="mb-0">
+                            <i class="fas fa-filter me-2 text-primary"></i>Filters
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Categories Filter -->
+                        <div class="mb-4">
+                            <h6 class="fw-semibold mb-3">Categories</h6>
+                            <div class="list-group list-group-flush">
+                                <a href="/Home/Product" class="list-group-item list-group-item-action border-0 px-0 py-2">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span>All Products</span>
+                                        <span class="badge bg-light text-dark">@Model.Products.Count</span>
+                                    </div>
+                                </a>
+                                @foreach (var category in Model.Categories)
+                                {
+                                    <a href="/Home/ProductCategory/@category.CatId"
+                                       class="list-group-item list-group-item-action border-0 px-0 py-2">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span>@category.CatName</span>
+                                            <span class="badge bg-light text-dark">
+                                                @Model.Products.Count(p => p.CatId == category.CatId)
+                                            </span>
+                                        </div>
+                                    </a>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Price Filter -->
+                        <div class="mb-4">
+                            <h6 class="fw-semibold mb-3">Price Range</h6>
+                            <div class="price-range">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="priceFilter" id="priceAll" checked>
+                                    <label class="form-check-label" for="priceAll">
+                                        All Prices
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="priceFilter" id="priceUnder50">
+                                    <label class="form-check-label" for="priceUnder50">
+                                        Under €50
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="priceFilter" id="price50to100">
+                                    <label class="form-check-label" for="price50to100">
+                                        €50 - €100
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="priceFilter" id="priceOver100">
+                                    <label class="form-check-label" for="priceOver100">
+                                        Over €100
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Links -->
+                        <div class="mb-3">
+                            <h6 class="fw-semibold mb-3">Quick Links</h6>
+                            <div class="d-grid gap-2">
+                                <a href="/Home/Product" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-fire me-2"></i>New Arrivals
+                                </a>
+                                <a href="/Home/Product" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-star me-2"></i>Best Sellers
+                                </a>
+                                <a href="/Home/Product" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-percent me-2"></i>On Sale
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Support Card -->
+                        <div class="card border-0 bg-light mt-4">
+                            <div class="card-body text-center p-3">
+                                <i class="fas fa-headset fa-2x text-primary mb-2"></i>
+                                <h6 class="mb-2">Need Help?</h6>
+                                <p class="text-muted small mb-2">Our experts are here to assist you</p>
+                                <a href="/Home/Contact" class="btn btn-primary btn-sm w-100">Contact Support</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="col-lg-9 col-md-8">
+                <!-- Products Header -->
+                <div class="products-header mb-4">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+                        <div class="mb-3 mb-md-0">
+                            <h3 class="h4 fw-bold mb-1">All Products</h3>
+                            <p class="text-muted small mb-0">Showing @Model.Products.Count products</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-sort me-2"></i>Sort by
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#">Featured</a></li>
+                                    <li><a class="dropdown-item" href="#">Price: Low to High</a></li>
+                                    <li><a class="dropdown-item" href="#">Price: High to Low</a></li>
+                                    <li><a class="dropdown-item" href="#">Newest First</a></li>
+                                </ul>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-eye me-2"></i>View
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" data-view="grid"><i class="fas fa-th-large me-2"></i>Grid</a></li>
+                                    <li><a class="dropdown-item" href="#" data-view="list"><i class="fas fa-list me-2"></i>List</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Search Bar -->
+                    <div class="search-box mb-4">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Search products..." id="shopSearch">
+                            <button class="btn btn-primary" type="button" onclick="searchProducts()">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Grid -->
+                <div class="row g-3" id="productsGrid">
+                    @foreach (var product in Model.Products)
+                    {
+                        <div class="col-xl-4 col-lg-6 col-md-6">
+                            <div class="card product-card h-100 border-0 shadow-sm">
+                                <!-- Product Image -->
+                                <div class="product-image-container position-relative">
+                                    <a href="/Home/ProductDetailes/@product.ProId" class="text-decoration-none">
+                                        <img class="card-img-top product-image" src="~/Product/@product.ProImage"
+                                             alt="@product.ProName" loading="lazy">
+                                        <div class="product-overlay"></div>
+                                    </a>
+
+                                    <!-- Category Badge -->
+                                    <div class="position-absolute top-0 start-0 m-2">
+                                        @{
+                                            var category = Model.Categories.FirstOrDefault(c => c.CatId == product.CatId);
+                                        }
+                                        <span class="badge bg-primary bg-opacity-90 text-white small">
+                                            @category?.CatName
+                                        </span>
+                                    </div>
+
+                                    <!-- Quick Actions -->
+                                    <div class="product-actions position-absolute top-0 end-0 m-2">
+                                        <button class="btn btn-light btn-xs rounded-circle shadow-sm wishlist-btn"
+                                                data-bs-toggle="tooltip" data-bs-placement="left"
+                                                data-bs-title="Add to wishlist"
+                                                data-product-id="@product.ProId">
+                                            <i class="far fa-heart"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Product Body -->
+                                <div class="card-body d-flex flex-column p-3">
+                                    <!-- Product Title -->
+                                    <h6 class="card-title product-title mb-2">
+                                        <a href="/Home/ProductDetailes/@product.ProId"
+                                           class="text-dark text-decoration-none"
+                                           title="@product.ProName">
+                                            @product.ProName
+                                        </a>
+                                    </h6>
+
+                                    <!-- Product Description -->
+                                    <p class="card-text product-description text-muted small mb-3 flex-grow-1">
+                                        @{
+                                            var description = product.Descreption ?? "";
+                                            var truncatedDescription = description.Length > 80
+                                            ? description.Substring(0, 80) + "..."
+                                            : description;
+                                        }
+                                        @truncatedDescription
+                                    </p>
+
+                                    <!-- Price and Rating -->
+                                    <div class="product-meta mb-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="product-price">
+                                                <span class="h5 text-primary fw-bold mb-0">€@product.Price.ToString("N2")</span>
+                                            </div>
+                                            <div class="product-rating">
+                                                <div class="rating-stars small">
+                                                    <i class="fas fa-star text-warning"></i>
+                                                    <i class="fas fa-star text-warning"></i>
+                                                    <i class="fas fa-star text-warning"></i>
+                                                    <i class="fas fa-star text-warning"></i>
+                                                    <i class="far fa-star text-warning"></i>
+                                                </div>
+                                                <small class="text-muted">(4.2)</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Action Buttons -->
+                                    <div class="product-actions-bottom mt-auto">
+                                        <div class="d-grid gap-2">
+                                            <a href="/Home/ProductDetailes/@product.ProId"
+                                               class="btn btn-primary btn-sm">
+                                                <i class="fas fa-eye me-2"></i>View Details
+                                            </a>
+                                            <button class="btn btn-outline-primary btn-sm quick-add-btn"
+                                                    data-product-id="@product.ProId"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-title="Add to cart">
+                                                <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Empty State -->
+                @if (!Model.Products.Any())
+                {
+                    <div class="text-center py-5 my-5">
+                        <div class="empty-state-icon mb-4">
+                            <i class="fas fa-box-open fa-4x text-muted"></i>
+                        </div>
+                        <h4 class="text-muted mb-3">No Products Found</h4>
+                        <p class="text-muted mb-4">We're currently updating our inventory. Please check back soon!</p>
+                        <a href="/Home/Product" class="btn btn-primary">
+                            <i class="fas fa-sync-alt me-2"></i>Refresh Page
+                        </a>
+                    </div>
+                }
+
+                <!-- Load More Button (if needed) -->
+                @if (Model.Products.Count >= 9)
+                {
+                    <div class="text-center mt-5">
+                        <button class="btn btn-outline-primary btn-load-more">
+                            <i class="fas fa-spinner fa-spin me-2 d-none"></i>
+                            <span class="btn-text">Load More Products</span>
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section py-4 bg-light">
+    <div class="container">
+        <div class="row g-3">
+            <div class="col-md-3 col-6">
+                <div class="feature-card text-center p-3">
+                    <div class="feature-icon mb-2">
+                        <i class="fas fa-shipping-fast fa-2x text-primary"></i>
+                    </div>
+                    <h6 class="mb-1">Free Shipping</h6>
+                    <p class="text-muted small mb-0">On orders over €50</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="feature-card text-center p-3">
+                    <div class="feature-icon mb-2">
+                        <i class="fas fa-undo-alt fa-2x text-primary"></i>
+                    </div>
+                    <h6 class="mb-1">Easy Returns</h6>
+                    <p class="text-muted small mb-0">30-day return policy</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="feature-card text-center p-3">
+                    <div class="feature-icon mb-2">
+                        <i class="fas fa-shield-alt fa-2x text-primary"></i>
+                    </div>
+                    <h6 class="mb-1">Secure Payment</h6>
+                    <p class="text-muted small mb-0">100% secure transactions</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="feature-card text-center p-3">
+                    <div class="feature-icon mb-2">
+                        <i class="fas fa-headset fa-2x text-primary"></i>
+                    </div>
+                    <h6 class="mb-1">24/7 Support</h6>
+                    <p class="text-muted small mb-0">Expert customer service</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    /* Hero Section */
+    .shop-hero-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin-bottom: 0.5rem;
+    }
+
+    .breadcrumb-item.active {
+        color: var(--primary-light);
+    }
+
+    .shop-stats {
+        flex-wrap: wrap;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 0.5rem 1rem;
+        background: white;
+        border-radius: 8px;
+        min-width: 100px;
+    }
+
+    .stat-number {
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+    }
+
+    /* Product Cards */
+    .product-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 12px;
+        overflow: hidden;
+        background: var(--white);
+    }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+    /* Product Image */
+    .product-image-container {
+        overflow: hidden;
+        background: #f8f9fa;
+        position: relative;
+    }
+
+    .product-image {
+        height: 200px;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+        width: 100%;
+    }
+
+    .product-card:hover .product-image {
+        transform: scale(1.05);
+    }
+
+    .product-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.1) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .product-card:hover .product-overlay {
+        opacity: 1;
+    }
+
+    /* Product Actions */
+    .product-actions .btn-xs {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        opacity: 0;
+        transform: translateX(10px);
+        transition: all 0.3s ease;
+    }
+
+    .product-card:hover .product-actions .btn-xs {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .wishlist-btn:hover {
+        background: #dc3545 !important;
+        color: white !important;
+    }
+
+    /* Category Badge */
+    .badge {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        font-weight: 600;
+    }
+
+    /* Product Title */
+    .product-title a {
+        font-weight: 600;
+        line-height: 1.3;
+        transition: color 0.3s ease;
+        font-size: 0.95rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+        .product-title a:hover {
+            color: var(--primary-light) !important;
+        }
+
+    /* Product Description */
+    .product-description {
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* Price and Rating */
+    .product-price {
+        font-family: 'Inter', sans-serif;
+    }
+
+    .rating-stars {
+        display: inline-flex;
+        gap: 1px;
+    }
+
+    /* Action Buttons */
+    .product-actions-bottom .btn {
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .quick-add-btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+
+        .quick-add-btn:hover {
+            background: var(--primary-light);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+    /* Features Section */
+    .features-section {
+        border-top: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .feature-card {
+        transition: transform 0.3s ease;
+        border-radius: 8px;
+        background: white;
+    }
+
+        .feature-card:hover {
+            transform: translateY(-3px);
+        }
+
+    .feature-icon {
+        color: var(--primary-light);
+    }
+
+    /* Filters */
+    .list-group-item {
+        border: none;
+        padding: 0.5rem 0;
+        background: transparent;
+    }
+
+        .list-group-item:hover, .list-group-item.active {
+            background: rgba(59, 93, 80, 0.05);
+            color: var(--primary-light);
+        }
+
+    /* Search Box */
+    .search-box .input-group {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .search-box .form-control {
+        border-right: 0;
+    }
+
+    .search-box .btn {
+        border-left: 0;
+    }
+
+    /* Dropdowns */
+    .dropdown-menu {
+        border: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border-radius: 8px;
+    }
+
+    .dropdown-item {
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        margin: 0.125rem 0.5rem;
+        width: auto;
+    }
+
+        .dropdown-item:hover {
+            background: rgba(59, 93, 80, 0.08);
+        }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .shop-hero-section {
+            padding: 2rem 0;
+        }
+
+        .display-5 {
+            font-size: 1.75rem;
+        }
+
+        .lead {
+            font-size: 1rem;
+        }
+
+        .stat-item {
+            min-width: 80px;
+            padding: 0.5rem;
+        }
+
+        .product-image {
+            height: 160px;
+        }
+
+        .product-card {
+            margin-bottom: 1rem;
+        }
+
+        .product-actions .btn-xs {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .sticky-top {
+            position: static !important;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .col-6 {
+            margin-bottom: 1rem;
+        }
+
+        .product-image {
+            height: 140px;
+        }
+
+        .card-body {
+            padding: 1rem !important;
+        }
+
+        .product-title a {
+            font-size: 0.9rem;
+        }
+
+        .features-section .col-6 {
+            margin-bottom: 0.5rem;
+        }
+    }
+
+    /* Loading States */
+    .btn-load-more .fa-spinner {
+        display: inline-block !important;
+    }
+
+    .btn-load-more.loading .btn-text {
+        display: none;
+    }
+
+    /* Focus States for Accessibility */
+    .btn:focus,
+    .form-control:focus,
+    .dropdown-item:focus {
+        box-shadow: 0 0 0 3px rgba(59, 93, 80, 0.25);
+    }
+
+    .product-card:focus-within {
+        outline: 2px solid var(--primary-light);
+        outline-offset: 2px;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Search functionality
+        const shopSearch = document.getElementById('shopSearch');
+        if (shopSearch) {
+            shopSearch.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchProducts();
+                }
+            });
+        }
+
+        // Wishlist functionality
+        const wishlistButtons = document.querySelectorAll('.wishlist-btn');
+        wishlistButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const productId = this.getAttribute('data-product-id');
+                const icon = this.querySelector('i');
+
+                if (icon.classList.contains('far')) {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas', 'text-danger');
+                    this.setAttribute('data-bs-title', 'Remove from wishlist');
+                    addToWishlist(productId);
+                } else {
+                    icon.classList.remove('fas', 'text-danger');
+                    icon.classList.add('far');
+                    this.setAttribute('data-bs-title', 'Add to wishlist');
+                    removeFromWishlist(productId);
+                }
+
+                // Update tooltip
+                const tooltip = bootstrap.Tooltip.getInstance(this);
+                if (tooltip) {
+                    tooltip.hide();
+                    tooltip.setContent({ '.tooltip-inner': this.getAttribute('data-bs-title') });
+                }
+            });
+        });
+
+        // Quick add to cart functionality
+        const quickAddButtons = document.querySelectorAll('.quick-add-btn');
+        quickAddButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const productId = this.getAttribute('data-product-id');
+
+                // Show loading state
+                const originalText = this.innerHTML;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Adding...';
+                this.disabled = true;
+
+                // Simulate API call
+                setTimeout(() => {
+                    addToCart(productId, 1);
+                    this.innerHTML = '<i class="fas fa-check me-2"></i>Added!';
+                    setTimeout(() => {
+                        this.innerHTML = originalText;
+                        this.disabled = false;
+                    }, 2000);
+                }, 1000);
+            });
+        });
+
+        // Price filter functionality
+        const priceFilters = document.querySelectorAll('input[name="priceFilter"]');
+        priceFilters.forEach(filter => {
+            filter.addEventListener('change', function() {
+                filterProducts();
+            });
+        });
+
+        // View toggle functionality
+        const viewLinks = document.querySelectorAll('[data-view]');
+        const productsGrid = document.getElementById('productsGrid');
+
+        viewLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const view = this.getAttribute('data-view');
+
+                viewLinks.forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+
+                if (view === 'list') {
+                    productsGrid.classList.add('list-view');
+                    productsGrid.classList.remove('grid-view');
+                } else {
+                    productsGrid.classList.add('grid-view');
+                    productsGrid.classList.remove('list-view');
+                }
+            });
+        });
+
+        // Load more functionality
+        const loadMoreBtn = document.querySelector('.btn-load-more');
+        if (loadMoreBtn) {
+            loadMoreBtn.addEventListener('click', function() {
+                this.classList.add('loading');
+
+                // Simulate loading more products
+                setTimeout(() => {
+                    this.classList.remove('loading');
+                    // In a real app, you would fetch more products here
+                    console.log('Loading more products...');
+                }, 1500);
+            });
+        }
+
+        // Add hover effects to product cards
+        const productCards = document.querySelectorAll('.product-card');
+        productCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.zIndex = '10';
+            });
+
+            card.addEventListener('mouseleave', function() {
+                this.style.zIndex = '1';
+            });
+        });
+
+        // Initialize filters
+        initializeFilters();
+    });
+
+    // Search function
+    function searchProducts() {
+        const searchTerm = document.getElementById('shopSearch').value;
+        if (searchTerm.trim() !== '') {
+            window.location.href = '/Home/SearchProduct?search=' + encodeURIComponent(searchTerm);
+        }
+    }
+
+    // Filter products based on selected filters
+    function filterProducts() {
+        const selectedPrice = document.querySelector('input[name="priceFilter"]:checked').id;
+        const productCards = document.querySelectorAll('.product-card');
+
+        productCards.forEach(card => {
+            const priceElement = card.querySelector('.product-price .h5');
+            if (priceElement) {
+                const priceText = priceElement.textContent.replace('€', '');
+                const price = parseFloat(priceText.replace(',', ''));
+
+                let showCard = true;
+
+                switch (selectedPrice) {
+                    case 'priceUnder50':
+                        showCard = price < 50;
+                        break;
+                    case 'price50to100':
+                        showCard = price >= 50 && price <= 100;
+                        break;
+                    case 'priceOver100':
+                        showCard = price > 100;
+                        break;
+                    default:
+                        showCard = true;
+                }
+
+                card.style.display = showCard ? 'block' : 'none';
+            }
+        });
+    }
+
+    // Initialize filters
+    function initializeFilters() {
+        // Set default price filter
+        document.getElementById('priceAll').checked = true;
+    }
+
+    // Add to cart function
+    function addToCart(productId, quantity) {
+        fetch('/Carts/AddToCart?ProId=' + productId + '&qty=' + quantity, {
+            method: 'POST',
+            headers: {
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update cart count in header
+                updateCartCount(data.cartItemCount);
+
+                // Show notification
+                showNotification('Product added to cart!', 'success');
+            } else {
+                showNotification('Failed to add product to cart', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Error adding to cart', 'error');
+        });
+    }
+
+    // Wishlist functions
+    function addToWishlist(productId) {
+        // In a real app, make API call to add to wishlist
+        console.log('Adding product', productId, 'to wishlist');
+        showNotification('Added to wishlist', 'success');
+    }
+
+    function removeFromWishlist(productId) {
+        // In a real app, make API call to remove from wishlist
+        console.log('Removing product', productId, 'from wishlist');
+        showNotification('Removed from wishlist', 'info');
+    }
+
+    // Update cart count in header
+    function updateCartCount(count) {
+        const cartCountElements = document.querySelectorAll('.cart-count');
+        cartCountElements.forEach(element => {
+            element.textContent = count;
+        });
+    }
+
+    // Show notification
+    function showNotification(message, type) {
+        // Create toast notification
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type} border-0 position-fixed bottom-0 end-0 m-3`;
+        toast.style.zIndex = '1060';
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">${message}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        document.body.appendChild(toast);
+
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+
+        // Remove toast after hiding
+        toast.addEventListener('hidden.bs.toast', () => {
+            toast.remove();
+        });
+    }
+</script>

@@ -54,28 +54,25 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
-// Configure Email Sender - Use REAL Gmail in production
+// Configure Email Sender
 if (builder.Environment.IsDevelopment())
 {
-    // In development, use the real email sender but log extensively
     builder.Services.AddTransient<IEmailSender, EmailSender>();
 }
 else
 {
-    // In production, use real Gmail
     builder.Services.AddTransient<IEmailSender, EmailSender>();
 }
+
 // Email Services
 builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 builder.Services.AddHttpContextAccessor();
-// Configure Email Sender
-builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddLogging();
 
 // Configure Application Cookie
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+    options.AccessDeniedPath = "/Error/AccessDenied";
     options.LoginPath = "/Identity/Account/Login";
     options.LogoutPath = "/Identity/Account/Logout";
 });
@@ -99,16 +96,33 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseExceptionHandler("/Home/Error");
+    app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
 
-app.UseStatusCodePagesWithRedirects("/Error/{0}");
+// Custom error handling middleware
+app.Use(async (context, next) =>
+{
+    await next();
+
+    if (context.Response.StatusCode == 404 && !context.Response.HasStarted)
+    {
+        // Store original path for logging
+        context.Items["originalPath"] = context.Request.Path;
+        // Re-execute to error controller
+        context.Request.Path = "/Error/NotFound";
+        await next();
+    }
+});
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Custom status code pages
+app.UseStatusCodePagesWithReExecute("/Error/{0}");
 
 app.MapControllerRoute(
     name: "Admin",

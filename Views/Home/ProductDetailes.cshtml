@@ -1,16 +1,7 @@
 ﻿@model Product
-
-<!-- Compact Breadcrumb -->
-<nav aria-label="breadcrumb" class="py-2 border-bottom">
-    <div class="container">
-        <ol class="breadcrumb mb-0 small">
-            <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Home</a></li>
-            <li class="breadcrumb-item"><a href="/Home/Product" class="text-decoration-none">Products</a></li>
-            <li class="breadcrumb-item active text-primary" aria-current="page">@Model.ProName</li>
-        </ol>
-    </div>
-</nav>
-
+<br />
+<br />
+<br />
 <!-- Product Details -->
 <section class="py-4">
     <div class="container">
@@ -28,7 +19,7 @@
                 <div class="product-info">
                     <!-- Category -->
                     <div class="mb-2">
-                        <span class="badge bg-primary bg-opacity-10 text-primary px-2 py-1 small">
+                        <span class="badge  bg-opacity-10 text-primary px-2 py-1 small">
                             @Model.Category?.CatName
                         </span>
                     </div>
@@ -279,7 +270,6 @@
     }
 
         .nav-tabs .nav-link.active {
-            background: var(--primary-light);
             color: white;
         }
 
