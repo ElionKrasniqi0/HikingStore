@@ -3,325 +3,492 @@
 @model IEnumerable<Users_In_Role_ViewModel>
 
 @{
-    ViewBag.Title = "Users With Roles";
+    ViewBag.Title = "User Management";
 }
-
-<div class="container-fluid">
-    <div class="panel panel-primary">
-        <div class="panel-heading">
-            <h1 class="box-title">
-                <b>Users with Roles</b>
-            </h1>
+<br />
+<br />
+<br />
+<br />
+<div class="container-fluid px-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800">User Management</h1>
+            <p class="text-muted">Manage users, roles, and account permissions</p>
         </div>
-        <!-- /.box-header -->
-        <div class="table-responsive-md">
-            <table class="table table-hover table-bordered " id="usersWithRoles">
-                <thead class="thead-dark">
-                    <tr>
-                        <th scope="col">Username</th>
-                        <th scope="col">Email</th>
-                        <th scope="col">Roles</th>
-                        <th scope="col">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var user in Model)
-                    {
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary">
+                <i class="fas fa-download me-2"></i>Export
+            </button>
+            <button class="btn btn-outline-secondary">
+                <i class="fas fa-sync-alt me-2"></i>Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary bg-opacity-10 border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0">@Model.Count()</h4>
+                            <p class="text-muted mb-0">Total Users</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-users fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success bg-opacity-10 border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0">@Model.Count(u => !u.IsLocked)</h4>
+                            <p class="text-muted mb-0">Active Users</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-user-check fa-2x text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning bg-opacity-10 border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0">@Model.Count(u => u.IsLocked)</h4>
+                            <p class="text-muted mb-0">Locked Users</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-user-lock fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-info bg-opacity-10 border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0">@Model.Count(u => u.Roles.Contains("Admin"))</h4>
+                            <p class="text-muted mb-0">Administrators</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-user-shield fa-2x text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h5 class="mb-0">All Users</h5>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search users..." id="searchInput">
+                        <button class="btn btn-outline-secondary" type="button">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="usersTable">
+                    <thead class="table-light">
                         <tr>
-                            <td scope="row">@user.UserName</td>
-                            <td>@user.Email</td>
-                            <td class="user-role-name-main">
-                                @foreach (var role in user.Roles)
-                                {
-                                    if (role != user.Roles.Last())
+                            <th class="border-0">User</th>
+                            <th class="border-0">Email</th>
+                            <th class="border-0">Roles</th>
+                            <th class="border-0">Status</th>
+                            <th class="border-0 text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold">@user.UserName</div>
+                                            <small class="text-muted">ID: @user.UserId</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>@user.Email</td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        @foreach (var role in user.Roles)
+                                        {
+                                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">
+                                                @role
+                                            </span>
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (user.IsLocked)
                                     {
-                                        <span class="user-role-name"> @role, </span>
+                                        <span class="badge bg-danger bg-opacity-10 text-danger">
+                                            <i class="fas fa-lock me-1"></i>Locked
+                                        </span>
                                     }
                                     else
                                     {
-                                        <span class="user-role-name">@role</span>
-
-                                        break;
+                                        <span class="badge bg-success bg-opacity-10 text-success">
+                                            <i class="fas fa-check-circle me-1"></i>Active
+                                        </span>
                                     }
-                                }
-                            </td>
-                            <td>
-                                <a class="btn-primary btn py-1 px-2 m-1" asp-area="Admin" asp-controller="Home" asp-action="EditRole" asp-route-UserId="@user.UserId">Edit Role</a>
-                                <a class="btn-danger btn py-1 px-2 m-1" onclick="modalDeleteUser('@user.UserId', '@user.UserName')" data-toggle="modal" data-target="#deleteUser">Delete User</a>
-
-                                @if (!user.IsLocked)
-                                {
-                                    <a class="btn-warning btn py-1 px-2 m-1" onclick="modalLockUser('@user.UserId', '@user.UserName')" data-toggle="modal" data-target="#lockUser">Lock User</a>
-                                }
-                                else
-                                {
-                                    <a class="btn-warning btn py-1 px-2 m-1" onclick="modalUnlockUser('@user.UserId', '@user.UserName')" data-toggle="modal" data-target="#unlockUser">Unlock User</a>
-                                }
-
-                                @foreach (var role in user.Roles)
-                                {
-                                    if (role == "RestaurantOwner" && user.Status == UserStatus.User)
-                                    {
-                                        <a class="btn-warning btn py-1 px-2 m-1" onclick="modalRestrictRORole('@user.UserId', '@user.UserName', 'RestaurantOwner')" data-toggle="modal" data-target="#restrictRORole">Restrict RO Role</a>
-
-                                        break;
-                                    }
-                                    else if (role == "User" && user.Status == UserStatus.RO_RoleRestricted)
-                                    {
-                                        <a class="btn-warning btn py-1 px-2 m-1" onclick="modalUnrestrictRORole('@user.UserId', '@user.UserName', 'RestaurantOwner')" data-toggle="modal" data-target="#unrestrictRORole">Unrestrict RO Role</a>
-
-                                        break;
-                                    }
-                                }
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                                </td>
+                                <td class="text-end">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
+                                                data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="fas fa-cog"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                                            <li>
+                                                <a class="dropdown-item" asp-area="Admin" asp-controller="Home" asp-action="EditRole" asp-route-UserId="@user.UserId">
+                                                    <i class="fas fa-user-shield me-2"></i>Manage Roles
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            @if (!user.IsLocked)
+                                            {
+                                                <li>
+                                                    <a class="dropdown-item text-warning" href="#"
+                                                       data-bs-toggle="modal" data-bs-target="#lockUserModal"
+                                                       data-user-id="@user.UserId" data-user-name="@user.UserName">
+                                                        <i class="fas fa-lock me-2"></i>Lock User
+                                                    </a>
+                                                </li>
+                                            }
+                                            else
+                                            {
+                                                <li>
+                                                    <a class="dropdown-item text-success" href="#"
+                                                       data-bs-toggle="modal" data-bs-target="#unlockUserModal"
+                                                       data-user-id="@user.UserId" data-user-name="@user.UserName">
+                                                        <i class="fas fa-unlock me-2"></i>Unlock User
+                                                    </a>
+                                                </li>
+                                            }
+                                            <li>
+                                                <a class="dropdown-item text-danger" href="#"
+                                                   data-bs-toggle="modal" data-bs-target="#deleteUserModal"
+                                                   data-user-id="@user.UserId" data-user-name="@user.UserName">
+                                                    <i class="fas fa-trash me-2"></i>Delete User
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
-
-        <!-- Delete User Modal -->
-        <div class="modal fade" id="deleteUser" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalDeleteUserTitle"></h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-
-                    <div class="modal-body">
-                        <b class="text-info" style="font-size:1.2em;">Warning: </b>
-                        You are about to <b>Delete</b> this User and all the Data associated, are you sure you want that?
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <form id="deleteUserFormLink" method="POST">
-                            <button type="submit" class="btn-danger btn">Confirm Procedure</button>
-                        </form>
-                    </div>
+        <div class="card-footer bg-white py-3">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0 text-muted">Showing <strong>@Model.Count()</strong> users</p>
+                </div>
+                <div class="col-md-6">
+                    <nav class="d-flex justify-content-end">
+                        <ul class="pagination mb-0">
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#">Previous</a>
+                            </li>
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
-        <!-- Lock User Modal -->
-        <div class="modal fade" id="lockUser" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalLockUserTitle"></h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+<!-- Delete User Modal -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteUserModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Delete User
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <div class="avatar-lg bg-danger bg-opacity-10 text-danger rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
+                        <i class="fas fa-user-slash fa-2x"></i>
                     </div>
-
-                    <div class="modal-body">
-                        <b class="text-info" style="font-size:1.2em;">Warning:</b>
-                        You are about to <b>Lock</b> this User. Locking this user may result in restricting the Restaurant from the page together with all the Data associated, are you sure you want that?
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <form id="lockUserFromLink" method="POST">
-                            <button type="submit" class="btn-danger btn">Confirm Procedure</button>
-                        </form>
+                    <h5 class="fw-bold" id="deleteUserName">User Name</h5>
+                    <p class="text-muted">This action cannot be undone. All user data will be permanently deleted.</p>
+                </div>
+                <div class="alert alert-warning border-0">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-circle text-warning"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <small class="fw-bold">Warning:</small>
+                            <small class="d-block">Deleting this user will remove all associated data including orders, preferences, and account information.</small>
+                        </div>
                     </div>
                 </div>
             </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteUserForm" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Delete User
+                    </button>
+                </form>
+            </div>
         </div>
+    </div>
+</div>
 
-        <!-- Unlock User Modal -->
-        <div class="modal fade" id="unlockUser" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalUnlockUserTitle"></h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+<!-- Lock User Modal -->
+<div class="modal fade" id="lockUserModal" tabindex="-1" aria-labelledby="lockUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="lockUserModalLabel">
+                    <i class="fas fa-lock me-2"></i>Lock User Account
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <div class="avatar-lg bg-warning bg-opacity-10 text-warning rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
+                        <i class="fas fa-user-lock fa-2x"></i>
                     </div>
-
-                    <div class="modal-body">
-                        <b class="text-info" style="font-size:1.2em;">Warning:</b>
-                        You are about to <b>Unlock</b> this User. Are you sure you want that?
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <form id="unlockUserFromLink" method="POST">
-                            <button type="submit" class="btn-danger btn">Confirm Procedure</button>
-                        </form>
+                    <h5 class="fw-bold" id="lockUserName">User Name</h5>
+                    <p class="text-muted">This user will be unable to access their account until unlocked.</p>
+                </div>
+                <div class="alert alert-info border-0">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-info-circle text-info"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <small class="fw-bold">Note:</small>
+                            <small class="d-block">Locking this account prevents login but preserves all user data.</small>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Resctrict RestaurantOwner Role Modal -->
-        <div class="modal fade" id="restrictRORole" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalRestrictRORoleTitle"></h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-
-                    <div class="modal-body">
-                        <b class="text-info" style="font-size:1.2em;">Warning:</b>
-                        You are about to <b>Restrict</b> the "RestaurantOwner" Role together with all The Restaurants, Products, Tables, Reservations and all Data associated, are you sure you want that?
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <form id="restrictRORoleFormLink" method="POST">
-                            <button type="submit" class="btn-danger btn">Confirm Procedure</button>
-                        </form>
-                    </div>
-                </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="lockUserForm" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-lock me-2"></i>Lock Account
+                    </button>
+                </form>
             </div>
         </div>
+    </div>
+</div>
 
-        <!-- Resctrict RestaurantOwner Role Modal -->
-        <div class="modal fade" id="unrestrictRORole" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalUnrestrictRORoleTitle"></h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+<!-- Unlock User Modal -->
+<div class="modal fade" id="unlockUserModal" tabindex="-1" aria-labelledby="unlockUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="unlockUserModalLabel">
+                    <i class="fas fa-unlock me-2"></i>Unlock User Account
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <div class="avatar-lg bg-success bg-opacity-10 text-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
+                        <i class="fas fa-user-check fa-2x"></i>
                     </div>
-
-                    <div class="modal-body">
-                        <b class="text-info" style="font-size:1.2em;">Warning:</b>
-                        You are about to <b>Restrict</b> the "RestaurantOwner" Role together with all The Restaurants, Products, Tables, Reservations and all Data associated, are you sure you want that?
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <form id="unrestrictRORoleFormLink" method="POST">
-                            <button type="submit" class="btn-danger btn">Confirm Procedure</button>
-                        </form>
-                    </div>
+                    <h5 class="fw-bold" id="unlockUserName">User Name</h5>
+                    <p class="text-muted">This user will regain access to their account immediately.</p>
                 </div>
             </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="panel-footer">
-            <p class="box-title"><b>Total Users till @String.Format("{0 : dddd, MMMM d, yyyy}", DateTime.Now): </b><span class="label label-primary">@Model.Count()</span></p>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="unlockUserForm" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-unlock me-2"></i>Unlock Account
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 
 @section Styles {
     <style>
-        .myTooltip {
-            position: relative;
-            display: inline-block;
+        .avatar-sm {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
         }
 
-            .myTooltip .tooltiptext {
-                /*visibility: hidden;*/
-                pointer-events: none;
-                opacity: 0%;
-                width: fit-content;
-                background-color: black;
-                color: #fff;
-                text-align: center;
-                border-radius: 6px;
-                padding: 5px;
-                transition-duration: 0.2s;
-                transition-timing-function: ease;
-                transition-property: opacity, bottom;
-                /* Position the tooltip */
-                position: absolute;
-                z-index: 1;
-                bottom: 100%;
-                left: 50%;
-                margin-left: -65px;
+        .avatar-lg {
+            width: 80px;
+            height: 80px;
+            font-size: 2rem;
+        }
+
+        .table th {
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 0.35em 0.65em;
+        }
+
+        .dropdown-toggle::after {
+            margin-left: 0.5em;
+        }
+
+        .modal-header {
+            border-bottom: none;
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            border-top: none;
+            padding: 1.5rem;
+        }
+
+        .alert {
+            border: none;
+            border-radius: 0.5rem;
+        }
+
+        /* Hover effects */
+        .card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+            .card:hover {
+                transform: translateY(-2px);
             }
 
-            .myTooltip:hover .tooltiptext {
-                /*visibility: visible;*/
-                bottom: 110%;
-                opacity: 100%;
-            }
-
-        #usersWithRoles_wrapper > div:first-child {
-            justify-content: space-between;
-        }
-
-        #usersWithRoles_wrapper div:first-child > div {
-            flex: 0%;
-            width: min-content;
-        }
-
-        #usersWithRoles_wrapper .modal-dialog > div, #usersWithRoles_wrapper .modal-content > div {
-            width: -webkit-fill-available !important;
-        }
-
-        .table th, .table td {
-            vertical-align: middle;
+        .table-hover tbody tr:hover {
+            background-color: rgba(59, 93, 80, 0.02);
         }
     </style>
 }
 
 @section Scripts {
     <script>
-        function modalDeleteUser(id, userName) {
-            //console.log(id, userName);
-
-            document.getElementById('modalDeleteUserTitle').innerText = 'Deleting: ' + userName;
-
-            document.getElementById('deleteUserFormLink').setAttribute('action', '/Admin/Home/DeleteUser?UserId=' + id);
-        }
-
-        function modalLockUser(id, userName) {
-            //console.log(id, userName);
-
-            document.getElementById('modalLockUserTitle').innerText = 'Locking: ' + userName
-
-            document.getElementById('lockUserFromLink').setAttribute('action', '/Admin/Home/LockUser?UserId=' + id);
-        }
-
-        function modalUnlockUser(id, userName) {
-            //console.log(id, userName);
-
-            document.getElementById('modalUnlockUserTitle').innerText = 'Unlocking: ' + userName;
-
-            document.getElementById('unlockUserFromLink').setAttribute('action', '/Admin/Home/UnlockUser?UserId=' + id);
-        }
-
-        function modalRestrictRORole(id, userName, roleName) {
-            //console.log(id, userName, roleName);
-
-            document.getElementById('modalRestrictRORoleTitle').innerText = 'Restricting "User" Role from: ' + userName;
-
-            $('#restrictRORoleFormLink').attr('action', '/Admin/Home/RestrictUserRORole?UserId=' + id + '&' + 'roleName=' + roleName)
-
-        }
-
-        function modalUnrestrictRORole(id, userName, roleName) {
-            //console.log(id, userName, roleName);
-
-            document.getElementById('modalUnrestrictRORoleTitle').innerText = 'Unrestricting "User" Role from: ' + userName;
-
-            $('#unrestrictRORoleFormLink').attr('action', '/Admin/Home/UnrestrictUserRORole?UserId=' + id + '&' + 'roleName=' + roleName)
-        }
-
-        $(function () {
-            $('#usersWithRoles').DataTable({
-                "paging": true,
-                "lengthChange": true,
-                "searching": true,
-                "ordering": true,
-                "info": true,
-                "autoWidth": false
+        // Initialize DataTable
+        $(document).ready(function() {
+            $('#usersTable').DataTable({
+                "pageLength": 25,
+                "responsive": true,
+                "language": {
+                    "search": "Search users:",
+                    "lengthMenu": "Show _MENU_ entries",
+                    "info": "Showing _START_ to _END_ of _TOTAL_ users",
+                    "infoEmpty": "Showing 0 to 0 of 0 users",
+                    "infoFiltered": "(filtered from _MAX_ total users)",
+                    "paginate": {
+                        "first": "First",
+                        "last": "Last",
+                        "next": "Next",
+                        "previous": "Previous"
+                    }
+                },
+                "columnDefs": [
+                    { "orderable": false, "targets": [4] } // Disable sorting for actions column
+                ]
             });
+
+            // Search functionality
+            $('#searchInput').on('keyup', function() {
+                $('#usersTable').DataTable().search(this.value).draw();
+            });
+        });
+
+        // Modal handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            // Delete User Modal
+            const deleteUserModal = document.getElementById('deleteUserModal');
+            deleteUserModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const userId = button.getAttribute('data-user-id');
+                const userName = button.getAttribute('data-user-name');
+
+                const modalTitle = deleteUserModal.querySelector('#deleteUserName');
+                const form = deleteUserModal.querySelector('#deleteUserForm');
+
+                modalTitle.textContent = userName;
+                form.setAttribute('action', '/Admin/Home/DeleteUser?UserId=' + userId);
+            });
+
+            // Lock User Modal
+            const lockUserModal = document.getElementById('lockUserModal');
+            lockUserModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const userId = button.getAttribute('data-user-id');
+                const userName = button.getAttribute('data-user-name');
+
+                const modalTitle = lockUserModal.querySelector('#lockUserName');
+                const form = lockUserModal.querySelector('#lockUserForm');
+
+                modalTitle.textContent = userName;
+                form.setAttribute('action', '/Admin/Home/LockUser?UserId=' + userId);
+            });
+
+            // Unlock User Modal
+            const unlockUserModal = document.getElementById('unlockUserModal');
+            unlockUserModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const userId = button.getAttribute('data-user-id');
+                const userName = button.getAttribute('data-user-name');
+
+                const modalTitle = unlockUserModal.querySelector('#unlockUserName');
+                const form = unlockUserModal.querySelector('#unlockUserForm');
+
+                modalTitle.textContent = userName;
+                form.setAttribute('action', '/Admin/Home/UnlockUser?UserId=' + userId);
+            });
+
+            // Toast notification function
+            function showToast(message, type = 'info') {
+                // You can integrate a toast library like Toastr here
+                console.log(`${type.toUpperCase()}: ${message}`);
+            }
         });
     </script>
 }

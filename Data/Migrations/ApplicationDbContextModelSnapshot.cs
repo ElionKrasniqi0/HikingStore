@@ -176,6 +176,9 @@ namespace HikingStore.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("StockQuantity")
+                        .HasColumnType("int");
+
                     b.HasKey("ProId");
 
                     b.HasIndex("CatId");

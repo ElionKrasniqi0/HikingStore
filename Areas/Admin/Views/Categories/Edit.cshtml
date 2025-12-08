@@ -1,50 +1,210 @@
 ﻿@model Category
-<section class="content">
-    <div class="container-fluid">
-        <div class="row">
+<br />
+<br />
+<br />
+<br />
+<div class="container-fluid px-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800">Edit Category</h1>
+            <p class="text-muted">Update category information and image</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Categories
+        </a>
+    </div>
 
-            <div class="col-md-6">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-4">
+                    <h5 class="mb-0 text-primary">
+                        <i class="fas fa-edit me-2"></i>Edit Category Information
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Edit" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        <input type="hidden" asp-for="CatId" />
+                        <input type="hidden" asp-for="CatPhoto" />
 
-                <div class="card card-primary">
-                    <div class="card-header">
-                        <h3 class="card-title">Edit Category</h3>
-                    </div>
-
-                    <form enctype="multipart/form-data" method="post">
-                        <input hidden asp-for="CatId" />
-                        <input hidden asp-for="CatPhoto" />
-                        <div class="card-body">
-                            <div class="form-group">
-                                <label for="exampleInputEmail1">Category Name</label>
-                                <input type="text" class="form-control"
-                                       asp-for="CatName"
-                                       placeholder="Category Name">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="exampleInputFile">Choose Image</label>
+                        <!-- Category Name -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <label asp-for="CatName" class="form-label fw-semibold">
+                                    Category Name <span class="text-danger">*</span>
+                                </label>
                                 <div class="input-group">
-                                    <div class="custom-file">
-                                        <input type="file" class="custom-file-input" name="File" asp-for="File">
-                                        <label class="custom-file-label" for="exampleInputFile">Choose file</label>
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-tag text-muted"></i>
+                                    </span>
+                                    <input asp-for="CatName"
+                                           class="form-control ps-0"
+                                           placeholder="Enter category name"
+                                           required>
+                                </div>
+                                <span asp-validation-for="CatName" class="text-danger small mt-1"></span>
+                            </div>
+                        </div>
+
+                        <!-- Current Image -->
+                        @if (!string.IsNullOrEmpty(Model.CatPhoto))
+                        {
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <label class="form-label fw-semibold">Current Image</label>
+                                    <div class="current-image-container">
+                                        <div class="border rounded p-3 bg-light d-inline-block">
+                                            <img src="~/category/@Model.CatPhoto"
+                                                 alt="@Model.CatName"
+                                                 class="rounded"
+                                                 style="width: 150px; height: 150px; object-fit: cover;">
+                                            <div class="mt-2 text-center">
+                                                <small class="text-muted">Current category image</small>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="input-group-append">
-                                        <span class="input-group-text" id="">Upload</span>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Image Upload -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <label class="form-label fw-semibold">
+                                    @(string.IsNullOrEmpty(Model.CatPhoto) ? "Upload Image" : "Change Image")
+                                </label>
+
+                                <!-- File Upload -->
+                                <div class="file-upload-wrapper mb-3">
+                                    <div class="input-group">
+                                        <input type="file"
+                                               name="File"
+                                               class="form-control"
+                                               accept="image/*"
+                                               onchange="previewImage(this)"
+                                               id="categoryImage">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('categoryImage').click()">
+                                            <i class="fas fa-folder-open me-2"></i>Browse
+                                        </button>
+                                    </div>
+                                    <div class="form-text">
+                                        Leave empty to keep current image. Recommended: Square image (500×500px). Max size: 2MB.
+                                    </div>
+                                </div>
+
+                                <!-- Image Preview -->
+                                <div class="image-preview-container mt-3 d-none" id="imagePreviewContainer">
+                                    <div class="border rounded p-4 text-center bg-light">
+                                        <div class="mb-3">
+                                            <img id="imagePreview"
+                                                 class="img-fluid rounded shadow-sm"
+                                                 style="max-height: 200px; max-width: 200px; object-fit: contain;"
+                                                 alt="New image preview">
+                                        </div>
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                                    onclick="clearImagePreview()">
+                                                <i class="fas fa-times me-1"></i>Remove New Image
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-
-                        <div class="card-footer">
-                            <button type="submit" class="btn btn-primary">Submit</button>
+                        <!-- Form Actions -->
+                        <div class="row mt-5">
+                            <div class="col-md-12">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a asp-action="Index" class="btn btn-outline-secondary px-4">
+                                        <i class="fas fa-times me-2"></i>Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary px-4">
+                                        <i class="fas fa-save me-2"></i>Update Category
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
-
             </div>
-
         </div>
-
     </div>
-</section>
+</div>
+
+@section Scripts {
+    <script>
+        // Image preview functionality
+        function previewImage(input) {
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            const preview = document.getElementById('imagePreview');
+
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+
+                // Check file size (2MB limit)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('File size must be less than 2MB');
+                    clearImagePreview();
+                    return;
+                }
+
+                // Check file type
+                const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                if (!validTypes.includes(file.type)) {
+                    alert('Please select a valid image file (JPG, PNG, GIF)');
+                    clearImagePreview();
+                    return;
+                }
+
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    previewContainer.classList.remove('d-none');
+                }
+
+                reader.readAsDataURL(file);
+            } else {
+                previewContainer.classList.add('d-none');
+            }
+        }
+
+        function clearImagePreview() {
+            const fileInput = document.getElementById('categoryImage');
+            const previewContainer = document.getElementById('imagePreviewContainer');
+
+            fileInput.value = '';
+            previewContainer.classList.add('d-none');
+        }
+
+        // Form validation
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                var forms = document.getElementsByClassName('needs-validation');
+                Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+
+                            // Scroll to first invalid field
+                            const firstInvalid = form.querySelector('.form-control:invalid');
+                            if (firstInvalid) {
+                                firstInvalid.scrollIntoView({
+                                    behavior: 'smooth',
+                                    block: 'center'
+                                });
+                                firstInvalid.focus();
+                            }
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
+}
+

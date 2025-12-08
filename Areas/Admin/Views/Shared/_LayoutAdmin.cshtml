@@ -4,113 +4,584 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <meta name="description" content="" />
-    <meta name="author" content="" />
-    <title>@ViewData["Title"] - Admin</title>
-    <link href="~/AdminTheme/dist/css/styles.css" rel="stylesheet" />
-    <link href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css" rel="stylesheet" crossorigin="anonymous" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js" crossorigin="anonymous"></script>
+    <meta name="description" content="HikingStore Admin Dashboard - Professional hiking store management" />
+    <meta name="author" content="HikingStore" />
+    <title>@ViewData["Title"] - HikingStore Admin</title>
 
-    <!-- Font Links-->
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@300&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+    <!-- Add this to your _Layout.cshtml head section -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Custom Admin CSS -->
+    <style>
+        :root {
+            --primary: #3b5d50;
+            --primary-dark: #2d473d;
+            --primary-light: #4a7565;
+            --secondary: #f9bf29;
+            --dark: #2f2f2f;
+            --light: #f8f9fa;
+            --gray: #6a6a6a;
+            --border: #e3e6f0;
+            --sidebar-width: 250px;
+            --sidebar-collapsed-width: 80px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fc;
+            color: var(--dark);
+            overflow-x: hidden;
+        }
+
+        /* Top Navigation */
+        .sb-topnav {
+            background: var(--primary) !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 0.75rem 0;
+            transition: all 0.3s ease;
+            z-index: 1030;
+        }
+
+            .sb-topnav .navbar-brand {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: white;
+                display: flex;
+                align-items: center;
+            }
+
+        .brand-icon {
+            margin-right: 0.5rem;
+            font-size: 1.75rem;
+        }
+
+        .sb-topnav .back-to-store {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+            .sb-topnav .back-to-store:hover {
+                color: white;
+                transform: translateX(-2px);
+            }
+
+        #sidebarToggle {
+            color: rgba(255, 255, 255, 0.8);
+            border: none;
+            background: transparent;
+            font-size: 1.25rem;
+            transition: all 0.2s ease;
+        }
+
+            #sidebarToggle:hover {
+                color: white;
+                transform: scale(1.05);
+            }
+
+        /* Layout Container */
+        #layoutSidenav {
+            display: flex;
+            height: calc(100vh - 73px);
+        }
+
+        /* Sidebar */
+        #layoutSidenav_nav {
+            width: var(--sidebar-width);
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+            z-index: 1020;
+        }
+
+        .sb-sidenav {
+            background: var(--dark);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sb-sidenav-menu {
+            flex-grow: 1;
+            padding: 1rem 0;
+        }
+
+            .sb-sidenav-menu .nav {
+                flex-direction: column;
+            }
+
+        .sb-sidenav-menu-heading {
+            padding: 1.25rem 1rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 0.5px;
+        }
+
+        .sb-sidenav-menu .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            margin: 0.125rem 0.5rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+            .sb-sidenav-menu .nav-link:hover {
+                color: #fff;
+                background-color: rgba(255, 255, 255, 0.1);
+                transform: translateX(3px);
+            }
+
+            .sb-sidenav-menu .nav-link.active {
+                color: #fff;
+                background-color: var(--primary);
+            }
+
+        .sb-nav-link-icon {
+            color: rgba(255, 255, 255, 0.6);
+            margin-right: 0.75rem;
+            font-size: 1rem;
+            width: 20px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .sb-sidenav-menu .nav-link:hover .sb-nav-link-icon,
+        .sb-sidenav-menu .nav-link.active .sb-nav-link-icon {
+            color: #fff;
+        }
+
+        .sb-sidenav-collapse-arrow {
+            margin-left: auto;
+            transition: transform 0.2s ease;
+        }
+
+        .sb-sidenav-menu-nested {
+            margin-left: 1.5rem;
+        }
+
+            .sb-sidenav-menu-nested .nav-link {
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+            }
+
+        /* Sidebar Footer */
+        .sb-sidenav-footer {
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logout {
+            width: 100%;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+            .logout:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+                color: white;
+            }
+
+        /* Main Content */
+        #layoutSidenav_content {
+            flex-grow: 1;
+            overflow-y: auto;
+            background-color: #f8f9fc;
+            transition: all 0.3s ease;
+        }
+
+        .container-fluid {
+            padding: 1.5rem;
+        }
+
+        /* Cards */
+        .card {
+            border: none;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            margin-bottom: 1.5rem;
+            border-radius: 0.5rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+            .card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 0.5rem 2rem 0 rgba(58, 59, 69, 0.2);
+            }
+
+        .card-header {
+            background-color: #fff;
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 1.25rem;
+            font-weight: 600;
+            border-radius: 0.5rem 0.5rem 0 0 !important;
+        }
+
+        .card-body {
+            padding: 1.25rem;
+        }
+
+        /* Buttons */
+        .btn {
+            border-radius: 0.375rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+            .btn-primary:hover {
+                background-color: var(--primary-dark);
+                border-color: var(--primary-dark);
+            }
+
+        /* Tables */
+        .table {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+            .table th {
+                border-top: none;
+                font-weight: 600;
+                color: var(--gray);
+                font-size: 0.875rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                padding: 0.75rem 0.75rem;
+                background-color: #f8f9fc;
+            }
+
+            .table td {
+                padding: 0.75rem 0.75rem;
+                vertical-align: middle;
+                border-top: 1px solid var(--border);
+            }
+
+        /* Forms */
+        .form-control {
+            border-radius: 0.375rem;
+            border: 1px solid #d1d3e2;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+            .form-control:focus {
+                border-color: var(--primary);
+                box-shadow: 0 0 0 0.2rem rgba(59, 93, 80, 0.25);
+            }
+
+        /* Badges */
+        .badge {
+            font-weight: 500;
+            padding: 0.35em 0.65em;
+            font-size: 0.75em;
+        }
+
+        /* Collapse Animation */
+        .collapse {
+            transition: height 0.3s ease;
+        }
+
+        /* Scrollbar Styling */
+        .sb-sidenav-menu::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sb-sidenav-menu::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sb-sidenav-menu::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+            .sb-sidenav-menu::-webkit-scrollbar-thumb:hover {
+                background: rgba(255, 255, 255, 0.3);
+            }
+
+
+
+        #layoutSidenav_nav.show {
+            transform: translateX(0);
+        }
+
+        #layoutSidenav_content {
+            width: 100%;
+        }
+
+        .container-fluid {
+            padding: 1rem;
+        }
+
+        .sb-topnav .back-to-store span {
+            display: none;
+        }
+
+        }
+
+        /* Toggle States */
+        .sb-sidenav-toggled #layoutSidenav_nav {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        .sb-sidenav-toggled #layoutSidenav_content {
+            margin-left: calc(var(--sidebar-collapsed-width) - var(--sidebar-width));
+        }
+
+        .sb-sidenav-toggled .sb-sidenav-menu-heading,
+        .sb-sidenav-toggled .nav-link-text {
+            display: none;
+        }
+
+        .sb-sidenav-toggled .sb-sidenav-collapse-arrow {
+            display: none;
+        }
+
+        .sb-sidenav-toggled .sb-sidenav-menu-nested {
+            display: none;
+        }
+
+        /* Custom SVG Icons */
+        .custom-svg-icon {
+            filter: brightness(0) invert(1) opacity(0.6);
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover .custom-svg-icon,
+        .nav-link.active .custom-svg-icon {
+            filter: brightness(0) invert(1) opacity(1);
+        }
+    </style>
+
+    @RenderSection("Styles", required: false)
 </head>
 <body class="sb-nav-fixed">
-    <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-        <a class="navbar-brand" asp-controller="Home" asp-action="Index">Admin Panel</a>
-        <button class="btn btn-link btn-md order-lg-0" id="sidebarToggle" href="#"><i class="fas fa-bars"></i></button>
-        <a asp-area="" asp-controller="Home" asp-action="Index" style="color:white; font-weight:600;"><i class="fas fa-arrow-left mx-2"></i>Back to User</a>
+    <!-- Top Navigation -->
+    <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark fixed-top">
+        <div class="container-fluid">
+            <!-- Sidebar Toggle -->
+            <button class="btn btn-link btn-sm order-1 order-lg-0 me-2" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <!-- Brand -->
+            <a class="navbar-brand me-auto" asp-controller="Home" asp-action="Index">
+                <i class="fas fa-couch brand-icon"></i>
+                <span>HikingStore Admin</span>
+            </a>
+
+            <!-- Back to Store -->
+            <a class="back-to-store ms-2" asp-area="" asp-controller="Home" asp-action="Index">
+                <i class="fas fa-arrow-left me-1"></i>
+                <span>Back to Store</span>
+            </a>
+        </div>
     </nav>
+
+    <!-- Layout Container -->
     <div id="layoutSidenav">
+        <!-- Sidebar -->
         <div id="layoutSidenav_nav">
             <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
                 <div class="sb-sidenav-menu">
                     <div class="nav">
+                        <!-- Dashboard -->
                         <div class="sb-sidenav-menu-heading">Core</div>
                         <a class="nav-link" asp-controller="Home" asp-action="Index">
                             <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                            Dashboard
+                            <span class="nav-link-text">Dashboard</span>
                         </a>
 
-                        <div class="sb-sidenav-menu-heading">Manage</div>
-                        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseRoles" aria-expanded="false" aria-controls="collapseRoles">
-                            <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
-                            Roles
+                        <!-- Management Section -->
+                        <div class="sb-sidenav-menu-heading">Management</div>
+
+                        <!-- Roles -->
+                        <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseRoles"
+                           aria-expanded="false" aria-controls="collapseRoles">
+                            <div class="sb-nav-link-icon"><i class="fas fa-user-shield"></i></div>
+                            <span class="nav-link-text">Roles</span>
                             <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
                         </a>
-                        <div class="collapse" id="collapseRoles" aria-labelledby="headingOne" data-parent="#sidenavAccordion">
+                        <div class="collapse" id="collapseRoles" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
                             <nav class="sb-sidenav-menu-nested nav">
-                                <a class="nav-link" asp-area="Admin" asp-action="Index" asp-controller="RoleManager">Create a New Role</a>
+                                <a class="nav-link" asp-area="Admin" asp-action="Index" asp-controller="RoleManager">
+                                    <i class="fas fa-plus-circle me-2"></i>Create Role
+                                </a>
                             </nav>
                         </div>
 
-
-                        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseOrders" aria-expanded="false" aria-controls="collapseOrders">
+                        <!-- Orders -->
+                        <a class="nav-link" asp-area="Admin" asp-controller="Orders" asp-action="Index">
                             <div class="sb-nav-link-icon">
-                                <svg width="20" height="20" fill="rgba(255, 255, 255, 0.5)" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 115.35 122.88" style="enable-background:new 0 0 115.35 122.88; color: " xml:space="preserve"><g>
-                                <path d="M25.27,86.92c-1.81,0-3.26-1.46-3.26-3.26s1.47-3.26,3.26-3.26h21.49c1.81,0,3.26,1.46,3.26,3.26s-1.46,3.26-3.26,3.26 H25.27L25.27,86.92L25.27,86.92z M61.1,77.47c-0.96,0-1.78-0.82-1.78-1.82c0-0.96,0.82-1.78,1.78-1.78h4.65c0.04,0,0.14,0,0.18,0 c1.64,0.04,3.1,0.36,4.33,1.14c1.37,0.87,2.37,2.19,2.92,4.15c0,0.04,0,0.09,0.05,0.14l0.46,1.82h39.89c1,0,1.78,0.82,1.78,1.78 c0,0.18-0.05,0.36-0.09,0.55l-4.65,18.74c-0.18,0.82-0.91,1.37-1.73,1.37l0,0l-29.18,0c0.64,2.37,1.28,3.65,2.14,4.24 c1.05,0.68,2.87,0.73,5.93,0.68h0.04l0,0h20.61c1,0,1.78,0.82,1.78,1.78c0,1-0.82,1.78-1.78,1.78H87.81l0,0 c-3.79,0.04-6.11-0.05-7.98-1.28c-1.92-1.28-2.92-3.46-3.92-7.43l0,0L69.8,80.2c0-0.05,0-0.05-0.04-0.09 c-0.27-1-0.73-1.69-1.37-2.05c-0.64-0.41-1.5-0.59-2.51-0.59c-0.05,0-0.09,0-0.14,0H61.1L61.1,77.47L61.1,77.47z M103.09,114.13 c2.42,0,4.38,1.96,4.38,4.38s-1.96,4.38-4.38,4.38s-4.38-1.96-4.38-4.38S100.67,114.13,103.09,114.13L103.09,114.13L103.09,114.13z M83.89,114.13c2.42,0,4.38,1.96,4.38,4.38s-1.96,4.38-4.38,4.38c-2.42,0-4.38-1.96-4.38-4.38S81.48,114.13,83.89,114.13 L83.89,114.13L83.89,114.13z M25.27,33.58c-1.81,0-3.26-1.47-3.26-3.26c0-1.8,1.47-3.26,3.26-3.26h50.52 c1.81,0,3.26,1.46,3.26,3.26c0,1.8-1.46,3.26-3.26,3.26H25.27L25.27,33.58L25.27,33.58z M7.57,0h85.63c2.09,0,3.99,0.85,5.35,2.21 s2.21,3.26,2.21,5.35v59.98h-6.5V7.59c0-0.29-0.12-0.56-0.31-0.76c-0.2-0.19-0.47-0.31-0.76-0.31l0,0H7.57 c-0.29,0-0.56,0.12-0.76,0.31S6.51,7.3,6.51,7.59v98.67c0,0.29,0.12,0.56,0.31,0.76s0.46,0.31,0.76,0.31h55.05 c0.61,2.39,1.3,4.48,2.23,6.47H7.57c-2.09,0-3.99-0.85-5.35-2.21C0.85,110.24,0,108.34,0,106.25V7.57c0-2.09,0.85-4,2.21-5.36 S5.48,0,7.57,0L7.57,0L7.57,0z M25.27,60.25c-1.81,0-3.26-1.46-3.26-3.26s1.47-3.26,3.26-3.26h50.52c1.81,0,3.26,1.46,3.26,3.26 s-1.46,3.26-3.26,3.26H25.27L25.27,60.25L25.27,60.25z" /></g>
+                                <svg width="20" height="20" class="custom-svg-icon" viewBox="0 0 115.35 122.88">
+                                    <path d="M25.27,86.92c-1.81,0-3.26-1.46-3.26-3.26s1.47-3.26,3.26-3.26h21.49c1.81,0,3.26,1.46,3.26,3.26s-1.46,3.26-3.26,3.26 H25.27L25.27,86.92L25.27,86.92z M61.1,77.47c-0.96,0-1.78-0.82-1.78-1.82c0-0.96,0.82-1.78,1.78-1.78h4.65c0.04,0,0.14,0,0.18,0 c1.64,0.04,3.1,0.36,4.33,1.14c1.37,0.87,2.37,2.19,2.92,4.15c0,0.04,0,0.09,0.05,0.14l0.46,1.82h39.89c1,0,1.78,0.82,1.78,1.78 c0,0.18-0.05,0.36-0.09,0.55l-4.65,18.74c-0.18,0.82-0.91,1.37-1.73,1.37l0,0l-29.18,0c0.64,2.37,1.28,3.65,2.14,4.24 c1.05,0.68,2.87,0.73,5.93,0.68h0.04l0,0h20.61c1,0,1.78,0.82,1.78,1.78c0,1-0.82,1.78-1.78,1.78H87.81l0,0 c-3.79,0.04-6.11-0.05-7.98-1.28c-1.92-1.28-2.92-3.46-3.92-7.43l0,0L69.8,80.2c0-0.05,0-0.05-0.04-0.09 c-0.27-1-0.73-1.69-1.37-2.05c-0.64-0.41-1.5-0.59-2.51-0.59c-0.05,0-0.09,0-0.14,0H61.1L61.1,77.47L61.1,77.47z M103.09,114.13 c2.42,0,4.38,1.96,4.38,4.38s-1.96,4.38-4.38,4.38s-4.38-1.96-4.38-4.38S100.67,114.13,103.09,114.13L103.09,114.13L103.09,114.13z M83.89,114.13c2.42,0,4.38,1.96,4.38,4.38s-1.96,4.38-4.38,4.38c-2.42,0-4.38-1.96-4.38-4.38S81.48,114.13,83.89,114.13 L83.89,114.13L83.89,114.13z M25.27,33.58c-1.81,0-3.26-1.47-3.26-3.26c0-1.8,1.47-3.26,3.26-3.26h50.52 c1.81,0,3.26,1.46,3.26,3.26c0,1.8-1.46,3.26-3.26,3.26H25.27L25.27,33.58L25.27,33.58z M7.57,0h85.63c2.09,0,3.99,0.85,5.35,2.21 s2.21,3.26,2.21,5.35v59.98h-6.5V7.59c0-0.29-0.12-0.56-0.31-0.76c-0.2-0.19-0.47-0.31-0.76-0.31l0,0H7.57 c-0.29,0-0.56,0.12-0.76,0.31S6.51,7.3,6.51,7.59v98.67c0,0.29,0.12,0.56,0.31,0.76s0.46,0.31,0.76,0.31h55.05 c0.61,2.39,1.3,4.48,2.23,6.47H7.57c-2.09,0-3.99-0.85-5.35-2.21C0.85,110.24,0,108.34,0,106.25V7.57c0-2.09,0.85-4,2.21-5.36 S5.48,0,7.57,0L7.57,0L7.57,0z M25.27,60.25c-1.81,0-3.26-1.46-3.26-3.26s1.47-3.26,3.26-3.26h50.52c1.81,0,3.26,1.46,3.26,3.26 s-1.46,3.26-3.26,3.26H25.27L25.27,60.25L25.27,60.25z" />
                                 </svg>
                             </div>
-                            Orders
-                            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                            <span class="nav-link-text">Orders</span>
                         </a>
-                        <div class="collapse" id="collapseOrders" aria-labelledby="headingTwo" data-parent="#sidenavAccordion">
-                            <nav class="sb-sidenav-menu-nested nav">
-                                <a class="nav-link" asp-area="Admin" asp-controller="Orders" asp-action="Index">Orders</a>
-                        </div>
 
+                        <!-- Products -->
                         <a class="nav-link" asp-controller="Products" asp-action="Index">
                             <div class="sb-nav-link-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-archive-fill" viewBox="0 0 16 16">
-                                    <path d="M12.643 15C13.979 15 15 13.845 15 12.5V5H1v7.5C1 13.845 2.021 15 3.357 15h9.286zM5.5 7h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1 0-1zM.8 1a.8.8 0 0 0-.8.8V3a.8.8 0 0 0 .8.8h14.4A.8.8 0 0 0 16 3V1.8a.8.8 0 0 0-.8-.8H.8z" />
-                                </svg>
-                            </div> Product
+                                <i class="fas fa-cube"></i>
+                            </div>
+                            <span class="nav-link-text">Products</span>
                         </a>
+
+                        <!-- Categories -->
                         <a class="nav-link" asp-controller="Categories" asp-action="Index">
                             <div class="sb-nav-link-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="fa fa-list-alt" viewBox="0 0 16 16">
-                                    <path d="M12.643 15C13.979 15 15 13.845 15 12.5V5H1v7.5C1 13.845 2.021 15 3.357 15h9.286zM5.5 7h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1 0-1zM.8 1a.8.8 0 0 0-.8.8V3a.8.8 0 0 0 .8.8h14.4A.8.8 0 0 0 16 3V1.8a.8.8 0 0 0-.8-.8H.8z" />
-                                </svg>
-                            </div> Categories
+                                <i class="fas fa-tags"></i>
+                            </div>
+                            <span class="nav-link-text">Categories</span>
                         </a>
+
+                        <!-- Contact Messages -->
                         <a class="nav-link" href="/Admin/Home/ShowMessage">
                             <div class="sb-nav-link-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="fa fa-list-alt" viewBox="0 0 16 16">
-                                    <path d="M12.643 15C13.979 15 15 13.845 15 12.5V5H1v7.5C1 13.845 2.021 15 3.357 15h9.286zM5.5 7h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1 0-1zM.8 1a.8.8 0 0 0-.8.8V3a.8.8 0 0 0 .8.8h14.4A.8.8 0 0 0 16 3V1.8a.8.8 0 0 0-.8-.8H.8z" />
-                                </svg>
-                            </div> Contact
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <span class="nav-link-text">Messages</span>
                         </a>
                     </div>
                 </div>
+
+                <!-- Sidebar Footer -->
                 <div class="sb-sidenav-footer">
-                    <div>
-                        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-                            <button type="submit" class=" btn btn-light logout">Log Out</button>
-                        </form>
-                    </div>
+                    <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
+                          asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                        <button type="submit" class="btn btn-light logout w-100">
+                            <i class="fas fa-sign-out-alt me-2"></i>Log Out
+                        </button>
+                    </form>
                 </div>
             </nav>
         </div>
+
+        <!-- Main Content -->
         <div id="layoutSidenav_content">
-            @RenderBody()
+            <main>
+                <div class="container-fluid py-4">
+                    @RenderBody()
+                </div>
+            </main>
         </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
+    <!-- Scripts -->
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-    <script src="~/AdminTheme/dist/js/scripts.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
-    <script src="~/AdminTheme/dist/assets/demo/chart-area-demo.js"></script>
-    <script src="~/AdminTheme/dist/assets/demo/chart-bar-demo.js"></script>
-    <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js" crossorigin="anonymous"></script>
-    <script src="~/AdminTheme/dist/assets/demo/datatables-demo.js"></script>
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+    <!-- Custom Admin Scripts -->
+    <script>
+        // Sidebar Toggle
+        document.getElementById('sidebarToggle').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.body.classList.toggle('sb-sidenav-toggled');
+            localStorage.setItem('sb|sidebar-toggle', document.body.classList.contains('sb|sidebar-toggle'));
+        });
+
+        // Restore sidebar state
+        if (localStorage.getItem('sb|sidebar-toggle') === 'true') {
+            document.body.classList.add('sb-sidenav-toggled');
+        }
+
+        // Mobile sidebar handling
+        function handleMobileSidebar() {
+            const sidebar = document.getElementById('layoutSidenav_nav');
+            if (window.innerWidth < 768) {
+                sidebar.classList.remove('show');
+            } else {
+                sidebar.classList.add('show');
+            }
+        }
+
+        // Initialize on load and resize
+        window.addEventListener('load', handleMobileSidebar);
+        window.addEventListener('resize', handleMobileSidebar);
+
+        // Auto-hide alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                if (!alert.classList.contains('alert-permanent')) {
+                    setTimeout(function() {
+                        alert.style.opacity = '0';
+                        setTimeout(function() {
+                            alert.style.display = 'none';
+                        }, 300);
+                    }, 5000);
+                }
+            });
+        });
+
+        // DataTables initialization
+        $(document).ready(function() {
+            if ($.fn.DataTable) {
+                $('.data-table').DataTable({
+                    "pageLength": 25,
+                    "language": {
+                        "search": "Search:",
+                        "lengthMenu": "Show _MENU_ entries",
+                        "info": "Showing _START_ to _END_ of _TOTAL_ entries",
+                        "infoEmpty": "Showing 0 to 0 of 0 entries",
+                        "infoFiltered": "(filtered from _MAX_ total entries)",
+                        "paginate": {
+                            "first": "First",
+                            "last": "Last",
+                            "next": "Next",
+                            "previous": "Previous"
+                        }
+                    },
+                    "responsive": true
+                });
+            }
+        });
+    </script>
+
     @RenderSection("Scripts", required: false)
-    @RenderSection("Styles", required: false)
 </body>
 </html>

@@ -1,4 +1,5 @@
 ﻿@model HikingStore.Enum.OrderStatus
+
 @{
     var statusSteps = new[]
     {
@@ -13,22 +14,31 @@
 }
 
 <div class="order-status-progress">
-    <div class="progress-bar">
-        <div class="progress-fill" style="width: @(currentStatusIndex * 25)%"></div>
-    </div>
-    <div class="step">
-        @for (int i = 0; i < statusSteps.Length; i++)
-        {
-            var (status, displayName, icon) = statusSteps[i];
-            var isCurrent = i == currentStatusIndex;
-            var isCompleted = i < currentStatusIndex;
-            <div class="step-item @(isCurrent ? "active" : "")">
-                <i class="@icon"></i>
-                <br />
-                <span>@displayName</span>
+    @for (int i = 0; i < statusSteps.Length; i++)
+    {
+        var (status, displayName, icon) = statusSteps[i];
+        var isCompleted = i < currentStatusIndex;
+        var isCurrent = i == currentStatusIndex;
+        var isPending = i > currentStatusIndex;
+
+        <div class="status-step @(isCompleted ? "completed" : "") @(isCurrent ? "current" : "") @(isPending ? "pending" : "")">
+            <div class="status-icon">
+                @if (isCompleted)
+                {
+                    <i class="fas fa-check"></i>
+                }
+                else
+                {
+                    <i class="@icon"></i>
+                }
             </div>
-        }
-    </div>
+            <div class="status-label">@displayName</div>
+            @if (i < statusSteps.Length - 1)
+            {
+                <div class="status-connector"></div>
+            }
+        </div>
+    }
 </div>
 
 <style>

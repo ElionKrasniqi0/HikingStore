@@ -1,10 +1,12 @@
 ﻿using HikingStore.Data;
 using HikingStore.Enum;
 using HikingStore.Models;
+using HikingStore.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Net;
 using System.Net.Mail;
 using System.Text;
@@ -61,7 +63,6 @@ namespace HikingStore.Areas.Admin.Controllers
             ViewBag.CurrentStatus = status;
             ViewBag.SearchQuery = search;
 
-            // FIXED: Use System.Enum explicitly
             ViewBag.StatusList = System.Enum.GetValues(typeof(OrderStatus)).Cast<OrderStatus>();
 
             return View(orders);
@@ -552,13 +553,13 @@ namespace HikingStore.Areas.Admin.Controllers
 
             sb.AppendLine($@"
             <div style='text-align: center; margin: 30px 0;'>
-                <a href='https://HikingStore.com/orders/track/{order.OrderId}' 
+                <a href='https://hikingstore.com/orders/track/{order.OrderId}' 
                    style='background: #3b5d50; color: white; padding: 12px 30px; 
                           text-decoration: none; border-radius: 6px; font-weight: 600;
                           display: inline-block; margin: 10px 5px; border: none;'>
                    Track Your Order
                 </a>
-                <a href='https://HikingStore.com/contact' 
+                <a href='https://hikingstore.com/contact' 
                    style='background: #6c757d; color: white; padding: 12px 30px; 
                           text-decoration: none; border-radius: 6px; font-weight: 600;
                           display: inline-block; margin: 10px 5px; border: none;'>
@@ -566,7 +567,7 @@ namespace HikingStore.Areas.Admin.Controllers
                 </a>
             </div>
 
-            <p>If you have any questions, don't hesitate to contact us at support@HikingStore.com or call +383 (458) 04-555.</p>
+            <p>If you have any questions, don't hesitate to contact us at support@hikingstore.com or call +383 (458) 04-555.</p>
             
             <p>Best regards,<br>The HikingStore Team</p>
         </div>
@@ -574,7 +575,7 @@ namespace HikingStore.Areas.Admin.Controllers
         <div class='footer'>
             <p><strong>HikingStore</strong></p>
             <p>Rr Prshtina Re, Prishtinë 10000</p>
-            <p>📧 support@HikingStore.com | 📞 +383 (458) 04-555</p>
+            <p>📧 support@hikingstore.com | 📞 +383 (458) 04-555</p>
             <p style='margin-top: 15px; opacity: 0.8; font-size: 12px;'>
                 &copy; 2025 HikingStore. All rights reserved.
             </p>
@@ -724,22 +725,54 @@ namespace HikingStore.Areas.Admin.Controllers
 </html>";
         }
         [HttpPost]
-        public async Task<JsonResult> DeleteOrder(int id)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteOrder(int id)
         {
-            var order = await _context.Orders.FindAsync(id);
+            var order = await _context.Orders
+                .Include(o => o.OrderDetails)
+                .FirstOrDefaultAsync(o => o.OrderId == id);
+
             if (order == null)
             {
                 return Json(new { success = false, message = "Order not found." });
             }
 
-            // Remove related order details first
-            var orderDetails = _context.OrderDetails.Where(od => od.OrderId == id);
-            _context.OrderDetails.RemoveRange(orderDetails);
+            try
+            {
+                // Remove related order details
+                if (order.OrderDetails != null && order.OrderDetails.Any())
+                {
+                    _context.OrderDetails.RemoveRange(order.OrderDetails);
+                }
 
-            _context.Orders.Remove(order);
-            await _context.SaveChangesAsync();
+                // Remove tracking events if they exist
+                var trackingEvents = await _context.TrackingEvents
+                    .Where(te => te.OrderId == id)
+                    .ToListAsync();
 
-            return Json(new { success = true, message = "Order deleted successfully." });
+                if (trackingEvents.Any())
+                {
+                    _context.TrackingEvents.RemoveRange(trackingEvents);
+                }
+
+                _context.Orders.Remove(order);
+                await _context.SaveChangesAsync();
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Order deleted successfully.",
+                    orderId = id
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = $"Error deleting order: {ex.Message}"
+                });
+            }
         }
 
         [HttpGet]
@@ -755,4 +788,3 @@ namespace HikingStore.Areas.Admin.Controllers
         }
     }
 }
-

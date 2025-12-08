@@ -19,13 +19,29 @@
                 <div class="product-info">
                     <!-- Category -->
                     <div class="mb-2">
-                        <span class="badge  bg-opacity-10 text-primary px-2 py-1 small">
+                        <span class="badge bg-opacity-10 text-primary px-2 py-1 small">
                             @Model.Category?.CatName
                         </span>
                     </div>
 
                     <!-- Title -->
                     <h1 class="h4 fw-bold text-dark mb-2">@Model.ProName</h1>
+
+                    <!-- Stock Status -->
+                    <div class="mb-3">
+                        @if (Model.IsInStock)
+                        {
+                            <span class="badge bg-success bg-opacity-10 text-success small">
+                                <i class="fas fa-check me-1"></i>In Stock (@Model.StockQuantity available)
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger bg-opacity-10 text-danger small">
+                                <i class="fas fa-times me-1"></i>Out of Stock
+                            </span>
+                        }
+                    </div>
 
                     <!-- Rating & Stock -->
                     <div class="d-flex align-items-center mb-3">
@@ -37,9 +53,6 @@
                             <i class="far fa-star text-warning"></i>
                         </div>
                         <span class="text-muted small me-3">4.2 (128)</span>
-                        <span class="badge bg-success bg-opacity-10 text-success small">
-                            <i class="fas fa-check me-1"></i>In Stock
-                        </span>
                     </div>
 
                     <!-- Price -->
@@ -58,6 +71,22 @@
                     <div class="mb-3">
                         <p class="text-muted small mb-0">@Model.Descreption</p>
                     </div>
+
+                    <!-- Stock Warning -->
+                    @if (!Model.IsInStock)
+                    {
+                        <div class="alert alert-warning mb-3">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            This product is currently out of stock. Check back later!
+                        </div>
+                    }
+                    else if (Model.StockQuantity <= 5)
+                    {
+                        <div class="alert alert-info mb-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Only @Model.StockQuantity items left in stock! Order soon.
+                        </div>
+                    }
 
                     <!-- Quick Features -->
                     <div class="mb-3">
@@ -78,40 +107,68 @@
                     </div>
 
                     <!-- Add to Cart Form -->
-                    <form id="addToCartForm" method="post">
-                        <div class="row g-2 align-items-end">
-                            <div class="col-auto">
-                                <label class="form-label small fw-semibold mb-1">Qty</label>
-                                <div class="quantity-controls d-flex border rounded-2">
-                                    <button type="button" class="btn btn-light btn-quantity border-0">
-                                        <i class="fas fa-minus small"></i>
+                    @if (Model.IsInStock)
+                    {
+                        <form id="addToCartForm" method="post">
+                            <div class="row g-2 align-items-end">
+                                <div class="col-auto">
+                                    <label class="form-label small fw-semibold mb-1">Qty</label>
+                                    <div class="quantity-controls d-flex border rounded-2">
+                                        <button type="button" class="btn btn-light btn-quantity border-0">
+                                            <i class="fas fa-minus small"></i>
+                                        </button>
+                                        <input type="text" id="qtyInput" name="qty"
+                                               class="form-control border-0 text-center shadow-none quantity-input"
+                                               value="1" style="width: 50px;" max="@Model.StockQuantity">
+                                        <button type="button" class="btn btn-light btn-quantity border-0">
+                                            <i class="fas fa-plus small"></i>
+                                        </button>
+                                    </div>
+                                    <small class="text-muted">Max: @Model.StockQuantity</small>
+                                </div>
+                                <div class="col">
+                                    <button type="submit" class="btn btn-primary w-100 add-to-cart-btn">
+                                        <i class="fas fa-shopping-cart me-2"></i>Add to Cart
                                     </button>
-                                    <input type="text" id="qtyInput" name="qty"
-                                           class="form-control border-0 text-center shadow-none quantity-input"
-                                           value="1" style="width: 50px;">
-                                    <button type="button" class="btn btn-light btn-quantity border-0">
-                                        <i class="fas fa-plus small"></i>
+                                </div>
+                                <div class="col-auto">
+                                    <button type="button" class="btn btn-outline-primary wishlist-btn">
+                                        <i class="far fa-heart"></i>
                                     </button>
                                 </div>
                             </div>
-                            <div class="col">
-                                <button type="submit" class="btn btn-primary w-100 add-to-cart-btn">
-                                    <i class="fas fa-shopping-cart me-2"></i>Add to Cart
-                                </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="alert alert-secondary">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-bell me-3 text-warning fa-lg"></i>
+                                <div>
+                                    <p class="mb-0 fw-semibold">Notify me when available</p>
+                                    <small class="text-muted">Enter your email to get notified when this product is back in stock</small>
+                                </div>
                             </div>
-                            <div class="col-auto">
-                                <button type="button" class="btn btn-outline-primary wishlist-btn">
-                                    <i class="far fa-heart"></i>
-                                </button>
+                            <div class="mt-3">
+                                <div class="input-group">
+                                    <input type="email" class="form-control" placeholder="Your email address">
+                                    <button class="btn btn-warning" type="button">Notify Me</button>
+                                </div>
                             </div>
                         </div>
-                    </form>
+                    }
 
                     <!-- Success Message -->
                     <div id="successMessage" class="alert alert-success mt-3 py-2 small" style="display: none;">
                         <i class="fas fa-check-circle me-2"></i>
                         <span>Item added to cart!</span>
                         <a href="/Carts/Index" class="alert-link ms-2">View Cart</a>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div id="errorMessage" class="alert alert-danger mt-3 py-2 small" style="display: none;">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <span id="errorText"></span>
                     </div>
 
                     <!-- Trust Badges -->
@@ -363,59 +420,88 @@
         });
 
         // Add to cart functionality
-        const addToCartForm = document.getElementById('addToCartForm');
-        const successMessage = document.getElementById('successMessage');
+       const addToCartForm = document.getElementById('addToCartForm');
+    const successMessage = document.getElementById('successMessage');
+    const errorMessage = document.getElementById('errorMessage');
+    const errorText = document.getElementById('errorText');
 
-        addToCartForm?.addEventListener('submit', function(e) {
-            e.preventDefault();
+    addToCartForm?.addEventListener('submit', function(e) {
+        e.preventDefault();
 
-            const quantity = qtyInput.value;
-            const productId = @Model.ProId;
+        const quantity = parseInt(qtyInput.value);
+        const productId = @Model.ProId;
+        const maxStock = @Model.StockQuantity;
 
-            // Show loading state
-            const submitBtn = this.querySelector('.add-to-cart-btn');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Adding...';
-            submitBtn.disabled = true;
+        // Validate quantity
+        if (quantity < 1) {
+            showError('Please enter a valid quantity.');
+            return;
+        }
 
-            // Submit via AJAX
-            fetch('/Carts/AddToCart?ProId=' + productId + '&qty=' + quantity, {
-                method: 'POST',
-                headers: {
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value,
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Show success message
-                    successMessage.style.display = 'block';
+        if (quantity > maxStock) {
+            showError(`Only ${maxStock} items available in stock.`);
+            return;
+        }
 
-                    // Update cart count in header
-                    updateCartCount(data.cartItemCount);
+        // Show loading state
+        const submitBtn = this.querySelector('.add-to-cart-btn');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Adding...';
+        submitBtn.disabled = true;
 
-                    // Reset button
-                    setTimeout(() => {
-                        submitBtn.innerHTML = originalText;
-                        submitBtn.disabled = false;
-                    }, 1000);
+        // Submit via AJAX
+        fetch('/Carts/AddToCart?ProId=' + productId + '&qty=' + quantity, {
+            method: 'POST',
+            headers: {
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                successMessage.style.display = 'block';
+                errorMessage.style.display = 'none';
 
-                    // Hide success message after 5 seconds
-                    setTimeout(() => {
-                        successMessage.style.display = 'none';
-                    }, 5000);
-                } else {
-                    throw new Error('Failed to add to cart');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
+                // Update cart count in header
+                updateCartCount(data.cartItemCount);
+
+                // Reset button
+                setTimeout(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }, 1000);
+
+                // Hide success message after 5 seconds
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                }, 5000);
+            } else {
+                showError(data.message || 'Failed to add to cart');
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
-                alert('Failed to add item to cart. Please try again.');
-            });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showError('Failed to add item to cart. Please try again.');
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
         });
+    });
+
+    // Function to show error messages
+    function showError(message) {
+        errorText.textContent = message;
+        errorMessage.style.display = 'block';
+        successMessage.style.display = 'none';
+
+        // Hide error after 5 seconds
+        setTimeout(() => {
+            errorMessage.style.display = 'none';
+        }, 5000);
+    }
 
         // Function to update cart count
         function updateCartCount(count) {

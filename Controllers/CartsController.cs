@@ -46,6 +46,28 @@ namespace HikingStore.Controllers
         [HttpPost]
         public async Task<IActionResult> AddToCart(int ProId, int qty)
         {
+            var product = await _context.Products.FindAsync(ProId);
+
+            // Check if product exists and has enough stock
+            if (product == null)
+            {
+                return Json(new { success = false, message = "Product not found." });
+            }
+
+            if (!product.IsInStock)
+            {
+                return Json(new { success = false, message = "This product is out of stock." });
+            }
+
+            if (qty > product.StockQuantity)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = $"Only {product.StockQuantity} items available in stock."
+                });
+            }
+
             var userId = _userManager.GetUserId(User);
             var cartItem = await _context.ShoppingCarts
                 .FirstOrDefaultAsync(c => c.UserId == userId && c.ProId == ProId);
@@ -62,7 +84,16 @@ namespace HikingStore.Controllers
             }
             else
             {
-                cartItem.Qty += qty;
+                var newTotalQuantity = cartItem.Qty + qty;
+                if (newTotalQuantity > product.StockQuantity)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = $"Cannot add more items. Only {product.StockQuantity} available total."
+                    });
+                }
+                cartItem.Qty = newTotalQuantity;
             }
 
             await _context.SaveChangesAsync();
@@ -117,19 +148,43 @@ namespace HikingStore.Controllers
                 return View(order);
             }
 
+            // Check stock for all items before processing checkout
+            var outOfStockItems = new List<string>();
+            foreach (var cartItem in cartItems)
+            {
+                var product = cartItem.Product;
+                if (!product.IsInStock)
+                {
+                    outOfStockItems.Add(product.ProName);
+                }
+                else if (cartItem.Qty > product.StockQuantity)
+                {
+                    outOfStockItems.Add($"{product.ProName} (only {product.StockQuantity} available)");
+                }
+            }
+
+            if (outOfStockItems.Any())
+            {
+                ModelState.AddModelError("", $"Some items are out of stock or have insufficient quantity: {string.Join(", ", outOfStockItems)}");
+                ViewBag.Carts = cartItems;
+                ViewBag.TotalAmount = cartItems.Sum(c => c.Product.Price * c.Qty);
+                return View("Checkout", order);
+            }
+
+            // Deduct stock quantities
+            foreach (var cartItem in cartItems)
+            {
+                var product = cartItem.Product;
+                product.StockQuantity -= cartItem.Qty;
+                _context.Products.Update(product);
+            }
+
             order.UserId = userId;
             order.OrderDate = DateTime.Now;
             order.TotalAmount = cartItems.Sum(c => c.Product.Price * c.Qty);
-
-            // Set default values for the new fields
             order.Status = OrderStatus.Received;
             order.TrackingNumber = "N/A";
             order.AdminNotes = "Order created";
-            order.VerifiedDate = null;
-            order.ProcessingDate = null;
-            order.ShippedDate = null;
-            order.CompletedDate = null;
-            order.CancelledDate = null;
 
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
@@ -157,7 +212,6 @@ namespace HikingStore.Controllers
             }
             catch (Exception ex)
             {
-                // Log the error but don't prevent the order from being completed
                 Console.WriteLine($"Failed to send confirmation email: {ex.Message}");
             }
 

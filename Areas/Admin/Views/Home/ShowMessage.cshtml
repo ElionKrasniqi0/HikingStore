@@ -1,45 +1,637 @@
 ﻿@model List<Contact>
+@{
+    ViewData["Title"] = "Contact Messages";
+}
+<br />
+<br />
+<br />
+<br />
+<div class="container-fluid px-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800">Contact Messages</h1>
+            <p class="text-muted">Manage and respond to customer inquiries</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary" onclick="exportMessages()">
+                <i class="fas fa-download me-2"></i>Export
+            </button>
+            <button class="btn btn-outline-secondary" onclick="refreshMessages()">
+                <i class="fas fa-sync-alt me-2"></i>Refresh
+            </button>
+        </div>
+    </div>
 
-<section class="content">
-    <div class="container-fluid">
-
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-
-                        <div class="card-body table-responsive p-0" style="height: 300px;">
-                            <table class="table table-head-fixed">
-                                <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Email</th>
-                                        <th>Subject</th>
-                                        <th>Message</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var item in Model)
-                                    {
-                                        <tr>
-                                            <td>@item.Name</td>
-                                            <td>@item.Email</td>
-                                            <td>@item.Subject</td>
-                                            <td>@item.Message</td>
-
-
-                                        </tr>
-                                    }
-
-
-                                </tbody>
-                            </table>
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary bg-opacity-10 border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0">@Model.Count</h4>
+                            <p class="text-muted mb-0">Total Messages</p>
                         </div>
-
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-inbox fa-2x text-primary"></i>
+                        </div>
                     </div>
-
                 </div>
             </div>
-
         </div>
-</section>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success bg-opacity-10 border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0">@Model.Count(m => !string.IsNullOrEmpty(m.Subject))</h4>
+                            <p class="text-muted mb-0">With Subject</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-tag fa-2x text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning bg-opacity-10 border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0">@Model.Count(m => string.IsNullOrEmpty(m.Subject))</h4>
+                            <p class="text-muted mb-0">No Subject</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-circle fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-info bg-opacity-10 border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0">Today</h4>
+                            <p class="text-muted mb-0">New Messages</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-clock fa-2x text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Messages Table -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h5 class="mb-0">Customer Messages</h5>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search messages..." id="searchInput">
+                        <button class="btn btn-outline-secondary" type="button">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="messagesTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="border-0">Contact</th>
+                                <th class="border-0">Subject</th>
+                                <th class="border-0">Message Preview</th>
+                                <th class="border-0">Date</th>
+                                <th class="border-0 text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr id="message-@item.CoId">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold">@item.Name</div>
+                                                <small class="text-muted">@item.Email</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.Subject))
+                                        {
+                                            <span class="fw-medium">@item.Subject</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted fst-italic">No subject</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="message-preview">
+                                            @if (!string.IsNullOrEmpty(item.Message))
+                                            {
+                                                if (item.Message.Length > 80)
+                                                {
+                                                    <span>@item.Message.Substring(0, 80)...</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>@item.Message</span>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted fst-italic">No message</span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">@item.CreatedDate.ToString("MMM dd, yyyy")</small>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-primary view-message"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#messageModal"
+                                                    data-id="@item.CoId"
+                                                    data-name="@item.Name"
+                                                    data-email="@item.Email"
+                                                    data-subject="@item.Subject"
+                                                    data-message="@item.Message">
+                                                <i class="fas fa-eye me-1"></i>View
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-success reply-message"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#replyModal"
+                                                    data-id="@item.CoId"
+                                                    data-email="@item.Email"
+                                                    data-subject="@item.Subject"
+                                                    data-name="@item.Name">
+                                                <i class="fas fa-reply me-1"></i>Reply
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger delete-message"
+                                                    data-id="@item.CoId"
+                                                    data-name="@item.Name">
+                                                <i class="fas fa-trash me-1"></i>Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <div class="empty-state-icon mb-3">
+                        <i class="fas fa-envelope-open fa-4x text-muted"></i>
+                    </div>
+                    <h4 class="text-muted">No Messages Found</h4>
+                    <p class="text-muted mb-4">All customer messages will appear here.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Message Detail Modal -->
+<div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="messageModalLabel">
+                    <i class="fas fa-envelope me-2"></i>Message Details
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label text-muted small mb-1">From</label>
+                            <p class="fw-bold mb-0" id="modalUserName"></p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small mb-1">Email</label>
+                            <p class="mb-0" id="modalUserEmail"></p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label text-muted small mb-1">Subject</label>
+                            <p class="mb-0" id="modalSubject"></p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small mb-1">Message ID</label>
+                            <p class="mb-0 text-muted" id="modalMessageId"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-top pt-3">
+                    <label class="form-label text-muted small mb-2">Message</label>
+                    <div class="bg-light rounded p-4">
+                        <p class="mb-0" id="modalMessage" style="white-space: pre-wrap;"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Close
+                </button>
+                <button type="button" class="btn btn-primary" id="replyFromView">
+                    <i class="fas fa-reply me-2"></i>Reply to Message
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reply Modal -->
+<div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="replyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="replyModalLabel">
+                    <i class="fas fa-reply me-2"></i>Reply to Message
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="replyForm">
+                    <input type="hidden" id="replyMessageId">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">To</label>
+                            <input type="email" class="form-control" id="replyToEmail" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Customer Name</label>
+                            <input type="text" class="form-control" id="replyCustomerName" readonly>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Subject</label>
+                        <input type="text" class="form-control" id="replySubject" required>
+                        <div class="form-text">The subject will automatically include "Re:" prefix.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Your Reply Message</label>
+                        <textarea class="form-control" id="replyMessage" rows="8" placeholder="Type your response here..." required></textarea>
+                        <div class="form-text">Your reply will be sent directly to the customer's email address.</div>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Tip:</strong> Be professional and courteous in your response. Include any relevant information the customer might need.
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-success" id="sendReply">
+                    <i class="fas fa-paper-plane me-2"></i>Send Reply
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container for Notifications -->
+<div class="position-fixed top-2 end-0 p-3" style="z-index: 11">
+    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto" id="toastTitle">Notification</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toastMessage"></div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .avatar-sm {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+
+        .table th {
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 0.35em 0.65em;
+        }
+
+        .message-preview {
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .btn-group .btn {
+            border-radius: 0.375rem;
+            margin: 0 2px;
+        }
+
+        .modal-header {
+            border-bottom: none;
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            border-top: none;
+            padding: 1.5rem;
+        }
+
+        .empty-state-icon {
+            opacity: 0.5;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(59, 93, 80, 0.02);
+            cursor: pointer;
+        }
+
+        .card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+            .card:hover {
+                transform: translateY(-2px);
+            }
+
+        @@media (max-width: 768px) {
+            .btn-group {
+                display: flex;
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+
+                .btn-group .btn {
+                    margin: 0;
+                }
+
+            .message-preview {
+                max-width: 150px;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        // Initialize DataTable
+        $(document).ready(function() {
+            $('#messagesTable').DataTable({
+                "pageLength": 25,
+                "responsive": true,
+                "language": {
+                    "search": "Search messages:",
+                    "lengthMenu": "Show _MENU_ entries",
+                    "info": "Showing _START_ to _END_ of _TOTAL_ messages",
+                    "infoEmpty": "Showing 0 to 0 of 0 messages",
+                    "infoFiltered": "(filtered from _MAX_ total messages)",
+                    "paginate": {
+                        "first": "First",
+                        "last": "Last",
+                        "next": "Next",
+                        "previous": "Previous"
+                    }
+                },
+                "columnDefs": [
+                    { "orderable": false, "targets": [4] }
+                ]
+            });
+
+            // Search functionality
+            $('#searchInput').on('keyup', function() {
+                $('#messagesTable').DataTable().search(this.value).draw();
+            });
+        });
+
+        // Set up modal handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            const messageModal = document.getElementById('messageModal');
+            const replyModal = document.getElementById('replyModal');
+
+            // View Message Modal
+            messageModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const id = button.getAttribute('data-id');
+                const name = button.getAttribute('data-name');
+                const email = button.getAttribute('data-email');
+                const subject = button.getAttribute('data-subject');
+                const message = button.getAttribute('data-message');
+
+                document.getElementById('modalMessageId').textContent = `#${id}`;
+                document.getElementById('modalUserName').textContent = name;
+                document.getElementById('modalUserEmail').textContent = email;
+                document.getElementById('modalSubject').textContent = subject || 'No subject';
+                document.getElementById('modalMessage').textContent = message || 'No message content';
+
+                // Store data for reply button
+                document.getElementById('replyFromView').setAttribute('data-id', id);
+                document.getElementById('replyFromView').setAttribute('data-email', email);
+                document.getElementById('replyFromView').setAttribute('data-subject', subject);
+                document.getElementById('replyFromView').setAttribute('data-name', name);
+            });
+
+            // Reply from View Message
+            document.getElementById('replyFromView').addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const email = this.getAttribute('data-email');
+                const subject = this.getAttribute('data-subject');
+                const name = this.getAttribute('data-name');
+
+                // Set reply modal values
+                document.getElementById('replyMessageId').value = id;
+                document.getElementById('replyToEmail').value = email;
+                document.getElementById('replyCustomerName').value = name;
+                document.getElementById('replySubject').value = subject ? `Re: ${subject}` : 'Re: Your Message';
+
+                // Close view modal and open reply modal
+                bootstrap.Modal.getInstance(messageModal).hide();
+                bootstrap.Modal.getInstance(replyModal).show();
+            });
+
+            // Reply Modal Handler
+            document.getElementById('replyModal').addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const id = button.getAttribute('data-id');
+                const email = button.getAttribute('data-email');
+                const subject = button.getAttribute('data-subject');
+                const name = button.getAttribute('data-name');
+
+                document.getElementById('replyMessageId').value = id;
+                document.getElementById('replyToEmail').value = email;
+                document.getElementById('replyCustomerName').value = name;
+                document.getElementById('replySubject').value = subject ? `Re: ${subject}` : 'Re: Your Message';
+                document.getElementById('replyMessage').value = ''; // Clear previous message
+            });
+
+            // Send Reply
+            document.getElementById('sendReply').addEventListener('click', function() {
+                const messageId = document.getElementById('replyMessageId').value;
+                const replySubject = document.getElementById('replySubject').value;
+                const replyMessage = document.getElementById('replyMessage').value;
+
+                // Validation
+                if (!replySubject.trim()) {
+                    showToast('Error', 'Please enter a subject for your reply.', 'danger');
+                    return;
+                }
+
+                if (!replyMessage.trim()) {
+                    showToast('Error', 'Please enter your reply message.', 'danger');
+                    return;
+                }
+
+                const sendButton = this;
+                const originalText = sendButton.innerHTML;
+                sendButton.disabled = true;
+                sendButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending...';
+
+                // Create form data
+                const formData = new FormData();
+                formData.append('id', messageId);
+                formData.append('replySubject', replySubject);
+                formData.append('replyMessage', replyMessage);
+
+                fetch('/Admin/Home/SendReply', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('Success', data.message, 'success');
+                        // Close the modal
+                        bootstrap.Modal.getInstance(replyModal).hide();
+                        // Clear the form
+                        document.getElementById('replyForm').reset();
+                    } else {
+                        showToast('Error', data.message, 'danger');
+                    }
+                })
+                .catch(error => {
+                    showToast('Error', 'Failed to send reply. Please try again.', 'danger');
+                    console.error('Error sending reply:', error);
+                })
+                .finally(() => {
+                    sendButton.disabled = false;
+                    sendButton.innerHTML = originalText;
+                });
+            });
+
+            // Delete Message
+            document.querySelectorAll('.delete-message').forEach(button => {
+                button.addEventListener('click', function() {
+                    const messageId = this.getAttribute('data-id');
+                    const customerName = this.getAttribute('data-name');
+
+                    if (confirm(`Are you sure you want to delete the message from ${customerName}? This action cannot be undone.`)) {
+                        const deleteButton = this;
+                        const originalText = deleteButton.innerHTML;
+                        deleteButton.disabled = true;
+                        deleteButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Deleting...';
+
+                        fetch('/Admin/Home/DeleteMessage', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: `id=${messageId}`
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                showToast('Success', data.message, 'success');
+                                // Remove the row from table
+                                document.getElementById(`message-${messageId}`).remove();
+
+                                // Check if table is empty
+                                if (document.querySelectorAll('#messagesTable tbody tr').length === 0) {
+                                    location.reload(); // Reload to show empty state
+                                }
+                            } else {
+                                showToast('Error', data.message, 'danger');
+                                deleteButton.disabled = false;
+                                deleteButton.innerHTML = originalText;
+                            }
+                        })
+                        .catch(error => {
+                            showToast('Error', 'Failed to delete message. Please try again.', 'danger');
+                            deleteButton.disabled = false;
+                            deleteButton.innerHTML = originalText;
+                        });
+                    }
+                });
+            });
+
+            // Row click to view message
+            document.querySelectorAll('#messagesTable tbody tr').forEach(row => {
+                row.addEventListener('click', function(e) {
+                    if (!e.target.closest('button')) {
+                        const viewButton = this.querySelector('.view-message');
+                        if (viewButton) {
+                            viewButton.click();
+                        }
+                    }
+                });
+            });
+        });
+
+        // Utility Functions
+        function showToast(title, message, type = 'info') {
+            const toast = document.getElementById('liveToast');
+            const toastTitle = document.getElementById('toastTitle');
+            const toastMessage = document.getElementById('toastMessage');
+
+            // Set toast style based on type
+            const bgClass = type === 'success' ? 'bg-success' : type === 'danger' ? 'bg-danger' : 'bg-info';
+            toast.className = `toast ${bgClass} text-white`;
+
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+        }
+
+        function exportMessages() {
+            showToast('Info', 'Export functionality would be implemented here.', 'info');
+        }
+
+        function refreshMessages() {
+            location.reload();
+        }
+    </script>
+}

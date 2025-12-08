@@ -52,7 +52,21 @@
                                     @item.ProName
                                 </a>
                             </h6>
-
+                            <!-- Stock Status Badge -->
+                            <div class="position-absolute top-0 start-0 m-2">
+                                @if (item.IsInStock)
+                                {
+                                    <span class="badge bg-success">In Stock</span>
+                                    @if (item.StockQuantity <= 5)
+                                    {
+                                        <span class="badge bg-warning ms-1">Low Stock</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Out of Stock</span>
+                                }
+                            </div>
                             <!-- Price -->
                             <div class="product-price mt-auto">
                                 <div class="d-flex align-items-center justify-content-between">
