@@ -5,8 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 [Area("Admin")]
-//[Authorize(Roles = "Admin")]
-[AllowAnonymous]
+[Authorize(Roles = "Admin")]
 public class RoleManagerController : Controller
 {
     private readonly RoleManager<IdentityRole> _roleManager;

@@ -1,5 +1,9 @@
 ﻿@model ShoppingCartDetails
-
+@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery antiforgery
+@{
+    var tokenSet = antiforgery.GetAndStoreTokens(Context);
+}
 <div class="container py-5">
     <div class="row">
         <div class="col-12">

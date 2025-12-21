@@ -13,129 +13,321 @@
     var currentStatusIndex = Array.FindIndex(statusSteps, s => s.Item1 == Model);
 }
 
-<div class="order-status-progress">
-    @for (int i = 0; i < statusSteps.Length; i++)
-    {
-        var (status, displayName, icon) = statusSteps[i];
-        var isCompleted = i < currentStatusIndex;
-        var isCurrent = i == currentStatusIndex;
-        var isPending = i > currentStatusIndex;
+<div class="order-status-tracker">
+    <div class="progress-container">
+        @for (int i = 0; i < statusSteps.Length; i++)
+        {
+            var (status, displayName, icon) = statusSteps[i];
+            var isCompleted = i < currentStatusIndex;
+            var isCurrent = i == currentStatusIndex;
+            var isPending = i > currentStatusIndex;
 
-        <div class="status-step @(isCompleted ? "completed" : "") @(isCurrent ? "current" : "") @(isPending ? "pending" : "")">
-            <div class="status-icon">
-                @if (isCompleted)
+            <div class="step @(isCompleted ? "completed" : "") @(isCurrent ? "current" : "") @(isPending ? "pending" : "")">
+                <div class="step-circle">
+                    @if (isCompleted)
+                    {
+                        <i class="fas fa-check"></i>
+                    }
+                    else
+                    {
+                        <i class="@icon"></i>
+                    }
+                </div>
+                <div class="step-label">@displayName</div>
+                @if (i < statusSteps.Length - 1)
                 {
-                    <i class="fas fa-check"></i>
-                }
-                else
-                {
-                    <i class="@icon"></i>
+                    <div class="step-connector"></div>
                 }
             </div>
-            <div class="status-label">@displayName</div>
-            @if (i < statusSteps.Length - 1)
-            {
-                <div class="status-connector"></div>
-            }
-        </div>
-    }
-</div>
+        }
+    </div>
+
 
 <style>
-    .order-status-progress {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        max-width: 400px;
+    .order-status-tracker {
+        width: 100%;
         margin: 0 auto;
     }
 
-    .status-step {
+    .progress-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        position: relative;
+        padding: 0 15px;
+        margin-bottom: 20px;
+    }
+
+    .step {
         display: flex;
         flex-direction: column;
         align-items: center;
-        flex: 1;
         position: relative;
+        z-index: 2;
+        flex: 1;
     }
 
-    .status-icon {
-        width: 32px;
-        height: 32px;
+    .step-circle {
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 14px;
-        margin-bottom: 5px;
-        z-index: 2;
+        font-size: 16px;
+        margin-bottom: 8px;
+        border: 3px solid;
+        background: white;
     }
 
-    .status-step.completed .status-icon {
+    .step.completed .step-circle {
         background-color: #28a745;
+        border-color: #28a745;
         color: white;
     }
 
-    .status-step.current .status-icon {
+    .step.current .step-circle {
         background-color: #007bff;
+        border-color: #007bff;
         color: white;
-        border: 2px solid #007bff;
+        box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.2);
     }
 
-    .status-step.pending .status-icon {
+    .step.pending .step-circle {
         background-color: #e9ecef;
+        border-color: #e9ecef;
         color: #6c757d;
-        border: 2px solid #e9ecef;
     }
 
-    .status-label {
-        font-size: 11px;
-        font-weight: 500;
+    .step-label {
+        font-size: 12px;
+        font-weight: 600;
         text-align: center;
-        line-height: 1.2;
+        color: #495057;
+        white-space: nowrap;
     }
 
-    .status-step.completed .status-label {
+    .step.completed .step-label {
         color: #28a745;
-        font-weight: 600;
     }
 
-    .status-step.current .status-label {
+    .step.current .step-label {
         color: #007bff;
-        font-weight: 600;
     }
 
-    .status-step.pending .status-label {
+    .step.pending .step-label {
         color: #6c757d;
     }
 
-    .status-connector {
+    .step-connector {
         position: absolute;
-        top: 16px;
-        left: 60%;
+        top: 20px;
+        left: 70%;
         width: 100%;
-        height: 2px;
+        height: 3px;
         background-color: #e9ecef;
         z-index: 1;
     }
 
-    .status-step.completed .status-connector {
+    .step.completed .step-connector {
         background-color: #28a745;
     }
 
-    /* Responsive adjustments */
+    /* Progress Bar */
+    .progress-bar-container {
+        padding: 0 30px;
+        margin-top: 10px;
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 6px;
+        background-color: #e9ecef;
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #28a745, #007bff);
+        border-radius: 3px;
+        transition: width 0.5s ease;
+    }
+
+    /* Order Status Colors */
+    .step:nth-child(1) .step-circle {
+        border-color: #007bff;
+        color: #007bff;
+    }
+
+    .step:nth-child(1).current .step-circle {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .step:nth-child(2) .step-circle {
+        border-color: #17a2b8;
+        color: #17a2b8;
+    }
+
+    .step:nth-child(2).current .step-circle {
+        background-color: #17a2b8;
+        color: white;
+    }
+
+    .step:nth-child(3) .step-circle {
+        border-color: #ffc107;
+        color: #ffc107;
+    }
+
+    .step:nth-child(3).current .step-circle {
+        background-color: #ffc107;
+        color: #212529;
+    }
+
+    .step:nth-child(4) .step-circle {
+        border-color: #6c757d;
+        color: #6c757d;
+    }
+
+    .step:nth-child(4).current .step-circle {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .step:nth-child(5) .step-circle {
+        border-color: #28a745;
+        color: #28a745;
+    }
+
+    .step:nth-child(5).current .step-circle {
+        background-color: #28a745;
+        color: white;
+    }
+
+    /* Responsive Design */
     @@media (max-width: 768px) {
-        .order-status-progress {
-            max-width: 300px;
+        .progress-container {
+            padding: 0 10px;
         }
 
-        .status-icon {
+        .step-circle {
+            width: 32px;
+            height: 32px;
+            font-size: 14px;
+            border-width: 2px;
+        }
+
+        .step-label {
+            font-size: 10px;
+            max-width: 60px;
+            white-space: normal;
+            line-height: 1.2;
+        }
+
+        .step-connector {
+            top: 16px;
+            height: 2px;
+        }
+
+        .progress-bar-container {
+            padding: 0 20px;
+        }
+
+        .progress-bar {
+            height: 4px;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .progress-container {
+            padding: 0 5px;
+        }
+
+        .step-circle {
             width: 28px;
             height: 28px;
             font-size: 12px;
         }
 
-        .status-label {
-            font-size: 10px;
+        .step-label {
+            font-size: 9px;
+            max-width: 50px;
+        }
+
+        .step-connector {
+            top: 14px;
+        }
+
+        .progress-bar-container {
+            padding: 0 15px;
+        }
+    }
+
+    /* Animation for completed steps */
+    .step.completed .step-circle {
+        animation: pulse 2s infinite;
+    }
+
+    @@keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4);
+        }
+
+        70% {
+            box-shadow: 0 0 0 6px rgba(40, 167, 69, 0);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+        }
+    }
+
+    .step.current .step-circle {
+        animation: bounce 2s infinite;
+    }
+
+    @@keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
+        }
+
+        40% {
+            transform: translateY(-5px);
+        }
+
+        60% {
+            transform: translateY(-3px);
         }
     }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Update progress fill animation
+        const progressFill = document.querySelector('.progress-fill');
+        if (progressFill) {
+            setTimeout(() => {
+                progressFill.style.transition = 'width 1s ease';
+            }, 100);
+        }
+
+        // Add hover effects
+        const steps = document.querySelectorAll('.step');
+        steps.forEach(step => {
+            step.addEventListener('mouseenter', function() {
+                const circle = this.querySelector('.step-circle');
+                if (circle && !circle.classList.contains('current') && !circle.classList.contains('completed')) {
+                    circle.style.transform = 'scale(1.1)';
+                }
+            });
+
+            step.addEventListener('mouseleave', function() {
+                const circle = this.querySelector('.step-circle');
+                if (circle) {
+                    circle.style.transform = 'scale(1)';
+                }
+            });
+        });
+    });
+</script>

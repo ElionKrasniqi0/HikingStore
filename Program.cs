@@ -28,7 +28,11 @@ builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnC
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString,
+        sqlServerOptions => sqlServerOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(30),
+            errorNumbersToAdd: null)));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 // Configure Identity with email confirmation REQUIRED
@@ -68,6 +72,7 @@ else
 builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddLogging();
+builder.Services.AddMemoryCache();
 
 // Configure Application Cookie
 builder.Services.ConfigureApplicationCookie(options =>
@@ -84,6 +89,23 @@ builder.Services.AddAuthentication().AddGoogle(googleOptions =>
     googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
 });
 
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+});
+
+builder.Services.AddOutputCache(options =>
+{
+    options.AddBasePolicy(builder =>
+        builder.Expire(TimeSpan.FromMinutes(10)));
+});
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
@@ -120,6 +142,10 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseResponseCompression();
+app.UseOutputCache();
+
+
 
 // Custom status code pages
 app.UseStatusCodePagesWithReExecute("/Error/{0}");

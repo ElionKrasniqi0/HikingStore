@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/print.css" media="print">
 
     <style>
         :root {
@@ -316,6 +317,48 @@
         .btn:focus {
             outline: 2px solid var(--primary-light);
             outline-offset: 2px;
+        }
+
+        @@media print {
+            /* Hide navigation, footer, and buttons when printing */
+            .navbar,
+            .sb-topnav,
+            .footer,
+            .breadcrumb,
+            button,
+            .btn,
+            .dropdown,
+            .nav-link,
+            .cart-summary-wrapper,
+            .user-dropdown-toggle,
+            .auth-buttons-container,
+            .no-print {
+                display: none !important;
+            }
+            /* Simple print layout */
+            body {
+                background: white !important;
+                color: black !important;
+                font-size: 12pt !important;
+                margin: 0 !important;
+                padding: 10mm !important;
+            }
+            /* Remove backgrounds and shadows */
+            * {
+                background: transparent !important;
+                box-shadow: none !important;
+                text-shadow: none !important;
+            }
+            /* Show URLs for links */
+            a[href]:after {
+                content: " (" attr(href) ")";
+                font-size: 90%;
+            }
+            /* Don't show links for images or internal links */
+            a[href^="#"]:after,
+            a[href^="javascript:"]:after {
+                content: "";
+            }
         }
     </style>
 

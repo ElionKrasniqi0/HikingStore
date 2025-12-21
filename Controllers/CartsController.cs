@@ -435,7 +435,37 @@ namespace HikingStore.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
+        [HttpPost]
+        public async Task<IActionResult> UpdateCartItem(int cartId, int quantity)
+        {
+            var userId = _userManager.GetUserId(User);
+            var cartItem = await _context.ShoppingCarts
+                .FirstOrDefaultAsync(c => c.CartId == cartId && c.UserId == userId);
 
+            if (cartItem == null)
+            {
+                return Json(new { success = false, message = "Cart item not found." });
+            }
+
+            if (quantity < 1)
+            {
+                _context.ShoppingCarts.Remove(cartItem);
+            }
+            else
+            {
+                cartItem.Qty = quantity;
+                _context.ShoppingCarts.Update(cartItem);
+            }
+
+            await _context.SaveChangesAsync();
+
+            // Get updated cart count
+            var cartItemCount = await _context.ShoppingCarts
+                .Where(c => c.UserId == userId)
+                .SumAsync(c => c.Qty);
+
+            return Json(new { success = true, cartItemCount = cartItemCount });
+        }
         public class CartItemUpdate
         {
             public int CartId { get; set; }
