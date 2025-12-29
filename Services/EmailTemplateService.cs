@@ -385,7 +385,7 @@ namespace HikingStore.Services
             <p>Your trusted partner for premium outdoor gear</p>
             <p>
                 📧 support@hikingstore.com | 
-                📞 +1 (555) 123-HELP | 
+                📞 +383 45-804-555HELP | 
                 🏔️ www.hikingstore.com
             </p>
             <p style='margin-top: 15px; font-size: 12px; color: #adb5bd;'>

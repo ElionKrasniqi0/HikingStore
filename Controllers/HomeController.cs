@@ -193,6 +193,7 @@ namespace HikingStore.Controllers
         {
             return View();
         }
+
         // Add to HomeController.cs
         public IActionResult Error(int? statusCode)
         {

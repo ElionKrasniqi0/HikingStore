@@ -1,6 +1,749 @@
 ﻿@{
     ViewData["Title"] = "Privacy Policy";
+    var lastUpdated = new DateTime(2025, 1, 1);
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<!-- Hero Section -->
+<section class="privacy-hero py-5 bg-gradient-primary">
+    <div class="container">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-8">
+                <span class="badge bg-white bg-opacity-20 text-white px-3 py-2 mb-3 fw-semibold border-0">
+                    <i class="fas fa-shield-alt me-2"></i>Privacy Commitment
+                </span>
+                <h1 class="display-4 fw-bold text-white mb-3">Privacy Policy</h1>
+                <p class="lead text-white-80 mb-0">Your privacy is our priority. Learn how we protect and manage your data.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Table of Contents -->
+<section class="toc-section py-4 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <nav class="toc-nav">
+                    <div class="nav nav-pills justify-content-center flex-wrap" id="privacyTabs" role="tablist">
+                        <button class="nav-link active" data-bs-target="#overview" data-bs-toggle="pill" type="button">
+                            <i class="fas fa-info-circle me-2"></i>Overview
+                        </button>
+                        <button class="nav-link" data-bs-target="#data-collection" data-bs-toggle="pill" type="button">
+                            <i class="fas fa-database me-2"></i>Data Collection
+                        </button>
+                        <button class="nav-link" data-bs-target="#usage" data-bs-toggle="pill" type="button">
+                            <i class="fas fa-cogs me-2"></i>Data Usage
+                        </button>
+                        <button class="nav-link" data-bs-target="#security" data-bs-toggle="pill" type="button">
+                            <i class="fas fa-lock me-2"></i>Security
+                        </button>
+                        <button class="nav-link" data-bs-target="#rights" data-bs-toggle="pill" type="button">
+                            <i class="fas fa-user-check me-2"></i>Your Rights
+                        </button>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Privacy Content -->
+<section class="privacy-content py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <!-- Last Updated -->
+                <div class="alert alert-light border-0 rounded-3 mb-5">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-clock text-primary fa-lg me-3"></i>
+                        <div>
+                            <strong>Last Updated:</strong> @lastUpdated.ToString("MMMM d, yyyy")
+                            <span class="text-muted ms-2">Version 2.1</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="tab-content" id="privacyTabContent">
+                    <!-- Overview -->
+                    <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                        <div class="privacy-section-card">
+                            <div class="section-header">
+                                <div class="section-icon">
+                                    <i class="fas fa-info-circle"></i>
+                                </div>
+                                <div>
+                                    <h2 class="section-title">1. Introduction & Scope</h2>
+                                    <p class="section-subtitle">Understanding our commitment to your privacy</p>
+                                </div>
+                            </div>
+                            <div class="section-body">
+                                <p>Welcome to HikingStore's Privacy Policy. At HikingStore ("we", "our", or "us"), we are committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or make a purchase.</p>
+
+                                <div class="alert alert-info mt-4">
+                                    <div class="d-flex">
+                                        <i class="fas fa-lightbulb me-3 mt-1 text-primary"></i>
+                                        <div>
+                                            <strong>Transparency Promise:</strong> We believe in being clear about how we handle your data. If you have any questions, please contact us at privacy@hikingstore.com
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h5 class="mt-4 mb-3">Scope of This Policy</h5>
+                                <ul class="checklist">
+                                    <li>Applies to all HikingStore websites and services</li>
+                                    <li>Covers both online and in-store data collection</li>
+                                    <li>Includes data from website visitors and registered users</li>
+                                    <li>Applies regardless of device or location</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Collection -->
+                    <div class="tab-pane fade" id="data-collection" role="tabpanel">
+                        <div class="privacy-section-card">
+                            <div class="section-header">
+                                <div class="section-icon">
+                                    <i class="fas fa-database"></i>
+                                </div>
+                                <div>
+                                    <h2 class="section-title">2. Information We Collect</h2>
+                                    <p class="section-subtitle">What data we collect and why</p>
+                                </div>
+                            </div>
+                            <div class="section-body">
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <div class="data-card">
+                                            <div class="data-icon">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <h5>Personal Information</h5>
+                                            <ul class="data-list">
+                                                <li>Name and contact details</li>
+                                                <li>Email address and phone number</li>
+                                                <li>Shipping and billing addresses</li>
+                                                <li>Account credentials (encrypted)</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="data-card">
+                                            <div class="data-icon">
+                                                <i class="fas fa-shopping-cart"></i>
+                                            </div>
+                                            <h5>Transaction Data</h5>
+                                            <ul class="data-list">
+                                                <li>Purchase history</li>
+                                                <li>Payment information (processed securely)</li>
+                                                <li>Order details and preferences</li>
+                                                <li>Shipping and delivery information</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="data-card">
+                                            <div class="data-icon">
+                                                <i class="fas fa-laptop"></i>
+                                            </div>
+                                            <h5>Technical Data</h5>
+                                            <ul class="data-list">
+                                                <li>IP address and device information</li>
+                                                <li>Browser type and version</li>
+                                                <li>Time zone and location data</li>
+                                                <li>Cookies and usage data</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="data-card">
+                                            <div class="data-icon">
+                                                <i class="fas fa-chart-line"></i>
+                                            </div>
+                                            <h5>Usage Data</h5>
+                                            <ul class="data-list">
+                                                <li>Pages visited and time spent</li>
+                                                <li>Product views and searches</li>
+                                                <li>Clickstream data</li>
+                                                <li>Interaction with emails</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Usage -->
+                    <div class="tab-pane fade" id="usage" role="tabpanel">
+                        <div class="privacy-section-card">
+                            <div class="section-header">
+                                <div class="section-icon">
+                                    <i class="fas fa-cogs"></i>
+                                </div>
+                                <div>
+                                    <h2 class="section-title">3. How We Use Your Information</h2>
+                                    <p class="section-subtitle">Purposes of data processing</p>
+                                </div>
+                            </div>
+                            <div class="section-body">
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <div class="usage-card">
+                                            <div class="usage-badge ">Service Delivery</div>
+                                            <ul>
+                                                <li>Process and fulfill orders</li>
+                                                <li>Manage your account</li>
+                                                <li>Provide customer support</li>
+                                                <li>Send order confirmations</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="usage-card">
+                                            <div class="usage-badge bg-success">Communication</div>
+                                            <ul>
+                                                <li>Respond to inquiries</li>
+                                                <li>Send service updates</li>
+                                                <li>Share important notices</li>
+                                                <li>Marketing (with consent)</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="usage-card">
+                                            <div class="usage-badge bg-warning">Improvement</div>
+                                            <ul>
+                                                <li>Enhance website functionality</li>
+                                                <li>Develop new products</li>
+                                                <li>Conduct market research</li>
+                                                <li>Analyze user behavior</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="usage-card">
+                                            <div class="usage-badge bg-danger">Security</div>
+                                            <ul>
+                                                <li>Prevent fraud and abuse</li>
+                                                <li>Ensure system security</li>
+                                                <li>Comply with legal obligations</li>
+                                                <li>Enforce terms of service</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security -->
+                    <div class="tab-pane fade" id="security" role="tabpanel">
+                        <div class="privacy-section-card">
+                            <div class="section-header">
+                                <div class="section-icon">
+                                    <i class="fas fa-lock"></i>
+                                </div>
+                                <div>
+                                    <h2 class="section-title">4. Data Security & Protection</h2>
+                                    <p class="section-subtitle">How we keep your data safe</p>
+                                </div>
+                            </div>
+                            <div class="section-body">
+                                <div class="security-features">
+                                    <div class="row g-4">
+                                        <div class="col-md-4">
+                                            <div class="security-card">
+                                                <div class="security-icon">
+                                                    <i class="fas fa-shield-alt"></i>
+                                                </div>
+                                                <h6>Encryption</h6>
+                                                <p class="small">SSL encryption for all data transmission</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="security-card">
+                                                <div class="security-icon">
+                                                    <i class="fas fa-user-lock"></i>
+                                                </div>
+                                                <h6>Access Control</h6>
+                                                <p class="small">Strict role-based access management</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="security-card">
+                                                <div class="security-icon">
+                                                    <i class="fas fa-database"></i>
+                                                </div>
+                                                <h6>Secure Storage</h6>
+                                                <p class="small">Encrypted databases with regular backups</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-warning mt-4">
+                                    <div class="d-flex">
+                                        <i class="fas fa-exclamation-triangle me-3 mt-1 text-warning"></i>
+                                        <div>
+                                            <strong>Important:</strong> While we implement robust security measures, no system is 100% secure. We recommend using strong passwords and keeping your login credentials confidential.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Your Rights -->
+                    <div class="tab-pane fade" id="rights" role="tabpanel">
+                        <div class="privacy-section-card">
+                            <div class="section-header">
+                                <div class="section-icon">
+                                    <i class="fas fa-user-check"></i>
+                                </div>
+                                <div>
+                                    <h2 class="section-title">5. Your Privacy Rights</h2>
+                                    <p class="section-subtitle">Control over your personal data</p>
+                                </div>
+                            </div>
+                            <div class="section-body">
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <div class="rights-card">
+                                            <h5><i class="fas fa-eye text-primary me-2"></i>Right to Access</h5>
+                                            <p>Request a copy of your personal data held by us.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="rights-card">
+                                            <h5><i class="fas fa-edit text-primary me-2"></i>Right to Rectification</h5>
+                                            <p>Correct inaccurate or incomplete personal data.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="rights-card">
+                                            <h5><i class="fas fa-trash-alt text-primary me-2"></i>Right to Erasure</h5>
+                                            <p>Request deletion of your personal data.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="rights-card">
+                                            <h5><i class="fas fa-ban text-primary me-2"></i>Right to Object</h5>
+                                            <p>Object to processing of your personal data.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="contact-card mt-5">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-8">
+                                            <h5 class="mb-2">Exercise Your Rights</h5>
+                                            <p class="text-muted mb-0">To exercise any of these rights, please contact our Data Protection Officer.</p>
+                                        </div>
+                                        <div class="col-md-4 text-md-end">
+                                            <a href="mailto:privacy@hikingstore.com" class="btn btn-primary">
+                                                <i class="fas fa-envelope me-2"></i>Contact DPO
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="contact-section mt-5">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body p-4">
+                                    <h5 class="card-title mb-4">Contact Information</h5>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="contact-item mb-3">
+                                                <i class="fas fa-envelope text-primary me-2"></i>
+                                                <span>Email: privacy@hikingstore.com</span>
+                                            </div>
+                                            <div class="contact-item mb-3">
+                                                <i class="fas fa-phone text-primary me-2"></i>
+                                                <span>Phone: +(383) 045 804 555</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="contact-item mb-3">
+                                                <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                                                <span>Address: Meto Bajraktari, Prishtina 10000</span>
+                                            </div>
+                                            <div class="contact-item mb-3">
+                                                <i class="fas fa-clock text-primary me-2"></i>
+                                                <span>Response Time: 48 hours</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body text-center p-4">
+                                    <i class="fas fa-question-circle fa-3x text-primary mb-3"></i>
+                                    <h6 class="mb-2">Questions?</h6>
+                                    <p class="text-muted small mb-3">We're here to help with any privacy concerns.</p>
+                                    <a href="/Home/Contact" class="btn btn-outline-primary btn-sm">Contact Support</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    /* Privacy Hero */
+    .privacy-hero {
+        background: linear-gradient(135deg, #2d473d 0%, #3b5d50 50%, #4a7565 100%);
+    }
+
+    .text-white-80 {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Table of Contents */
+    .toc-section {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .toc-nav .nav-link {
+        border-radius: 20px;
+        padding: 0.5rem 1.25rem;
+        margin: 0 0.25rem;
+        color: #6c757d;
+        border: 1px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+        .toc-nav .nav-link.active {
+            background: #3b5d50;
+            color: white;
+            border-color: #3b5d50;
+            box-shadow: 0 4px 12px rgba(59, 93, 80, 0.3);
+        }
+
+        .toc-nav .nav-link:hover:not(.active) {
+            background: rgba(59, 93, 80, 0.1);
+            color: #3b5d50;
+            border-color: rgba(59, 93, 80, 0.2);
+        }
+
+    /* Privacy Section Cards */
+    .privacy-section-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+        overflow: hidden;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .section-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .section-icon {
+        width: 60px;
+        height: 60px;
+        background: #3b5d50;
+        color: white;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .section-title {
+        color: #2d473d;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .section-subtitle {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .section-body {
+        padding: 2rem;
+    }
+
+    /* Data Cards */
+    .data-card {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 1.5rem;
+        height: 100%;
+        border-left: 4px solid #3b5d50;
+    }
+
+    .data-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(59, 93, 80, 0.1);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        color: #3b5d50;
+        margin-bottom: 1rem;
+    }
+
+    .data-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+        .data-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+            .data-list li:last-child {
+                border-bottom: none;
+            }
+
+    /* Usage Cards */
+    .usage-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        height: 100%;
+        border: 1px solid rgba(0,0,0,0.05);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .usage-badge {
+        display: inline-block;
+        padding: 0.25rem 1rem;
+        border-radius: 20px;
+        color: white;
+        font-weight: 600;
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Security Cards */
+    .security-card {
+        text-align: center;
+        padding: 1.5rem;
+        background: white;
+        border-radius: 12px;
+        border: 1px solid rgba(0,0,0,0.05);
+        transition: transform 0.3s ease;
+    }
+
+        .security-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+    .security-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(59, 93, 80, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: #3b5d50;
+        margin: 0 auto 1rem;
+    }
+
+    /* Rights Cards */
+    .rights-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid rgba(0,0,0,0.05);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        height: 100%;
+    }
+
+    .contact-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border-left: 4px solid #3b5d50;
+    }
+
+    /* Contact Items */
+    .contact-item {
+        display: flex;
+        align-items: center;
+    }
+
+    /* Checklist */
+    .checklist {
+        list-style: none;
+        padding: 0;
+    }
+
+        .checklist li {
+            padding: 0.5rem 0;
+            padding-left: 1.75rem;
+            position: relative;
+        }
+
+            .checklist li:before {
+                content: '✓';
+                position: absolute;
+                left: 0;
+                color: #28a745;
+                font-weight: bold;
+            }
+
+    /* Alert Styling */
+    .alert {
+        border-radius: 10px;
+        border: none;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .section-header {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+            padding: 1.5rem;
+        }
+
+        .section-icon {
+            margin: 0 auto;
+        }
+
+        .toc-nav .nav-link {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-body {
+            padding: 1.5rem;
+        }
+
+        .display-4 {
+            font-size: 2.5rem;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .toc-nav .nav-link {
+            width: 100%;
+            margin-bottom: 0.5rem;
+            text-align: left;
+        }
+
+        .display-4 {
+            font-size: 2rem;
+        }
+
+        .section-body {
+            padding: 1rem;
+        }
+    }
+
+    /* Print Styles */
+    @@media print {
+        .toc-section,
+        .alert,
+        .contact-section {
+            display: none;
+        }
+
+        .privacy-section-card {
+            box-shadow: none;
+            border: 1px solid #000;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Smooth scroll to sections
+        const tocLinks = document.querySelectorAll('.toc-nav .nav-link');
+        tocLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.getAttribute('data-bs-target');
+                const tabPane = document.querySelector(target);
+
+                if (tabPane) {
+                    // Smooth scroll to the tab content
+                    tabPane.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                    // Update URL hash without scrolling
+                    history.pushState(null, null, target);
+                }
+            });
+        });
+
+        // Update active tab based on scroll
+        const observerOptions = {
+            threshold: 0.5
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const tabId = entry.target.id;
+                    const correspondingLink = document.querySelector(`[data-bs-target="#${tabId}"]`);
+
+                    if (correspondingLink) {
+                        // Remove active class from all links
+                        tocLinks.forEach(link => link.classList.remove('active'));
+                        // Add active class to current link
+                        correspondingLink.classList.add('active');
+                    }
+                }
+            });
+        }, observerOptions);
+
+        // Observe all tab panes
+        const tabPanes = document.querySelectorAll('.tab-pane');
+        tabPanes.forEach(pane => observer.observe(pane));
+
+        // Copy contact email on click
+        const emailElement = document.querySelector('.contact-item span');
+        emailElement?.addEventListener('click', function() {
+            const email = this.textContent.replace('Email: ', '');
+            navigator.clipboard.writeText(email).then(() => {
+                const originalText = this.textContent;
+                this.innerHTML = '<i class="fas fa-check text-success me-2"></i>Copied to clipboard!';
+
+                setTimeout(() => {
+                    this.innerHTML = `<i class="fas fa-envelope text-primary me-2"></i>${originalText}`;
+                }, 2000);
+            });
+        });
+
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>

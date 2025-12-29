@@ -1,0 +1,1076 @@
+﻿@{
+    ViewData["Title"] = "Terms of Service";
+    var lastUpdated = new DateTime(2025, 1, 1);
+}
+
+<!-- Hero Section -->
+<section class="terms-hero py-5 bg-gradient-primary">
+    <div class="container">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-8">
+                <span class="badge bg-white bg-opacity-20 text-white px-3 py-2 mb-3 fw-semibold border-0">
+                    <i class="fas fa-file-contract me-2"></i>Legal Terms
+                </span>
+                <h1 class="display-4 fw-bold text-white mb-3">Terms of Service</h1>
+                <p class="lead text-white-80 mb-0">Please read these terms carefully before using our services</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Navigation -->
+<section class="terms-nav py-4 bg-light sticky-top">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <nav class="terms-quick-nav">
+                    <div class="nav nav-pills justify-content-center flex-wrap" id="termsTabs" role="tablist">
+                        <button class="nav-link active" data-bs-target="#overview" data-bs-toggle="pill" type="button">
+                            <i class="fas fa-home me-2"></i>Overview
+                        </button>
+                        <button class="nav-link" data-bs-target="#accounts" data-bs-toggle="pill" type="button">
+                            <i class="fas fa-user me-2"></i>Accounts
+                        </button>
+                        <button class="nav-link" data-bs-target="#purchases" data-bs-toggle="pill" type="button">
+                            <i class="fas fa-shopping-cart me-2"></i>Purchases
+                        </button>
+                        <button class="nav-link" data-bs-target="#content" data-bs-toggle="pill" type="button">
+                            <i class="fas fa-pen me-2"></i>Content
+                        </button>
+                        <button class="nav-link" data-bs-target="#liability" data-bs-toggle="pill" type="button">
+                            <i class="fas fa-balance-scale me-2"></i>Liability
+                        </button>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Terms Content -->
+<section class="terms-content py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <!-- Last Updated & Acceptance -->
+                <div class="terms-acceptance mb-5">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-clock text-primary fa-lg me-3"></i>
+                                        <div>
+                                            <strong>Last Updated:</strong> @lastUpdated.ToString("MMMM d, yyyy")
+                                            <span class="badge bg-opacity-10 text-primary ms-2">v2.1</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-muted mb-0">
+                                        By accessing or using HikingStore services, you agree to be bound by these Terms of Service. If you disagree with any part, you may not access our services.
+                                    </p>
+                                </div>
+                                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                                    <button class="btn btn-primary" onclick="printTerms()">
+                                        <i class="fas fa-print me-2"></i>Print Terms
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="tab-content" id="termsTabContent">
+                    <!-- Overview -->
+                    <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                        <div class="terms-section">
+                            <div class="section-header mb-4">
+                                <h2 class="section-title">
+                                    <span class="section-number">1</span>
+                                    Agreement Overview
+                                </h2>
+                                <div class="section-subtitle">Understanding our service agreement</div>
+                            </div>
+
+                            <div class="section-body">
+                                <div class="agreement-card mb-4">
+                                    <div class="agreement-icon">
+                                        <i class="fas fa-handshake"></i>
+                                    </div>
+                                    <div class="agreement-content">
+                                        <h5>The HikingStore Agreement</h5>
+                                        <p>These Terms of Service ("Terms") constitute a legally binding agreement made between you ("User", "Customer") and HikingStore ("Company", "we", "us", "our"), concerning your access to and use of the hikingstore.com website as well as any related applications, products, and services (collectively, "Services").</p>
+                                    </div>
+                                </div>
+
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <div class="key-point-card">
+                                            <div class="point-icon">
+                                                <i class="fas fa-globe-europe"></i>
+                                            </div>
+                                            <h6>Jurisdiction & Applicability</h6>
+                                            <p class="small text-muted">These Terms apply to all users worldwide, with specific provisions for Kosovo residents.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="key-point-card">
+                                            <div class="point-icon">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </div>
+                                            <h6>Updates & Modifications</h6>
+                                            <p class="small text-muted">We may modify these Terms at any time. Continued use constitutes acceptance.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-info mt-4">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-info-circle mt-1 me-3 text-primary"></i>
+                                        <div>
+                                            <strong>Important:</strong> These Terms incorporate our Privacy Policy, Cookie Policy, and Return Policy by reference. Please review all policies carefully.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Accounts -->
+                    <div class="tab-pane fade" id="accounts" role="tabpanel">
+                        <div class="terms-section">
+                            <div class="section-header mb-4">
+                                <h2 class="section-title">
+                                    <span class="section-number">2</span>
+                                    Account Terms
+                                </h2>
+                                <div class="section-subtitle">Requirements for creating and maintaining an account</div>
+                            </div>
+
+                            <div class="section-body">
+                                <div class="requirements-list mb-4">
+                                    <div class="requirement-item">
+                                        <div class="requirement-check">
+                                            <i class="fas fa-check-circle text-success"></i>
+                                        </div>
+                                        <div class="requirement-content">
+                                            <h6>Age Requirement</h6>
+                                            <p>You must be at least 18 years old to create an account. Users under 18 may use services only with parental supervision.</p>
+                                        </div>
+                                    </div>
+                                    <div class="requirement-item">
+                                        <div class="requirement-check">
+                                            <i class="fas fa-check-circle text-success"></i>
+                                        </div>
+                                        <div class="requirement-content">
+                                            <h6>Accurate Information</h6>
+                                            <p>You must provide accurate, current, and complete information during registration and keep it updated.</p>
+                                        </div>
+                                    </div>
+                                    <div class="requirement-item">
+                                        <div class="requirement-check">
+                                            <i class="fas fa-check-circle text-success"></i>
+                                        </div>
+                                        <div class="requirement-content">
+                                            <h6>Account Security</h6>
+                                            <p>You are responsible for maintaining the confidentiality of your login credentials and all activities under your account.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="permissions-grid">
+                                    <h5 class="mb-3">Account Permissions & Restrictions</h5>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="permission-card allowed">
+                                                <div class="permission-icon">
+                                                    <i class="fas fa-check"></i>
+                                                </div>
+                                                <div class="permission-text">
+                                                    <strong>Allowed:</strong> One account per person
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="permission-card not-allowed">
+                                                <div class="permission-icon">
+                                                    <i class="fas fa-times"></i>
+                                                </div>
+                                                <div class="permission-text">
+                                                    <strong>Not Allowed:</strong> Sharing accounts
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="permission-card allowed">
+                                                <div class="permission-icon">
+                                                    <i class="fas fa-check"></i>
+                                                </div>
+                                                <div class="permission-text">
+                                                    <strong>Allowed:</strong> Multiple devices
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="permission-card not-allowed">
+                                                <div class="permission-icon">
+                                                    <i class="fas fa-times"></i>
+                                                </div>
+                                                <div class="permission-text">
+                                                    <strong>Not Allowed:</strong> Automated account creation
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Purchases -->
+                    <div class="tab-pane fade" id="purchases" role="tabpanel">
+                        <div class="terms-section">
+                            <div class="section-header mb-4">
+                                <h2 class="section-title">
+                                    <span class="section-number">3</span>
+                                    Purchase Terms
+                                </h2>
+                                <div class="section-subtitle">Rules governing purchases and transactions</div>
+                            </div>
+
+                            <div class="section-body">
+                                <div class="purchase-timeline mb-5">
+                                    <div class="timeline-step">
+                                        <div class="step-number">1</div>
+                                        <div class="step-content">
+                                            <h6>Order Placement</h6>
+                                            <p>All orders are subject to availability and our acceptance. We reserve the right to refuse any order.</p>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-step">
+                                        <div class="step-number">2</div>
+                                        <div class="step-content">
+                                            <h6>Pricing & Payment</h6>
+                                            <p>Prices are in Euros (€) and include VAT. We accept major credit cards and PayPal.</p>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-step">
+                                        <div class="step-number">3</div>
+                                        <div class="step-content">
+                                            <h6>Order Confirmation</h6>
+                                            <p>You'll receive email confirmation. The contract is formed when we send this confirmation.</p>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-step">
+                                        <div class="step-number">4</div>
+                                        <div class="step-content">
+                                            <h6>Shipping & Delivery</h6>
+                                            <p>Shipping times are estimates. Risk passes to you upon delivery.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <div class="pricing-card">
+                                            <h5 class="card-title mb-3">Payment Terms</h5>
+                                            <ul class="pricing-list">
+                                                <li>Full payment required at checkout</li>
+                                                <li>Payment methods may vary by region</li>
+                                                <li>Currency conversion fees may apply</li>
+                                                <li>Recurring payments for subscriptions</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="pricing-card">
+                                            <h5 class="card-title mb-3">Shipping Terms</h5>
+                                            <ul class="pricing-list">
+                                                <li>Free shipping over €50 in Kosovo</li>
+                                                <li>International shipping available</li>
+                                                <li>Delivery delays may occur</li>
+                                                <li>Signature may be required</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-warning mt-4">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-exclamation-triangle mt-1 me-3 text-warning"></i>
+                                        <div>
+                                            <strong>Note:</strong> Custom or personalized items may have different return policies. Please review product-specific terms before purchasing.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="tab-pane fade" id="content" role="tabpanel">
+                        <div class="terms-section">
+                            <div class="section-header mb-4">
+                                <h2 class="section-title">
+                                    <span class="section-number">4</span>
+                                    Content & Intellectual Property
+                                </h2>
+                                <div class="section-subtitle">Rules regarding content and ownership</div>
+                            </div>
+
+                            <div class="section-body">
+                                <div class="ip-section mb-5">
+                                    <div class="ip-card">
+                                        <div class="ip-icon">
+                                            <i class="fas fa-copyright"></i>
+                                        </div>
+                                        <div class="ip-content">
+                                            <h5>Our Intellectual Property</h5>
+                                            <p>All content on HikingStore (logos, trademarks, text, graphics, images, software) is our property or licensed to us and protected by intellectual property laws.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="ip-card mt-4">
+                                        <div class="ip-icon">
+                                            <i class="fas fa-user-edit"></i>
+                                        </div>
+                                        <div class="ip-content">
+                                            <h5>User Content License</h5>
+                                            <p>By submitting content (reviews, photos, comments), you grant us a worldwide, royalty-free license to use, modify, and display it for promotional purposes.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="content-guidelines">
+                                    <h5 class="mb-3">Content Guidelines</h5>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="guideline-card permitted">
+                                                <div class="guideline-header">
+                                                    <i class="fas fa-thumbs-up"></i>
+                                                    <span>Permitted Content</span>
+                                                </div>
+                                                <ul>
+                                                    <li>Helpful product reviews</li>
+                                                    <li>Relevant questions</li>
+                                                    <li>Constructive feedback</li>
+                                                    <li>Personal experiences</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="guideline-card prohibited">
+                                                <div class="guideline-header">
+                                                    <i class="fas fa-thumbs-down"></i>
+                                                    <span>Prohibited Content</span>
+                                                </div>
+                                                <ul>
+                                                    <li>Spam or advertisements</li>
+                                                    <li>Offensive language</li>
+                                                    <li>False information</li>
+                                                    <li>Copyright violations</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Liability -->
+                    <div class="tab-pane fade" id="liability" role="tabpanel">
+                        <div class="terms-section">
+                            <div class="section-header mb-4">
+                                <h2 class="section-title">
+                                    <span class="section-number">5</span>
+                                    Liability & Disclaimers
+                                </h2>
+                                <div class="section-subtitle">Limitations of liability and important disclaimers</div>
+                            </div>
+
+                            <div class="section-body">
+                                <div class="disclaimer-section mb-5">
+                                    <div class="disclaimer-card important">
+                                        <div class="disclaimer-icon">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </div>
+                                        <div class="disclaimer-content">
+                                            <h5>Important Disclaimers</h5>
+                                            <p>Our services are provided "as is" without warranties of any kind. We do not guarantee uninterrupted, secure, or error-free service. Product colors may vary from displays.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="disclaimer-card mt-4">
+                                        <div class="disclaimer-icon">
+                                            <i class="fas fa-balance-scale-left"></i>
+                                        </div>
+                                        <div class="disclaimer-content">
+                                            <h5>Limitation of Liability</h5>
+                                            <p>To the maximum extent permitted by law, HikingStore shall not be liable for any indirect, incidental, or consequential damages arising from your use of our services.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="liability-limits">
+                                    <h5 class="mb-3">Liability Caps</h5>
+                                    <div class="row g-4">
+                                        <div class="col-md-6">
+                                            <div class="limit-card">
+                                                <div class="limit-amount text-primary">€500</div>
+                                                <div class="limit-description">
+                                                    Maximum liability for direct damages related to product defects
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="limit-card">
+                                                <div class="limit-amount text-primary">€0</div>
+                                                <div class="limit-description">
+                                                    Liability for indirect or consequential damages
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="indemnification mt-5">
+                                    <h5 class="mb-3">Indemnification</h5>
+                                    <div class="indemnity-card">
+                                        <p>You agree to defend, indemnify, and hold harmless HikingStore and its affiliates from any claims, damages, or expenses arising from your violation of these Terms or your use of our services.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact & Dispute Resolution -->
+                <div class="dispute-section mt-5">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h5 class="card-title mb-4">
+                                <i class="fas fa-gavel text-primary me-2"></i>
+                                Contact & Dispute Resolution
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="contact-info">
+                                        <h6>Contact Information</h6>
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2">
+                                                <i class="fas fa-envelope text-muted me-2"></i>
+                                                legal@hikingstore.com
+                                            </li>
+                                            <li class="mb-2">
+                                                <i class="fas fa-phone text-muted me-2"></i>
+                                                +(383) 045 804 555
+                                            </li>
+                                            <li>
+                                                <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                                                Meto Bajraktari, Prishtina 10000
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="dispute-info">
+                                        <h6>Governing Law</h6>
+                                        <p class="small text-muted">
+                                            These Terms are governed by the laws of Kosovo. Any disputes shall be resolved in the courts of Prishtina, Kosovo.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acceptance Button -->
+                <div class="acceptance-section text-center mt-5 pt-4 border-top">
+                    <p class="text-muted mb-4">
+                        By using HikingStore services, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.
+                    </p>
+                    <a href="/" class="btn btn-primary btn-lg">
+                        <i class="fas fa-check-circle me-2"></i>I Understand & Accept
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    /* Terms Hero */
+    .terms-hero {
+        background: linear-gradient(135deg, #2d473d 0%, #3b5d50 50%, #4a7565 100%);
+    }
+
+    /* Quick Navigation */
+    .terms-nav {
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        z-index: 1000;
+    }
+
+    .terms-quick-nav .nav-link {
+        border-radius: 20px;
+        padding: 0.5rem 1.25rem;
+        margin: 0 0.25rem;
+        color: #6c757d;
+        border: 1px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+        .terms-quick-nav .nav-link.active {
+            background: #3b5d50;
+            color: white;
+            border-color: #3b5d50;
+            box-shadow: 0 4px 12px rgba(59, 93, 80, 0.3);
+        }
+
+        .terms-quick-nav .nav-link:hover:not(.active) {
+            background: rgba(59, 93, 80, 0.1);
+            color: #3b5d50;
+            border-color: rgba(59, 93, 80, 0.2);
+        }
+
+    /* Terms Sections */
+    .terms-section {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .section-header {
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+        color: #2d473d;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .section-number {
+        width: 40px;
+        height: 40px;
+        background: #3b5d50;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+    }
+
+    .section-subtitle {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+
+    /* Agreement Cards */
+    .agreement-card {
+        display: flex;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 12px;
+        border-left: 4px solid #3b5d50;
+    }
+
+    .agreement-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(59, 93, 80, 0.1);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: #3b5d50;
+        flex-shrink: 0;
+    }
+
+    /* Key Point Cards */
+    .key-point-card {
+        text-align: center;
+        padding: 1.5rem;
+        border: 1px solid rgba(0,0,0,0.05);
+        border-radius: 12px;
+        height: 100%;
+        transition: transform 0.3s ease;
+    }
+
+        .key-point-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+    .point-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(59, 93, 80, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        color: #3b5d50;
+        margin: 0 auto 1rem;
+    }
+
+    /* Requirements List */
+    .requirements-list {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+
+    .requirement-item {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+        .requirement-item:last-child {
+            border-bottom: none;
+        }
+
+    .requirement-check {
+        flex-shrink: 0;
+        padding-top: 0.25rem;
+    }
+
+    /* Permission Cards */
+    .permission-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-radius: 10px;
+        border: 2px solid;
+    }
+
+        .permission-card.allowed {
+            border-color: #28a745;
+            background: rgba(40, 167, 69, 0.05);
+        }
+
+        .permission-card.not-allowed {
+            border-color: #dc3545;
+            background: rgba(220, 53, 69, 0.05);
+        }
+
+    .permission-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+    }
+
+    .permission-card.allowed .permission-icon {
+        background: #28a745;
+        color: white;
+    }
+
+    .permission-card.not-allowed .permission-icon {
+        background: #dc3545;
+        color: white;
+    }
+
+    /* Purchase Timeline */
+    .purchase-timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+
+        .purchase-timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #3b5d50;
+        }
+
+    .timeline-step {
+        position: relative;
+        padding-bottom: 2rem;
+    }
+
+        .timeline-step:last-child {
+            padding-bottom: 0;
+        }
+
+    .step-number {
+        position: absolute;
+        left: -40px;
+        top: 0;
+        width: 30px;
+        height: 30px;
+        background: #3b5d50;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.875rem;
+    }
+
+    /* Pricing Cards */
+    .pricing-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid rgba(0,0,0,0.05);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        height: 100%;
+    }
+
+    .pricing-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+        .pricing-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+            .pricing-list li:last-child {
+                border-bottom: none;
+            }
+
+    /* IP Cards */
+    .ip-card {
+        display: flex;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 12px;
+    }
+
+    .ip-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(59, 93, 80, 0.1);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        color: #3b5d50;
+        flex-shrink: 0;
+    }
+
+    /* Guideline Cards */
+    .guideline-card {
+        border-radius: 12px;
+        padding: 1.5rem;
+        height: 100%;
+    }
+
+        .guideline-card.permitted {
+            background: rgba(40, 167, 69, 0.05);
+            border: 2px solid #28a745;
+        }
+
+        .guideline-card.prohibited {
+            background: rgba(220, 53, 69, 0.05);
+            border: 2px solid #dc3545;
+        }
+
+    .guideline-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .guideline-card.permitted .guideline-header {
+        color: #28a745;
+    }
+
+    .guideline-card.prohibited .guideline-header {
+        color: #dc3545;
+    }
+
+    .guideline-card ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+        .guideline-card ul li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+            .guideline-card ul li:last-child {
+                border-bottom: none;
+            }
+
+    /* Disclaimer Cards */
+    .disclaimer-card {
+        display: flex;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 12px;
+        border-left: 4px solid #6c757d;
+    }
+
+        .disclaimer-card.important {
+            border-left-color: #dc3545;
+            background: rgba(220, 53, 69, 0.05);
+        }
+
+    .disclaimer-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(108, 117, 125, 0.1);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        color: #6c757d;
+        flex-shrink: 0;
+    }
+
+    .disclaimer-card.important .disclaimer-icon {
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+    }
+
+    /* Liability Limits */
+    .limit-card {
+        text-align: center;
+        padding: 2rem;
+        background: white;
+        border-radius: 12px;
+        border: 2px solid #e9ecef;
+    }
+
+    .limit-amount {
+        font-size: 2.5rem;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 1rem;
+    }
+
+    /* Indemnity Card */
+    .indemnity-card {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 1.5rem;
+        border-left: 4px solid #ffc107;
+    }
+
+    /* Alert Styling */
+    .alert {
+        border-radius: 10px;
+        border: none;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .terms-section {
+            padding: 1.5rem;
+        }
+
+        .agreement-card,
+        .ip-card,
+        .disclaimer-card {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .section-title {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .terms-quick-nav .nav-link {
+            width: 100%;
+            margin-bottom: 0.5rem;
+            text-align: left;
+        }
+
+        .display-4 {
+            font-size: 2.5rem;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .terms-section {
+            padding: 1rem;
+        }
+
+        .purchase-timeline {
+            padding-left: 20px;
+        }
+
+        .step-number {
+            left: -30px;
+            width: 25px;
+            height: 25px;
+            font-size: 0.75rem;
+        }
+
+        .display-4 {
+            font-size: 2rem;
+        }
+
+        .limit-card {
+            padding: 1.5rem;
+        }
+
+        .limit-amount {
+            font-size: 2rem;
+        }
+    }
+
+    /* Print Styles */
+    @@media print {
+        .terms-nav,
+        .btn,
+        .alert,
+        .acceptance-section {
+            display: none !important;
+        }
+
+        .terms-section {
+            box-shadow: none;
+            border: 1px solid #000;
+            page-break-inside: avoid;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Print terms function
+        window.printTerms = function() {
+            window.print();
+        };
+
+        // Update active tab based on scroll
+        const observerOptions = {
+            threshold: 0.3
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const tabId = entry.target.id;
+                    const correspondingLink = document.querySelector(`[data-bs-target="#${tabId}"]`);
+
+                    if (correspondingLink) {
+                        // Remove active class from all links
+                        const allLinks = document.querySelectorAll('.terms-quick-nav .nav-link');
+                        allLinks.forEach(link => link.classList.remove('active'));
+
+                        // Add active class to current link
+                        correspondingLink.classList.add('active');
+
+                        // Update URL hash without scrolling
+                        history.replaceState(null, null, `#${tabId}`);
+                    }
+                }
+            });
+        }, observerOptions);
+
+        // Observe all tab panes
+        const tabPanes = document.querySelectorAll('.tab-pane');
+        tabPanes.forEach(pane => observer.observe(pane));
+
+        // Smooth scroll for internal links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Acceptance button functionality
+        const acceptanceBtn = document.querySelector('.acceptance-section .btn');
+        acceptanceBtn?.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            // Store acceptance in localStorage
+            localStorage.setItem('termsAccepted', 'true');
+            localStorage.setItem('termsVersion', '2.1');
+            localStorage.setItem('termsAcceptanceDate', new Date().toISOString());
+
+            // Show success message
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-check-circle me-2"></i>Terms Accepted!';
+            this.classList.remove('btn-primary');
+            this.classList.add('btn-success');
+
+            // Redirect after delay
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 2000);
+        });
+
+        // Check if terms were already accepted
+        const termsAccepted = localStorage.getItem('termsAccepted');
+        const termsVersion = localStorage.getItem('termsVersion');
+
+        if (termsAccepted === 'true' && termsVersion === '2.1') {
+            acceptanceBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Terms Already Accepted';
+            acceptanceBtn.classList.remove('btn-primary');
+            acceptanceBtn.classList.add('btn-success');
+            acceptanceBtn.disabled = true;
+        }
+
+        // Add animation to section headers
+        const sectionHeaders = document.querySelectorAll('.section-header');
+        sectionHeaders.forEach(header => {
+            header.addEventListener('mouseenter', function() {
+                const number = this.querySelector('.section-number');
+                if (number) {
+                    number.style.transform = 'scale(1.1) rotate(5deg)';
+                }
+            });
+
+            header.addEventListener('mouseleave', function() {
+                const number = this.querySelector('.section-number');
+                if (number) {
+                    number.style.transform = 'scale(1) rotate(0)';
+                }
+            });
+        });
+    });
+</script>

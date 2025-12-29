@@ -187,3 +187,12 @@
         color: #f8f9fa;
     }
 }
+.privacy-policy {
+    line-height: 1.8;
+    color: #333;
+}
+
+    .privacy-policy h2 {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 8px;
+    }
