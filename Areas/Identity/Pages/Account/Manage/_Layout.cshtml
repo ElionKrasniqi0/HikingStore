@@ -1,5 +1,5 @@
 ﻿@{
-    if (ViewData.TryGetValue("ParentLayout", out var parentLayout) && parentLayout !=  null)
+    if (ViewData.TryGetValue("ParentLayout", out var parentLayout) && parentLayout != null)
     {
         Layout = parentLayout.ToString();
     }
@@ -9,17 +9,39 @@
     }
 }
 
-<h1>Manage your account</h1>
+<div class="min-vh-100 bg-light py-5">
+    <div class="container">
+        <div class="row">
+            <!-- Sidebar Navigation -->
+            <div class="col-lg-3 col-md-4 mb-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-0 py-4">
+                        <div class="d-flex align-items-center">
+                            <div class="user-avatar me-3">
+                                <div class="avatar-circle">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h6 class="mb-1 fw-bold">Account Settings</h6>
+                                <p class="text-muted small mb-0">Manage your profile</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <partial name="_ManageNav" />
+                    </div>
+                </div>
+            </div>
 
-<div>
-    <h2>Change your account settings</h2>
-    <hr />
-    <div class="row">
-        <div class="col-md-3">
-            <partial name="_ManageNav" />
-        </div>
-        <div class="col-md-9">
-            @RenderBody()
+            <!-- Main Content -->
+            <div class="col-lg-9 col-md-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        @RenderBody()
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

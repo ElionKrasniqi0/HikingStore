@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity.UI.Services;
-using System.Net;
-using System.Net.Mail;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Net;
+using System.Net.Mail;
+using System.Threading.Tasks;
 
 namespace HikingStore.Services
 {
@@ -24,20 +25,17 @@ namespace HikingStore.Services
             try
             {
                 var emailSettings = _configuration.GetSection("EmailSettings");
-
                 var fromEmail = emailSettings["SenderEmail"];
                 var fromPassword = emailSettings["SenderPassword"];
-
-                // Gmail SMTP settings
-                var smtpHost = "smtp.gmail.com";
-                var port = 587;
+                var smtpServer = emailSettings["SmtpServer"] ?? "smtp.gmail.com";
+                var port = int.Parse(emailSettings["SmtpPort"] ?? "587");
                 var senderName = emailSettings["SenderName"] ?? "HikingStore";
+                var enableSsl = bool.Parse(emailSettings["EnableSsl"] ?? "true");
 
-                // Validate configuration
                 if (string.IsNullOrEmpty(fromEmail) || string.IsNullOrEmpty(fromPassword))
                 {
-                    _logger.LogError("❌ Gmail configuration is missing. Please check appsettings.json");
-                    throw new Exception("Gmail configuration is missing. Please check your appsettings.json file.");
+                    _logger.LogError("❌ Email configuration is missing. Please check appsettings.json");
+                    throw new Exception("Email configuration is missing. Please check your appsettings.json file.");
                 }
 
                 _logger.LogInformation("📧 Preparing to send email to: {Email}", email);
@@ -50,24 +48,22 @@ namespace HikingStore.Services
                     message.Body = htmlMessage;
                     message.IsBodyHtml = true;
 
-                    using (var smtpClient = new SmtpClient(smtpHost, port))
+                    using (var smtpClient = new SmtpClient(smtpServer, port))
                     {
                         smtpClient.Credentials = new NetworkCredential(fromEmail, fromPassword);
-                        smtpClient.EnableSsl = true;
+                        smtpClient.EnableSsl = enableSsl;
                         smtpClient.Timeout = 30000;
 
                         _logger.LogInformation("🚀 Sending email to {Email}...", email);
-
                         await smtpClient.SendMailAsync(message);
-
                         _logger.LogInformation("✅ Email sent successfully to {Email}", email);
                     }
                 }
             }
             catch (SmtpException smtpEx)
             {
-                _logger.LogError(smtpEx, "❌ SMTP Error sending email to {Email}. Check your Gmail settings and App Password.", email);
-                throw new Exception($"SMTP Error: {smtpEx.Message}. Please check your Gmail configuration.");
+                _logger.LogError(smtpEx, "❌ SMTP Error sending email to {Email}. Check your email settings.", email);
+                throw new Exception($"SMTP Error: {smtpEx.Message}. Please check your email configuration.");
             }
             catch (Exception ex)
             {

@@ -1,26 +1,600 @@
 ﻿@page
 @model ResendEmailConfirmationModel
 @{
-    ViewData["Title"] = "Resend email confirmation";
+    ViewData["Title"] = "Resend Email Confirmation";
 }
 
-<h1>@ViewData["Title"]</h1>
-<h2>Enter your email.</h2>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form method="post">
-            <div asp-validation-summary="All" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Input.Email"></label>
-                <input asp-for="Input.Email" class="form-control" autocomplete="email" aria-required="true" />
-                <span asp-validation-for="Input.Email" class="text-danger"></span>
+<!-- Elegant Hero Section -->
+<section class="hero-section py-5 bg-gradient-primary">
+    <div class="container">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-8">
+                <div class="hero-content text-white">
+                    <span class="badge bg-white bg-opacity-20 px-3 py-2 mb-3 fw-semibold border-0">
+                        <i class="fas fa-envelope me-2"></i>Email Verification
+                    </span>
+                    <h1 class="display-5 fw-bold text-white mb-3">Resend Confirmation Email</h1>
+                    <p class="lead text-white-80 mb-0">
+                        Didn't receive the confirmation email? Enter your email below and we'll send you a new one.
+                    </p>
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary">Resend</button>
-        </form>
+        </div>
+    </div>
+</section>
+
+<!-- Resend Email Form Section -->
+<section class="resend-section py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="card border-0 shadow-lg rounded-3 overflow-hidden">
+                    <!-- Card Header -->
+                    <div class="card-header bg-white border-0 py-4 px-4">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle p-3 me-3">
+                                <i class="fas fa-paper-plane fa-lg text-primary"></i>
+                            </div>
+                            <div>
+                                <h3 class="h4 fw-bold text-dark mb-1">Resend Verification Email</h3>
+                                <p class="text-muted mb-0 small">We'll send a new confirmation link to your inbox</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="card-body p-4">
+                        <form method="post" id="resendForm" class="needs-validation" novalidate>
+                            <!-- Validation Summary -->
+                            @if (ViewData.ModelState.ErrorCount > 0)
+                            {
+                                <div class="alert alert-light border-0 rounded-2 mb-4">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-info-circle text-primary mt-1 me-3"></i>
+                                        <div class="flex-grow-1">
+                                            <div asp-validation-summary="All" class="text-danger small"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            else if (!string.IsNullOrEmpty(ViewData.ModelState[""]?.Errors.FirstOrDefault()?.ErrorMessage))
+                            {
+                                <div class="alert alert-success border-0 rounded-2 mb-4">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-check-circle text-success mt-1 me-3"></i>
+                                        <div class="flex-grow-1">
+                                            <p class="mb-0 small">@ViewData.ModelState[""].Errors.First().ErrorMessage</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Email Field -->
+                            <div class="form-group mb-4">
+                                <label asp-for="Input.Email" class="form-label fw-semibold text-dark mb-2">
+                                    <i class="fas fa-envelope text-primary me-2"></i>Email Address
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-at text-muted"></i>
+                                    </span>
+                                    <input asp-for="Input.Email"
+                                           class="form-control form-control-lg border-start-0 py-3"
+                                           placeholder="your.email@example.com"
+                                           autocomplete="email"
+                                           aria-required="true" />
+                                </div>
+                                <span asp-validation-for="Input.Email" class="text-danger small mt-1 d-block"></span>
+
+                                <!-- Help Text -->
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-lightbulb me-1 text-warning"></i>
+                                        Make sure to check your spam folder if you don't see the email.
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="d-grid gap-3">
+                                <button type="submit" class="btn btn-primary btn-lg py-3 fw-semibold resend-btn">
+                                    <i class="fas fa-paper-plane me-2"></i>Resend Confirmation Email
+                                </button>
+
+                                <a asp-page="./Login" class="btn btn-outline-primary btn-lg py-3 fw-semibold">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Back to Login
+                                </a>
+                            </div>
+                        </form>
+
+                        <!-- Additional Help -->
+                        <div class="mt-4 pt-3 border-top">
+                            <div class="accordion" id="helpAccordion">
+                                <div class="accordion-item border-0">
+                                    <h2 class="accordion-header" id="headingOne">
+                                        <button class="accordion-button collapsed border-0 px-0 py-2 fw-semibold"
+                                                type="button"
+                                                data-bs-toggle="collapse"
+                                                data-bs-target="#collapseOne"
+                                                aria-expanded="false"
+                                                aria-controls="collapseOne">
+                                            <i class="fas fa-question-circle text-primary me-2"></i>
+                                            Need help with email verification?
+                                        </button>
+                                    </h2>
+                                    <div id="collapseOne" class="accordion-collapse collapse"
+                                         aria-labelledby="headingOne"
+                                         data-bs-parent="#helpAccordion">
+                                        <div class="accordion-body px-0 pt-2 pb-0 small text-muted">
+                                            <ul class="list-unstyled mb-0">
+                                                <li class="mb-2">
+                                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                                    Make sure you're using the correct email address
+                                                </li>
+                                                <li class="mb-2">
+                                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                                    Check your spam or junk folder
+                                                </li>
+                                                <li class="mb-2">
+                                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                                    Wait a few minutes for the email to arrive
+                                                </li>
+                                                <li>
+                                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                                    Contact support if you continue to have issues
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Badges -->
+                <div class="text-center mt-4">
+                    <div class="d-flex justify-content-center gap-4">
+                        <div class="security-badge">
+                            <div class="badge-icon mb-2">
+                                <i class="fas fa-shield-alt fa-lg text-primary"></i>
+                            </div>
+                            <span class="text-muted small">Secure Process</span>
+                        </div>
+                        <div class="security-badge">
+                            <div class="badge-icon mb-2">
+                                <i class="fas fa-lock fa-lg text-primary"></i>
+                            </div>
+                            <span class="text-muted small">Data Protected</span>
+                        </div>
+                        <div class="security-badge">
+                            <div class="badge-icon mb-2">
+                                <i class="fas fa-bolt fa-lg text-primary"></i>
+                            </div>
+                            <span class="text-muted small">Instant Delivery</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0">
+            <div class="modal-header border-0 pb-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-4">
+                <div class="success-icon mb-3">
+                    <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle p-4 mx-auto">
+                        <i class="fas fa-check fa-3x text-success"></i>
+                    </div>
+                </div>
+                <h4 class="modal-title fw-bold text-dark mb-2">Email Sent Successfully!</h4>
+                <p class="text-muted mb-4">
+                    We've sent a new confirmation email to your address. Please check your inbox and follow the instructions.
+                </p>
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                        <i class="fas fa-check me-2"></i>Got It
+                    </button>
+                    <a href="/" class="btn btn-outline-primary">
+                        <i class="fas fa-home me-2"></i>Return to Home
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
+
+<style>
+    /* Elegant Color Scheme */
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #2d473d 0%, #3b5d50 50%, #4a7565 100%);
+    }
+
+    .text-white-80 {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .text-white-60 {
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    /* Card Design */
+    .card {
+        border: 1px solid rgba(0,0,0,0.05);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.1) !important;
+        }
+
+    /* Icon Wrapper */
+    .icon-wrapper {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .card:hover .icon-wrapper {
+        transform: scale(1.1);
+    }
+
+    /* Form Enhancements */
+    .form-control {
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        font-size: 1rem;
+    }
+
+        .form-control:focus {
+            border-color: #3b5d50;
+            box-shadow: 0 0 0 0.2rem rgba(59, 93, 80, 0.15);
+            transform: translateY(-1px);
+        }
+
+    .form-control-lg {
+        padding: 1rem 1.25rem;
+    }
+
+    /* Input Group */
+    .input-group-text {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        color: #6c757d;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus + .input-group-text,
+    .form-control:focus ~ .input-group-text {
+        border-color: #3b5d50;
+        background: #f8f9fa;
+        color: #3b5d50;
+    }
+
+    /* Button Enhancements */
+    .btn {
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #3b5d50, #2d473d);
+        border: none;
+        box-shadow: 0 4px 15px rgba(59, 93, 80, 0.3);
+    }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2d473d, #1a2f26);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 93, 80, 0.4);
+        }
+
+    .btn-outline-primary {
+        border: 2px solid #3b5d50;
+        color: #3b5d50;
+        background: transparent;
+    }
+
+        .btn-outline-primary:hover {
+            background: #3b5d50;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+    /* Alert Styling */
+    .alert {
+        border-radius: 8px;
+        border: none;
+        padding: 1.25rem 1.5rem;
+    }
+
+    .alert-light {
+        background: #f8f9fa;
+    }
+
+    .alert-success {
+        background: #d1f2eb;
+        color: #0d6efd;
+    }
+
+    /* Accordion */
+    .accordion-button {
+        background: transparent;
+        color: #2d473d;
+        border-radius: 8px !important;
+        padding: 0.75rem 0;
+        font-size: 0.9rem;
+    }
+
+        .accordion-button:not(.collapsed) {
+            background: transparent;
+            color: #3b5d50;
+            box-shadow: none;
+        }
+
+        .accordion-button:focus {
+            box-shadow: 0 0 0 0.2rem rgba(59, 93, 80, 0.25);
+            border-color: #3b5d50;
+        }
+
+    .accordion-body {
+        background: transparent;
+        padding: 0.5rem 0;
+    }
+
+    /* Security Badges */
+    .security-badge {
+        text-align: center;
+        padding: 0.5rem 1rem;
+    }
+
+    .badge-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: rgba(59, 93, 80, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        transition: all 0.3s ease;
+    }
+
+    .security-badge:hover .badge-icon {
+        background: rgba(59, 93, 80, 0.2);
+        transform: scale(1.1);
+    }
+
+    /* Modal */
+    .modal-content {
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .success-icon .icon-wrapper {
+        width: 80px;
+        height: 80px;
+    }
+
+    /* Loading Animation */
+    .btn-loading {
+        position: relative;
+        color: transparent !important;
+    }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: button-spinner 0.8s linear infinite;
+        }
+
+    @@keyframes button-spinner {
+        from {
+            transform: rotate(0turn);
+        }
+
+        to {
+            transform: rotate(1turn);
+        }
+    }
+
+    /* Badge */
+    .badge {
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        padding: 0.5rem 1rem;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .hero-section {
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        .display-5 {
+            font-size: 2.5rem;
+        }
+
+        .icon-wrapper {
+            width: 50px;
+            height: 50px;
+        }
+
+        .form-control-lg {
+            font-size: 0.9rem;
+            padding: 0.75rem 1rem;
+        }
+
+        .security-badge {
+            padding: 0.5rem;
+        }
+
+        .badge-icon {
+            width: 40px;
+            height: 40px;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .display-5 {
+            font-size: 2rem;
+        }
+
+        .h4 {
+            font-size: 1.5rem;
+        }
+
+        .card-body {
+            padding: 1.5rem !important;
+        }
+
+        .d-flex.justify-content-center {
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .security-badge {
+            flex: 0 0 30%;
+        }
+
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+        }
+    }
+
+    /* Focus States for Accessibility */
+    .btn:focus,
+    .form-control:focus,
+    .accordion-button:focus {
+        box-shadow: 0 0 0 3px rgba(59, 93, 80, 0.3);
+    }
+
+    /* Smooth Scrolling */
+    html {
+        scroll-behavior: smooth;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const resendForm = document.getElementById('resendForm');
+        const resendBtn = document.querySelector('.resend-btn');
+        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+
+        // Form submission handling
+        resendForm?.addEventListener('submit', function (e) {
+            // Show loading state
+            const originalText = resendBtn.innerHTML;
+            resendBtn.disabled = true;
+            resendBtn.classList.add('btn-loading');
+            resendBtn.innerHTML = 'Sending...';
+
+            // If form is valid, show success modal after submission
+            if (resendForm.checkValidity()) {
+                // In a real app, this would be handled by server response
+                setTimeout(() => {
+                    successModal.show();
+                    resendBtn.disabled = false;
+                    resendBtn.classList.remove('btn-loading');
+                    resendBtn.innerHTML = originalText;
+                }, 1500);
+            } else {
+                // Re-enable button if form is invalid
+                setTimeout(() => {
+                    resendBtn.disabled = false;
+                    resendBtn.classList.remove('btn-loading');
+                    resendBtn.innerHTML = originalText;
+                }, 1000);
+            }
+        });
+
+        // Input validation feedback
+        const emailInput = document.querySelector('input[asp-for="Input.Email"]');
+        emailInput?.addEventListener('input', function () {
+            if (this.checkValidity()) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            } else {
+                this.classList.remove('is-valid');
+                this.classList.add('is-invalid');
+            }
+        });
+
+        // Enhanced accordion interactions
+        const accordionButtons = document.querySelectorAll('.accordion-button');
+        accordionButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const icon = this.querySelector('i');
+                if (this.classList.contains('collapsed')) {
+                    icon.classList.remove('fa-question-circle');
+                    icon.classList.add('fa-chevron-down');
+                } else {
+                    icon.classList.remove('fa-chevron-down');
+                    icon.classList.add('fa-question-circle');
+                }
+            });
+        });
+
+        // Show success modal if there's a success message
+        const successMessage = document.querySelector('.alert-success');
+        if (successMessage) {
+            setTimeout(() => {
+                successModal.show();
+            }, 500);
+        }
+
+        // Add smooth scroll to top when page loads
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // Keyboard navigation for form
+        emailInput?.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                resendForm.requestSubmit();
+            }
+        });
+
+        // Add hover effects to security badges
+        const securityBadges = document.querySelectorAll('.security-badge');
+        securityBadges.forEach(badge => {
+            badge.addEventListener('mouseenter', function () {
+                const icon = this.querySelector('.badge-icon i');
+                icon.style.transform = 'rotate(10deg)';
+            });
+
+            badge.addEventListener('mouseleave', function () {
+                const icon = this.querySelector('.badge-icon i');
+                icon.style.transform = 'rotate(0deg)';
+            });
+        });
+    });
+</script>

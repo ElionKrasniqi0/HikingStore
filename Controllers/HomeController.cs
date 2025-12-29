@@ -82,14 +82,73 @@ namespace HikingStore.Controllers
                 .ToList();
             return View(products);
         }
-
-        [HttpPost]
-        public IActionResult SearchProduct(string NamePro)
+        [HttpGet]
+        public IActionResult QuickSearch(string term)
         {
+            if (string.IsNullOrWhiteSpace(term) || term.Length < 2)
+            {
+                return Json(new { results = new List<object>() });
+            }
+
             var products = _context.Products
-                .Where(p => p.ProName == NamePro)
+                .Where(p => p.ProName.Contains(term))
+                .Take(5)
+                .Select(p => new
+                {
+                    id = p.ProId,
+                    text = p.ProName,
+                    type = "Product",
+                    url = $"/Home/ProductDetailes/{p.ProId}"
+                })
                 .ToList();
-            return View(products);
+
+            var categories = _context.Categories
+                .Where(c => c.CatName.Contains(term))
+                .Take(5)
+                .Select(c => new
+                {
+                    id = c.CatId,
+                    text = c.CatName,
+                    type = "Category",
+                    url = $"/Home/ProductCategory/{c.CatId}"
+                })
+                .ToList();
+
+            var results = products.Concat(categories).ToList();
+
+            return Json(new { results });
+        }
+        // Add this method to your HomeController class
+        [HttpGet]
+        public IActionResult Search(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return RedirectToAction("Product");
+            }
+
+            // Search in both products and categories
+            var products = _context.Products
+                .Include(p => p.Category)
+                .Where(p => p.ProName.Contains(query) ||
+                           p.Descreption.Contains(query) ||
+                           p.Category.CatName.Contains(query))
+                .ToList();
+
+            var categories = _context.Categories
+                .Where(c => c.CatName.Contains(query))
+                .ToList();
+
+            var model = new SearchResultViewModel
+            {
+                Query = query,
+                Products = products,
+                Categories = categories,
+                ProductCount = products.Count,
+                CategoryCount = categories.Count
+            };
+
+            return View("SearchResults", model);
         }
 
         public IActionResult ProductDetailes(int? id)

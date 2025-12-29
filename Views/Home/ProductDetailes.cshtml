@@ -1,7 +1,5 @@
 ﻿@model Product
-<br />
-<br />
-<br />
+
 <!-- Product Details -->
 <section class="py-4">
     <div class="container">
@@ -200,6 +198,8 @@
     </div>
 </section>
 
+
+</script>
 <!-- Compact Tabs -->
 <section class="py-4 bg-light">
     <div class="container">
@@ -420,13 +420,13 @@
         });
 
         // Add to cart functionality
-       const addToCartForm = document.getElementById('addToCartForm');
+         const addToCartForm = document.getElementById('addToCartForm');
     const successMessage = document.getElementById('successMessage');
     const errorMessage = document.getElementById('errorMessage');
     const errorText = document.getElementById('errorText');
 
     addToCartForm?.addEventListener('submit', function(e) {
-        e.preventDefault();
+        e.preventDefault(); // Prevent form submission
 
         const quantity = parseInt(qtyInput.value);
         const productId = @Model.ProId;

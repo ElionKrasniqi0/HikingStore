@@ -22,9 +22,6 @@ using System.Threading.Tasks;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add configuration
-builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -58,17 +55,8 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
-// Configure Email Sender
-if (builder.Environment.IsDevelopment())
-{
-    builder.Services.AddTransient<IEmailSender, EmailSender>();
-}
-else
-{
-    builder.Services.AddTransient<IEmailSender, EmailSender>();
-}
-
-// Email Services
+// Configure Email Services
+builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddLogging();
@@ -80,33 +68,62 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Error/AccessDenied";
     options.LoginPath = "/Identity/Account/Login";
     options.LogoutPath = "/Identity/Account/Logout";
+    options.ExpireTimeSpan = TimeSpan.FromDays(30);
+    options.SlidingExpiration = true;
 });
 
 // Configure Google Authentication
-builder.Services.AddAuthentication().AddGoogle(googleOptions =>
-{
-    googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
-    googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-});
+var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
+var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
 
+if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
+{
+    builder.Services.AddAuthentication().AddGoogle(googleOptions =>
+    {
+        googleOptions.ClientId = googleClientId;
+        googleOptions.ClientSecret = googleClientSecret;
+        googleOptions.Scope.Add("profile");
+        googleOptions.Scope.Add("email");
+    });
+}
+// Configure Email Services based on environment
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddTransient<IEmailSender, DevelopmentEmailSender>();
+}
+else
+{
+    builder.Services.AddTransient<IEmailSender, EmailSender>();
+}
+builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+// Session and caching
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
+    options.Cookie.Name = ".HikingStore.Session";
 });
+
+// Response compression
 builder.Services.AddResponseCompression(options =>
 {
     options.EnableForHttps = true;
+    options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.BrotliCompressionProvider>();
+    options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProvider>();
 });
 
-builder.Services.AddOutputCache(options =>
-{
-    options.AddBasePolicy(builder =>
-        builder.Expire(TimeSpan.FromMinutes(10)));
-});
+// Controllers and Razor Pages
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
+
+// Add Antiforgery for security
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "X-CSRF-TOKEN";
+    options.SuppressXFrameOptionsHeader = false;
+});
 
 var app = builder.Build();
 
@@ -142,14 +159,13 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseSession();
 app.UseResponseCompression();
-app.UseOutputCache();
-
-
 
 // Custom status code pages
 app.UseStatusCodePagesWithReExecute("/Error/{0}");
 
+// Map endpoints
 app.MapControllerRoute(
     name: "Admin",
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
@@ -157,6 +173,7 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-app.MapRazorPages();
 
+app.MapRazorPages();
+app.UseRouting();
 app.Run();

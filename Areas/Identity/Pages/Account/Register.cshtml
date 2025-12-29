@@ -4,7 +4,7 @@
     ViewData["Title"] = "Register";
 }
 
-<div class="min-vh-100 d-flex align-items-center justify-content-center bg-light py-5">
+<div class="d-flex align-items-center justify-content-center bg-light py-5">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-5 col-md-7">
@@ -12,7 +12,7 @@
                 <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
                     <!-- Card Header -->
                     <div class="card-header bg-gradient-primary text-white text-center py-4 border-0">
-                        <div class="icon-wrapper  bg-opacity-20 rounded-circle p-3 mx-auto mb-3">
+                        <div class="icon-wrapper bg-opacity-20 rounded-circle p-3 mx-auto mb-3">
                             <i class="fas fa-user-plus fa-lg text-white"></i>
                         </div>
                         <h2 class="h4 fw-bold mb-2">Create Your Account</h2>
@@ -31,7 +31,7 @@
                                     <span class="input-group-text bg-light border-end-0">
                                         <i class="fas fa-envelope text-muted"></i>
                                     </span>
-                                    <input asp-for="Input.Email" class="form-control border-start-0 py-3"
+                                    <input asp-for="Input.Email" type="email" class="form-control border-start-0 py-3"
                                            placeholder="Enter your email address" />
                                 </div>
                                 <span asp-validation-for="Input.Email" class="text-danger small mt-1 d-block"></span>
@@ -41,10 +41,10 @@
                             <div class="form-group mb-3">
                                 <label asp-for="Input.Password" class="form-label fw-semibold text-dark mb-2">Password</label>
                                 <div class="input-group">
-                                    <span class="input-group-text  border-end-0">
+                                    <span class="input-group-text border-end-0">
                                         <i class="fas fa-lock text-muted"></i>
                                     </span>
-                                    <input asp-for="Input.Password" class="form-control border-start-0 py-3"
+                                    <input asp-for="Input.Password" type="password" class="form-control border-start-0 py-3"
                                            placeholder="Create a strong password" />
                                 </div>
                                 <span asp-validation-for="Input.Password" class="text-danger small mt-1 d-block"></span>
@@ -54,10 +54,10 @@
                             <div class="form-group mb-4">
                                 <label asp-for="Input.ConfirmPassword" class="form-label fw-semibold text-dark mb-2">Confirm Password</label>
                                 <div class="input-group">
-                                    <span class="input-group-text  border-end-0">
+                                    <span class="input-group-text border-end-0">
                                         <i class="fas fa-lock text-muted"></i>
                                     </span>
-                                    <input asp-for="Input.ConfirmPassword" class="form-control border-start-0 py-3"
+                                    <input asp-for="Input.ConfirmPassword" type="password" class="form-control border-start-0 py-3"
                                            placeholder="Confirm your password" />
                                 </div>
                                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger small mt-1 d-block"></span>
@@ -156,8 +156,8 @@
 
     /* Icon Wrapper */
     .icon-wrapper {
-        width: 60px;
-        height: 60px;
+        width: 52px;
+        height: 52px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -181,8 +181,8 @@
         transition: all 0.3s ease;
     }
 
-    .form-control:focus + .input-group-text,
-    .form-control:focus ~ .input-group-text {
+    /* Focus state for input-group when input inside is focused */
+    .input-group.focused .input-group-text {
         border-color: #3b5d50;
         background: #f8f9fa;
     }
@@ -349,7 +349,7 @@
             registerBtn.classList.add('btn-loading');
             registerBtn.innerHTML = 'Creating Account...';
 
-            // Re-enable button after form submission (in case of validation errors)
+            // Re-enable button after form validation fail (client side)
             setTimeout(() => {
                 if (!registerForm.checkValidity()) {
                     registerBtn.disabled = false;
@@ -359,16 +359,16 @@
             }, 2000);
         });
 
-        // Add input focus effects
+        // Add input focus effects on input-group wrapper
         const inputs = document.querySelectorAll('.form-control');
         inputs.forEach(input => {
             input.addEventListener('focus', function () {
-                this.parentElement.classList.add('focused');
+                this.closest('.input-group').classList.add('focused');
             });
 
             input.addEventListener('blur', function () {
                 if (this.value === '') {
-                    this.parentElement.classList.remove('focused');
+                    this.closest('.input-group').classList.remove('focused');
                 }
             });
         });

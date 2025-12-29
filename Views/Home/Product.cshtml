@@ -18,82 +18,51 @@
             </div>
         </div>
 
-        <!-- Products Grid -->
-        <div class="row g-4">
+        <div class="row g-3">
             @foreach (var item in Model)
             {
-                <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
-                    <div class="card product-card h-100 border-0 shadow-sm">
-                        <!-- Product Image -->
-                        <div class="product-image-container position-relative">
-                            <a href="/Home/ProductDetailes/@item.ProId" class="text-decoration-none">
-                                <img class="card-img-top product-image" src="~/Product/@item.ProImage"
-                                     alt="@item.ProName" loading="lazy">
-                                <div class="product-overlay"></div>
-                            </a>
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="card product-card h-100">
 
-                            <!-- Quick Actions -->
-                            <div class="product-actions position-absolute top-0 end-0 p-2">
-                                <button class="btn btn-light btn-sm rounded-circle shadow-sm wishlist-btn"
-                                        data-bs-toggle="tooltip" data-bs-placement="left"
-                                        data-bs-title="Add to wishlist">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                            </div>
+                        <!-- IMAGE BOX -->
+                        <div class="product-image-box">
+                            <span class="badge stock-badge @(item.IsInStock ? "bg-success" : "bg-danger")">
+                                @(item.IsInStock ? "In Stock" : "Out of Stock")
+                            </span>
+
+                            <img src="~/Product/@item.ProImage"
+                                 alt="@item.ProName"
+                                 class="product-img" />
                         </div>
 
-                        <!-- Product Body -->
-                        <div class="card-body d-flex flex-column p-3">
-                            <!-- Product Title -->
-                            <h6 class="card-title product-title mb-2">
-                                <a href="/Home/ProductDetailes/@item.ProId"
-                                   class="text-dark text-decoration-none text-truncate d-block"
-                                   title="@item.ProName">
-                                    @item.ProName
-                                </a>
-                            </h6>
-                            <!-- Stock Status Badge -->
-                            <div class="position-absolute top-0 start-0 m-2">
-                                @if (item.IsInStock)
-                                {
-                                    <span class="badge bg-success">In Stock</span>
-                                    @if (item.StockQuantity <= 5)
-                                    {
-                                        <span class="badge bg-warning ms-1">Low Stock</span>
-                                    }
-                                }
-                                else
-                                {
-                                    <span class="badge bg-danger">Out of Stock</span>
-                                }
-                            </div>
-                            <!-- Price -->
-                            <div class="product-price mt-auto">
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <span class="h6 text-primary fw-bold mb-0">€@item.Price.ToString("N2")</span>
-                                    <span class="badge bg-opacity-10 text-primary small">
-                                        @item.Category?.CatName
-                                    </span>
-                                </div>
-                            </div>
+                        <!-- CARD BODY -->
+                        <div class="card-body p-2 d-flex flex-column">
+                            <h6 class="product-title">@item.ProName</h6>
+                            <span class="text-muted small">@item.Category?.CatName</span>
 
-                            <!-- Action Button -->
-                            <div class="product-actions-bottom mt-3">
+                            <div class="mt-auto d-flex justify-content-between align-items-center">
+                                <span class="fw-semibold text-primary">
+                                    €@item.Price.ToString("N2")
+                                </span>
                                 <a href="/Home/ProductDetailes/@item.ProId"
-                                   class="btn btn-outline-primary btn-sm w-100">
-                                    <i class="fas fa-eye me-1 small"></i>View Details
+                                   class="btn btn-sm btn-outline-primary">
+                                    View
                                 </a>
                             </div>
                         </div>
+
                     </div>
                 </div>
             }
         </div>
 
+
+
+
         <!-- Pagination -->
         @if (ViewBag.PageCount > 1)
         {
-            <div class="row mt-5">
+            <div class="row mt-4">
                 <div class="col-12">
                     <nav aria-label="Product pagination">
                         <ul class="pagination justify-content-center mb-0">
@@ -130,82 +99,64 @@
 </section>
 
 <style>
-    /* Product Cards */
+    /* ===============================
+       PRODUCT CARD (GJIRAF50 STYLE)
+    ================================ */
     .product-card {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border-radius: 12px;
-        overflow: hidden;
-        background: var(--white);
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0,0,0,.08);
+        transition: transform .2s ease;
+        height: 100%;
     }
 
         .product-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
         }
 
-    /* Product Image */
-    .product-image-container {
-        overflow: hidden;
-        background: #f8f9fa;
+    /* IMAGE BOX */
+    .product-image-box {
+        height: 160px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         position: relative;
     }
-
-    .product-image {
-        height: 180px;
-        object-fit: cover;
-        transition: transform 0.3s ease;
-        width: 100%;
+    .card-body {
+        padding: 0.75rem !important;
+    }
+    /* IMAGE */
+    .product-img {
+        max-height: 120px;
+        width: auto;
+        object-fit: contain;
     }
 
-    .product-card:hover .product-image {
-        transform: scale(1.05);
-    }
-
-    .product-overlay {
+    /* STOCK BADGE */
+    .stock-badge {
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.05) 100%);
-        opacity: 0;
-        transition: opacity 0.3s ease;
+        top: 6px;
+        left: 6px;
+        font-size: 0.65rem;
+        padding: 2px 6px;
     }
 
-    .product-card:hover .product-overlay {
-        opacity: 1;
-    }
-
-    /* Product Actions */
-    .product-actions .btn {
-        opacity: 0;
-        transform: translateX(10px);
-        transition: all 0.3s ease;
-    }
-
-    .product-card:hover .product-actions .btn {
-        opacity: 1;
-        transform: translateX(0);
-    }
-
-    .wishlist-btn:hover {
-        background: #dc3545 !important;
-        color: white !important;
-    }
-
-    /* Product Title */
+    /* TITLE */
     .product-title {
-        font-weight: 600;
+        font-size: 0.95rem;
         line-height: 1.3;
-        transition: color 0.3s ease;
-        font-size: 0.9rem;
+        height: 2.8em; /* was ~2.4em */
+        margin-bottom: 6px;
     }
 
-        .product-title a:hover {
-            color: var(--primary-light) !important;
-        }
+    .card-body .mt-auto {
+        margin-top: 10px;
+    }
 
-    /* Price */
+
+
+    /* ===============================
+       PRICE BADGE
+    ================================ */
     .product-price .badge {
         font-size: 0.7rem;
         padding: 0.3rem 0.5rem;
@@ -213,7 +164,9 @@
         font-weight: 500;
     }
 
-    /* Action Button */
+    /* ===============================
+       ACTION BUTTON
+    ================================ */
     .product-actions-bottom .btn {
         border-radius: 8px;
         font-size: 0.8rem;
@@ -227,7 +180,9 @@
             transform: translateY(-1px);
         }
 
-    /* Pagination */
+    /* ===============================
+       PAGINATION
+    ================================ */
     .pagination .page-link {
         border: none;
         color: var(--gray-light);
@@ -245,66 +200,11 @@
     .pagination .page-item.active .page-link {
         background: var(--primary-light);
         color: white;
-        border: none;
     }
 
-    /* Responsive Design */
-    @@media (max-width: 1200px) {
-        .col-xl-2 {
-            flex: 0 0 25%;
-            max-width: 25%;
-        }
-    }
-
-    @@media (max-width: 992px) {
-        .col-lg-3 {
-            flex: 0 0 33.333%;
-            max-width: 33.333%;
-        }
-
-        .product-image {
-            height: 160px;
-        }
-    }
-
-    @@media (max-width: 768px) {
-        .col-md-4 {
-            flex: 0 0 50%;
-            max-width: 50%;
-        }
-
-        .product-image {
-            height: 140px;
-        }
-
-        .products-section {
-            padding: 2rem 0;
-        }
-    }
-
-    @@media (max-width: 576px) {
-        .col-sm-6 {
-            flex: 0 0 50%;
-            max-width: 50%;
-        }
-
-        .product-image {
-            height: 120px;
-        }
-
-        .card-body {
-            padding: 1rem !important;
-        }
-
-        .product-title {
-            font-size: 0.85rem;
-        }
-
-        .h3 {
-            font-size: 1.5rem;
-        }
-    }
-
+    /* ===============================
+       RESPONSIVE
+    ================================ */
     @@media (max-width: 400px) {
         .col-sm-6 {
             flex: 0 0 100%;
@@ -312,13 +212,9 @@
         }
     }
 
-    /* Loading States */
-    .product-image {
-        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-        background-size: 200% 100%;
-    }
-
-    /* Focus States for Accessibility */
+    /* ===============================
+       ACCESSIBILITY
+    ================================ */
     .product-card:focus-within {
         outline: 2px solid var(--primary-light);
         outline-offset: 2px;
@@ -328,6 +224,7 @@
     .page-link:focus {
         box-shadow: 0 0 0 3px rgba(59, 93, 80, 0.3);
     }
+
 </style>
 
 <script>
@@ -372,4 +269,28 @@
             });
         });
     });
+        wishlistButtons.forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            const icon = this.querySelector('i');
+            const isActive = icon.classList.contains('fas');
+
+            icon.classList.toggle('fas', !isActive);
+            icon.classList.toggle('far', isActive);
+            icon.classList.toggle('text-danger', !isActive);
+
+            const title = isActive
+                ? 'Add to wishlist'
+                : 'Remove from wishlist';
+
+            // Proper tooltip refresh
+            const tooltip = bootstrap.Tooltip.getInstance(this);
+            if (tooltip) tooltip.dispose();
+
+            this.setAttribute('data-bs-title', title);
+            new bootstrap.Tooltip(this);
+        });
+    });
+
 </script>

@@ -11,18 +11,20 @@ using System.Text;
 
 namespace HikingStore.Controllers
 {
-    [Authorize]
     public class CartsController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IConfiguration _configuration;
 
-        public CartsController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public CartsController(ApplicationDbContext context, UserManager<IdentityUser> userManager, IConfiguration configuration)
         {
             _context = context;
             _userManager = userManager;
+            _configuration = configuration;
         }
 
+        [Authorize]
         public async Task<IActionResult> Index()
         {
             var userId = _userManager.GetUserId(User);
@@ -37,78 +39,87 @@ namespace HikingStore.Controllers
             {
                 Carts = cartItems,
                 TotalAmount = totalAmount,
-                IsEmpty = !cartItems.Any() // Add a flag to indicate if the cart is empty
+                IsEmpty = !cartItems.Any()
             };
 
             return View(model);
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddToCart(int ProId, int qty)
+        public async Task<IActionResult> AddToCart(int ProId, int qty = 1)
         {
-            var product = await _context.Products.FindAsync(ProId);
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Json(new { success = false, message = "Please login to add items to cart." });
+            }
 
-            // Check if product exists and has enough stock
+            var product = await _context.Products.FindAsync(ProId);
             if (product == null)
             {
                 return Json(new { success = false, message = "Product not found." });
             }
 
-            if (!product.IsInStock)
+            if (qty <= 0)
             {
-                return Json(new { success = false, message = "This product is out of stock." });
+                return Json(new { success = false, message = "Quantity must be at least 1." });
             }
 
-            if (qty > product.StockQuantity)
+            if (!product.IsInStock || product.StockQuantity < qty)
             {
-                return Json(new
-                {
-                    success = false,
-                    message = $"Only {product.StockQuantity} items available in stock."
-                });
+                return Json(new { success = false, message = "Insufficient stock." });
             }
 
-            var userId = _userManager.GetUserId(User);
-            var cartItem = await _context.ShoppingCarts
+            // Check if item already exists in cart
+            var existingCartItem = await _context.ShoppingCarts
                 .FirstOrDefaultAsync(c => c.UserId == userId && c.ProId == ProId);
 
-            if (cartItem == null)
+            if (existingCartItem != null)
             {
-                cartItem = new ShoppingCart
+                // Update quantity
+                existingCartItem.Qty += qty;
+                if (existingCartItem.Qty > product.StockQuantity)
                 {
-                    UserId = userId,
+                    existingCartItem.Qty = product.StockQuantity;
+                }
+            }
+            else
+            {
+                // Add new item
+                var cartItem = new ShoppingCart
+                {
                     ProId = ProId,
+                    UserId = userId,
                     Qty = qty
                 };
                 _context.ShoppingCarts.Add(cartItem);
             }
-            else
-            {
-                var newTotalQuantity = cartItem.Qty + qty;
-                if (newTotalQuantity > product.StockQuantity)
-                {
-                    return Json(new
-                    {
-                        success = false,
-                        message = $"Cannot add more items. Only {product.StockQuantity} available total."
-                    });
-                }
-                cartItem.Qty = newTotalQuantity;
-            }
 
             await _context.SaveChangesAsync();
 
-            // Get the updated cart item count
+            // Get updated cart count
             var cartItemCount = await _context.ShoppingCarts
                 .Where(c => c.UserId == userId)
                 .SumAsync(c => c.Qty);
 
-            return Json(new { success = true, cartItemCount = cartItemCount });
+            return Json(new { success = true, message = "Item added to cart!", cartItemCount = cartItemCount });
         }
+        [AllowAnonymous]
+        public IActionResult RequireLogin(string returnUrl = null)
+        {
+            // Store the intended URL so we can return after login
+            ViewBag.ReturnUrl = returnUrl ?? "/Carts";
+            return View();
+        }
+
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> RemoveFromCart(int CartId)
         {
-            var cartItem = await _context.ShoppingCarts.FindAsync(CartId);
+            var userId = _userManager.GetUserId(User);
+            var cartItem = await _context.ShoppingCarts
+                .FirstOrDefaultAsync(c => c.CartId == CartId && c.UserId == userId);
+
             if (cartItem != null)
             {
                 _context.ShoppingCarts.Remove(cartItem);
@@ -117,6 +128,7 @@ namespace HikingStore.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [Authorize]
         public async Task<IActionResult> Checkout()
         {
             var userId = _userManager.GetUserId(User);
@@ -134,6 +146,8 @@ namespace HikingStore.Controllers
         }
 
         [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Checkout(Order order)
         {
             var userId = _userManager.GetUserId(User);
@@ -145,6 +159,8 @@ namespace HikingStore.Controllers
             if (!cartItems.Any())
             {
                 ModelState.AddModelError("", "Your cart is empty.");
+                ViewBag.Carts = cartItems;
+                ViewBag.TotalAmount = 0;
                 return View(order);
             }
 
@@ -209,10 +225,12 @@ namespace HikingStore.Controllers
             {
                 var user = await _userManager.GetUserAsync(User);
                 await SendOrderConfirmationEmail(user.Email, order, cartItems);
+                TempData["EmailSent"] = "Order confirmation email has been sent to your email address.";
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Failed to send confirmation email: {ex.Message}");
+                // Don't fail the order if email fails
             }
 
             return RedirectToAction("OrderConfirmation", new { id = order.OrderId });
@@ -222,18 +240,13 @@ namespace HikingStore.Controllers
         {
             try
             {
-                var configuration = new ConfigurationBuilder()
-                    .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("appsettings.json")
-                    .Build();
-
-                var emailSettings = configuration.GetSection("EmailSettings");
+                var emailSettings = _configuration.GetSection("EmailSettings");
 
                 var fromEmail = emailSettings["SenderEmail"];
                 var fromPassword = emailSettings["SenderPassword"];
-                var smtpHost = emailSettings["SmtpServer"];
-                var smtpPort = emailSettings["SmtpPort"];
-                var senderName = emailSettings["SenderName"];
+                var smtpHost = emailSettings["SmtpServer"] ?? "smtp.gmail.com";
+                var smtpPort = emailSettings["SmtpPort"] ?? "587";
+                var senderName = emailSettings["SenderName"] ?? "HikingStore";
 
                 if (string.IsNullOrEmpty(fromEmail) || string.IsNullOrEmpty(fromPassword))
                 {
@@ -256,7 +269,7 @@ namespace HikingStore.Controllers
                     From = new MailAddress(fromEmail, senderName),
                     Subject = subject,
                     Body = emailBody,
-                    IsBodyHtml = true // Changed to true for better formatting
+                    IsBodyHtml = true
                 };
 
                 message.To.Add(userEmail);
@@ -307,7 +320,7 @@ namespace HikingStore.Controllers
         
         <div class='content'>
             <div class='thank-you'>Thank you for your order!</div>
-            <p>Dear {order.User?.UserName ?? "Customer"},</p>
+            <p>Dear Customer,</p>
             <p>We're pleased to confirm that we've received your order and it's being processed. Here are your order details:</p>
             
             <div class='order-details'>
@@ -341,10 +354,10 @@ namespace HikingStore.Controllers
             {
                 sb.AppendLine($@"
                     <tr>
-                        <td>{item.Product.ProName}</td>
+                        <td>{item.Product?.ProName ?? "Product"}</td>
                         <td>{item.Qty}</td>
-                        <td>€{item.Product.Price:N2}</td>
-                        <td>€{(item.Product.Price * item.Qty):N2}</td>
+                        <td>€{item.Product?.Price:N2 ?? 0:N2}</td>
+                        <td>€{(item.Product?.Price * item.Qty ?? 0):N2}</td>
                     </tr>");
             }
 
@@ -380,71 +393,52 @@ namespace HikingStore.Controllers
 
             return sb.ToString();
         }
+
+        [Authorize]
         public IActionResult OrderConfirmation(int id)
         {
+            var userId = _userManager.GetUserId(User);
             var order = _context.Orders
                 .Include(o => o.User)
                 .Include(o => o.OrderDetails)
                 .ThenInclude(od => od.Product)
-                .FirstOrDefault(o => o.OrderId == id);
+                .FirstOrDefault(o => o.OrderId == id && o.UserId == userId);
 
             if (order == null)
             {
                 return NotFound();
             }
 
-            // Add a message to indicate email was sent
-            TempData["EmailSent"] = "Order confirmation email has been sent to your email address.";
-
             return View(order);
         }
+
         [HttpPost]
-        public async Task<IActionResult> UpdateCartQuantities(Dictionary<int, CartItemUpdate> cartItems)
-        {
-            try
-            {
-                var userId = _userManager.GetUserId(User);
-
-                foreach (var item in cartItems.Values)
-                {
-                    var cartItem = await _context.ShoppingCarts
-                        .FirstOrDefaultAsync(c => c.CartId == item.CartId && c.UserId == userId);
-
-                    if (cartItem != null)
-                    {
-                        if (item.Quantity < 1)
-                        {
-                            // Remove item if quantity is 0 or less
-                            _context.ShoppingCarts.Remove(cartItem);
-                        }
-                        else
-                        {
-                            // Update quantity
-                            cartItem.Qty = item.Quantity;
-                            _context.ShoppingCarts.Update(cartItem);
-                        }
-                    }
-                }
-
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                // Handle error - you might want to show an error message
-                return RedirectToAction(nameof(Index));
-            }
-        }
-        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateCartItem(int cartId, int quantity)
         {
             var userId = _userManager.GetUserId(User);
             var cartItem = await _context.ShoppingCarts
+                .Include(c => c.Product)
                 .FirstOrDefaultAsync(c => c.CartId == cartId && c.UserId == userId);
 
             if (cartItem == null)
             {
                 return Json(new { success = false, message = "Cart item not found." });
+            }
+
+            // Check stock if increasing quantity
+            if (quantity > cartItem.Qty)
+            {
+                var availableStock = cartItem.Product.StockQuantity;
+                if (quantity > availableStock)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = $"Only {availableStock} items available in stock."
+                    });
+                }
             }
 
             if (quantity < 1)
@@ -459,13 +453,25 @@ namespace HikingStore.Controllers
 
             await _context.SaveChangesAsync();
 
-            // Get updated cart count
+            // Get updated cart count and total
             var cartItemCount = await _context.ShoppingCarts
                 .Where(c => c.UserId == userId)
                 .SumAsync(c => c.Qty);
 
-            return Json(new { success = true, cartItemCount = cartItemCount });
+            var totalAmount = await _context.ShoppingCarts
+                .Include(c => c.Product)
+                .Where(c => c.UserId == userId)
+                .SumAsync(c => c.Product.Price * c.Qty);
+
+            return Json(new
+            {
+                success = true,
+                cartItemCount = cartItemCount,
+                itemTotal = cartItem.Product.Price * quantity,
+                totalAmount = totalAmount
+            });
         }
+
         public class CartItemUpdate
         {
             public int CartId { get; set; }

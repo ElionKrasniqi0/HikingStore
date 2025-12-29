@@ -2,7 +2,7 @@
 @{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
 }
-<ul class="nav nav-pills flex-column">
+<ul class="nav flex-column nav-pills">
     <li class="nav-item"><a class="nav-link @ManageNavPages.IndexNavClass(ViewContext)" id="profile" asp-page="./Index">Profile</a></li>
     <li class="nav-item"><a class="nav-link @ManageNavPages.EmailNavClass(ViewContext)" id="email" asp-page="./Email">Email</a></li>
     <li class="nav-item"><a class="nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-page="./ChangePassword">Password</a></li>
@@ -12,4 +12,63 @@
     }
     <li class="nav-item"><a class="nav-link @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)" id="two-factor" asp-page="./TwoFactorAuthentication">Two-factor authentication</a></li>
     <li class="nav-item"><a class="nav-link @ManageNavPages.PersonalDataNavClass(ViewContext)" id="personal-data" asp-page="./PersonalData">Personal data</a></li>
+    @if (User.IsInRole("Admin"))
+    {
+        <li class="nav-item">
+            <a class="nav-link text-warning" href="/Admin">
+                <i class="fas fa-shield-alt me-2"></i>Admin Dashboard
+            </a>
+        </li>
+    }
+    <li class="nav-item mt-4">
+        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+            <button type="submit" class="nav-link text-danger border-0 bg-transparent w-100 text-start">
+                <i class="fas fa-sign-out-alt me-2"></i>Logout
+            </button>
+        </form>
+    </li>
 </ul>
+
+<style>
+    .nav-pills .nav-link {
+        padding: 0.75rem 1.25rem;
+        border-radius: 0;
+        color: #6c757d;
+        border-left: 3px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+        .nav-pills .nav-link:hover {
+            background: rgba(59, 93, 80, 0.05);
+            color: #3b5d50;
+            border-left-color: rgba(59, 93, 80, 0.3);
+        }
+
+        .nav-pills .nav-link.active {
+            background: rgba(59, 93, 80, 0.1);
+            color: #3b5d50;
+            border-left-color: #3b5d50;
+            font-weight: 600;
+        }
+
+        .nav-pills .nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+
+    .avatar-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b5d50, #2d473d);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+
+    .text-warning {
+        color: #ffc107 !important;
+    }
+</style>

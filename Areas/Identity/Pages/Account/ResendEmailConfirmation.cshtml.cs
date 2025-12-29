@@ -1,15 +1,15 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
-using System.Text.Encodings.Web;
-using System.Threading.Tasks;
+﻿using HikingStore.Services;
 using Microsoft.AspNetCore.Authorization;
-
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.Text;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
 
 namespace HikingStore.Areas.Identity.Pages.Account
 {
@@ -18,11 +18,16 @@ namespace HikingStore.Areas.Identity.Pages.Account
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IEmailSender _emailSender;
+        private readonly IEmailTemplateService _emailTemplateService;
 
-        public ResendEmailConfirmationModel(UserManager<IdentityUser> userManager, IEmailSender emailSender)
+        public ResendEmailConfirmationModel(
+            UserManager<IdentityUser> userManager,
+            IEmailSender emailSender,
+            IEmailTemplateService emailTemplateService)
         {
             _userManager = userManager;
             _emailSender = emailSender;
+            _emailTemplateService = emailTemplateService;
         }
 
         [BindProperty]
@@ -32,6 +37,7 @@ namespace HikingStore.Areas.Identity.Pages.Account
         {
             [Required]
             [EmailAddress]
+            [Display(Name = "Email Address")]
             public string Email { get; set; }
         }
 
@@ -49,22 +55,29 @@ namespace HikingStore.Areas.Identity.Pages.Account
             var user = await _userManager.FindByEmailAsync(Input.Email);
             if (user == null)
             {
-                ModelState.AddModelError(string.Empty, "Verification email sent. Please check your email.");
+                // Don't reveal that the user doesn't exist
+                ModelState.AddModelError(string.Empty, "If an account exists with this email, a verification link has been sent.");
                 return Page();
             }
 
             var userId = await _userManager.GetUserIdAsync(user);
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
             var callbackUrl = Url.Page(
                 "/Account/ConfirmEmail",
                 pageHandler: null,
                 values: new { userId = userId, code = code },
                 protocol: Request.Scheme);
+
+            // Generate beautiful email template
+            var userName = user.UserName ?? user.Email;
+            var emailBody = _emailTemplateService.GenerateEmailConfirmationTemplate(callbackUrl, userName);
+
             await _emailSender.SendEmailAsync(
                 Input.Email,
-                "Confirm your email",
-                $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                "Confirm your HikingStore email",
+                emailBody);
 
             ModelState.AddModelError(string.Empty, "Verification email sent. Please check your email.");
             return Page();
