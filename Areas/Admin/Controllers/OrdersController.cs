@@ -728,53 +728,97 @@ namespace HikingStore.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteOrder(int id)
         {
+            var userId = _userManager.GetUserId(User);
             var order = await _context.Orders
                 .Include(o => o.OrderDetails)
-                .FirstOrDefaultAsync(o => o.OrderId == id);
+                .Include(o => o.TrackingEvents)
+                .FirstOrDefaultAsync(o => o.OrderId == id && o.UserId == userId);
 
             if (order == null)
             {
-                return Json(new { success = false, message = "Order not found." });
+                TempData["ErrorMessage"] = "Order not found.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Only allow deletion of certain statuses (e.g., cancelled or received)
+            // You can customize this based on your business rules
+            if (order.Status != OrderStatus.Cancelled && order.Status != OrderStatus.Received)
+            {
+                TempData["ErrorMessage"] = "You can only delete orders that are cancelled or recently received.";
+                return RedirectToAction(nameof(Details), new { id });
             }
 
             try
             {
-                // Remove related order details
-                if (order.OrderDetails != null && order.OrderDetails.Any())
+                // Remove related data
+                if (order.OrderDetails.Any())
                 {
                     _context.OrderDetails.RemoveRange(order.OrderDetails);
                 }
 
-                // Remove tracking events if they exist
-                var trackingEvents = await _context.TrackingEvents
-                    .Where(te => te.OrderId == id)
-                    .ToListAsync();
-
-                if (trackingEvents.Any())
+                if (order.TrackingEvents.Any())
                 {
-                    _context.TrackingEvents.RemoveRange(trackingEvents);
+                    _context.TrackingEvents.RemoveRange(order.TrackingEvents);
                 }
 
+                // Remove the order
                 _context.Orders.Remove(order);
                 await _context.SaveChangesAsync();
 
-                return Json(new
-                {
-                    success = true,
-                    message = "Order deleted successfully.",
-                    orderId = id
-                });
+                TempData["SuccessMessage"] = $"Order #{order.OrderId} deleted successfully.";
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                return Json(new
-                {
-                    success = false,
-                    message = $"Error deleting order: {ex.Message}"
-                });
+                TempData["ErrorMessage"] = $"Error deleting order: {ex.Message}";
+                return RedirectToAction(nameof(Details), new { id });
             }
         }
+    
 
+
+// Add this method for direct deletion (without JSON)
+[HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var order = await _context.Orders
+                .Include(o => o.OrderDetails)
+                .Include(o => o.TrackingEvents)
+                .FirstOrDefaultAsync(o => o.OrderId == id);
+
+            if (order == null)
+            {
+                TempData["ErrorMessage"] = "Order not found.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            try
+            {
+                // Remove related data
+                if (order.OrderDetails.Any())
+                {
+                    _context.OrderDetails.RemoveRange(order.OrderDetails);
+                }
+
+                if (order.TrackingEvents.Any())
+                {
+                    _context.TrackingEvents.RemoveRange(order.TrackingEvents);
+                }
+
+                // Remove the order
+                _context.Orders.Remove(order);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = $"Order #{order.OrderId} deleted successfully.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Error deleting order: {ex.Message}";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+        }
         [HttpGet]
         public async Task<IActionResult> GetOrdersByStatus(OrderStatus status)
         {

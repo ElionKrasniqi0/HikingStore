@@ -8,141 +8,408 @@
             <div class="col-lg-5">
                 <div class="intro-excerpt">
                     <h1>Checkout</h1>
+                    <p class="text-muted">Complete your order with secure checkout</p>
                 </div>
             </div>
             <div class="col-lg-7">
-                <!-- Empty column for layout purposes -->
+                <!-- Steps indicator -->
+                <div class="checkout-steps d-flex justify-content-end">
+                    <div class="step active">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Cart</div>
+                    </div>
+                    <div class="step active">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Details</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Payment</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-label">Complete</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 <!-- End Hero Section -->
 
-<form asp-action="Checkout" method="post">
+<form asp-action="Checkout" method="post" id="checkoutForm">
     <div class="untree_co-section">
         <div class="container">
             <div class="row mb-5">
                 <div class="col-md-12">
-                    <div class="border p-4 rounded" role="alert">
-                        Returning customer? <a href="#">Click here</a> to login
+                    <div class="alert alert-info border-0 p-4 rounded-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-info-circle fa-lg me-3 text-primary"></i>
+                            <div>
+                                <h5 class="alert-heading mb-2">Returning customer?</h5>
+                                <p class="mb-0">Click <a href="/Identity/Account/Login?returnUrl=/Carts/Checkout" class="alert-link fw-bold">here to login</a> or <a href="/Identity/Account/Register" class="alert-link fw-bold">create an account</a> for faster checkout next time.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+
             <div class="row">
-                <div class="col-md-6 mb-5 mb-md-0">
-                    <h2 class="h3 mb-3 text-black">Billing Details</h2>
-                    <div class="p-3 p-lg-5 border bg-white">
-                        <div class="form-group row">
-                            <div class="col-md-6">
-                                <label asp-for="ShippingAddress">Shipping Address</label>
-                                <input asp-for="ShippingAddress" class="form-control" required />
-                                <span asp-validation-for="ShippingAddress" class="text-danger"></span>
-                            </div>
-                            <div class="col-md-6">
-                                <label asp-for="City">City</label>
-                                <input asp-for="City" class="form-control" required />
-                                <span asp-validation-for="City" class="text-danger"></span>
-                            </div>
+                <!-- Billing Details Column (Enhanced) -->
+                <div class="col-md-7 mb-5 mb-md-0">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white py-4">
+                            <h2 class="h3 mb-0 text-primary">
+                                <i class="fas fa-user-circle me-2"></i>Billing & Shipping Details
+                            </h2>
+                            <p class="text-muted mb-0 mt-2">Please fill in all required fields marked with *</p>
                         </div>
+                        <div class="card-body p-4 p-lg-5">
+                            <!-- Personal Information -->
+                            <div class="section-title mb-4">
+                                <h4 class="text-dark mb-3">
+                                    <i class="fas fa-user me-2"></i>Personal Information
+                                </h4>
+                                <div class="border-top mb-4"></div>
+                            </div>
 
-                        <div class="form-group row">
-                            <div class="col-md-12">
-                                <label asp-for="PhoneNumber">Phone Number</label>
-                                <input asp-for="PhoneNumber" class="form-control" required />
-                                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="ShippingAddress" class="form-label fw-semibold">
+                                            Full Name <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" class="form-control"
+                                               placeholder="Enter your full name"
+                                               required
+                                               oninput="updateShippingLabel('name', this.value)">
+                                        <div class="form-text">As it appears on your identification</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="PhoneNumber" class="form-label fw-semibold">
+                                            Phone Number <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">+383</span>
+                                            <input asp-for="PhoneNumber" class="form-control"
+                                                   placeholder="e.g., 44 123 456"
+                                                   required>
+                                        </div>
+                                        <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="form-group row">
-                            <div class="col-md-12">
-                                <label asp-for="Comment">Comment</label>
-                                <textarea asp-for="Comment" class="form-control"></textarea>
-                                <span asp-validation-for="Comment" class="text-danger"></span>
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label class="form-label fw-semibold">
+                                            Email Address <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="email" class="form-control"
+                                               placeholder="your.email@example.com"
+                                               required
+                                               value="@User.Identity?.Name"
+                                               readonly>
+                                        <div class="form-text">Order confirmation will be sent to this email</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Shipping Address -->
+                            <div class="section-title mb-4">
+                                <h4 class="text-dark mb-3">
+                                    <i class="fas fa-map-marker-alt me-2"></i>Shipping Address
+                                </h4>
+                                <div class="border-top mb-4"></div>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label asp-for="ShippingAddress" class="form-label fw-semibold">
+                                            Street Address <span class="text-danger">*</span>
+                                        </label>
+                                        <input asp-for="ShippingAddress" class="form-control"
+                                               placeholder="e.g., Rr. Nëna Terezë 123"
+                                               required
+                                               oninput="updateShippingLabel('address', this.value)">
+                                        <span asp-validation-for="ShippingAddress" class="text-danger small"></span>
+                                        <div class="form-text">House number, street name, apartment/suite</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="City" class="form-label fw-semibold">
+                                            City <span class="text-danger">*</span>
+                                        </label>
+                                        <select asp-for="City" class="form-select" required>
+                                            <option value="">Select your city</option>
+                                            <option value="Prishtinë">Prishtinë</option>
+                                            <option value="Prizren">Prizren</option>
+                                            <option value="Pejë">Pejë</option>
+                                            <option value="Mitrovicë">Mitrovicë</option>
+                                            <option value="Gjakovë">Gjakovë</option>
+                                            <option value="Gjilan">Gjilan</option>
+                                            <option value="Ferizaj">Ferizaj</option>
+                                            <option value="Podujevë">Podujevë</option>
+                                            <option value="Vushtrri">Vushtrri</option>
+                                            <option value="Suharekë">Suharekë</option>
+                                            <option value="Rahovec">Rahovec</option>
+                                            <option value="Malishevë">Malishevë</option>
+                                            <option value="Lipjan">Lipjan</option>
+                                            <option value="Istog">Istog</option>
+                                            <option value="Klinë">Klinë</option>
+                                            <option value="Viti">Viti</option>
+                                            <option value="Skenderaj">Skenderaj</option>
+                                            <option value="Dragash">Dragash</option>
+                                            <option value="Fushë Kosovë">Fushë Kosovë</option>
+                                            <option value="Kaçanik">Kaçanik</option>
+                                            <option value="Obiliq">Obiliq</option>
+                                            <option value="Shtime">Shtime</option>
+                                            <option value="Other">Other (specify in comments)</option>
+                                        </select>
+                                        <span asp-validation-for="City" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label fw-semibold">
+                                            Postal Code
+                                        </label>
+                                        <input type="text" class="form-control"
+                                               placeholder="e.g., 10000"
+                                               pattern="[0-9]{5}"
+                                               title="5-digit postal code">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Delivery Information -->
+                            <div class="section-title mb-4">
+                                <h4 class="text-dark mb-3">
+                                    <i class="fas fa-truck me-2"></i>Delivery Information
+                                </h4>
+                                <div class="border-top mb-4"></div>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label class="form-label fw-semibold">Preferred Delivery Date</label>
+                                        <input type="date" class="form-control"
+                                               min="@DateTime.Now.ToString("yyyy-MM-dd")"
+                                               max="@DateTime.Now.AddDays(14).ToString("yyyy-MM-dd")">
+                                        <div class="form-text">Select a date within next 14 days</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label class="form-label fw-semibold">Delivery Time Preference</label>
+                                        <select class="form-select">
+                                            <option value="">Any time</option>
+                                            <option value="morning">Morning (9 AM - 12 PM)</option>
+                                            <option value="afternoon">Afternoon (12 PM - 5 PM)</option>
+                                            <option value="evening">Evening (5 PM - 8 PM)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Additional Information -->
+                            <div class="section-title mb-4">
+                                <h4 class="text-dark mb-3">
+                                    <i class="fas fa-notes-medical me-2"></i>Additional Information
+                                </h4>
+                                <div class="border-top mb-4"></div>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label asp-for="Comment" class="form-label fw-semibold">
+                                            Order Notes (Optional)
+                                        </label>
+                                        <textarea asp-for="Comment" class="form-control" rows="4"
+                                                  placeholder="Special instructions, delivery preferences, gift message, etc."></textarea>
+                                        <span asp-validation-for="Comment" class="text-danger small"></span>
+                                        <div class="form-text">Add any special instructions for your order</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Save for Future Checkouts -->
+                            <div class="form-check mb-4">
+                                <input class="form-check-input" type="checkbox" id="saveDetails" checked>
+                                <label class="form-check-label" for="saveDetails">
+                                    <strong>Save these details for faster checkout next time</strong>
+                                </label>
+                                <div class="form-text">We'll securely store your information for future orders</div>
+                            </div>
+
+                            <!-- Shipping Address Preview -->
+                            <div class="card border-info mb-4">
+                                <div class="card-header bg-info bg-opacity-10 text-info border-info">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-check-circle me-2"></i>Shipping Address Preview
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="address-preview" id="addressPreview">
+                                        <div class="placeholder-text text-muted">
+                                            Your shipping address will appear here as you fill the form
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Back to Cart Button -->
+                    <div class="mt-4">
+                        <a href="/Carts" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Cart
+                        </a>
                     </div>
                 </div>
 
-                <div class="col-md-6">
-                    <div class="row mb-5">
-                        <div class="col-md-12">
-                            <h2 class="h3 mb-3 text-black">Your Order</h2>
-                            <div class="p-3 p-lg-5 border bg-white">
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Product</th>
-                                            <th>Quantity</th>
-                                            <th>Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @if (ViewBag.Carts != null)
+                <!-- Order Summary Column -->
+                <div class="col-md-5">
+                    <div class="sticky-top" style="top: 20px;">
+                        <!-- Order Summary Card -->
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-white py-4">
+                                <h2 class="h3 mb-0 text-primary">
+                                    <i class="fas fa-shopping-bag me-2"></i>Order Summary
+                                </h2>
+                                <p class="text-muted mb-0 mt-2">Review your items and total</p>
+                            </div>
+                            <div class="card-body p-4">
+                                <!-- Items List -->
+                                <div class="order-items mb-4">
+                                    @if (ViewBag.Carts != null && ViewBag.Carts.Count > 0)
+                                    {
+                                        foreach (var item in ViewBag.Carts)
                                         {
-                                            foreach (var item in ViewBag.Carts)
-                                            {
-                                                <tr>
-                                                    <td>@item.Product.ProName</td>
-                                                    <td>@item.Qty</td>
-                                                    <td>€@(item.Product.Price* item.Qty)</td>
-                                                </tr>
-                                            }
+                                            <div class="order-item d-flex align-items-center py-3 border-bottom">
+                                                <div class="item-image flex-shrink-0 me-3">
+                                                    <img src="~/Product/@item.Product.ProImage"
+                                                         alt="@item.Product.ProName"
+                                                         class="rounded"
+                                                         style="width: 60px; height: 60px; object-fit: cover;">
+                                                </div>
+                                                <div class="item-details flex-grow-1">
+                                                    <h6 class="mb-1">@item.Product.ProName</h6>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <small class="text-muted">Qty: @item.Qty</small>
+                                                        <strong class="text-primary">€@(item.Product.Price* item.Qty)</strong>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         }
-                                        else
-                                        {
-                                            <tr>
-                                                <td colspan="3">No items in the cart.</td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <td colspan="2"><strong>Cart Subtotal</strong></td>
-                                            <td>€@ViewBag.TotalAmount</td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="2"><strong>Order Total</strong></td>
-                                            <td>€@ViewBag.TotalAmount</td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
+                                    }
+                                    else
+                                    {
+                                        <div class="text-center py-4">
+                                            <i class="fas fa-shopping-cart fa-2x text-muted mb-3"></i>
+                                            <p class="text-muted">No items in your cart</p>
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Order Totals -->
+                                <div class="order-totals">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Subtotal</span>
+                                        <span class="fw-semibold">€@ViewBag.TotalAmount.ToString("N2")</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Shipping</span>
+                                        <span class="text-success fw-semibold">FREE</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Tax (VAT 18%)</span>
+                                        <span>€@((ViewBag.TotalAmount * 0.18m).ToString("N2"))</span>
+                                    </div>
+                                    <div class="border-top pt-3 mb-3"></div>
+                                    <div class="d-flex justify-content-between mb-4">
+                                        <span class="h5 fw-bold">Total</span>
+                                        <span class="h4 fw-bold text-primary">€@((ViewBag.TotalAmount * 1.18m).ToString("N2"))</span>
+                                    </div>
+                                </div>
+
+                                <!-- Shipping Info Preview -->
+                                <div class="shipping-info-preview mb-4 p-3 bg-light rounded">
+                                    <h6 class="mb-2">
+                                        <i class="fas fa-shipping-fast me-2 text-primary"></i>Shipping Info
+                                    </h6>
+                                    <div class="small">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span>Delivery to:</span>
+                                            <span id="previewCity" class="fw-semibold">Select city</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Estimated delivery:</span>
+                                            <span class="fw-semibold">3-5 business days</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Secure Checkout -->
+                                <div class="secure-checkout mb-4">
+                                    <div class="d-flex align-items-center justify-content-center mb-3">
+                                        <i class="fas fa-lock fa-lg text-success me-2"></i>
+                                        <span class="fw-semibold">Secure SSL Checkout</span>
+                                    </div>
+                                    <div class="text-center mb-3">
+                                        <img src="https://img.icons8.com/color/48/000000/visa.png" alt="Visa" class="payment-icon mx-1">
+                                        <img src="https://img.icons8.com/color/48/000000/mastercard.png" alt="Mastercard" class="payment-icon mx-1">
+                                        <img src="https://img.icons8.com/color/48/000000/paypal.png" alt="PayPal" class="payment-icon mx-1">
+                                    </div>
+                                </div>
+
+                                <!-- Continue to Payment Button -->
+                                <button type="submit" class="btn btn-primary btn-lg w-100 py-3">
+                                    <i class="fas fa-lock me-2"></i>Continue to Payment
+                                </button>
+
+                                <div class="text-center mt-3">
+                                    <small class="text-muted">
+                                        By completing your purchase, you agree to our
+                                        <a href="/Home/Terms" class="text-decoration-none">Terms of Service</a>
+                                        and <a href="/Home/Privacy" class="text-decoration-none">Privacy Policy</a>
+                                    </small>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="row mb-5">
-                        <div class="col-md-12">
-                            <h2 class="h3 mb-3 text-black">Payment Methods</h2>
-                            <div class="p-3 p-lg-5 border bg-white">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="PaymentMethod" id="bankTransfer" value="Bank Transfer" checked />
-                                    <label class="form-check-label" for="bankTransfer">
-                                        Direct Bank Transfer<br />
-                                        Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order won't be shipped until the funds have cleared in our account.
-                                    </label>
+                        <!-- Need Help Card -->
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-4">
+                                <h5 class="mb-3">
+                                    <i class="fas fa-question-circle me-2 text-primary"></i>Need Help?
+                                </h5>
+                                <p class="small text-muted mb-3">Our customer service team is here to assist you</p>
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-phone text-primary me-2"></i>
+                                    <span class="small">+383 (458) 04-555</span>
                                 </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="PaymentMethod" id="cheque" value="Cheque" />
-                                    <label class="form-check-label" for="cheque">
-                                        Cheque Payment<br />
-                                        Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order won't be shipped until the funds have cleared in our account.
-                                    </label>
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-envelope text-primary me-2"></i>
+                                    <span class="small">support@hikingstore.com</span>
                                 </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="PaymentMethod" id="paypal" value="PayPal" />
-                                    <label class="form-check-label" for="paypal">
-                                        PayPal<br />
-                                        Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order won't be shipped until the funds have cleared in our account.
-                                    </label>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-clock text-primary me-2"></i>
+                                    <span class="small">Mon-Fri: 9 AM - 6 PM</span>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="card-footer">
-                                <button type="submit" class="btn btn-primary btn-lg btn-block">Place Order</button>
                             </div>
                         </div>
                     </div>
@@ -151,3 +418,294 @@
         </div>
     </div>
 </form>
+
+<style>
+    /* Checkout Steps */
+    .checkout-steps {
+        gap: 2rem;
+    }
+
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+    }
+
+        .step:not(:last-child):after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 60px;
+            width: 60px;
+            height: 2px;
+            background: #dee2e6;
+        }
+
+        .step.active:not(:last-child):after {
+            background: #3b5d50;
+        }
+
+    .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #dee2e6;
+        color: #6c757d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .step.active .step-number {
+        background: #3b5d50;
+        color: white;
+        box-shadow: 0 4px 12px rgba(59, 93, 80, 0.3);
+    }
+
+    .step-label {
+        font-size: 0.875rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+    .step.active .step-label {
+        color: #3b5d50;
+        font-weight: 600;
+    }
+
+    /* Form Styling */
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control, .form-select {
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #3b5d50;
+            box-shadow: 0 0 0 0.2rem rgba(59, 93, 80, 0.25);
+        }
+
+    .section-title h4 {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .border-top {
+        border-top: 2px solid #3b5d50 !important;
+        opacity: 0.3;
+    }
+
+    /* Address Preview */
+    .address-preview {
+        min-height: 100px;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        background: #f8f9fa;
+    }
+
+    .address-line {
+        margin-bottom: 0.25rem;
+        color: #495057;
+        font-size: 0.95rem;
+    }
+
+    .placeholder-text {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100px;
+        color: #6c757d;
+    }
+
+    /* Payment Icons */
+    .payment-icon {
+        width: 40px;
+        height: 40px;
+        object-fit: contain;
+        filter: grayscale(100%);
+        transition: filter 0.3s ease;
+    }
+
+        .payment-icon:hover {
+            filter: grayscale(0%);
+        }
+
+    /* Order Item Styling */
+    .order-item {
+        transition: background-color 0.2s ease;
+    }
+
+        .order-item:hover {
+            background-color: #f8f9fa;
+        }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .checkout-steps {
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .step:not(:last-child):after {
+            width: 30px;
+            left: 45px;
+        }
+
+        .step-number {
+            width: 35px;
+            height: 35px;
+            font-size: 0.875rem;
+        }
+
+        .card-body {
+            padding: 1.5rem !important;
+        }
+
+        .hero .intro-excerpt h1 {
+            font-size: 2rem;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .step:not(:last-child):after {
+            display: none;
+        }
+
+        .checkout-steps {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .step {
+            flex-direction: row;
+            width: 100%;
+        }
+
+        .step-number {
+            margin-right: 1rem;
+            margin-bottom: 0;
+        }
+    }
+
+    /* Validation Styling */
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+    }
+
+    .form-check-input:checked {
+        background-color: #3b5d50;
+        border-color: #3b5d50;
+    }
+
+    .form-check-label {
+        cursor: pointer;
+    }
+
+    /* Shipping Info Preview */
+    .shipping-info-preview {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-left: 4px solid #3b5d50;
+    }
+</style>
+
+<script>
+    // Address Preview Update
+    function updateShippingLabel(type, value) {
+        const preview = document.getElementById('addressPreview');
+
+        if (value.trim() === '') {
+            preview.innerHTML = '<div class="placeholder-text text-muted">Your shipping address will appear here as you fill the form</div>';
+            return;
+        }
+
+        let html = '';
+
+        // Get form values
+        const fullName = document.querySelector('input[placeholder*="full name"]')?.value || '';
+        const address = document.querySelector('input[placeholder*="street"]')?.value || '';
+        const city = document.querySelector('select[name="City"]')?.value || '';
+        const phone = document.querySelector('input[name="PhoneNumber"]')?.value || '';
+
+        if (fullName) html += `<div class="address-line"><strong>${fullName}</strong></div>`;
+        if (address) html += `<div class="address-line">${address}</div>`;
+        if (city) {
+            html += `<div class="address-line">${city}, Kosovo</div>`;
+            // Update shipping preview
+            document.getElementById('previewCity').textContent = city;
+        }
+        if (phone) html += `<div class="address-line">Phone: +383 ${phone}</div>`;
+
+        if (html) {
+            preview.innerHTML = html;
+        }
+    }
+
+    // City selection handler
+    document.querySelector('select[name="City"]')?.addEventListener('change', function() {
+        updateShippingLabel('city', this.value);
+    });
+
+    // Form validation
+    document.getElementById('checkoutForm')?.addEventListener('submit', function(e) {
+        const requiredFields = this.querySelectorAll('[required]');
+        let isValid = true;
+
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+            showValidationError();
+        }
+    });
+
+    function showValidationError() {
+        const toast = document.createElement('div');
+        toast.className = 'toast align-items-center text-white bg-danger border-0 position-fixed bottom-0 end-0 m-3';
+        toast.style.zIndex = '1060';
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    Please fill in all required fields marked with *
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        document.body.appendChild(toast);
+
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+
+        setTimeout(() => {
+            toast.remove();
+        }, 5000);
+    }
+
+    // Auto-focus first field
+    document.addEventListener('DOMContentLoaded', function() {
+        const firstField = document.querySelector('input[required]');
+        if (firstField) {
+            setTimeout(() => {
+                firstField.focus();
+            }, 300);
+        }
+    });
+</script>

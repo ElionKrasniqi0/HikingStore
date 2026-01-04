@@ -175,10 +175,14 @@
                                             </li>
                                             <li><hr class="dropdown-divider"></li>
                                             <li>
-                                                <a class="dropdown-item text-danger delete-order" href="#"
-                                                   data-order-id="@order.OrderId">
-                                                    <i class="fas fa-trash me-2"></i>Delete
-                                                </a>
+                                                <form asp-action="Delete" method="post"
+                                                      onsubmit="return confirm('Are you sure you want to delete order #@order.OrderId?');">
+                                                    <input type="hidden" name="id" value="@order.OrderId" />
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="dropdown-item text-danger">
+                                                        <i class="fas fa-trash me-2"></i>Delete Order
+                                                    </button>
+                                                </form>
                                             </li>
                                         </ul>
                                     </div>
