@@ -82,7 +82,7 @@
         background: rgba(59, 93, 80, 0.08);
         color: #3b5d50;
         border-left-color: rgba(59, 93, 80, 0.5);
-        transform: translateX(2px);
+        transform: none !important;
     }
 
     .nav-pills .nav-link.active {
@@ -145,21 +145,19 @@
         box-shadow: 0 2px 8px rgba(59, 93, 80, 0.2);
     }
 
-    /* Prevent vibration/shake animations - only allow smooth transitions */
+    /* Prevent vibration/shake animations - Remove ALL transforms */
     .nav-link,
-    .logout-button {
+    .logout-button,
+    .nav-link:hover,
+    .nav-link:active,
+    .logout-button:hover,
+    .logout-button:active {
         animation: none !important;
+        transform: none !important;
     }
 
     /* Smooth page transitions */
     html {
         scroll-behavior: smooth;
-    }
-
-    /* Ensure buttons don't have vibration on click */
-    .manage-nav button:active,
-    .manage-nav .nav-link:active {
-        transform: translateX(1px) !important;
-        animation: none !important;
     }
 </style>

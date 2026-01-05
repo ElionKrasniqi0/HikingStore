@@ -74,12 +74,20 @@ namespace HikingStore.Areas.Identity.Pages.Account
             var userName = user.UserName ?? user.Email;
             var emailBody = _emailTemplateService.GenerateEmailConfirmationTemplate(callbackUrl, userName);
 
-            await _emailSender.SendEmailAsync(
-                Input.Email,
-                "Confirm your HikingStore email",
-                emailBody);
-
-            ModelState.AddModelError(string.Empty, "Verification email sent. Please check your email.");
+            try
+            {
+                await _emailSender.SendEmailAsync(
+                    Input.Email,
+                    "Confirm your HikingStore email",
+                    emailBody);
+                
+                ModelState.AddModelError(string.Empty, "Verification email sent. Please check your email.");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, $"Failed to send verification email: {ex.Message}. Please check your email configuration.");
+            }
+            
             return Page();
         }
     }

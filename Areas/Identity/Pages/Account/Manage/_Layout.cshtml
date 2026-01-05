@@ -80,24 +80,30 @@
     @@keyframes fadeIn {
         from {
             opacity: 0;
-            transform: translateY(10px);
         }
         to {
             opacity: 1;
-            transform: translateY(0);
         }
     }
 
-    /* Ensure smooth page transitions */
+    /* Ensure smooth page transitions - Only color/background/box-shadow, NO transforms */
     .user-area-container a,
     .user-area-container button {
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: background-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease !important;
     }
 
-    /* Prevent vibration/shake animations - only allow smooth fadeIn */
+    /* Prevent vibration/shake animations - Remove ALL transforms */
     .user-area-container .nav-link,
-    .user-area-container button {
+    .user-area-container button,
+    .user-area-container .btn,
+    .user-area-container .nav-link:hover,
+    .user-area-container .nav-link:active,
+    .user-area-container button:hover,
+    .user-area-container button:active,
+    .user-area-container .btn:hover,
+    .user-area-container .btn:active {
         animation: none !important;
+        transform: none !important;
     }
 
     /* Professional form styling */
@@ -129,13 +135,13 @@
     .user-content-card .btn-primary:hover {
         background-color: #2d473d;
         border-color: #2d473d;
-        transform: translateY(-1px);
         box-shadow: 0 4px 8px rgba(59, 93, 80, 0.3);
+        transform: none !important;
     }
 
     .user-content-card .btn-primary:active {
-        transform: translateY(0);
         box-shadow: 0 2px 4px rgba(59, 93, 80, 0.2);
+        transform: none !important;
     }
 
     /* Responsive adjustments */
@@ -182,12 +188,25 @@
                 });
             }
 
-            // Prevent any vibration/shake effects on buttons
-            const allButtons = document.querySelectorAll('.user-area-container button, .user-area-container .btn');
+            // Prevent any vibration/shake effects on buttons - Remove ALL transforms
+            const allButtons = document.querySelectorAll('.user-area-container button, .user-area-container .btn, .user-area-container .nav-link');
             allButtons.forEach(button => {
                 button.addEventListener('click', function(e) {
                     // Ensure no vibration - allow default behavior
                     this.style.animation = 'none';
+                    this.style.transform = 'none';
+                });
+                button.addEventListener('mouseenter', function() {
+                    this.style.transform = 'none';
+                });
+                button.addEventListener('mouseleave', function() {
+                    this.style.transform = 'none';
+                });
+                button.addEventListener('mousedown', function() {
+                    this.style.transform = 'none';
+                });
+                button.addEventListener('mouseup', function() {
+                    this.style.transform = 'none';
                 });
             });
 

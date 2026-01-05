@@ -155,22 +155,44 @@ namespace HikingStore.Areas.Admin.Controllers
         {
             if (UserExists(UserId))
             {
-                var user = await _userManager.FindByIdAsync(UserId.ToString());
-                var result = await _userManager.DeleteAsync(user);
+                var userIdString = UserId.ToString();
+                var user = await _userManager.FindByIdAsync(userIdString);
 
-                if (result.Succeeded)
+                try
                 {
-                    //TempData["Message"] = $"User: {user.UserName} deleted successfully.";
-                    //_notyf.Success($"User: {user.UserName} was deleted successfully!");
+                    // Delete all shopping cart items for this user first
+                    var shoppingCarts = await _context.ShoppingCarts
+                        .Where(c => c.UserId == userIdString)
+                        .ToListAsync();
 
-                    return RedirectToAction("Index");
+                    if (shoppingCarts.Any())
+                    {
+                        _context.ShoppingCarts.RemoveRange(shoppingCarts);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    // Now delete the user
+                    var result = await _userManager.DeleteAsync(user);
+
+                    if (result.Succeeded)
+                    {
+                        //TempData["Message"] = $"User: {user.UserName} deleted successfully.";
+                        //_notyf.Success($"User: {user.UserName} was deleted successfully!");
+
+                        return RedirectToAction("Index");
+                    }
+
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+                    return View("Index");
                 }
-
-                foreach (var error in result.Errors)
+                catch (Exception ex)
                 {
-                    ModelState.AddModelError("", error.Description);
+                    ModelState.AddModelError("", $"Error deleting user: {ex.Message}");
+                    return View("Index");
                 }
-                return View("Index");
             }
 
             ViewBag.ErrorMessage = $"User with the Id = {UserId}, cannot be found!";

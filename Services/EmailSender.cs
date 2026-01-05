@@ -25,8 +25,9 @@ namespace HikingStore.Services
             try
             {
                 var emailSettings = _configuration.GetSection("EmailSettings");
-                var fromEmail = emailSettings["SenderEmail"];
-                var fromPassword = emailSettings["SenderPassword"];
+                var fromEmail = emailSettings["SenderEmail"]?.Trim();
+                // Remove spaces from Gmail App Password if present (Gmail App Passwords should not have spaces)
+                var fromPassword = emailSettings["SenderPassword"]?.Replace(" ", "")?.Trim() ?? "";
                 var smtpServer = emailSettings["SmtpServer"] ?? "smtp.gmail.com";
                 var port = int.Parse(emailSettings["SmtpPort"] ?? "587");
                 var senderName = emailSettings["SenderName"] ?? "HikingStore";
@@ -34,11 +35,14 @@ namespace HikingStore.Services
 
                 if (string.IsNullOrEmpty(fromEmail) || string.IsNullOrEmpty(fromPassword))
                 {
-                    _logger.LogError("❌ Email configuration is missing. Please check appsettings.json");
+                    _logger.LogError("❌ Email configuration is missing. SenderEmail: {SenderEmail}, Password: {HasPassword}", 
+                        string.IsNullOrEmpty(fromEmail) ? "MISSING" : "SET", 
+                        string.IsNullOrEmpty(fromPassword) ? "MISSING" : "SET");
                     throw new Exception("Email configuration is missing. Please check your appsettings.json file.");
                 }
 
-                _logger.LogInformation("📧 Preparing to send email to: {Email}", email);
+                _logger.LogInformation("📧 Preparing to send email from {FromEmail} to {ToEmail}", fromEmail, email);
+                _logger.LogInformation("📧 SMTP Server: {SmtpServer}:{Port}, SSL: {EnableSsl}", smtpServer, port, enableSsl);
 
                 using (var message = new MailMessage())
                 {
@@ -47,27 +51,48 @@ namespace HikingStore.Services
                     message.Subject = subject;
                     message.Body = htmlMessage;
                     message.IsBodyHtml = true;
+                    message.Priority = MailPriority.Normal;
 
                     using (var smtpClient = new SmtpClient(smtpServer, port))
                     {
                         smtpClient.Credentials = new NetworkCredential(fromEmail, fromPassword);
                         smtpClient.EnableSsl = enableSsl;
-                        smtpClient.Timeout = 30000;
+                        smtpClient.Timeout = 60000; // Increased timeout to 60 seconds
+                        smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+                        smtpClient.UseDefaultCredentials = false;
 
-                        _logger.LogInformation("🚀 Sending email to {Email}...", email);
+                        _logger.LogInformation("🚀 Attempting to send email to {Email} via {SmtpServer}:{Port}...", email, smtpServer, port);
+                        
                         await smtpClient.SendMailAsync(message);
+                        
                         _logger.LogInformation("✅ Email sent successfully to {Email}", email);
                     }
                 }
             }
             catch (SmtpException smtpEx)
             {
-                _logger.LogError(smtpEx, "❌ SMTP Error sending email to {Email}. Check your email settings.", email);
-                throw new Exception($"SMTP Error: {smtpEx.Message}. Please check your email configuration.");
+                var errorMessage = $"SMTP Error: {smtpEx.Message}";
+                
+                // Provide helpful error messages for common Gmail issues
+                if (smtpEx.Message.Contains("535") || smtpEx.Message.Contains("5.7.8") || smtpEx.Message.Contains("Authentication"))
+                {
+                    errorMessage += "\n\nGmail Authentication Error: Please verify:\n" +
+                                   "1. You are using a Gmail App Password (not your regular password)\n" +
+                                   "2. 2-Step Verification is enabled on your Gmail account\n" +
+                                   "3. The App Password is correct (16 characters, no spaces)\n" +
+                                   "4. Generate a new App Password at: https://myaccount.google.com/apppasswords";
+                }
+                else if (smtpEx.Message.Contains("5.7.1") || smtpEx.Message.Contains("relay"))
+                {
+                    errorMessage += "\n\nGmail Relay Error: Your account may need to allow less secure apps or use App Passwords.";
+                }
+                
+                _logger.LogError(smtpEx, "❌ SMTP Error sending email to {Email}. {ErrorMessage}", email, errorMessage);
+                throw new Exception(errorMessage);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ Failed to send email to {Email}", email);
+                _logger.LogError(ex, "❌ Failed to send email to {Email}. Error: {ErrorMessage}", email, ex.Message);
                 throw new Exception($"Failed to send email: {ex.Message}");
             }
         }

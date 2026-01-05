@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace HikingStore.Data
 {
@@ -15,8 +16,14 @@ namespace HikingStore.Data
 
         [ForeignKey("UserId")]
         public virtual ICollection<Request> Requests { get; set; }
+
+        [PersonalData]
+        public string? FirstName { get; set; }
+
+        [PersonalData]
+        public string? LastName { get; set; }
     }
-    public class ApplicationDbContext : IdentityDbContext
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -29,6 +36,12 @@ namespace HikingStore.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<TrackingEvent> TrackingEvents { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            // Additional configurations can be added here if needed
+        }
     }
 }
 

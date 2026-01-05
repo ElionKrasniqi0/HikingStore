@@ -35,7 +35,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 // Configure Identity with email confirmation REQUIRED
-builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = true; // ✅ REQUIRES email confirmation
     options.User.RequireUniqueEmail = true;
@@ -86,10 +86,15 @@ if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientS
         googleOptions.Scope.Add("email");
     });
 }
-// Configure Email Services based on environment
+// Configure Email Services - Use real email sender for both development and production
+// To use DevelopmentEmailSender (logs only), uncomment the development check below
 if (builder.Environment.IsDevelopment())
 {
-    builder.Services.AddTransient<IEmailSender, DevelopmentEmailSender>();
+    // Uncomment the line below to use DevelopmentEmailSender (logs only, doesn't send)
+    // builder.Services.AddTransient<IEmailSender, DevelopmentEmailSender>();
+    
+    // Use real EmailSender to actually send emails
+    builder.Services.AddTransient<IEmailSender, EmailSender>();
 }
 else
 {
