@@ -41,27 +41,18 @@ namespace HikingStore.Controllers
             return pageData;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            try
+            var model = new IndexVM
             {
-                var model = new IndexVM
-                {
-                    Categories = await _context.Categories.ToListAsync(),
-                    Products = await _context.Products
-                        .Include(p => p.Category)
-                        .Where(p => p.IsInStock)
-                        .OrderByDescending(p => p.ProId)
-                        .Take(8)
-                        .ToListAsync()
-                };
-                return View(model);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading index page");
-                return View(new IndexVM { Categories = new List<Category>(), Products = new List<Product>() });
-            }
+                Categories = _context.Categories.ToList(),
+                Products = _context.Products
+                    .Include(p => p.Category)
+                    .OrderByDescending(p => p.ProId)
+                    .Take(8)
+                    .ToList()
+            };
+            return View(model);
         }
         public async Task<IActionResult> Shop()
         {
@@ -162,22 +153,9 @@ namespace HikingStore.Controllers
 
         public IActionResult ProductDetailes(int? id)
         {
-            if (id == null)
-            {
-                _logger.LogWarning("ProductDetailes called with null id");
-                return RedirectToAction(nameof(Product));
-            }
+            var product = _context.Products.Include(x => x.Category)
 
-            var product = _context.Products
-                .Include(x => x.Category)
                 .FirstOrDefault(p => p.ProId == id);
-
-            if (product == null)
-            {
-                _logger.LogWarning("Product with id {ProductId} not found", id);
-                return NotFound();
-            }
-
             return View(product);
         }
 
@@ -186,24 +164,14 @@ namespace HikingStore.Controllers
             return View();
         }
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Contact(Contact model)
+        public IActionResult Contact(Contact model)
+
         {
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Add(model);
-                    await _context.SaveChangesAsync();
-                    _logger.LogInformation("Contact form submitted successfully from {Email}", model.Email);
-                    TempData["SuccessMessage"] = "Thank you for contacting us! We'll get back to you soon.";
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error saving contact form");
-                    ModelState.AddModelError("", "An error occurred while submitting your message. Please try again.");
-                }
+                _context.Add(model);
+                _context.SaveChanges();
+                return RedirectToAction("Index");
             }
             return View(model);
         }
@@ -227,20 +195,5 @@ namespace HikingStore.Controllers
         {
             return View();
         }
-
-        // Add to HomeController.cs
-        public IActionResult Error(int? statusCode)
-        {
-            if (statusCode.HasValue)
-            {
-                if (statusCode.Value == 404)
-                {
-                    return View("NotFound");
-                }
-            }
-
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
     }
 }
-
