@@ -23,7 +23,7 @@ namespace HikingStore.Data
         [PersonalData]
         public string? LastName { get; set; }
     }
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)

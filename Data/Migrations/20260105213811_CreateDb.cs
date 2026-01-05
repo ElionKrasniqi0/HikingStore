@@ -88,6 +88,7 @@ namespace HikingStore.Data.Migrations
                     Descreption = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     ProImage = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StockQuantity = table.Column<int>(type: "int", nullable: false),
                     CatId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>

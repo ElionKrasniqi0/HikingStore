@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HikingStore.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251201174816_CreateDb")]
+    [Migration("20260105213811_CreateDb")]
     partial class CreateDb
     {
         /// <inheritdoc />
@@ -178,6 +178,9 @@ namespace HikingStore.Data.Migrations
                     b.Property<string>("ProName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("StockQuantity")
+                        .HasColumnType("int");
 
                     b.HasKey("ProId");
 

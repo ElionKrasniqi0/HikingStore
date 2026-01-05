@@ -19,7 +19,7 @@ public class ShoppingCart
     public string? UserId { get; set; }
     [ForeignKey("UserId")]
 
-    public virtual ApplicationUser IdentityUser { get; set; }
+    public virtual IdentityUser IdentityUser { get; set; }
 }
 
 public class ShoppingCartDetails
