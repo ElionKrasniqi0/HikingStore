@@ -32,6 +32,10 @@ namespace HikingStore.Areas.Identity.Pages.Account.Manage
 
         public class InputModel
         {
+            [Required]
+            [Display(Name = "Username")]
+            public string Username { get; set; }
+
             [Phone]
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
@@ -46,6 +50,7 @@ namespace HikingStore.Areas.Identity.Pages.Account.Manage
 
             Input = new InputModel
             {
+                Username = userName,
                 PhoneNumber = phoneNumber
             };
         }
@@ -74,6 +79,21 @@ namespace HikingStore.Areas.Identity.Pages.Account.Manage
             {
                 await LoadAsync(user);
                 return Page();
+            }
+
+            var userName = await _userManager.GetUserNameAsync(user);
+            if (Input.Username != userName)
+            {
+                var setUserNameResult = await _userManager.SetUserNameAsync(user, Input.Username);
+                if (!setUserNameResult.Succeeded)
+                {
+                    foreach (var error in setUserNameResult.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                    await LoadAsync(user);
+                    return Page();
+                }
             }
 
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);

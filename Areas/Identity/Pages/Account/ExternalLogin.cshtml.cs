@@ -7,6 +7,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
+using HikingStore.Data;
 
 namespace HikingStore.Areas.Identity.Pages.Account
 {
@@ -14,17 +15,20 @@ namespace HikingStore.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IUserStore<IdentityUser> _userStore;
         private readonly IEmailSender _emailSender;
 
         public ExternalLoginModel(
             SignInManager<IdentityUser> signInManager,
             UserManager<IdentityUser> userManager,
+            RoleManager<IdentityRole> roleManager,
             IUserStore<IdentityUser> userStore,
             IEmailSender emailSender)
         {
             _signInManager = signInManager;
             _userManager = userManager;
+            _roleManager = roleManager;
             _userStore = userStore;
             _emailSender = emailSender;
         }
@@ -110,55 +114,115 @@ namespace HikingStore.Areas.Identity.Pages.Account
 
             if (ModelState.IsValid)
             {
-                var user = CreateUser();
-
-                await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
-                var emailStore = GetEmailStore();
-                await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-
-                var result = await _userManager.CreateAsync(user);
-                if (result.Succeeded)
+                // Check if a user with this email already exists
+                var existingUser = await _userManager.FindByEmailAsync(Input.Email);
+                
+                if (existingUser != null)
                 {
-                    result = await _userManager.AddLoginAsync(user, info);
+                    // User already exists, link the external login to the existing user
+                    var result = await _userManager.AddLoginAsync(existingUser, info);
                     if (result.Succeeded)
                     {
-                        // Generate email confirmation token and send email
-                        var userId = await _userManager.GetUserIdAsync(user);
-                        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-
-                        var callbackUrl = Url.Page(
-                            "/Account/ConfirmEmail",
-                            pageHandler: null,
-                            values: new { area = "Identity", userId = userId, code = code },
-                            protocol: Request.Scheme);
-
-                        try
+                        // Ensure user has User role if they don't have any role
+                        const string userRoleName = "User";
+                        if (await _roleManager.RoleExistsAsync(userRoleName))
                         {
-                            await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                                $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-                        }
-                        catch (Exception ex)
-                        {
-                            // Log the email sending error but continue with user creation
-                            Console.WriteLine($"Failed to send confirmation email: {ex.Message}");
-                            // You might want to add a model error here to inform the user
-                            ModelState.AddModelError(string.Empty, "Account created but confirmation email could not be sent. Please contact support.");
+                            var userRoles = await _userManager.GetRolesAsync(existingUser);
+                            if (userRoles.Count == 0)
+                            {
+                                await _userManager.AddToRoleAsync(existingUser, userRoleName);
+                            }
                         }
 
-                        // If account confirmation is required, we need to show the link if we don't have a real email sender
-                        if (_userManager.Options.SignIn.RequireConfirmedAccount)
-                        {
-                            return RedirectToPage("./RegisterConfirmation", new { email = Input.Email });
-                        }
-
-                        await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
+                        // Sign in the existing user with the external login
+                        await _signInManager.SignInAsync(existingUser, isPersistent: false, info.LoginProvider);
                         return LocalRedirect(returnUrl);
                     }
+                    else
+                    {
+                        // Failed to link external login
+                        foreach (var error in result.Errors)
+                        {
+                            ModelState.AddModelError(string.Empty, error.Description);
+                        }
+                    }
                 }
-                foreach (var error in result.Errors)
+                else
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    // User doesn't exist, create a new user
+                    var user = CreateUser();
+
+                    await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+                    var emailStore = GetEmailStore();
+                    await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+
+                    // Extract first and last name from external claims if available
+                    if (info.Principal.HasClaim(c => c.Type == ClaimTypes.GivenName))
+                    {
+                        if (user is ApplicationUser appUser)
+                        {
+                            appUser.FirstName = info.Principal.FindFirstValue(ClaimTypes.GivenName);
+                        }
+                    }
+                    if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Surname))
+                    {
+                        if (user is ApplicationUser appUser)
+                        {
+                            appUser.LastName = info.Principal.FindFirstValue(ClaimTypes.Surname);
+                        }
+                    }
+
+                    var result = await _userManager.CreateAsync(user);
+                    if (result.Succeeded)
+                    {
+                        // Assign User role to new external login users
+                        const string userRoleName = "User";
+                        if (await _roleManager.RoleExistsAsync(userRoleName))
+                        {
+                            await _userManager.AddToRoleAsync(user, userRoleName);
+                        }
+
+                        result = await _userManager.AddLoginAsync(user, info);
+                        if (result.Succeeded)
+                        {
+                            // Generate email confirmation token and send email
+                            var userId = await _userManager.GetUserIdAsync(user);
+                            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+                            var callbackUrl = Url.Page(
+                                "/Account/ConfirmEmail",
+                                pageHandler: null,
+                                values: new { area = "Identity", userId = userId, code = code },
+                                protocol: Request.Scheme);
+
+                            try
+                            {
+                                await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                                    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                            }
+                            catch (Exception ex)
+                            {
+                                // Log the email sending error but continue with user creation
+                                Console.WriteLine($"Failed to send confirmation email: {ex.Message}");
+                                // You might want to add a model error here to inform the user
+                                ModelState.AddModelError(string.Empty, "Account created but confirmation email could not be sent. Please contact support.");
+                            }
+
+                            // If account confirmation is required, we need to show the link if we don't have a real email sender
+                            if (_userManager.Options.SignIn.RequireConfirmedAccount)
+                            {
+                                return RedirectToPage("./RegisterConfirmation", new { email = Input.Email });
+                            }
+
+                            await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
+                            return LocalRedirect(returnUrl);
+                        }
+                    }
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
                 }
             }
 
@@ -171,12 +235,12 @@ namespace HikingStore.Areas.Identity.Pages.Account
         {
             try
             {
-                return Activator.CreateInstance<IdentityUser>();
+                return Activator.CreateInstance<ApplicationUser>();
             }
             catch
             {
-                throw new InvalidOperationException($"Can't create an instance of '{nameof(IdentityUser)}'. " +
-                    $"Ensure that '{nameof(IdentityUser)}' is not an abstract class and has a parameterless constructor, or alternatively " +
+                throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
+                    $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor, or alternatively " +
                     $"override the external login page in /Areas/Identity/Pages/Account/ExternalLogin.cshtml");
             }
         }

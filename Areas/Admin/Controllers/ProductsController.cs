@@ -31,15 +31,15 @@ namespace HikingStore.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Product model, IFormFile File)
+        public async Task<IActionResult> Create(Product model)
         {
-            if (File != null)
+            if (model.File != null && model.File.Length > 0)
             {
                 string imageName = Guid.NewGuid().ToString() + ".jpg";
                 string filePathImage = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\Product", imageName);
                 using (var stream = System.IO.File.Create(filePathImage))
                 {
-                    await File.CopyToAsync(stream);
+                    await model.File.CopyToAsync(stream);
                 }
                 model.ProImage = imageName;
             }
@@ -65,15 +65,15 @@ namespace HikingStore.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(int id, Product model, IFormFile File)
+        public async Task<IActionResult> Edit(int id, Product model)
         {
-            if (File != null)
+            if (model.File != null && model.File.Length > 0)
             {
                 string imageName = Guid.NewGuid().ToString() + ".jpg";
                 string filePathImage = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\Product", imageName);
                 using (var stream = System.IO.File.Create(filePathImage))
                 {
-                    await File.CopyToAsync(stream);
+                    await model.File.CopyToAsync(stream);
                 }
                 model.ProImage = imageName;
             }

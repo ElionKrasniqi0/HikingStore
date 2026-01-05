@@ -1,11 +1,31 @@
 ﻿@using HikingStore.Data
 @using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
+@inject ApplicationDbContext Context
 
 <div class="navbar-nav align-items-center">
     @if (SignInManager.IsSignedIn(User))
     {
+        var userId = UserManager.GetUserId(User);
+        string displayName = UserManager.GetUserName(User) ?? "";
+        ApplicationUser appUser = null;
+        
+        if (!string.IsNullOrEmpty(userId))
+        {
+            var user = await Context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user is ApplicationUser appUserType)
+            {
+                appUser = appUserType;
+                var firstName = appUser.FirstName ?? "";
+                var lastName = appUser.LastName ?? "";
+                if (!string.IsNullOrWhiteSpace(firstName) || !string.IsNullOrWhiteSpace(lastName))
+                {
+                    displayName = $"{firstName} {lastName}".Trim();
+                }
+            }
+        }
         <!-- User Dropdown for logged-in users -->
         <div class="dropdown">
             <a class="nav-link dropdown-toggle d-flex align-items-center text-decoration-none user-dropdown-toggle"
@@ -17,7 +37,7 @@
                     </div>
                 </div>
                 <div class="user-info d-none d-md-block">
-                    <div class="user-name">@UserManager.GetUserName(User)</div>
+                    <div class="user-name">@displayName</div>
                     <div class="user-role text-muted small">
                         @if (User.IsInRole("Admin"))
                         {
@@ -38,7 +58,7 @@
                 <li>
                     <div class="dropdown-header user-welcome">
                         <div class="welcome-text">Welcome back</div>
-                        <div class="user-email text-truncate">@UserManager.GetUserName(User)</div>
+                        <div class="user-email text-truncate">@displayName</div>
                     </div>
                 </li>
                 <li><hr class="dropdown-divider my-2"></li>

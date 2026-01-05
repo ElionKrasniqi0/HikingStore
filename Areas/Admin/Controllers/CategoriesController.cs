@@ -1,6 +1,7 @@
 ﻿using HikingStore.Data;
 using HikingStore.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace HikingStore.Areas.Admin.Controllers
 {
@@ -26,15 +27,15 @@ namespace HikingStore.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Category model, IFormFile File)
+        public async Task<IActionResult> Create(Category model)
         {
-            if (File != null)
+            if (model.File != null && model.File.Length > 0)
             {
                 string imageName = Guid.NewGuid().ToString() + ".jpg";
                 string filePathImage = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\category", imageName);
                 using (var stream = System.IO.File.Create(filePathImage))
                 {
-                    await File.CopyToAsync(stream);
+                    await model.File.CopyToAsync(stream);
                 }
                 model.CatPhoto = imageName;
             }
@@ -51,24 +52,29 @@ namespace HikingStore.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public IActionResult Edit(int id, Category model, IFormFile File)
+        public async Task<IActionResult> Edit(int id, Category model)
         {
-            if (File != null)
+            if (model.File != null && model.File.Length > 0)
             {
                 string imageName = Guid.NewGuid().ToString() + ".jpg";
                 string filePathImage = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\category", imageName);
                 using (var stream = System.IO.File.Create(filePathImage))
                 {
-                    File.CopyTo(stream);
+                    await model.File.CopyToAsync(stream);
                 }
                 model.CatPhoto = imageName;
             }
             else
             {
-                model.CatPhoto = model.CatPhoto;
+                // Preserve existing image
+                var existingCategory = await _context.Categories.AsNoTracking().FirstOrDefaultAsync(c => c.CatId == id);
+                if (existingCategory != null)
+                {
+                    model.CatPhoto = existingCategory.CatPhoto;
+                }
             }
             _context.Update(model);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
