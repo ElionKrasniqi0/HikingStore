@@ -9,12 +9,12 @@
     }
 }
 
-<div class="min-vh-100 bg-light py-5">
+<div class="user-area-container min-vh-100 bg-light py-5">
     <div class="container">
         <div class="row">
             <!-- Sidebar Navigation -->
             <div class="col-lg-3 col-md-4 mb-4">
-                <div class="card border-0 shadow-sm">
+                <div class="card border-0 shadow-sm user-sidebar-card">
                     <div class="card-header bg-white border-0 py-4">
                         <div class="d-flex align-items-center">
                             <div class="user-avatar me-3">
@@ -23,7 +23,7 @@
                                 </div>
                             </div>
                             <div>
-                                <h6 class="mb-1 fw-bold">Account Settings</h6>
+                                <h6 class="mb-1 fw-bold text-dark">Account Settings</h6>
                                 <p class="text-muted small mb-0">Manage your profile</p>
                             </div>
                         </div>
@@ -36,7 +36,7 @@
 
             <!-- Main Content -->
             <div class="col-lg-9 col-md-8">
-                <div class="card border-0 shadow-sm">
+                <div class="card border-0 shadow-sm user-content-card">
                     <div class="card-body p-4">
                         @RenderBody()
                     </div>
@@ -46,6 +46,164 @@
     </div>
 </div>
 
+<style>
+    .user-area-container {
+        background: linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%);
+        min-height: 100vh;
+    }
+
+    .user-sidebar-card,
+    .user-content-card {
+        transition: box-shadow 0.3s ease, transform 0.3s ease;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .user-sidebar-card:hover,
+    .user-content-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .user-sidebar-card .card-header {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .user-content-card {
+        background: #ffffff;
+    }
+
+    .user-content-card .card-body {
+        animation: fadeIn 0.3s ease-in;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Ensure smooth page transitions */
+    .user-area-container a,
+    .user-area-container button {
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Prevent vibration/shake animations - only allow smooth fadeIn */
+    .user-area-container .nav-link,
+    .user-area-container button {
+        animation: none !important;
+    }
+
+    /* Professional form styling */
+    .user-content-card .form-control {
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 0.625rem 0.875rem;
+        transition: all 0.25s ease;
+    }
+
+    .user-content-card .form-control:focus {
+        border-color: #3b5d50;
+        box-shadow: 0 0 0 0.2rem rgba(59, 93, 80, 0.15);
+        outline: none;
+    }
+
+    .user-content-card .btn {
+        border-radius: 6px;
+        padding: 0.625rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.25s ease;
+    }
+
+    .user-content-card .btn-primary {
+        background-color: #3b5d50;
+        border-color: #3b5d50;
+    }
+
+    .user-content-card .btn-primary:hover {
+        background-color: #2d473d;
+        border-color: #2d473d;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(59, 93, 80, 0.3);
+    }
+
+    .user-content-card .btn-primary:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(59, 93, 80, 0.2);
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 991.98px) {
+        .user-sidebar-card {
+            margin-bottom: 1.5rem;
+        }
+    }
+
+    @@media (max-width: 767.98px) {
+        .user-area-container {
+            padding-top: 1.5rem;
+            padding-bottom: 1.5rem;
+        }
+
+        .user-content-card .card-body {
+            padding: 1.5rem !important;
+        }
+    }
+</style>
+
 @section Scripts {
+    <script>
+        // Ensure smooth page transitions and button functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Smooth scroll to top on navigation
+            const navLinks = document.querySelectorAll('.manage-nav .nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Allow default navigation behavior
+                    // Smooth scroll to top after navigation
+                    setTimeout(() => {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }, 100);
+                });
+            });
+
+            // Ensure logout button works smoothly
+            const logoutButton = document.querySelector('.logout-button');
+            if (logoutButton) {
+                logoutButton.addEventListener('click', function(e) {
+                    // Allow form submission - no preventDefault
+                    this.style.opacity = '0.8';
+                });
+            }
+
+            // Prevent any vibration/shake effects on buttons
+            const allButtons = document.querySelectorAll('.user-area-container button, .user-area-container .btn');
+            allButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    // Ensure no vibration - allow default behavior
+                    this.style.animation = 'none';
+                });
+            });
+
+            // Smooth form submissions
+            const forms = document.querySelectorAll('.user-area-container form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    // Allow normal form submission
+                    const submitButton = form.querySelector('button[type="submit"], input[type="submit"]');
+                    if (submitButton) {
+                        submitButton.style.pointerEvents = 'none';
+                        submitButton.style.opacity = '0.7';
+                    }
+                });
+            });
+        });
+    </script>
     @RenderSection("Scripts", required: false)
 }

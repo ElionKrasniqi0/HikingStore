@@ -2,27 +2,51 @@
 @{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
 }
-<ul class="nav flex-column nav-pills">
-    <li class="nav-item"><a class="nav-link @ManageNavPages.IndexNavClass(ViewContext)" id="profile" asp-page="./Index">Profile</a></li>
-    <li class="nav-item"><a class="nav-link @ManageNavPages.EmailNavClass(ViewContext)" id="email" asp-page="./Email">Email</a></li>
-    <li class="nav-item"><a class="nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-page="./ChangePassword">Password</a></li>
+<ul class="nav flex-column nav-pills manage-nav">
+    <li class="nav-item">
+        <a class="nav-link @ManageNavPages.IndexNavClass(ViewContext)" id="profile" asp-page="./Index">
+            <i class="fas fa-user-circle me-2"></i>Profile
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @ManageNavPages.EmailNavClass(ViewContext)" id="email" asp-page="./Email">
+            <i class="fas fa-envelope me-2"></i>Email
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-page="./ChangePassword">
+            <i class="fas fa-lock me-2"></i>Password
+        </a>
+    </li>
     @if (hasExternalLogins)
     {
-        <li id="external-logins" class="nav-item"><a id="external-login" class="nav-link @ManageNavPages.ExternalLoginsNavClass(ViewContext)" asp-page="./ExternalLogins">External logins</a></li>
+        <li id="external-logins" class="nav-item">
+            <a id="external-login" class="nav-link @ManageNavPages.ExternalLoginsNavClass(ViewContext)" asp-page="./ExternalLogins">
+                <i class="fas fa-link me-2"></i>External logins
+            </a>
+        </li>
     }
-    <li class="nav-item"><a class="nav-link @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)" id="two-factor" asp-page="./TwoFactorAuthentication">Two-factor authentication</a></li>
-    <li class="nav-item"><a class="nav-link @ManageNavPages.PersonalDataNavClass(ViewContext)" id="personal-data" asp-page="./PersonalData">Personal data</a></li>
+    <li class="nav-item">
+        <a class="nav-link @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)" id="two-factor" asp-page="./TwoFactorAuthentication">
+            <i class="fas fa-shield-alt me-2"></i>Two-factor authentication
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @ManageNavPages.PersonalDataNavClass(ViewContext)" id="personal-data" asp-page="./PersonalData">
+            <i class="fas fa-database me-2"></i>Personal data
+        </a>
+    </li>
     @if (User.IsInRole("Admin"))
     {
         <li class="nav-item">
-            <a class="nav-link text-warning" href="/Admin">
-                <i class="fas fa-shield-alt me-2"></i>Admin Dashboard
+            <a class="nav-link admin-link" href="/Admin">
+                <i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard
             </a>
         </li>
     }
     <li class="nav-item mt-4">
-        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-            <button type="submit" class="nav-link text-danger border-0 bg-transparent w-100 text-start">
+        <form class="form-inline logout-form" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+            <button type="submit" class="nav-link logout-button border-0 bg-transparent w-100 text-start">
                 <i class="fas fa-sign-out-alt me-2"></i>Logout
             </button>
         </form>
@@ -30,31 +54,83 @@
 </ul>
 
 <style>
-    .nav-pills .nav-link {
-        padding: 0.75rem 1.25rem;
-        border-radius: 0;
-        color: #6c757d;
-        border-left: 3px solid transparent;
-        transition: all 0.3s ease;
+    .manage-nav {
+        margin: 0;
+        padding: 0;
     }
 
-        .nav-pills .nav-link:hover {
-            background: rgba(59, 93, 80, 0.05);
-            color: #3b5d50;
-            border-left-color: rgba(59, 93, 80, 0.3);
-        }
+    .nav-pills .nav-link {
+        padding: 0.875rem 1.5rem;
+        border-radius: 0;
+        color: #495057;
+        border-left: 3px solid transparent;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        position: relative;
+        margin: 0.125rem 0;
+    }
 
-        .nav-pills .nav-link.active {
-            background: rgba(59, 93, 80, 0.1);
-            color: #3b5d50;
-            border-left-color: #3b5d50;
-            font-weight: 600;
-        }
+    .nav-pills .nav-link:focus {
+        outline: none;
+        box-shadow: none;
+    }
 
-        .nav-pills .nav-link i {
-            width: 20px;
-            text-align: center;
-        }
+    .nav-pills .nav-link:hover {
+        background: rgba(59, 93, 80, 0.08);
+        color: #3b5d50;
+        border-left-color: rgba(59, 93, 80, 0.5);
+        transform: translateX(2px);
+    }
+
+    .nav-pills .nav-link.active {
+        background: rgba(59, 93, 80, 0.12);
+        color: #3b5d50;
+        border-left-color: #3b5d50;
+        font-weight: 600;
+    }
+
+    .nav-pills .nav-link.active:hover {
+        background: rgba(59, 93, 80, 0.15);
+    }
+
+    .nav-pills .nav-link i {
+        width: 20px;
+        text-align: center;
+        font-size: 0.95rem;
+    }
+
+    .nav-pills .nav-link.admin-link {
+        color: #ffc107;
+    }
+
+    .nav-pills .nav-link.admin-link:hover {
+        background: rgba(255, 193, 7, 0.1);
+        border-left-color: #ffc107;
+        color: #ffb300;
+    }
+
+    .logout-button {
+        color: #dc3545 !important;
+        cursor: pointer;
+    }
+
+    .logout-button:hover {
+        background: rgba(220, 53, 69, 0.1) !important;
+        color: #c82333 !important;
+        border-left-color: #dc3545 !important;
+    }
+
+    .logout-button:active {
+        transform: translateX(1px);
+    }
+
+    .logout-form {
+        margin: 0;
+        padding: 0;
+    }
 
     .avatar-circle {
         width: 50px;
@@ -66,9 +142,24 @@
         justify-content: center;
         color: white;
         font-size: 1.2rem;
+        box-shadow: 0 2px 8px rgba(59, 93, 80, 0.2);
     }
 
-    .text-warning {
-        color: #ffc107 !important;
+    /* Prevent vibration/shake animations - only allow smooth transitions */
+    .nav-link,
+    .logout-button {
+        animation: none !important;
+    }
+
+    /* Smooth page transitions */
+    html {
+        scroll-behavior: smooth;
+    }
+
+    /* Ensure buttons don't have vibration on click */
+    .manage-nav button:active,
+    .manage-nav .nav-link:active {
+        transform: translateX(1px) !important;
+        animation: none !important;
     }
 </style>
