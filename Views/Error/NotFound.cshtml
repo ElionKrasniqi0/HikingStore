@@ -14,25 +14,26 @@
         </p>
 
         <div class="d-flex flex-wrap justify-content-center gap-3 mb-5">
-            <a href="/" class="btn btn-primary">
-                <i class="fas fa-home me-2"></i>Go Home
+            <a href="/" class="btn btn-primary" aria-label="Go to home page">
+                <i class="fas fa-home me-2" aria-hidden="true"></i>Go Home
             </a>
-            <a href="/Home/Product" class="btn btn-outline-primary">
-                <i class="fas fa-shopping-bag me-2"></i>Browse Products
+            <a href="/Home/Product" class="btn btn-outline-primary" aria-label="Browse all products">
+                <i class="fas fa-shopping-bag me-2" aria-hidden="true"></i>Browse Products
             </a>
-            <button onclick="history.back()" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-2"></i>Go Back
+            <button onclick="history.back()" class="btn btn-outline-secondary" aria-label="Go back to previous page">
+                <i class="fas fa-arrow-left me-2" aria-hidden="true"></i>Go Back
             </button>
         </div>
 
         <div class="search-box mt-4">
             <p class="text-muted small mb-2">Try searching instead:</p>
-            <div class="input-group" style="max-width: 400px; margin: 0 auto;">
-                <input type="text" class="form-control" placeholder="What are you looking for?">
-                <button class="btn btn-primary" type="button">
-                    <i class="fas fa-search"></i>
+            <form class="input-group" style="max-width: 400px; margin: 0 auto;" onsubmit="handleNotFoundSearch(event)" role="search">
+                <input type="text" class="form-control" placeholder="What are you looking for?" 
+                       id="notfound-search" aria-label="Search products">
+                <button class="btn btn-primary" type="submit" aria-label="Submit search">
+                    <i class="fas fa-search" aria-hidden="true"></i>
                 </button>
-            </div>
+            </form>
         </div>
     </div>
 </div>
@@ -91,3 +92,14 @@
         }
     }
 </style>
+
+<script>
+    function handleNotFoundSearch(event) {
+        event.preventDefault();
+        const searchInput = document.getElementById('notfound-search');
+        const searchTerm = searchInput ? searchInput.value.trim() : '';
+        if (searchTerm !== '') {
+            window.location.href = '/Home/SearchProduct?search=' + encodeURIComponent(searchTerm);
+        }
+    }
+</script>

@@ -3,8 +3,31 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Premium hiking gear and outdoor equipment for your next adventure">
-    <title>@ViewData["Title"] - HikingStore</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="description" content="Premium hiking gear and outdoor equipment for your next adventure. Shop quality hiking boots, backpacks, camping gear, and outdoor clothing.">
+    <meta name="keywords" content="hiking gear, outdoor equipment, camping supplies, hiking boots, backpacks, outdoor clothing">
+    <meta name="author" content="HikingStore">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#2d473d">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="@(Context.Request.Scheme)://@(Context.Request.Host)">
+    <meta property="og:title" content="@(ViewData["Title"] ?? "HikingStore") - Premium Hiking Gear">
+    <meta property="og:description" content="Premium hiking gear and outdoor equipment for your next adventure">
+    <meta property="og:image" content="@(Context.Request.Scheme)://@(Context.Request.Host)/img/banner-1.jpg">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="@(Context.Request.Scheme)://@(Context.Request.Host)">
+    <meta property="twitter:title" content="@(ViewData["Title"] ?? "HikingStore") - Premium Hiking Gear">
+    <meta property="twitter:description" content="Premium hiking gear and outdoor equipment for your next adventure">
+    <meta property="twitter:image" content="@(Context.Request.Scheme)://@(Context.Request.Host)/img/banner-1.jpg">
+    
+    <title>@(ViewData["Title"] != null ? $"{ViewData["Title"]} - " : "")HikingStore - Premium Hiking Gear & Outdoor Equipment</title>
+    
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
+    <link rel="canonical" href="@(Context.Request.Scheme)://@(Context.Request.Host)@(Context.Request.Path)" />
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -296,8 +319,6 @@
             padding: 2rem 0;
         }
 
-        }
-
         /* Accessibility */
         .sr-only {
             position: absolute;
@@ -309,6 +330,36 @@
             clip: rect(0, 0, 0, 0);
             white-space: nowrap;
             border: 0;
+        }
+
+        .sr-only-focusable:focus {
+            position: static;
+            width: auto;
+            height: auto;
+            padding: 0.5rem 1rem;
+            margin: 0;
+            overflow: visible;
+            clip: auto;
+            white-space: normal;
+            background: var(--primary-color);
+            color: var(--white);
+            z-index: 9999;
+            border-radius: var(--border-radius);
+        }
+
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--primary-color);
+            color: var(--white);
+            padding: 8px;
+            text-decoration: none;
+            z-index: 10000;
+        }
+
+        .skip-link:focus {
+            top: 0;
         }
 
         /* Focus states for accessibility */
@@ -363,13 +414,33 @@
     </style>
 
     @RenderSection("Styles", required: false)
+    
+    <!-- Structured Data for SEO -->
+    <script type="application/ld+json">
+    {
+        "@@context": "https://schema.org",
+        "@@type": "Store",
+        "name": "HikingStore",
+        "description": "Premium hiking gear and outdoor equipment for your next adventure",
+        "url": "@(Context.Request.Scheme)://@(Context.Request.Host)",
+        "logo": "@(Context.Request.Scheme)://@(Context.Request.Host)/img/banner-1.jpg",
+        "sameAs": [
+            "https://www.facebook.com/",
+            "https://www.x.com/",
+            "https://www.instagram.com/",
+            "https://www.linkedin.com/"
+        ]
+    }
+    </script>
 </head>
 <body>
+    <!-- Skip to main content for accessibility -->
+    <a href="#main-content" class="sr-only sr-only-focusable skip-link">Skip to main content</a>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top" role="navigation" aria-label="Main navigation">
         <div class="container">
-            <a class="navbar-brand" asp-controller="Home" asp-action="Index">
-                <i class="fas fa-mountain me-2"></i>HikingStore
+            <a class="navbar-brand" asp-controller="Home" asp-action="Index" aria-label="HikingStore Home">
+                <i class="fas fa-mountain me-2" aria-hidden="true"></i>HikingStore
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -400,13 +471,14 @@
                 <div class="navbar-nav align-items-center">
                     <!-- Search Bar -->
                     <div class="nav-item me-3">
-                        <div class="input-group input-group-sm">
+                        <form class="input-group input-group-sm" role="search" onsubmit="handleSearch(event)">
                             <input type="text" class="form-control" placeholder="Search products..."
-                                   aria-label="Search" aria-describedby="search-button">
-                            <button class="btn btn-primary" type="button" id="search-button">
-                                <i class="fas fa-search"></i>
+                                   aria-label="Search products" aria-describedby="search-button" 
+                                   id="navbar-search-input" name="search">
+                            <button class="btn btn-primary" type="submit" id="search-button" aria-label="Submit search">
+                                <i class="fas fa-search" aria-hidden="true"></i>
                             </button>
-                        </div>
+                        </form>
                     </div>
 
                     <!-- User Authentication -->
@@ -422,7 +494,7 @@
     </nav>
 
     <!-- Main Content -->
-    <main role="main">
+    <main id="main-content" role="main" tabindex="-1">
         @RenderBody()
     </main>
 
@@ -435,11 +507,11 @@
                         <i class="fas fa-mountain me-2"></i>HikingStore
                     </h5>
                     <p class="mb-4">Your trusted partner for premium hiking gear and outdoor equipment. Explore nature with confidence and style.</p>
-                    <div class="social-links">
-                        <a href="https://www.facebook.com/" target="_blank"><i class="fa fa-brands fa-facebook-f"></i></a>
-                        <a href="https://www.x.com/" target="_blank"><i class="fa fa-brands fa-twitter"></i></a>
-                        <a href="https://www.instagram.com/ " target="_blank"><i class="fa fa-brands fa-instagram"></i></a>
-                        <a href="https://www.linkedin.com/" target="_blank"><i class="fa fa-brands fa-linkedin"></i></a>
+                    <div class="social-links" role="list">
+                        <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" aria-label="Visit our Facebook page"><i class="fa fa-brands fa-facebook-f" aria-hidden="true"></i></a>
+                        <a href="https://www.x.com/" target="_blank" rel="noopener noreferrer" aria-label="Visit our Twitter page"><i class="fa fa-brands fa-twitter" aria-hidden="true"></i></a>
+                        <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Visit our Instagram page"><i class="fa fa-brands fa-instagram" aria-hidden="true"></i></a>
+                        <a href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer" aria-label="Visit our LinkedIn page"><i class="fa fa-brands fa-linkedin" aria-hidden="true"></i></a>
                     </div>
                 </div>
 
@@ -507,12 +579,24 @@
         });
 
         // Search functionality
-        document.getElementById('search-button').addEventListener('click', function() {
-            const searchTerm = document.querySelector('input[placeholder="Search products..."]').value;
-            if (searchTerm.trim() !== '') {
+        function handleSearch(event) {
+            event.preventDefault();
+            const searchInput = document.getElementById('navbar-search-input');
+            const searchTerm = searchInput ? searchInput.value.trim() : '';
+            if (searchTerm !== '') {
                 window.location.href = '/Home/SearchProduct?search=' + encodeURIComponent(searchTerm);
             }
-        });
+        }
+
+        // Allow Enter key to submit search
+        const searchInput = document.getElementById('navbar-search-input');
+        if (searchInput) {
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleSearch(e);
+                }
+            });
+        }
 
         // Cart functionality
         function updateCartItem(cartId, quantity) {

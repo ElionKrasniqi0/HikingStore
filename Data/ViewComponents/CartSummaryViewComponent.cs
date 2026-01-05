@@ -1,29 +1,43 @@
 ﻿using HikingStore.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
-public class CartSummaryViewComponent : ViewComponent
+namespace HikingStore.Data.ViewComponents
 {
-    private readonly ApplicationDbContext _context;
-
-    public CartSummaryViewComponent(ApplicationDbContext context)
+    public class CartSummaryViewComponent : ViewComponent
     {
-        _context = context;
-    }
+        private readonly ApplicationDbContext _context;
+        private readonly ILogger<CartSummaryViewComponent> _logger;
 
-    public async Task<IViewComponentResult> InvokeAsync()
-    {
-        var userId = UserClaimsPrincipal.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        if (userId == null)
+        public CartSummaryViewComponent(ApplicationDbContext context, ILogger<CartSummaryViewComponent> logger)
         {
-            return View(0);
+            _context = context;
+            _logger = logger;
         }
 
-        var cartItems = await _context.ShoppingCarts
-            .Where(c => c.UserId == userId)
-            .ToListAsync();
+        public async Task<IViewComponentResult> InvokeAsync()
+        {
+            try
+            {
+                var userId = UserClaimsPrincipal?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return View(0);
+                }
 
-        var totalItems = cartItems.Sum(c => c.Qty);
-        return View(totalItems);
+                var cartItems = await _context.ShoppingCarts
+                    .Where(c => c.UserId == userId)
+                    .ToListAsync();
+
+                var totalItems = cartItems.Sum(c => c.Qty);
+                return View(totalItems);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading cart summary for user");
+                return View(0);
+            }
+        }
     }
 }

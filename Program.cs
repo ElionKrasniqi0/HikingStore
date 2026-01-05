@@ -58,8 +58,6 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 .AddDefaultTokenProviders();
 
 // Configure Email Services
-builder.Services.AddTransient<IEmailSender, EmailSender>();
-builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddLogging();
 builder.Services.AddMemoryCache();
@@ -156,6 +154,23 @@ app.Use(async (context, next) =>
     }
 });
 
+// Security Headers
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.Append("X-Frame-Options", "DENY");
+    context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
+    context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+    context.Response.Headers.Append("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
+    
+    if (!context.Request.IsHttps && !app.Environment.IsDevelopment())
+    {
+        context.Response.Headers.Append("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+    }
+    
+    await next();
+});
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
@@ -177,5 +192,5 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapRazorPages();
-app.UseRouting();
+
 app.Run();
