@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using HikingStore.Data;
 
 public class ShoppingCart
 {
@@ -18,7 +19,7 @@ public class ShoppingCart
     public string? UserId { get; set; }
     [ForeignKey("UserId")]
 
-    public virtual IdentityUser IdentityUser { get; set; }
+    public virtual ApplicationUser IdentityUser { get; set; }
 }
 
 public class ShoppingCartDetails
