@@ -1,0 +1,54 @@
+@{
+    ViewData["Title"] = "Test Email";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-envelope me-2"></i>Test Email Configuration</h4>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.Success != null)
+                    {
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>@ViewBag.Success
+                        </div>
+                    }
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle me-2"></i>@ViewBag.Error
+                        </div>
+                    }
+                    
+                    <form method="post" asp-action="SendTestEmail">
+                        <div class="mb-3">
+                            <label for="testEmail" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="testEmail" name="testEmail" required placeholder="Enter email address to test">
+                            <small class="form-text text-muted">Enter an email address to send a test email</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-paper-plane me-2"></i>Send Test Email
+                        </button>
+                    </form>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle me-2"></i>Gmail Setup Instructions:</h6>
+                        <ol class="mb-0">
+                            <li>Enable <strong>2-Step Verification</strong> on your Gmail account</li>
+                            <li>Generate an <strong>App Password</strong> at: <a href="https://myaccount.google.com/apppasswords" target="_blank">myaccount.google.com/apppasswords</a></li>
+                            <li>Use the 16-character App Password (without spaces) in appsettings.json</li>
+                            <li>Do NOT use your regular Gmail password</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
