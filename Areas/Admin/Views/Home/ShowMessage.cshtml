@@ -1,106 +1,316 @@
 ﻿@model List<Contact>
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
     ViewData["Title"] = "Contact Messages";
+    var todayCount = Model.Count(m => m.CreatedDate.Date == DateTime.Today);
 }
+
+<style>
+    /* Hero Section */
+    .hero-section {
+        background: linear-gradient(135deg, #3b5d50 0%, #2d4a3f 100%);
+        color: white;
+        padding: 30px 0;
+        margin-bottom: 40px;
+    }
+
+    .hero-section h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .hero-section p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+
+    /* Statistics Cards */
+    .stat-card {
+        border-radius: 12px;
+        border: none;
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-card .card-body {
+        padding: 20px;
+    }
+
+    .stat-card h4 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .stat-card p {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+
+    /* Filter Card */
+    .filter-card {
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        margin-bottom: 30px;
+    }
+
+    .filter-card .card-body {
+        padding: 25px;
+    }
+
+    /* Messages Table */
+    .messages-table-card {
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+
+    .messages-table-card .card-header {
+        background: #f8fafc;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 20px 25px;
+    }
+
+    .messages-table-card .table {
+        margin-bottom: 0;
+    }
+
+    .messages-table-card .table thead {
+        background: #f8fafc;
+    }
+
+    .messages-table-card .table th {
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #6b7280;
+        padding: 15px;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .messages-table-card .table td {
+        padding: 15px;
+        vertical-align: middle;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .messages-table-card .table tbody tr {
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .messages-table-card .table tbody tr:hover {
+        background: #f9fafb;
+    }
+
+    /* Avatar */
+    .avatar-sm {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+        background: #f3f4f6;
+        color: #3b5d50;
+    }
+
+    /* Message Preview */
+    .message-preview {
+        max-width: 300px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: #d1d5db;
+        margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+        color: #6b7280;
+        margin-bottom: 10px;
+    }
+
+    .empty-state p {
+        color: #9ca3af;
+        margin-bottom: 0;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .hero-section {
+            padding: 20px 0;
+        }
+
+        .hero-section h1 {
+            font-size: 2rem;
+        }
+
+        .stat-card {
+            margin-bottom: 15px;
+        }
+
+        .messages-table-card .table {
+            font-size: 0.875rem;
+        }
+
+        .messages-table-card .table th,
+        .messages-table-card .table td {
+            padding: 10px 8px;
+        }
+
+        .message-preview {
+            max-width: 150px;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+    }
+</style>
+
 <br />
 <br />
 <br />
-<br />
-<div class="container-fluid px-4">
-    <!-- Header Section -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 mb-1 text-gray-800">Contact Messages</h1>
-            <p class="text-muted">Manage and respond to customer inquiries</p>
+
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container-fluid px-4">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1>Contact Messages</h1>
+                <p>Manage and respond to customer inquiries</p>
+            </div>
+            <div class="col-lg-4 text-end">
+                <button class="btn btn-light btn-lg" onclick="refreshMessages()">
+                    <i class="fas fa-sync-alt me-2"></i>Refresh
+                </button>
+            </div>
         </div>
-        <div class="d-flex gap-2">
-            <button class="btn btn-outline-primary" onclick="exportMessages()">
-                <i class="fas fa-download me-2"></i>Export
-            </button>
-            <button class="btn btn-outline-secondary" onclick="refreshMessages()">
-                <i class="fas fa-sync-alt me-2"></i>Refresh
-            </button>
+    </div>
+</div>
+
+<div class="container-fluid px-4 pb-5">
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stat-card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0">@Model.Count</h4>
+                            <p class="mb-0">Total Messages</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-inbox fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stat-card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0">@Model.Count(m => !string.IsNullOrEmpty(m.Subject))</h4>
+                            <p class="mb-0">With Subject</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-tag fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stat-card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0">@Model.Count(m => string.IsNullOrEmpty(m.Subject))</h4>
+                            <p class="mb-0">No Subject</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-circle fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stat-card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0">@todayCount</h4>
+                            <p class="mb-0">Today's Messages</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-clock fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-primary bg-opacity-10 border-0">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <h4 class="mb-0">@Model.Count</h4>
-                            <p class="text-muted mb-0">Total Messages</p>
-                        </div>
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-inbox fa-2x text-primary"></i>
-                        </div>
+    <!-- Search Filter -->
+    <div class="card filter-card">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-10">
+                    <label class="form-label fw-semibold">Search Messages</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="searchInput" 
+                               placeholder="Search by name, email, subject, or message..." 
+                               onkeypress="if(event.key === 'Enter') searchMessages()">
+                        <button class="btn btn-outline-secondary" type="button" onclick="searchMessages()">
+                            <i class="fas fa-search"></i>
+                        </button>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-success bg-opacity-10 border-0">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <h4 class="mb-0">@Model.Count(m => !string.IsNullOrEmpty(m.Subject))</h4>
-                            <p class="text-muted mb-0">With Subject</p>
-                        </div>
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-tag fa-2x text-success"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-warning bg-opacity-10 border-0">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <h4 class="mb-0">@Model.Count(m => string.IsNullOrEmpty(m.Subject))</h4>
-                            <p class="text-muted mb-0">No Subject</p>
-                        </div>
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-exclamation-circle fa-2x text-warning"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-info bg-opacity-10 border-0">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <h4 class="mb-0">Today</h4>
-                            <p class="text-muted mb-0">New Messages</p>
-                        </div>
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-clock fa-2x text-info"></i>
-                        </div>
-                    </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button class="btn btn-outline-secondary w-100" onclick="clearSearch()">
+                        <i class="fas fa-times me-2"></i>Clear
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Messages Table -->
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-white py-3">
+    <div class="card messages-table-card">
+        <div class="card-header">
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    <h5 class="mb-0">Customer Messages</h5>
+                    <h5 class="mb-0 fw-semibold">Customer Messages</h5>
                 </div>
-                <div class="col-md-6">
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Search messages..." id="searchInput">
-                        <button class="btn btn-outline-secondary" type="button">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
+                <div class="col-md-6 text-end">
+                    <span class="text-muted">Showing <strong id="messageCount">@Model.Count</strong> @(Model.Count == 1 ? "message" : "messages")</span>
                 </div>
             </div>
         </div>
@@ -109,22 +319,22 @@
             {
                 <div class="table-responsive">
                     <table class="table table-hover mb-0" id="messagesTable">
-                        <thead class="table-light">
+                        <thead>
                             <tr>
-                                <th class="border-0">Contact</th>
-                                <th class="border-0">Subject</th>
-                                <th class="border-0">Message Preview</th>
-                                <th class="border-0">Date</th>
-                                <th class="border-0 text-end">Actions</th>
+                                <th>Contact</th>
+                                <th>Subject</th>
+                                <th>Message Preview</th>
+                                <th>Date</th>
+                                <th class="text-end">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var item in Model)
                             {
-                                <tr id="message-@item.CoId">
+                                <tr id="message-@item.CoId" onclick="viewMessage(@item.CoId, '@item.Name', '@item.Email', '@(item.Subject ?? "")', '@(item.Message ?? "")')">
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <div class="avatar-sm bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3">
+                                            <div class="avatar-sm bg-light rounded-circle d-flex align-items-center justify-content-center me-3">
                                                 <i class="fas fa-user"></i>
                                             </div>
                                             <div>
@@ -163,9 +373,10 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <small class="text-muted">@item.CreatedDate.ToString("MMM dd, yyyy")</small>
+                                        <div>@item.CreatedDate.ToString("MMM dd, yyyy")</div>
+                                        <small class="text-muted">@item.CreatedDate.ToString("hh:mm tt")</small>
                                     </td>
-                                    <td class="text-end">
+                                    <td class="text-end" onclick="event.stopPropagation()">
                                         <div class="btn-group" role="group">
                                             <button class="btn btn-sm btn-outline-primary view-message"
                                                     data-bs-toggle="modal"
@@ -173,8 +384,8 @@
                                                     data-id="@item.CoId"
                                                     data-name="@item.Name"
                                                     data-email="@item.Email"
-                                                    data-subject="@item.Subject"
-                                                    data-message="@item.Message">
+                                                    data-subject="@(item.Subject ?? "")"
+                                                    data-message="@(item.Message ?? "")">
                                                 <i class="fas fa-eye me-1"></i>View
                                             </button>
                                             <button class="btn btn-sm btn-outline-success reply-message"
@@ -182,7 +393,7 @@
                                                     data-bs-target="#replyModal"
                                                     data-id="@item.CoId"
                                                     data-email="@item.Email"
-                                                    data-subject="@item.Subject"
+                                                    data-subject="@(item.Subject ?? "")"
                                                     data-name="@item.Name">
                                                 <i class="fas fa-reply me-1"></i>Reply
                                             </button>
@@ -201,12 +412,10 @@
             }
             else
             {
-                <div class="text-center py-5">
-                    <div class="empty-state-icon mb-3">
-                        <i class="fas fa-envelope-open fa-4x text-muted"></i>
-                    </div>
-                    <h4 class="text-muted">No Messages Found</h4>
-                    <p class="text-muted mb-4">All customer messages will appear here.</p>
+                <div class="empty-state">
+                    <i class="fas fa-envelope-open"></i>
+                    <h3>No Messages Found</h3>
+                    <p>All customer messages will appear here.</p>
                 </div>
             }
         </div>
@@ -317,132 +526,35 @@
     </div>
 </div>
 
-<!-- Toast Container for Notifications -->
-<div class="position-fixed top-2 end-0 p-3" style="z-index: 11">
-    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-            <strong class="me-auto" id="toastTitle">Notification</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the message from <strong id="deleteCustomerName"></strong>?</p>
+                <p class="text-danger"><strong>This action cannot be undone.</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fas fa-trash me-2"></i>Delete Message
+                </button>
+            </div>
         </div>
-        <div class="toast-body" id="toastMessage"></div>
     </div>
 </div>
 
-@section Styles {
-    <style>
-        .avatar-sm {
-            width: 40px;
-            height: 40px;
-            font-size: 1rem;
-        }
-
-        .table th {
-            font-weight: 600;
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .badge {
-            font-size: 0.75rem;
-            font-weight: 500;
-            padding: 0.35em 0.65em;
-        }
-
-        .message-preview {
-            max-width: 300px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .btn-group .btn {
-            border-radius: 0.375rem;
-            margin: 0 2px;
-        }
-
-        .modal-header {
-            border-bottom: none;
-            padding: 1.5rem;
-        }
-
-        .modal-footer {
-            border-top: none;
-            padding: 1.5rem;
-        }
-
-        .empty-state-icon {
-            opacity: 0.5;
-        }
-
-        .table-hover tbody tr:hover {
-            background-color: rgba(59, 93, 80, 0.02);
-            cursor: pointer;
-        }
-
-        .card {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-            .card:hover {
-                transform: translateY(-2px);
-            }
-
-        @@media (max-width: 768px) {
-            .btn-group {
-                display: flex;
-                flex-direction: column;
-                gap: 0.25rem;
-            }
-
-                .btn-group .btn {
-                    margin: 0;
-                }
-
-            .message-preview {
-                max-width: 150px;
-            }
-        }
-    </style>
-}
-
 @section Scripts {
     <script>
-        // Initialize DataTable
-        $(document).ready(function() {
-            $('#messagesTable').DataTable({
-                "pageLength": 25,
-                "responsive": true,
-                "language": {
-                    "search": "Search messages:",
-                    "lengthMenu": "Show _MENU_ entries",
-                    "info": "Showing _START_ to _END_ of _TOTAL_ messages",
-                    "infoEmpty": "Showing 0 to 0 of 0 messages",
-                    "infoFiltered": "(filtered from _MAX_ total messages)",
-                    "paginate": {
-                        "first": "First",
-                        "last": "Last",
-                        "next": "Next",
-                        "previous": "Previous"
-                    }
-                },
-                "columnDefs": [
-                    { "orderable": false, "targets": [4] }
-                ]
-            });
+        let currentMessageId = null;
 
-            // Search functionality
-            $('#searchInput').on('keyup', function() {
-                $('#messagesTable').DataTable().search(this.value).draw();
-            });
-        });
-
-        // Set up modal handlers
         document.addEventListener('DOMContentLoaded', function() {
-            const messageModal = document.getElementById('messageModal');
-            const replyModal = document.getElementById('replyModal');
-
             // View Message Modal
+            const messageModal = document.getElementById('messageModal');
             messageModal.addEventListener('show.bs.modal', function(event) {
                 const button = event.relatedTarget;
                 const id = button.getAttribute('data-id');
@@ -479,11 +591,13 @@
 
                 // Close view modal and open reply modal
                 bootstrap.Modal.getInstance(messageModal).hide();
-                bootstrap.Modal.getInstance(replyModal).show();
+                const replyModal = new bootstrap.Modal(document.getElementById('replyModal'));
+                replyModal.show();
             });
 
             // Reply Modal Handler
-            document.getElementById('replyModal').addEventListener('show.bs.modal', function(event) {
+            const replyModal = document.getElementById('replyModal');
+            replyModal.addEventListener('show.bs.modal', function(event) {
                 const button = event.relatedTarget;
                 const id = button.getAttribute('data-id');
                 const email = button.getAttribute('data-email');
@@ -494,7 +608,7 @@
                 document.getElementById('replyToEmail').value = email;
                 document.getElementById('replyCustomerName').value = name;
                 document.getElementById('replySubject').value = subject ? `Re: ${subject}` : 'Re: Your Message';
-                document.getElementById('replyMessage').value = ''; // Clear previous message
+                document.getElementById('replyMessage').value = '';
             });
 
             // Send Reply
@@ -503,14 +617,13 @@
                 const replySubject = document.getElementById('replySubject').value;
                 const replyMessage = document.getElementById('replyMessage').value;
 
-                // Validation
                 if (!replySubject.trim()) {
-                    showToast('Error', 'Please enter a subject for your reply.', 'danger');
+                    showNotification('Please enter a subject for your reply.', 'error');
                     return;
                 }
 
                 if (!replyMessage.trim()) {
-                    showToast('Error', 'Please enter your reply message.', 'danger');
+                    showNotification('Please enter your reply message.', 'error');
                     return;
                 }
 
@@ -519,31 +632,25 @@
                 sendButton.disabled = true;
                 sendButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending...';
 
-                // Create form data
-                const formData = new FormData();
-                formData.append('id', messageId);
-                formData.append('replySubject', replySubject);
-                formData.append('replyMessage', replyMessage);
-
-                fetch('/Admin/Home/SendReply', {
+                fetch('@Url.Action("SendReply", "Home", new { area = "Admin" })', {
                     method: 'POST',
-                    body: formData
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `id=${messageId}&replySubject=${encodeURIComponent(replySubject)}&replyMessage=${encodeURIComponent(replyMessage)}`
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        showToast('Success', data.message, 'success');
-                        // Close the modal
+                        showNotification(data.message, 'success');
                         bootstrap.Modal.getInstance(replyModal).hide();
-                        // Clear the form
                         document.getElementById('replyForm').reset();
                     } else {
-                        showToast('Error', data.message, 'danger');
+                        showNotification(data.message, 'error');
                     }
                 })
                 .catch(error => {
-                    showToast('Error', 'Failed to send reply. Please try again.', 'danger');
-                    console.error('Error sending reply:', error);
+                    showNotification('Failed to send reply. Please try again.', 'error');
                 })
                 .finally(() => {
                     sendButton.disabled = false;
@@ -553,85 +660,135 @@
 
             // Delete Message
             document.querySelectorAll('.delete-message').forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
                     const messageId = this.getAttribute('data-id');
                     const customerName = this.getAttribute('data-name');
-
-                    if (confirm(`Are you sure you want to delete the message from ${customerName}? This action cannot be undone.`)) {
-                        const deleteButton = this;
-                        const originalText = deleteButton.innerHTML;
-                        deleteButton.disabled = true;
-                        deleteButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Deleting...';
-
-                        fetch('/Admin/Home/DeleteMessage', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
-                            },
-                            body: `id=${messageId}`
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                showToast('Success', data.message, 'success');
-                                // Remove the row from table
-                                document.getElementById(`message-${messageId}`).remove();
-
-                                // Check if table is empty
-                                if (document.querySelectorAll('#messagesTable tbody tr').length === 0) {
-                                    location.reload(); // Reload to show empty state
-                                }
-                            } else {
-                                showToast('Error', data.message, 'danger');
-                                deleteButton.disabled = false;
-                                deleteButton.innerHTML = originalText;
-                            }
-                        })
-                        .catch(error => {
-                            showToast('Error', 'Failed to delete message. Please try again.', 'danger');
-                            deleteButton.disabled = false;
-                            deleteButton.innerHTML = originalText;
-                        });
-                    }
+                    currentMessageId = messageId;
+                    document.getElementById('deleteCustomerName').textContent = customerName;
+                    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+                    deleteModal.show();
                 });
             });
 
-            // Row click to view message
-            document.querySelectorAll('#messagesTable tbody tr').forEach(row => {
-                row.addEventListener('click', function(e) {
-                    if (!e.target.closest('button')) {
-                        const viewButton = this.querySelector('.view-message');
-                        if (viewButton) {
-                            viewButton.click();
-                        }
-                    }
-                });
+            // Confirm Delete
+            document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+                if (currentMessageId) {
+                    deleteMessage(currentMessageId);
+                }
             });
         });
 
-        // Utility Functions
-        function showToast(title, message, type = 'info') {
-            const toast = document.getElementById('liveToast');
-            const toastTitle = document.getElementById('toastTitle');
-            const toastMessage = document.getElementById('toastMessage');
+        function viewMessage(id, name, email, subject, message) {
+            document.getElementById('modalMessageId').textContent = `#${id}`;
+            document.getElementById('modalUserName').textContent = name;
+            document.getElementById('modalUserEmail').textContent = email;
+            document.getElementById('modalSubject').textContent = subject || 'No subject';
+            document.getElementById('modalMessage').textContent = message || 'No message content';
 
-            // Set toast style based on type
-            const bgClass = type === 'success' ? 'bg-success' : type === 'danger' ? 'bg-danger' : 'bg-info';
-            toast.className = `toast ${bgClass} text-white`;
+            document.getElementById('replyFromView').setAttribute('data-id', id);
+            document.getElementById('replyFromView').setAttribute('data-email', email);
+            document.getElementById('replyFromView').setAttribute('data-subject', subject);
+            document.getElementById('replyFromView').setAttribute('data-name', name);
 
-            toastTitle.textContent = title;
-            toastMessage.textContent = message;
-
-            const bsToast = new bootstrap.Toast(toast);
-            bsToast.show();
+            const modal = new bootstrap.Modal(document.getElementById('messageModal'));
+            modal.show();
         }
 
-        function exportMessages() {
-            showToast('Info', 'Export functionality would be implemented here.', 'info');
+        function deleteMessage(messageId) {
+            const deleteBtn = document.getElementById('confirmDeleteBtn');
+            const originalText = deleteBtn.innerHTML;
+            deleteBtn.disabled = true;
+            deleteBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Deleting...';
+
+            fetch('@Url.Action("DeleteMessage", "Home", new { area = "Admin" })', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `id=${messageId}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+                    const row = document.getElementById(`message-${messageId}`);
+                    if (row) {
+                        row.remove();
+                        updateMessageCount();
+                    }
+                    if (document.querySelectorAll('#messagesTable tbody tr').length === 0) {
+                        location.reload();
+                    }
+                } else {
+                    showNotification(data.message, 'error');
+                    deleteBtn.disabled = false;
+                    deleteBtn.innerHTML = originalText;
+                }
+            })
+            .catch(error => {
+                showNotification('Failed to delete message. Please try again.', 'error');
+                deleteBtn.disabled = false;
+                deleteBtn.innerHTML = originalText;
+            });
+        }
+
+        function searchMessages() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#messagesTable tbody tr');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(search)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            updateMessageCount(visibleCount);
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            const rows = document.querySelectorAll('#messagesTable tbody tr');
+            rows.forEach(row => row.style.display = '');
+            updateMessageCount(rows.length);
+        }
+
+        function updateMessageCount(count) {
+            const countElement = document.getElementById('messageCount');
+            if (countElement) {
+                const actualCount = count !== undefined ? count : document.querySelectorAll('#messagesTable tbody tr').length;
+                countElement.textContent = actualCount;
+            }
         }
 
         function refreshMessages() {
             location.reload();
+        }
+
+        function showNotification(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0 position-fixed top-0 end-0 m-3`;
+            toast.style.zIndex = '1060';
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            document.body.appendChild(toast);
+
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+
+            toast.addEventListener('hidden.bs.toast', () => {
+                toast.remove();
+            });
         }
     </script>
 }

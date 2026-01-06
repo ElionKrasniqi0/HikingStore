@@ -19,7 +19,9 @@ namespace HikingStore.Areas.Admin.Controllers
 
         public IActionResult Index()
         {
-            var categories = _context.Categories.ToList();
+            var categories = _context.Categories
+                .Include(c => c.Product)
+                .ToList();
             return View(categories);
         }
         [HttpGet]

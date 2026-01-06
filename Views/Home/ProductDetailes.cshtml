@@ -1,149 +1,177 @@
 @model Product
 
-<!-- Product Details -->
-<section class="py-4">
+@{
+    var vatRate = 0.18m; // 18% VAT
+    var priceWithVat = Model.Price;
+    var priceWithoutVat = priceWithVat / (1 + vatRate);
+    var monthlyInstallment24 = priceWithVat / 24;
+    var monthlyInstallment36 = priceWithVat / 36;
+    var protectionPlanPrice = priceWithVat * 0.0477m; // ~4.77% of price
+}
+
+<!-- Breadcrumbs -->
+<section class="py-2 bg-light">
     <div class="container">
-        <div class="row g-4">
-            <!-- Product Image with more space -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 small">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Shop">Shop</a></li>
+                @if (Model.Category != null)
+                {
+                    <li class="breadcrumb-item"><a href="#">@Model.Category.CatName</a></li>
+                }
+                <li class="breadcrumb-item active" aria-current="page">@Model.ProName</li>
+            </ol>
+        </nav>
+    </div>
+</section>
+
+<!-- Product Details -->
+<section class="py-3">
+    <div class="container">
+        <div class="row g-3">
+            <!-- Product Image Section -->
             <div class="col-lg-6">
-                <div class="product-image-container text-center">
-                    <img src="~/Product/@Model.ProImage" alt="@Model.ProName"
+                <!-- Best Price Guaranteed Banner -->
+                <div class="best-price-banner mb-2">
+                    <span class="badge bg-danger px-2 py-1" style="font-size: 0.8rem;">
+                        <i class="fas fa-tag me-1"></i>BEST PRICE GUARANTEED
+                    </span>
+                </div>
+
+                <!-- Main Product Image -->
+                <div class="product-image-container text-center mb-2">
+                    <img id="mainProductImage" src="~/Product/@Model.ProImage" alt="@Model.ProName"
                          class="img-fluid rounded-3 product-main-image"
-                         style="max-height: 400px; object-fit: contain; padding: 20px;">
+                         style="max-height: 350px; object-fit: contain; padding: 15px;">
+                </div>
+
+                <!-- Thumbnail Gallery -->
+                <div class="thumbnail-gallery">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <div class="thumbnail-item active" data-image="~/Product/@Model.ProImage">
+                            <img src="~/Product/@Model.ProImage" alt="Thumbnail 1" class="img-fluid rounded">
+                        </div>
+                        @for (int i = 2; i <= 6; i++)
+                        {
+                            <div class="thumbnail-item" data-image="~/Product/@Model.ProImage">
+                                <img src="~/Product/@Model.ProImage" alt="Thumbnail @i" class="img-fluid rounded">
+                            </div>
+                        }
+                    </div>
+                    <div class="text-center mt-2">
+                        <small class="text-muted">1/10</small>
+                    </div>
                 </div>
             </div>
 
-            <!-- Product Info -->
+            <!-- Product Info Section -->
             <div class="col-lg-6">
                 <div class="product-info">
-                    <!-- Category -->
+                    <!-- Product Title -->
+                    <h1 class="h4 fw-bold text-dark mb-1">@Model.ProName</h1>
+
+                    <!-- Brand -->
                     <div class="mb-2">
-                        <span class="badge bg-opacity-10 text-primary px-2 py-1 small">
-                            @Model.Category?.CatName
-                        </span>
+                        <span class="text-muted small">Brand: </span>
+                        <span class="fw-semibold">@(Model.Category?.CatName ?? "HikingStore")</span>
+                        <span class="text-muted small ms-3">Code: @Model.ProId.ToString("D6")</span>
                     </div>
 
-                    <!-- Title -->
-                    <h1 class="h4 fw-bold text-dark mb-2">@Model.ProName</h1>
-
-                    <!-- Stock Status -->
-                    <div class="mb-3">
-                        @if (Model.IsInStock)
-                        {
-                            <span class="badge bg-success bg-opacity-10 text-success small">
-                                <i class="fas fa-check me-1"></i>In Stock (@Model.StockQuantity available)
-                            </span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-danger bg-opacity-10 text-danger small">
-                                <i class="fas fa-times me-1"></i>Out of Stock
-                            </span>
-                        }
-                    </div>
-
-                    <!-- Rating & Stock -->
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="rating-stars small me-2">
+                    <!-- Rating -->
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="rating-stars me-2">
                             <i class="fas fa-star text-warning"></i>
                             <i class="fas fa-star text-warning"></i>
                             <i class="fas fa-star text-warning"></i>
                             <i class="fas fa-star text-warning"></i>
                             <i class="far fa-star text-warning"></i>
                         </div>
-                        <span class="text-muted small me-3">4.2 (128)</span>
+                        <a href="#reviews" class="text-muted small text-decoration-none">Rate</a>
+                        <span class="text-muted small ms-2">4.2 (128 reviews)</span>
                     </div>
 
-                    <!-- Price -->
-                    <div class="mb-3">
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="h3 fw-bold text-primary">€@Model.Price.ToString("N2")</span>
-                            <span class="text-muted text-decoration-line-through small">€@((Model.Price * 1.2m).ToString("N2"))</span>
-                            <span class="badge bg-danger small">Save 20%</span>
+                    <!-- Price Section -->
+                    <div class="price-section mb-3">
+                        <div class="d-flex align-items-baseline gap-2 mb-1">
+                            <span class="h3 fw-bold text-dark">€@priceWithVat.ToString("N2")</span>
                         </div>
-                        <p class="text-success small mb-0 mt-1">
-                            <i class="fas fa-shipping-fast me-1"></i>Free shipping over €50
-                        </p>
-                    </div>
-
-                    <!-- Description -->
-                    <div class="mb-3">
-                        <p class="text-muted small mb-0">@Model.Descreption</p>
-                    </div>
-
-                    <!-- Stock Warning -->
-                    @if (!Model.IsInStock)
-                    {
-                        <div class="alert alert-warning mb-3">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            This product is currently out of stock. Check back later!
+                        <div class="mb-1">
+                            <span class="text-muted small">Including VAT</span>
+                            <span class="text-muted small ms-2">Without VAT: €@priceWithoutVat.ToString("N2")</span>
                         </div>
-                    }
-                    else if (Model.StockQuantity <= 5)
-                    {
-                        <div class="alert alert-info mb-3">
-                            <i class="fas fa-info-circle me-2"></i>
-                            Only @Model.StockQuantity items left in stock! Order soon.
-                        </div>
-                    }
-
-                    <!-- Quick Features -->
-                    <div class="mb-3">
-                        <div class="row g-2 small">
-                            <div class="col-6">
-                                <div class="d-flex align-items-center text-muted">
-                                    <i class="fas fa-check text-success me-2"></i>
-                                    <span>Premium Quality</span>
-                                </div>
+                        @if (Model.IsInStock && Model.StockQuantity > 0)
+                        {
+                            <div class="mt-2">
+                                <a href="#" class="text-primary small text-decoration-none">Buy outlet product for €@((priceWithVat * 0.87m).ToString("N2"))</a>
                             </div>
-                            <div class="col-6">
-                                <div class="d-flex align-items-center text-muted">
-                                    <i class="fas fa-check text-success me-2"></i>
-                                    <span>2-Year Warranty</span>
-                                </div>
-                            </div>
-                        </div>
+                        }
                     </div>
 
-                    <!-- Add to Cart Form - FIXED: Quantity and Add to Cart in parallel -->
+                    <!-- Quantity Selector -->
                     @if (Model.IsInStock)
                     {
-                        <form id="addToCartForm" method="post" class="mb-4">
-                            <div class="row g-2 align-items-center">
-                                <div class="col-auto">
-                                    <label class="form-label small fw-semibold mb-1">Quantity</label>
-                                </div>
-                            </div>
-                            <div class="row g-2 align-items-center">
-                                <!-- Quantity Controls -->
-                                <div class="col-auto">
+                        <form id="addToCartForm" method="post">
+                            <div class="quantity-section mb-3">
+                                <label class="form-label small fw-semibold mb-1">Quantity</label>
+                                <div class="d-flex align-items-center gap-2">
                                     <div class="quantity-controls d-flex border rounded-2" style="width: 120px;">
                                         <button type="button" class="btn btn-light btn-quantity border-0">
                                             <i class="fas fa-minus small"></i>
                                         </button>
                                         <input type="text" id="qtyInput" name="qty"
                                                class="form-control border-0 text-center shadow-none quantity-input"
-                                               value="1" style="width: 50px;" max="@Model.StockQuantity">
+                                               value="1" style="width: 60px;" max="@Model.StockQuantity">
                                         <button type="button" class="btn btn-light btn-quantity border-0">
                                             <i class="fas fa-plus small"></i>
                                         </button>
                                     </div>
-                                    <small class="text-muted d-block mt-1">Max: @Model.StockQuantity</small>
+                                    <span class="text-muted small">More than 10 items available</span>
                                 </div>
+                            </div>
 
-                                <!-- Add to Cart Button -->
-                                <div class="col">
-                                    <button type="submit" class="btn btn-primary w-100 add-to-cart-btn"
-                                            style="height: 38px;">
-                                        <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+                            <!-- Shipping Information -->
+                            <div class="shipping-section mb-3">
+                                <h6 class="fw-semibold mb-1" style="font-size: 0.9rem;">Shipping</h6>
+                                <p class="text-muted small mb-1" style="font-size: 0.85rem;">
+                                    Delivery date for this product is uncertain. However, you can pre-order, and we will do our best to deliver it as soon as possible.
+                                </p>
+                                <a href="#" class="text-primary small text-decoration-none">More</a>
+                            </div>
+
+                            <!-- Secure Payment Options -->
+                            <div class="payment-options mb-3">
+                                <h6 class="fw-semibold mb-1" style="font-size: 0.9rem;">Secure Payment</h6>
+                                <div class="d-flex gap-3 flex-wrap">
+                                    <div class="d-flex align-items-center text-muted small">
+                                        <i class="fas fa-money-bill-wave me-2"></i>
+                                        <span>Pay with cash on delivery</span>
+                                    </div>
+                                    <div class="d-flex align-items-center text-muted small">
+                                        <i class="fas fa-credit-card me-2"></i>
+                                        <span>Pay online</span>
+                                    </div>
+                                    <div class="d-flex align-items-center text-muted small">
+                                        <i class="fas fa-university me-2"></i>
+                                        <span>Pay with bank transfer</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="action-buttons mb-3">
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <button type="submit" class="btn btn-warning flex-grow-1 buy-now-btn" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                                        <i class="fas fa-check me-1"></i>BUY NOW
                                     </button>
-                                </div>
-
-                                <!-- Wishlist Button -->
-                                <div class="col-auto">
-                                    <button type="button" class="btn btn-outline-primary wishlist-btn"
-                                            style="width: 38px; height: 38px;">
+                                    <button type="button" class="btn btn-outline-primary add-to-cart-btn-action" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                                        <i class="fas fa-shopping-cart me-1"></i>ADD TO CART
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary wishlist-btn-action" style="width: 42px; height: 42px; padding: 0;">
                                         <i class="far fa-heart"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary share-btn" style="width: 42px; height: 42px; padding: 0;">
+                                        <i class="fas fa-share-alt"></i>
                                     </button>
                                 </div>
                             </div>
@@ -151,20 +179,9 @@
                     }
                     else
                     {
-                        <div class="alert alert-secondary mb-4">
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-bell me-3 text-warning fa-lg"></i>
-                                <div>
-                                    <p class="mb-0 fw-semibold">Notify me when available</p>
-                                    <small class="text-muted">Enter your email to get notified when this product is back in stock</small>
-                                </div>
-                            </div>
-                            <div class="mt-3">
-                                <div class="input-group">
-                                    <input type="email" class="form-control" placeholder="Your email address">
-                                    <button class="btn btn-warning" type="button">Notify Me</button>
-                                </div>
-                            </div>
+                        <div class="alert alert-warning mb-4">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            This product is currently out of stock. Check back later!
                         </div>
                     }
 
@@ -180,75 +197,68 @@
                         <i class="fas fa-exclamation-circle me-2"></i>
                         <span id="errorText"></span>
                     </div>
-
-                    <!-- Trust Badges -->
-                    <div class="mt-3 pt-3 border-top">
-                        <div class="row text-center g-2 small">
-                            <div class="col-4">
-                                <div class="text-muted">
-                                    <i class="fas fa-shipping-fast d-block mb-1 text-primary"></i>
-                                    <span>Free Shipping</span>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="text-muted">
-                                    <i class="fas fa-undo d-block mb-1 text-primary"></i>
-                                    <span>30-Day Return</span>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="text-muted">
-                                    <i class="fas fa-shield-alt d-block mb-1 text-primary"></i>
-                                    <span>Secure</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Compact Tabs -->
-<section class="py-4 bg-light">
+<!-- Delimiter -->
+<div class="container">
+    <hr class="my-0" style="border-top: 2px solid #dee2e6;">
+</div>
+
+<!-- Product Description Tabs -->
+<section class="py-3 bg-light">
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
+        <div class="row">
+            <div class="col-12">
                 <div class="bg-white rounded-3 shadow-sm">
-                    <ul class="nav nav-tabs border-0 px-3 pt-3" id="productTabs" role="tablist">
+                    <ul class="nav nav-tabs border-0 px-3 pt-2" id="productTabs" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active border-0 small fw-semibold" id="description-tab" data-bs-toggle="tab"
+                            <button class="nav-link active border-0 fw-semibold" id="description-tab" data-bs-toggle="tab"
                                     data-bs-target="#description" type="button" role="tab">
                                 Description
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link border-0 small fw-semibold" id="specifications-tab" data-bs-toggle="tab"
-                                    data-bs-target="#specifications" type="button" role="tab">
-                                Specifications
+                            <button class="nav-link border-0 fw-semibold" id="details-tab" data-bs-toggle="tab"
+                                    data-bs-target="#details" type="button" role="tab">
+                                Details
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link border-0 fw-semibold" id="reviews-tab" data-bs-toggle="tab"
+                                    data-bs-target="#reviews" type="button" role="tab">
+                                Reviews
                             </button>
                         </li>
                     </ul>
 
                     <div class="tab-content p-3" id="productTabsContent">
                         <div class="tab-pane fade show active" id="description" role="tabpanel">
-                            <p class="text-muted small mb-0">@Model.Descreption</p>
+                            <div class="product-description">
+                                <p class="mb-3">@Model.Descreption</p>
+                            </div>
                         </div>
-                        <div class="tab-pane fade" id="specifications" role="tabpanel">
-                            <div class="small">
+                        <div class="tab-pane fade" id="details" role="tabpanel">
+                            <div class="product-details">
                                 <div class="row">
-                                    <div class="col-6">
+                                    <div class="col-md-6">
                                         <div class="border-bottom py-2">
                                             <strong>Material:</strong>
-                                            <span class="text-muted float-end">Premium</span>
+                                            <span class="text-muted float-end">Premium Quality</span>
                                         </div>
                                         <div class="border-bottom py-2">
                                             <strong>Weight:</strong>
-                                            <span class="text-muted float-end">Light</span>
+                                            <span class="text-muted float-end">Lightweight</span>
+                                        </div>
+                                        <div class="border-bottom py-2">
+                                            <strong>Dimensions:</strong>
+                                            <span class="text-muted float-end">Standard</span>
                                         </div>
                                     </div>
-                                    <div class="col-6">
+                                    <div class="col-md-6">
                                         <div class="border-bottom py-2">
                                             <strong>Warranty:</strong>
                                             <span class="text-muted float-end">2 Years</span>
@@ -257,7 +267,32 @@
                                             <strong>SKU:</strong>
                                             <span class="text-muted float-end">HS-@Model.ProId.ToString("D4")</span>
                                         </div>
+                                        <div class="border-bottom py-2">
+                                            <strong>Brand:</strong>
+                                            <span class="text-muted float-end">@(Model.Category?.CatName ?? "HikingStore")</span>
+                                        </div>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="reviews" role="tabpanel">
+                            <div class="product-reviews">
+                                <h5 class="mb-3">Customer Reviews</h5>
+                                <div class="review-summary mb-4 p-3 bg-light rounded">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="h3 fw-bold me-2">4.2</span>
+                                        <div class="rating-stars me-2">
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="far fa-star text-warning"></i>
+                                        </div>
+                                        <span class="text-muted">(128 reviews)</span>
+                                    </div>
+                                </div>
+                                <div class="reviews-list">
+                                    <p class="text-muted">No reviews yet. Be the first to review this product!</p>
                                 </div>
                             </div>
                         </div>
@@ -269,16 +304,42 @@
 </section>
 
 <style>
-    /* Product Image Styling - Added more space */
+    /* Breadcrumbs */
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+    }
+
+    .breadcrumb-item a {
+        color: #6c757d;
+        text-decoration: none;
+    }
+
+    .breadcrumb-item a:hover {
+        color: #3b5d50;
+    }
+
+    /* Best Price Banner */
+    .best-price-banner {
+        text-align: center;
+    }
+
+    .best-price-banner .badge {
+        font-size: 0.9rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    /* Product Image Styling */
     .product-image-container {
         background: #f8f9fa;
         border-radius: 12px;
-        padding: 30px;
-        margin-bottom: 20px;
+        padding: 15px;
+        margin-bottom: 15px;
     }
 
     .product-main-image {
-        max-height: 400px;
+        max-height: 350px;
         width: auto;
         object-fit: contain;
         transition: transform 0.3s ease;
@@ -288,19 +349,40 @@
         transform: scale(1.02);
     }
 
-    /* Quantity and Add to Cart in parallel layout */
-    #addToCartForm .row {
-        margin-bottom: 10px;
+    /* Thumbnail Gallery */
+    .thumbnail-gallery .thumbnail-item {
+        width: 60px;
+        height: 60px;
+        border: 2px solid transparent;
+        border-radius: 8px;
+        cursor: pointer;
+        overflow: hidden;
+        transition: all 0.3s ease;
     }
 
+    .thumbnail-gallery .thumbnail-item:hover {
+        border-color: #3b5d50;
+        transform: scale(1.05);
+    }
+
+    .thumbnail-gallery .thumbnail-item.active {
+        border-color: #ff6b35;
+    }
+
+    .thumbnail-gallery .thumbnail-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Quantity Controls */
     .quantity-controls {
-        width: 120px;
         background: white;
     }
 
     .btn-quantity {
-        width: 35px;
-        height: 35px;
+        width: 36px;
+        height: 36px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -308,62 +390,119 @@
         transition: all 0.2s ease;
     }
 
-        .btn-quantity:hover {
-            background: #f8f9fa;
-        }
+    .btn-quantity:hover {
+        background: #f8f9fa;
+    }
 
     .quantity-input {
-        height: 35px;
+        height: 36px;
         font-weight: 600;
         font-size: 0.9rem;
         background: transparent;
         border: none;
     }
 
-    .add-to-cart-btn {
-        height: 38px;
-        font-size: 0.9rem;
+    /* Action Buttons */
+    .buy-now-btn {
+        background-color: #ff6b35;
+        border-color: #ff6b35;
+        color: white;
         font-weight: 600;
         transition: all 0.3s ease;
     }
 
-        .add-to-cart-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(59, 93, 80, 0.3);
-        }
+    .buy-now-btn:hover {
+        background-color: #e55a2b;
+        border-color: #e55a2b;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+    }
 
-    .wishlist-btn {
-        width: 38px;
-        height: 38px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 8px;
+    .add-to-cart-btn-action {
+        font-weight: 600;
         transition: all 0.3s ease;
     }
 
-        .wishlist-btn:hover {
-            background: #3b5d50;
-            color: white;
-        }
+    .add-to-cart-btn-action:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 93, 80, 0.2);
+    }
+
+    .wishlist-btn-action,
+    .share-btn {
+        transition: all 0.3s ease;
+    }
+
+    .wishlist-btn-action:hover,
+    .share-btn:hover {
+        background: #3b5d50;
+        color: white;
+        border-color: #3b5d50;
+    }
+
+    /* Installment Section */
+    .installment-option {
+        background: #f8f9fa;
+        transition: all 0.2s ease;
+    }
+
+    .installment-option:hover {
+        background: #e9ecef;
+        border-color: #3b5d50;
+    }
+
+    /* Protection Plan */
+    .protection-plan-section .form-check {
+        padding: 8px 16px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+
+    .protection-plan-section .form-check:hover {
+        border-color: #3b5d50;
+        background: #f8f9fa;
+    }
+
+    .protection-plan-section .form-check-input:checked {
+        background-color: #3b5d50;
+        border-color: #3b5d50;
+    }
+
+    /* Tabs */
+    .nav-tabs .nav-link {
+        color: #6c757d;
+        padding: 10px 16px;
+        margin-right: 8px;
+        font-size: 0.9rem;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #3b5d50;
+        border-bottom: 3px solid #3b5d50;
+    }
+
+    .nav-tabs .nav-link:hover {
+        color: #3b5d50;
+        border-color: transparent;
+    }
 
     /* Responsive adjustments */
     @@media (max-width: 768px) {
         .product-image-container {
-            padding: 20px;
+            padding: 12px;
         }
 
         .product-main-image {
-            max-height: 300px;
-        }
-        /* Stack vertically on mobile */
-        #addToCartForm .row.g-2 {
-            flex-direction: column;
+            max-height: 250px;
         }
 
-        #addToCartForm .col-auto,
-        #addToCartForm .col,
-        #addToCartForm .col-auto {
+        .thumbnail-gallery .thumbnail-item {
+            width: 50px;
+            height: 50px;
+        }
+
+        .action-buttons .btn {
             width: 100%;
             margin-bottom: 10px;
         }
@@ -371,31 +510,24 @@
         .quantity-controls {
             width: 100%;
             max-width: 200px;
-            margin: 0 auto;
-        }
-
-        .add-to-cart-btn,
-        .wishlist-btn {
-            width: 100%;
-            margin-bottom: 10px;
         }
     }
 
     @@media (max-width: 576px) {
         .product-image-container {
-            padding: 15px;
+            padding: 10px;
         }
 
         .product-main-image {
-            max-height: 250px;
+            max-height: 200px;
         }
 
         .h4 {
-            font-size: 1.3rem;
+            font-size: 1.25rem;
         }
 
         .h3 {
-            font-size: 1.6rem;
+            font-size: 1.5rem;
         }
     }
 
@@ -417,17 +549,28 @@
             transform: translateY(0);
         }
     }
-
-    /* Loading spinner for button */
-    .spinner-border-sm {
-        width: 1rem;
-        height: 1rem;
-        border-width: 0.2em;
-    }
 </style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Thumbnail gallery functionality
+        const thumbnailItems = document.querySelectorAll('.thumbnail-item');
+        const mainImage = document.getElementById('mainProductImage');
+
+        thumbnailItems.forEach(item => {
+            item.addEventListener('click', function() {
+                // Remove active class from all thumbnails
+                thumbnailItems.forEach(t => t.classList.remove('active'));
+                // Add active class to clicked thumbnail
+                this.classList.add('active');
+                // Update main image
+                const imageSrc = this.getAttribute('data-image');
+                if (mainImage && imageSrc) {
+                    mainImage.src = imageSrc;
+                }
+            });
+        });
+
         // Quantity controls
         const qtyInput = document.getElementById('qtyInput');
         const quantityButtons = document.querySelectorAll('.btn-quantity');
@@ -443,111 +586,140 @@
 
         plusButton?.addEventListener('click', function() {
             let currentValue = parseInt(qtyInput.value) || 1;
-            if (currentValue < 10) {
+            const maxStock = @Model.StockQuantity;
+            if (currentValue < maxStock) {
                 qtyInput.value = currentValue + 1;
             }
         });
 
         // Wishlist functionality
-        const wishlistBtn = document.querySelector('.wishlist-btn');
+        const wishlistBtn = document.querySelector('.wishlist-btn-action');
         wishlistBtn?.addEventListener('click', function() {
             const icon = this.querySelector('i');
             if (icon.classList.contains('far')) {
                 icon.classList.remove('far');
                 icon.classList.add('fas', 'text-danger');
-                this.setAttribute('data-bs-original-title', 'Remove from wishlist');
             } else {
                 icon.classList.remove('fas', 'text-danger');
                 icon.classList.add('far');
-                this.setAttribute('data-bs-original-title', 'Add to wishlist');
             }
-
-            // Initialize tooltip if not already
-            if (!this._tooltip) {
-                this._tooltip = new bootstrap.Tooltip(this);
-            }
-            this._tooltip.show();
         });
 
-        // Initialize tooltip for wishlist button
-        if (wishlistBtn) {
-            new bootstrap.Tooltip(wishlistBtn);
-        }
+        // Share functionality
+        const shareBtn = document.querySelector('.share-btn');
+        shareBtn?.addEventListener('click', function() {
+            if (navigator.share) {
+                navigator.share({
+                    title: '@Model.ProName',
+                    text: 'Check out this product!',
+                    url: window.location.href
+                });
+            } else {
+                // Fallback: copy to clipboard
+                navigator.clipboard.writeText(window.location.href);
+                alert('Link copied to clipboard!');
+            }
+        });
 
-        // Add to cart functionality
+        // Add to cart functionality (both buttons)
         const addToCartForm = document.getElementById('addToCartForm');
+        const addToCartBtn = document.querySelector('.add-to-cart-btn-action');
+        const buyNowBtn = document.querySelector('.buy-now-btn');
         const successMessage = document.getElementById('successMessage');
         const errorMessage = document.getElementById('errorMessage');
         const errorText = document.getElementById('errorText');
 
+        function addToCart(redirect = false) {
+            if (!addToCartForm) return;
+
+            const quantity = parseInt(qtyInput.value) || 1;
+            const productId = @Model.ProId;
+            const maxStock = @Model.StockQuantity;
+
+            // Validate quantity
+            if (quantity < 1) {
+                showError('Please enter a valid quantity.');
+                return;
+            }
+
+            if (quantity > maxStock) {
+                showError(`Only ${maxStock} items available in stock.`);
+                return;
+            }
+
+            // Show loading state
+            const submitBtn = redirect ? buyNowBtn : addToCartBtn;
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
+            submitBtn.disabled = true;
+
+            // Get anti-forgery token
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+            // Submit via AJAX
+            fetch('/Carts/AddToCart?ProId=' + productId + '&qty=' + quantity, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': token
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    successMessage.style.display = 'block';
+                    errorMessage.style.display = 'none';
+
+                    // Update cart count in header
+                    updateCartCount(data.cartItemCount);
+
+                    // Reset button after 1 second
+                    setTimeout(() => {
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+
+                        // Redirect if buy now
+                        if (redirect) {
+                            window.location.href = '/Carts/Index';
+                        }
+                    }, 1000);
+
+                    // Hide success message after 5 seconds
+                    setTimeout(() => {
+                        successMessage.style.display = 'none';
+                    }, 5000);
+                } else {
+                    showError(data.message || 'Failed to add to cart');
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('Failed to add item to cart. Please try again.');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+        }
+
+        // Add to cart button
+        addToCartBtn?.addEventListener('click', function(e) {
+            e.preventDefault();
+            addToCart(false);
+        });
+
+        // Buy now button
+        buyNowBtn?.addEventListener('click', function(e) {
+            e.preventDefault();
+            addToCart(true);
+        });
+
+        // Form submit
         if (addToCartForm) {
             addToCartForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-
-                const quantity = parseInt(qtyInput.value) || 1;
-                const productId = @Model.ProId;
-                const maxStock = @Model.StockQuantity;
-
-                // Validate quantity
-                if (quantity < 1) {
-                    showError('Please enter a valid quantity.');
-                    return;
-                }
-
-                if (quantity > maxStock) {
-                    showError(`Only ${maxStock} items available in stock.`);
-                    return;
-                }
-
-                // Show loading state
-                const submitBtn = this.querySelector('.add-to-cart-btn');
-                const originalText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Adding...';
-                submitBtn.disabled = true;
-
-                // Get anti-forgery token
-                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
-
-                // Submit via AJAX
-                fetch('/Carts/AddToCart?ProId=' + productId + '&qty=' + quantity, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'RequestVerificationToken': token
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Show success message
-                        successMessage.style.display = 'block';
-                        errorMessage.style.display = 'none';
-
-                        // Update cart count in header
-                        updateCartCount(data.cartItemCount);
-
-                        // Reset button after 1 second
-                        setTimeout(() => {
-                            submitBtn.innerHTML = originalText;
-                            submitBtn.disabled = false;
-                        }, 1000);
-
-                        // Hide success message after 5 seconds
-                        setTimeout(() => {
-                            successMessage.style.display = 'none';
-                        }, 5000);
-                    } else {
-                        showError(data.message || 'Failed to add to cart');
-                        submitBtn.innerHTML = originalText;
-                        submitBtn.disabled = false;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showError('Failed to add item to cart. Please try again.');
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
-                });
+                addToCart(false);
             });
         }
 
@@ -574,10 +746,11 @@
         // Input validation
         qtyInput?.addEventListener('change', function() {
             let value = parseInt(this.value);
+            const maxStock = @Model.StockQuantity;
             if (isNaN(value) || value < 1) {
                 this.value = 1;
-            } else if (value > 10) {
-                this.value = 10;
+            } else if (value > maxStock) {
+                this.value = maxStock;
             }
         });
     });

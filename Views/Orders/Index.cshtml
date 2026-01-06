@@ -98,17 +98,24 @@
         font-size: 14px;
         text-decoration: none;
         transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
     }
 
         .order-details-btn:hover {
             background: #2d473d;
             color: white;
             text-decoration: none;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 93, 80, 0.3);
         }
 
     .empty-state {
-        padding: 60px 20px;
+        padding: 80px 20px;
         text-align: center;
+        background: #f8f9fa;
+        border-radius: 12px;
+        margin-top: 2rem;
     }
 
     .empty-state-icon {
@@ -117,12 +124,42 @@
         margin-bottom: 20px;
     }
 
+    .empty-state h3 {
+        color: #374151;
+        font-weight: 600;
+        margin-bottom: 12px;
+    }
+
+    .empty-state p {
+        color: #6b7280;
+        margin-bottom: 24px;
+    }
+
     .status-filter {
         display: flex;
         gap: 8px;
         overflow-x: auto;
         padding-bottom: 16px;
         margin-bottom: 24px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .status-filter::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .status-filter::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .status-filter::-webkit-scrollbar-thumb {
+        background: #3b5d50;
+        border-radius: 10px;
+    }
+
+    .status-filter::-webkit-scrollbar-thumb:hover {
+        background: #2d473d;
     }
 
     .status-filter-btn {
@@ -161,6 +198,11 @@
         gap: 6px;
         color: #6b7280;
         font-size: 14px;
+    }
+
+    .order-meta-item i {
+        color: #3b5d50;
+        font-size: 16px;
     }
 
     .order-actions {
@@ -215,27 +257,36 @@
     }
 </style>
 
-<div class="container py-5">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-5">
-        <div>
-            <h1 class="h3 fw-bold text-dark mb-2">My Orders</h1>
-            <p class="text-muted mb-0">Track and manage all your purchases</p>
+<div class="hero">
+    <div class="container">
+        <div class="row justify-content-between align-items-center">
+            <div class="col-lg-8">
+                <div class="intro-excerpt">
+                    <h1>My Orders</h1>
+                    <p class="text-muted">Track and manage all your purchases</p>
+                </div>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <a href="/Home/Product" class="btn btn-outline-primary">
+                    <i class="fas fa-shopping-bag me-2"></i>Continue Shopping
+                </a>
+            </div>
         </div>
-        <a href="/Home/Product" class="btn btn-outline-primary">
-            <i class="fas fa-shopping-bag me-2"></i>Continue Shopping
-        </a>
     </div>
+</div>
+
+<div class="container py-5">
 
     <!-- Status Filters -->
     <div class="status-filter">
         <a href="@Url.Action("Index", new { status = "" })"
            class="status-filter-btn @(string.IsNullOrEmpty(ViewBag.CurrentStatus?.ToString()) ? "active" : "")">
-            All Orders (@Model.Count)
+            All Orders (@ViewBag.TotalCount)
         </a>
         @foreach (var status in System.Enum.GetValues(typeof(OrderStatus)).Cast<OrderStatus>())
         {
-            var count = Model.Count(o => o.Status == status);
+            var statusCounts = ViewBag.StatusCounts as Dictionary<OrderStatus, int>;
+            var count = statusCounts != null && statusCounts.ContainsKey(status) ? statusCounts[status] : 0;
             <a href="@Url.Action("Index", new { status = status })"
                class="status-filter-btn @(ViewBag.CurrentStatus?.ToString() == status.ToString() ? "active" : "")">
                 @status (@count)

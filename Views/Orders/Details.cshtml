@@ -52,8 +52,9 @@
     .info-item {
         display: flex;
         justify-content: space-between;
-        padding: 8px 0;
+        padding: 10px 0;
         border-bottom: 1px solid #e5e7eb;
+        align-items: flex-start;
     }
 
         .info-item:last-child {
@@ -63,6 +64,7 @@
     .info-label {
         color: #6b7280;
         font-size: 14px;
+        font-weight: 500;
     }
 
     .info-value {
@@ -70,6 +72,8 @@
         font-weight: 500;
         font-size: 14px;
         text-align: right;
+        word-break: break-word;
+        max-width: 60%;
     }
 
     .product-row {
@@ -77,17 +81,27 @@
         align-items: center;
         padding: 16px 0;
         border-bottom: 1px solid #e5e7eb;
+        transition: background-color 0.2s ease;
     }
+
+        .product-row:hover {
+            background-color: #f9fafb;
+            border-radius: 8px;
+            padding-left: 8px;
+            padding-right: 8px;
+        }
 
         .product-row:last-child {
             border-bottom: none;
         }
 
     .product-image {
-        height: 64px;
+        width: 80px;
+        height: 80px;
         border-radius: 8px;
         object-fit: cover;
         margin-right: 16px;
+        border: 1px solid #e5e7eb;
     }
 
     .product-name {
@@ -95,42 +109,49 @@
         color: #374151;
         font-weight: 500;
         font-size: 15px;
+        line-height: 1.4;
     }
 
     .product-qty {
         color: #6b7280;
         font-size: 14px;
         margin-right: 24px;
+        background: #f3f4f6;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-weight: 500;
     }
 
     .product-price {
         color: #3b5d50;
         font-weight: 600;
         font-size: 16px;
-        min-width: 80px;
+        min-width: 100px;
         text-align: right;
     }
 
     .total-section {
-        background: #f8fafc;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
         border-radius: 8px;
         padding: 20px;
         margin-top: 24px;
+        border: 1px solid #e5e7eb;
     }
 
     .total-row {
         display: flex;
         justify-content: space-between;
-        padding: 8px 0;
+        padding: 10px 0;
+        align-items: center;
     }
 
         .total-row.grand-total {
-            border-top: 1px solid #e5e7eb;
-            margin-top: 8px;
-            padding-top: 12px;
+            border-top: 2px solid #3b5d50;
+            margin-top: 12px;
+            padding-top: 16px;
             font-weight: 700;
             color: #3b5d50;
-            font-size: 18px;
+            font-size: 20px;
         }
 
     .status-timeline {
@@ -195,10 +216,24 @@
         font-weight: 600;
     }
 
+    .status-timeline::before {
+        background: linear-gradient(to right, #10b981 0%, #10b981 var(--progress, 0%), #e5e7eb var(--progress, 0%), #e5e7eb 100%);
+    }
+
+    .status-step.completed ~ .status-step .status-indicator {
+        border-color: #10b981;
+    }
+
     .action-buttons {
         display: flex;
+        flex-direction: column;
         gap: 12px;
         margin-top: 24px;
+    }
+
+    .action-buttons .btn {
+        width: 100%;
+        justify-content: center;
     }
 
     .btn-primary {
@@ -638,22 +673,120 @@
     .compact-card .card-body {
         padding: 0.8em;
     }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .order-detail-header {
+            padding: 16px !important;
+        }
+
+        .order-detail-body {
+            padding: 16px !important;
+        }
+
+        .product-row {
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .product-image {
+            width: 60px;
+            height: 60px;
+        }
+
+        .product-name {
+            flex: 1 1 100%;
+            margin-top: 8px;
+        }
+
+        .product-qty {
+            margin-right: 12px;
+        }
+
+        .status-timeline {
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .status-step {
+            flex: 0 0 calc(50% - 8px);
+        }
+
+        .info-item {
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .info-value {
+            text-align: left;
+            max-width: 100%;
+        }
+
+        .action-buttons {
+            margin-top: 16px;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .status-timeline {
+            flex-direction: column;
+        }
+
+        .status-step {
+            flex: 1;
+            width: 100%;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-indicator {
+            margin: 0;
+        }
+
+        .status-timeline::before {
+            display: none;
+        }
+
+        .order-number {
+            font-size: 11px;
+            padding: 3px 10px;
+        }
+    }
 </style>
 
-<div class="container py-5">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <a asp-action="Index" class="text-decoration-none text-muted mb-2 d-inline-block">
-                <i class="fas fa-arrow-left me-2"></i>Back to Orders
-            </a>
-            <h1 class="h3 fw-bold text-dark mb-1">Order Details</h1>
-            <div class="d-flex align-items-center gap-2">
-                <span class="order-number">#@Model.OrderId</span>
-                <span class="text-muted">• @Model.OrderDate.ToString("MMM dd, yyyy • hh:mm tt")</span>
+@{
+    var vatRate = 0.18m; // 18% VAT
+    var subtotalWithoutVat = Model.TotalAmount / (1 + vatRate);
+    var vatAmount = Model.TotalAmount - subtotalWithoutVat;
+}
+
+<div class="hero">
+    <div class="container">
+        <div class="row justify-content-between align-items-center">
+            <div class="col-lg-8">
+                <div class="intro-excerpt">
+                    <a asp-action="Index" class="text-decoration-none text-muted mb-2 d-inline-block">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Orders
+                    </a>
+                    <h1>Order Details</h1>
+                    <div class="d-flex align-items-center gap-3 mt-2">
+                        <span class="order-number">#@Model.OrderId</span>
+                        <span class="text-muted">• @Model.OrderDate.ToString("MMM dd, yyyy • hh:mm tt")</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <button class="btn btn-outline-primary no-print" onclick="printOrder()">
+                    <i class="fas fa-print me-2"></i>Print Order
+                </button>
             </div>
         </div>
     </div>
+</div>
+
+<div class="container py-5">
 
     <div class="row g-4">
         <!-- Left Column: Order Status & Items -->
@@ -678,12 +811,21 @@
                         var currentStatusIndex = Array.FindIndex(statuses, s => s.Item1 == Model.Status);
                     }
 
-                    <div class="status-timeline">
+                    <div class="status-timeline" style="--progress: @((currentStatusIndex + 1) * 20)%">
                         @for (int i = 0; i < statuses.Length; i++)
                         {
                             var (status, displayName, icon) = statuses[i];
                             var isCompleted = i < currentStatusIndex;
                             var isCurrent = i == currentStatusIndex;
+                            var dateProperty = status switch
+                            {
+                                OrderStatus.Received => Model.OrderDate,
+                                OrderStatus.Verified => Model.VerifiedDate,
+                                OrderStatus.Processing => Model.ProcessingDate,
+                                OrderStatus.Shipped => Model.ShippedDate,
+                                OrderStatus.Completed => Model.CompletedDate,
+                                _ => (DateTime?)null
+                            };
 
                             <div class="status-step @(isCompleted ? "completed" : "") @(isCurrent ? "active" : "")">
                                 <div class="status-indicator">
@@ -697,6 +839,10 @@
                                     }
                                 </div>
                                 <div class="status-label">@displayName</div>
+                                @if (dateProperty.HasValue)
+                                {
+                                    <div class="text-muted small mt-1">@dateProperty.Value.ToString("MMM dd, yyyy")</div>
+                                }
                             </div>
                         }
                     </div>
@@ -742,15 +888,15 @@
                     <div class="total-section">
                         <div class="total-row">
                             <span class="info-label">Subtotal</span>
-                            <span class="info-value">€@Model.TotalAmount.ToString("N2")</span>
+                            <span class="info-value">€@subtotalWithoutVat.ToString("N2")</span>
                         </div>
                         <div class="total-row">
                             <span class="info-label">Shipping</span>
                             <span class="info-value text-success">Free</span>
                         </div>
                         <div class="total-row">
-                            <span class="info-label">Tax</span>
-                            <span class="info-value">€0.00</span>
+                            <span class="info-label">VAT (18%)</span>
+                            <span class="info-value">€@vatAmount.ToString("N2")</span>
                         </div>
                         <div class="total-row grand-total">
                             <span>Total</span>
@@ -824,29 +970,13 @@
             }
 
             <!-- Action Buttons -->
-            <div class="action-buttons">
+            <div class="action-buttons no-print">
                 <a href="/Home/Product" class="btn btn-primary flex-grow-1">
                     <i class="fas fa-shopping-bag me-2"></i>Shop Again
                 </a>
-                <div class="text-end mb-3 no-print">
-                    <button class="btn btn-outline-primary btn-sm" onclick="printOrder()">
-                        <i class="fas fa-print me-2"></i>Print Order
-                    </button>
-                </div>
-
-                <!-- Add this print-only header/footer template -->
-                <div class="print-only" style="display: none;">
-                    <div class="print-header">
-                        <div class="company-name">HikingStore</div>
-                        <div class="company-details">
-                            Rr Komandant Zefi, Ferizaj 70000 | Phone: 04580455 | Email: planegame2020@gmail.com
-                        </div>
-                    </div>
-                </div>
-
-                <div class="print-footer print-only" style="display: none;">
-                    Order #: <span id="printOrderId"></span> | Printed: <span id="printDate"></span> | Page <span class="page-number"></span> of <span class="page-total"></span>
-                </div>
+                <a asp-action="Index" class="btn btn-outline-primary">
+                    <i class="fas fa-list me-2"></i>View All Orders
+                </a>
             </div>
         </div>
     </div>

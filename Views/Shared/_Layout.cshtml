@@ -81,54 +81,73 @@
             background: var(--white) !important;
             box-shadow: 0 2px 20px rgba(0,0,0,0.08);
             transition: var(--transition);
+            padding: 1rem 0;
+            z-index: 1030;
         }
 
         .navbar-scrolled {
-            padding: 0.5rem 0;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            padding: 0.75rem 0;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.12);
         }
 
         .navbar-brand {
             font-family: 'Playfair Display', serif;
             font-weight: 700;
-            font-size: 2rem;
+            font-size: 1.75rem;
             background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
+
+            .navbar-brand:hover {
+                opacity: 0.9;
+            }
+
+            .navbar-brand i {
+                background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
 
         .nav-link {
             font-weight: 500;
             color: var(--dark-text) !important;
-            padding: 0.5rem 1rem !important;
-            margin: 0 0.25rem;
+            padding: 0.625rem 1rem !important;
+            margin: 0 0.125rem;
             border-radius: var(--border-radius);
             transition: var(--transition);
             position: relative;
+            font-size: 0.95rem;
         }
 
             .nav-link:hover,
             .nav-link.active {
                 color: var(--primary-light) !important;
-                background-color: rgba(59, 93, 80, 0.05);
+                background-color: rgba(59, 93, 80, 0.08);
             }
 
             .nav-link::after {
                 content: '';
                 position: absolute;
-                bottom: 0;
+                bottom: 0.25rem;
                 left: 50%;
                 width: 0;
                 height: 2px;
                 background: var(--primary-light);
                 transition: var(--transition);
                 transform: translateX(-50%);
+                border-radius: 2px;
             }
 
             .nav-link:hover::after,
             .nav-link.active::after {
-                width: 80%;
+                width: 70%;
             }
 
         /* Buttons */
@@ -306,9 +325,76 @@
 
 
 
-        .nav-link {
-            padding: 0.75rem 1rem !important;
-            margin: 0.125rem 0;
+        /* Search Bar Styling */
+        .navbar-search-form {
+            position: relative;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .navbar-search-form .form-control {
+            border: 2px solid rgba(59, 93, 80, 0.15);
+            border-radius: 25px;
+            padding: 0.625rem 3rem 0.625rem 1.25rem;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            background: rgba(248, 249, 250, 0.8);
+        }
+
+            .navbar-search-form .form-control:focus {
+                border-color: var(--primary-light);
+                box-shadow: 0 0 0 0.2rem rgba(59, 93, 80, 0.15);
+                background: var(--white);
+            }
+
+        .navbar-search-form .btn {
+            position: absolute;
+            right: 0.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary-light);
+            border: none;
+            transition: var(--transition);
+        }
+
+            .navbar-search-form .btn:hover {
+                background: var(--primary-color);
+                transform: translateY(-50%) scale(1.05);
+            }
+
+        /* Navbar Container Improvements */
+        .navbar .container {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .navbar-collapse {
+            flex-grow: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .navbar-nav.me-auto {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        /* Navbar Right Section */
+        .navbar-right-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
 
         .btn {
@@ -317,6 +403,59 @@
 
         .section-padding {
             padding: 2rem 0;
+        }
+
+        /* Navbar Responsive Adjustments */
+        @@media (max-width: 991.98px) {
+            .navbar-collapse {
+                flex-direction: column;
+                align-items: stretch !important;
+                gap: 1rem;
+                padding-top: 1rem;
+            }
+
+            .navbar-nav.me-auto {
+                flex-direction: column;
+                width: 100%;
+                gap: 0.5rem;
+            }
+
+            .navbar-right-section {
+                width: 100%;
+                justify-content: space-between;
+                flex-wrap: wrap;
+            }
+
+            .navbar-search-form {
+                max-width: 100%;
+                order: -1;
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+
+            .nav-link {
+                padding: 0.75rem 1rem !important;
+                width: 100%;
+                text-align: left;
+            }
+
+            .nav-link::after {
+                display: none;
+            }
+        }
+
+        @@media (max-width: 767.98px) {
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+
+            .navbar {
+                padding: 0.75rem 0;
+            }
+
+            .navbar-right-section {
+                gap: 0.75rem;
+            }
         }
 
         /* Accessibility */
@@ -440,57 +579,83 @@
     <nav class="navbar navbar-expand-lg navbar-light sticky-top" role="navigation" aria-label="Main navigation">
         <div class="container">
             <a class="navbar-brand" asp-controller="Home" asp-action="Index" aria-label="HikingStore Home">
-                <i class="fas fa-mountain me-2" aria-hidden="true"></i>HikingStore
+                <i class="fas fa-mountain" aria-hidden="true"></i>
+                <span>HikingStore</span>
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"
+                    style="border: 2px solid rgba(59, 93, 80, 0.2); border-radius: 8px; padding: 0.5rem;">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")"
-                           asp-controller="Home" asp-action="Index">Home</a>
+                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" && ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "active" : "")"
+                           asp-controller="Home" asp-action="Index">
+                            <i class="fas fa-home me-1 d-lg-none"></i>Home
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Shop" ? "active" : "")"
-                           asp-controller="Home" asp-action="Shop">Shop</a>
+                           asp-controller="Home" asp-action="Shop">
+                            <i class="fas fa-store me-1 d-lg-none"></i>Shop
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Product" ? "active" : "")"
-                           asp-controller="Home" asp-action="Product">Products</a>
+                           asp-controller="Home" asp-action="Product">
+                            <i class="fas fa-box me-1 d-lg-none"></i>Products
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Contact" ? "active" : "")"
-                           asp-controller="Home" asp-action="Contact">Contact</a>
+                           asp-controller="Home" asp-action="Contact">
+                            <i class="fas fa-envelope me-1 d-lg-none"></i>Contact
+                        </a>
                     </li>
                 </ul>
 
-                <div class="navbar-nav align-items-center">
+                <div class="navbar-right-section">
                     <!-- Search Bar -->
-                    <div class="nav-item me-3">
-                        <form class="input-group input-group-sm" role="search" onsubmit="handleSearch(event)">
-                            <input type="text" class="form-control" placeholder="Search products..."
-                                   aria-label="Search products" aria-describedby="search-button" 
-                                   id="navbar-search-input" name="search">
-                            <button class="btn btn-primary" type="submit" id="search-button" aria-label="Submit search">
-                                <i class="fas fa-search" aria-hidden="true"></i>
-                            </button>
-                        </form>
-                    </div>
+                    <form class="navbar-search-form d-none d-md-flex" role="search" onsubmit="handleSearch(event)">
+                        <input type="text" class="form-control" placeholder="Search products..."
+                               aria-label="Search products" aria-describedby="search-button" 
+                               id="navbar-search-input" name="search">
+                        <button class="btn btn-primary" type="submit" id="search-button" aria-label="Submit search">
+                            <i class="fas fa-search" aria-hidden="true"></i>
+                        </button>
+                    </form>
+
+                    <!-- Mobile Search Button -->
+                    <button class="btn btn-outline-primary d-md-none me-2" type="button" 
+                            data-bs-toggle="collapse" data-bs-target="#mobileSearch" 
+                            aria-expanded="false" aria-controls="mobileSearch"
+                            style="border-radius: 50%; width: 40px; height: 40px; padding: 0;">
+                        <i class="fas fa-search"></i>
+                    </button>
 
                     <!-- User Authentication -->
                     <partial name="_LoginPartial" />
 
                     <!-- Cart Summary -->
                     @await Component.InvokeAsync("CartSummary")
-
                 </div>
             </div>
-        </div>
 
+            <!-- Mobile Search Collapse -->
+            <div class="collapse w-100 mt-2" id="mobileSearch">
+                <form class="navbar-search-form" role="search" onsubmit="handleSearch(event)">
+                    <input type="text" class="form-control" placeholder="Search products..."
+                           aria-label="Search products" aria-describedby="mobile-search-button" 
+                           id="mobile-search-input" name="search">
+                    <button class="btn btn-primary" type="submit" id="mobile-search-button" aria-label="Submit search">
+                        <i class="fas fa-search" aria-hidden="true"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
     </nav>
 
     <!-- Main Content -->
@@ -581,22 +746,39 @@
         // Search functionality
         function handleSearch(event) {
             event.preventDefault();
-            const searchInput = document.getElementById('navbar-search-input');
+            const searchInput = document.getElementById('navbar-search-input') || document.getElementById('mobile-search-input');
             const searchTerm = searchInput ? searchInput.value.trim() : '';
             if (searchTerm !== '') {
                 window.location.href = '/Home/SearchProduct?search=' + encodeURIComponent(searchTerm);
             }
         }
 
-        // Allow Enter key to submit search
-        const searchInput = document.getElementById('navbar-search-input');
-        if (searchInput) {
-            searchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    handleSearch(e);
+        // Allow Enter key to submit search for both inputs
+        const searchInputs = [document.getElementById('navbar-search-input'), document.getElementById('mobile-search-input')];
+        searchInputs.forEach(searchInput => {
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        handleSearch(e);
+                    }
+                });
+            }
+        });
+
+        // Close mobile search when clicking outside
+        document.addEventListener('click', function(e) {
+            const mobileSearch = document.getElementById('mobileSearch');
+            const mobileSearchBtn = document.querySelector('[data-bs-target="#mobileSearch"]');
+            if (mobileSearch && mobileSearchBtn && 
+                !mobileSearch.contains(e.target) && 
+                !mobileSearchBtn.contains(e.target) &&
+                mobileSearch.classList.contains('show')) {
+                const bsCollapse = bootstrap.Collapse.getInstance(mobileSearch);
+                if (bsCollapse) {
+                    bsCollapse.hide();
                 }
-            });
-        }
+            }
+        });
 
         // Cart functionality
         function updateCartItem(cartId, quantity) {

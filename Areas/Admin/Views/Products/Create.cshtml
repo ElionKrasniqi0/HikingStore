@@ -1,77 +1,387 @@
 ﻿@model Product
-<br />
-<br />
-<br />
-<br />
-<section class="content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card card-primary">
-                    <div class="card-header">
-                        <h3 class="card-title">Add Product</h3>
-                    </div>
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
-                    <form asp-action="Create" enctype="multipart/form-data" method="post">
-                        <div class="card-body">
-                            <div class="form-group">
-                                <label for="exampleInputEmail1">Product Name</label>
-                                <input type="text" asp-for="ProName"
-                                       class="form-control"
-                                       placeholder="Enter Product Name">
+<style>
+    /* Hero Section */
+    .hero-section {
+        background: linear-gradient(135deg, #3b5d50 0%, #2d4a3f 100%);
+        color: white;
+        padding: 30px 0;
+        margin-bottom: 40px;
+    }
+
+    .hero-section h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .hero-section p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+
+    /* Form Card */
+    .form-card {
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-card .card-header {
+        background: #f8fafc;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 20px 25px;
+    }
+
+    /* File Upload */
+    .file-upload-area {
+        border: 2px dashed #dee2e6;
+        border-radius: 12px;
+        padding: 40px;
+        text-align: center;
+        background: #fafafa;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .file-upload-area:hover {
+        border-color: #3b5d50;
+        background: #f8f9fa;
+    }
+
+    .file-upload-area.dragover {
+        border-color: #3b5d50;
+        background: #e8f5e8;
+        border-style: solid;
+    }
+
+    /* Image Preview */
+    .image-preview-container {
+        margin-top: 20px;
+    }
+
+    .image-preview {
+        max-width: 300px;
+        max-height: 300px;
+        border-radius: 12px;
+        border: 2px solid #e5e7eb;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .hero-section {
+            padding: 20px 0;
+        }
+
+        .hero-section h1 {
+            font-size: 2rem;
+        }
+    }
+</style>
+
+<br />
+<br />
+<br />
+
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container-fluid px-4">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1>Add New Product</h1>
+                <p>Create a new product for your store</p>
+            </div>
+            <div class="col-lg-4 text-end">
+                <a asp-action="Index" asp-controller="Products" asp-area="Admin" class="btn btn-light btn-lg">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Products
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid px-4 pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card form-card">
+                <div class="card-header">
+                    <h5 class="mb-0 fw-semibold">
+                        <i class="fas fa-box me-2 text-primary"></i>Product Information
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Create" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        <div class="row">
+                            <!-- Product Name -->
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="ProName" class="form-label fw-semibold">
+                                    Product Name <span class="text-danger">*</span>
+                                </label>
+                                <input asp-for="ProName" class="form-control" placeholder="Enter product name" required>
+                                <span asp-validation-for="ProName" class="text-danger small"></span>
                             </div>
 
-                            <div class="form-group">
-                                <label for="exampleInputEmail1">Category</label>
-                                <select type="text" asp-for="CatId"
-                                        class="form-control"
-                                        asp-items="ViewBag.CategoryId">
+                            <!-- Category -->
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="CatId" class="form-label fw-semibold">
+                                    Category <span class="text-danger">*</span>
+                                </label>
+                                <select asp-for="CatId" class="form-select" asp-items="ViewBag.CategoryId" required>
+                                    <option value="">Select a category</option>
                                 </select>
+                                <span asp-validation-for="CatId" class="text-danger small"></span>
                             </div>
 
-                            <div class="form-group">
-                                <label for="exampleInputEmail1">Description</label>
-                                <input type="text" asp-for="Descreption"
-                                       class="form-control"
-                                       placeholder="Enter Description">
+                            <!-- Description -->
+                            <div class="col-md-12 mb-4">
+                                <label asp-for="Descreption" class="form-label fw-semibold">
+                                    Description <span class="text-danger">*</span>
+                                </label>
+                                <textarea asp-for="Descreption" class="form-control" rows="4" placeholder="Enter product description" required></textarea>
+                                <span asp-validation-for="Descreption" class="text-danger small"></span>
                             </div>
 
-                            <div class="form-group">
-                                <label for="exampleInputEmail1">Price</label>
-                                <input type="text" asp-for="Price"
-                                       class="form-control"
-                                       placeholder="Enter Price">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="exampleInputEmail1">Stock Quantity</label>
-                                <input type="number" asp-for="StockQuantity"
-                                       class="form-control"
-                                       placeholder="Enter stock quantity"
-                                       min="0">
-                                <small class="text-muted">Set to 0 for out of stock</small>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="exampleInputFile">Choose Image</label>
+                            <!-- Price -->
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="Price" class="form-label fw-semibold">
+                                    Price (€) <span class="text-danger">*</span>
+                                </label>
                                 <div class="input-group">
-                                    <div class="custom-file">
-                                        <input type="file" name="File" asp-for="File" class="custom-file-input">
-                                        <label class="custom-file-label" for="exampleInputFile">Choose file</label>
-                                    </div>
-                                    <div class="input-group-append">
-                                        <span class="input-group-text" id="">Upload</span>
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" asp-for="Price" class="form-control" placeholder="0.00" step="0.01" min="0" required>
+                                </div>
+                                <span asp-validation-for="Price" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Stock Quantity -->
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="StockQuantity" class="form-label fw-semibold">
+                                    Stock Quantity <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" asp-for="StockQuantity" class="form-control" placeholder="0" min="0" required>
+                                <div class="form-text">Set to 0 to mark as out of stock</div>
+                                <span asp-validation-for="StockQuantity" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Image Upload -->
+                            <div class="col-md-12 mb-4">
+                                <label class="form-label fw-semibold">
+                                    Product Image <span class="text-danger">*</span>
+                                </label>
+                                
+                                <!-- Drag & Drop Area -->
+                                <div class="file-upload-area" 
+                                     id="dropZone"
+                                     ondrop="handleDrop(event)"
+                                     ondragover="handleDragOver(event)"
+                                     ondragleave="handleDragLeave(event)"
+                                     onclick="document.getElementById('productImage').click()">
+                                    <div id="uploadPlaceholder">
+                                        <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                        <h5 class="text-muted">Drag & drop your image here</h5>
+                                        <p class="text-muted mb-3">or click to browse</p>
+                                        <button type="button" class="btn btn-outline-primary">
+                                            <i class="fas fa-search me-2"></i>Browse Files
+                                        </button>
                                     </div>
                                 </div>
+
+                                <!-- Hidden File Input -->
+                                <input type="file" name="File" asp-for="File" class="form-control d-none" accept="image/*" onchange="handleFileSelect(this)" id="productImage" required>
+
+                                <!-- Image Preview -->
+                                <div class="image-preview-container d-none" id="imagePreviewContainer">
+                                    <div class="text-center">
+                                        <img id="imagePreview" class="image-preview" alt="Product image preview">
+                                        <div class="mt-3">
+                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearImagePreview()">
+                                                <i class="fas fa-times me-1"></i>Remove Image
+                                            </button>
+                                        </div>
+                                        <div class="mt-2">
+                                            <small class="text-muted" id="fileInfo"></small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-text mt-2">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Recommended: JPG, PNG, or GIF. Max size: 2MB. Square images work best.
+                                </div>
+                                <span asp-validation-for="File" class="text-danger small"></span>
                             </div>
                         </div>
 
-                        <div class="card-footer">
-                            <button type="submit" class="btn btn-primary">Submit</button>
+                        <!-- Form Actions -->
+                        <div class="row mt-4 pt-4 border-top">
+                            <div class="col-md-12">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a asp-action="Index" asp-controller="Products" asp-area="Admin" class="btn btn-outline-secondary px-4">
+                                        <i class="fas fa-times me-2"></i>Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary px-4" id="submitBtn">
+                                        <i class="fas fa-plus me-2"></i>Create Product
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-</section>
+</div>
+
+@section Scripts {
+    <script>
+        // Drag and drop functionality
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.dataTransfer.dropEffect = 'copy';
+            document.getElementById('dropZone').classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('dropZone').classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('dropZone').classList.remove('dragover');
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFiles(files[0]);
+            }
+        }
+
+        function handleFileSelect(input) {
+            if (input.files && input.files[0]) {
+                handleFiles(input.files[0]);
+            }
+        }
+
+        function handleFiles(file) {
+            if (!validateFile(file)) {
+                return;
+            }
+
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            const preview = document.getElementById('imagePreview');
+            const fileInfo = document.getElementById('fileInfo');
+            const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+            const fileInput = document.getElementById('productImage');
+
+            // Create a FileList-like object
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileInput.files = dataTransfer.files;
+
+            // Hide placeholder, show preview
+            uploadPlaceholder.style.display = 'none';
+            previewContainer.classList.remove('d-none');
+
+            // Display file info
+            const fileSize = (file.size / 1024 / 1024).toFixed(2);
+            fileInfo.textContent = `${file.name} (${fileSize} MB)`;
+
+            // Preview image
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function validateFile(file) {
+            const maxSize = 2 * 1024 * 1024; // 2MB
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+
+            if (file.size > maxSize) {
+                showNotification('File size must be less than 2MB', 'error');
+                return false;
+            }
+
+            if (!validTypes.includes(file.type)) {
+                showNotification('Please select a valid image file (JPG, PNG, GIF)', 'error');
+                return false;
+            }
+
+            return true;
+        }
+
+        function clearImagePreview() {
+            const fileInput = document.getElementById('productImage');
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+
+            fileInput.value = '';
+            previewContainer.classList.add('d-none');
+            uploadPlaceholder.style.display = 'block';
+        }
+
+        function showNotification(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0 position-fixed top-0 end-0 m-3`;
+            toast.style.zIndex = '1060';
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            document.body.appendChild(toast);
+
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+
+            toast.addEventListener('hidden.bs.toast', () => {
+                toast.remove();
+            });
+        }
+
+        // Form submission
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerHTML;
+
+            if (this.checkValidity()) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creating...';
+            }
+        });
+
+        // Form validation
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                var forms = document.getElementsByClassName('needs-validation');
+                Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+
+                            const firstInvalid = form.querySelector('.form-control:invalid, .form-select:invalid');
+                            if (firstInvalid) {
+                                firstInvalid.scrollIntoView({
+                                    behavior: 'smooth',
+                                    block: 'center'
+                                });
+                                firstInvalid.focus();
+                            }
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
+}

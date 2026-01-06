@@ -1,8 +1,61 @@
 ﻿@model Category
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<style>
+    /* Hero Section */
+    .hero-section {
+        background: linear-gradient(135deg, #3b5d50 0%, #2d4a3f 100%);
+        color: white;
+        padding: 30px 0;
+        margin-bottom: 40px;
+    }
+
+    .hero-section h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .hero-section p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .hero-section {
+            padding: 20px 0;
+        }
+
+        .hero-section h1 {
+            font-size: 2rem;
+        }
+    }
+</style>
+
 <br />
 <br />
 <br />
-<br />
+
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container-fluid px-4">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1>Create New Category</h1>
+                <p>Add a new product category to organize your inventory</p>
+            </div>
+            <div class="col-lg-4 text-end">
+                <a asp-action="Index" asp-controller="Categories" asp-area="Admin" class="btn btn-light btn-lg">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Categories
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="container-fluid px-4">
     <!-- Enhanced Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">

@@ -1,6 +1,7 @@
 ﻿using HikingStore.Data;
 using HikingStore.Enum;
 using HikingStore.Models;
+using HikingStore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,20 +17,47 @@ namespace HikingStore.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IConfiguration _configuration;
+        private readonly SessionCartService _sessionCartService;
 
-        public CartsController(ApplicationDbContext context, UserManager<IdentityUser> userManager, IConfiguration configuration)
+        public CartsController(ApplicationDbContext context, UserManager<IdentityUser> userManager, IConfiguration configuration, SessionCartService sessionCartService)
         {
             _context = context;
             _userManager = userManager;
             _configuration = configuration;
+            _sessionCartService = sessionCartService;
         }
 
-        [Authorize]
         public async Task<IActionResult> Index()
         {
+            // Check if user is logged in
             var userId = _userManager.GetUserId(User);
+            
+            if (string.IsNullOrEmpty(userId))
+            {
+                // User is not logged in - check if they have items in session cart
+                var sessionCart = _sessionCartService.GetSessionCart();
+                if (sessionCart.Any())
+                {
+                    // Show login required page with cart preview
+                    ViewBag.HasSessionCart = true;
+                    ViewBag.SessionCartCount = sessionCart.Sum(c => c.Qty);
+                    return View("RequireLogin");
+                }
+                else
+                {
+                    // Empty cart, show login required
+                    ViewBag.HasSessionCart = false;
+                    return View("RequireLogin");
+                }
+            }
+
+            // User is logged in - merge session cart if exists
+            await _sessionCartService.MergeSessionCartToUserCartAsync(userId);
+
+            // Get user's cart items
             var cartItems = await _context.ShoppingCarts
                 .Include(c => c.Product)
+                .ThenInclude(p => p.Category)
                 .Where(c => c.UserId == userId)
                 .ToListAsync();
 
@@ -46,14 +74,9 @@ namespace HikingStore.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> AddToCart(int ProId, int qty = 1)
         {
-            var userId = _userManager.GetUserId(User);
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Json(new { success = false, message = "Please login to add items to cart." });
-            }
-
             var product = await _context.Products.FindAsync(ProId);
             if (product == null)
             {
@@ -70,39 +93,67 @@ namespace HikingStore.Controllers
                 return Json(new { success = false, message = "Insufficient stock." });
             }
 
-            // Check if item already exists in cart
-            var existingCartItem = await _context.ShoppingCarts
-                .FirstOrDefaultAsync(c => c.UserId == userId && c.ProId == ProId);
+            var userId = _userManager.GetUserId(User);
 
-            if (existingCartItem != null)
+            if (string.IsNullOrEmpty(userId))
             {
-                // Update quantity
-                existingCartItem.Qty += qty;
-                if (existingCartItem.Qty > product.StockQuantity)
+                // Anonymous user - use session cart
+                var sessionCart = _sessionCartService.GetSessionCart();
+                var existingItem = sessionCart.FirstOrDefault(c => c.ProId == ProId);
+
+                if (existingItem != null)
                 {
-                    existingCartItem.Qty = product.StockQuantity;
+                    var newQty = existingItem.Qty + qty;
+                    if (newQty > product.StockQuantity)
+                    {
+                        newQty = product.StockQuantity;
+                    }
+                    _sessionCartService.UpdateSessionCartItem(ProId, newQty);
                 }
+                else
+                {
+                    _sessionCartService.AddToSessionCart(ProId, qty);
+                }
+
+                var sessionCartCount = _sessionCartService.GetSessionCartCount();
+                return Json(new { success = true, message = "Item added to cart!", cartItemCount = sessionCartCount });
             }
             else
             {
-                // Add new item
-                var cartItem = new ShoppingCart
+                // Logged in user - use database cart
+                var existingCartItem = await _context.ShoppingCarts
+                    .FirstOrDefaultAsync(c => c.UserId == userId && c.ProId == ProId);
+
+                if (existingCartItem != null)
                 {
-                    ProId = ProId,
-                    UserId = userId,
-                    Qty = qty
-                };
-                _context.ShoppingCarts.Add(cartItem);
+                    // Update quantity
+                    existingCartItem.Qty += qty;
+                    if (existingCartItem.Qty > product.StockQuantity)
+                    {
+                        existingCartItem.Qty = product.StockQuantity;
+                    }
+                }
+                else
+                {
+                    // Add new item
+                    var cartItem = new ShoppingCart
+                    {
+                        ProId = ProId,
+                        UserId = userId,
+                        Qty = qty
+                    };
+                    _context.ShoppingCarts.Add(cartItem);
+                }
+
+                await _context.SaveChangesAsync();
+
+                // Get updated cart count
+                var cartItemCount = await _context.ShoppingCarts
+                    .Where(c => c.UserId == userId)
+                    .SumAsync(c => c.Qty);
+
+                return Json(new { success = true, message = "Item added to cart!", cartItemCount = cartItemCount });
             }
-
-            await _context.SaveChangesAsync();
-
-            // Get updated cart count
-            var cartItemCount = await _context.ShoppingCarts
-                .Where(c => c.UserId == userId)
-                .SumAsync(c => c.Qty);
-
-            return Json(new { success = true, message = "Item added to cart!", cartItemCount = cartItemCount });
         }
         [AllowAnonymous]
         public IActionResult RequireLogin(string returnUrl = null)
@@ -113,18 +164,33 @@ namespace HikingStore.Controllers
         }
 
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> RemoveFromCart(int CartId)
         {
             var userId = _userManager.GetUserId(User);
-            var cartItem = await _context.ShoppingCarts
-                .FirstOrDefaultAsync(c => c.CartId == CartId && c.UserId == userId);
-
-            if (cartItem != null)
+            
+            if (string.IsNullOrEmpty(userId))
             {
-                _context.ShoppingCarts.Remove(cartItem);
-                await _context.SaveChangesAsync();
+                // Anonymous user - remove from session cart
+                var sessionCart = _sessionCartService.GetSessionCart();
+                var item = sessionCart.FirstOrDefault(c => c.ProId == CartId); // For session, CartId is actually ProId
+                if (item != null)
+                {
+                    _sessionCartService.RemoveFromSessionCart(CartId);
+                }
             }
+            else
+            {
+                // Logged in user - remove from database
+                var cartItem = await _context.ShoppingCarts
+                    .FirstOrDefaultAsync(c => c.CartId == CartId && c.UserId == userId);
+
+                if (cartItem != null)
+                {
+                    _context.ShoppingCarts.Remove(cartItem);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            
             return RedirectToAction(nameof(Index));
         }
 
@@ -413,63 +479,122 @@ namespace HikingStore.Controllers
         }
 
         [HttpPost]
-        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateCartItem(int cartId, int quantity)
         {
             var userId = _userManager.GetUserId(User);
-            var cartItem = await _context.ShoppingCarts
-                .Include(c => c.Product)
-                .FirstOrDefaultAsync(c => c.CartId == cartId && c.UserId == userId);
 
-            if (cartItem == null)
+            if (string.IsNullOrEmpty(userId))
             {
-                return Json(new { success = false, message = "Cart item not found." });
-            }
-
-            // Check stock if increasing quantity
-            if (quantity > cartItem.Qty)
-            {
-                var availableStock = cartItem.Product.StockQuantity;
-                if (quantity > availableStock)
+                // Anonymous user - update session cart
+                var sessionCart = _sessionCartService.GetSessionCart();
+                var item = sessionCart.FirstOrDefault(c => c.ProId == cartId); // For session, cartId is ProId
+                
+                if (item == null)
                 {
-                    return Json(new
-                    {
-                        success = false,
-                        message = $"Only {availableStock} items available in stock."
-                    });
+                    return Json(new { success = false, message = "Cart item not found." });
                 }
-            }
 
-            if (quantity < 1)
-            {
-                _context.ShoppingCarts.Remove(cartItem);
+                var product = await _context.Products.FindAsync(cartId);
+                if (product == null)
+                {
+                    return Json(new { success = false, message = "Product not found." });
+                }
+
+                // Check stock if increasing quantity
+                if (quantity > item.Qty)
+                {
+                    var availableStock = product.StockQuantity;
+                    if (quantity > availableStock)
+                    {
+                        return Json(new
+                        {
+                            success = false,
+                            message = $"Only {availableStock} items available in stock."
+                        });
+                    }
+                }
+
+                _sessionCartService.UpdateSessionCartItem(cartId, quantity);
+                var sessionCartCount = _sessionCartService.GetSessionCartCount();
+                
+                var sessionCartItems = _sessionCartService.GetSessionCart();
+                var totalAmount = 0m;
+                foreach (var sessionItem in sessionCartItems)
+                {
+                    var prod = await _context.Products.FindAsync(sessionItem.ProId);
+                    if (prod != null)
+                    {
+                        totalAmount += prod.Price * sessionItem.Qty;
+                    }
+                }
+
+                var itemTotal = product.Price * (quantity > 0 ? quantity : 0);
+
+                return Json(new
+                {
+                    success = true,
+                    cartItemCount = sessionCartCount,
+                    itemTotal = itemTotal,
+                    totalAmount = totalAmount
+                });
             }
             else
             {
-                cartItem.Qty = quantity;
-                _context.ShoppingCarts.Update(cartItem);
+                // Logged in user - update database cart
+                var cartItem = await _context.ShoppingCarts
+                    .Include(c => c.Product)
+                    .FirstOrDefaultAsync(c => c.CartId == cartId && c.UserId == userId);
+
+                if (cartItem == null)
+                {
+                    return Json(new { success = false, message = "Cart item not found." });
+                }
+
+                // Check stock if increasing quantity
+                if (quantity > cartItem.Qty)
+                {
+                    var availableStock = cartItem.Product.StockQuantity;
+                    if (quantity > availableStock)
+                    {
+                        return Json(new
+                        {
+                            success = false,
+                            message = $"Only {availableStock} items available in stock."
+                        });
+                    }
+                }
+
+                if (quantity < 1)
+                {
+                    _context.ShoppingCarts.Remove(cartItem);
+                }
+                else
+                {
+                    cartItem.Qty = quantity;
+                    _context.ShoppingCarts.Update(cartItem);
+                }
+
+                await _context.SaveChangesAsync();
+
+                // Get updated cart count and total
+                var cartItemCount = await _context.ShoppingCarts
+                    .Where(c => c.UserId == userId)
+                    .SumAsync(c => c.Qty);
+
+                var totalAmount = await _context.ShoppingCarts
+                    .Include(c => c.Product)
+                    .Where(c => c.UserId == userId)
+                    .SumAsync(c => c.Product.Price * c.Qty);
+
+                return Json(new
+                {
+                    success = true,
+                    cartItemCount = cartItemCount,
+                    itemTotal = cartItem.Product.Price * quantity,
+                    totalAmount = totalAmount
+                });
             }
-
-            await _context.SaveChangesAsync();
-
-            // Get updated cart count and total
-            var cartItemCount = await _context.ShoppingCarts
-                .Where(c => c.UserId == userId)
-                .SumAsync(c => c.Qty);
-
-            var totalAmount = await _context.ShoppingCarts
-                .Include(c => c.Product)
-                .Where(c => c.UserId == userId)
-                .SumAsync(c => c.Product.Price * c.Qty);
-
-            return Json(new
-            {
-                success = true,
-                cartItemCount = cartItemCount,
-                itemTotal = cartItem.Product.Price * quantity,
-                totalAmount = totalAmount
-            });
         }
 
         public class CartItemUpdate

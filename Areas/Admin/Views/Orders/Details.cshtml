@@ -1,110 +1,457 @@
 ﻿@model Order
 @using HikingStore.Enum
+@{
+    ViewData["Title"] = "Order Details";
+    var vatRate = 0.18m; // 18% VAT
+    var subtotalWithoutVat = Model.TotalAmount / (1 + vatRate);
+    var vatAmount = Model.TotalAmount - subtotalWithoutVat;
+}
+
+<style>
+    .order-detail-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        transition: box-shadow 0.3s ease;
+    }
+
+    .order-detail-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .order-detail-header {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-bottom: 1px solid #e5e7eb;
+        border-radius: 12px 12px 0 0;
+        padding: 24px;
+    }
+
+    .order-detail-body {
+        padding: 24px;
+    }
+
+    .order-detail-title {
+        color: #3b5d50;
+        font-weight: 700;
+        font-size: 20px;
+        margin: 0;
+    }
+
+    .order-detail-subtitle {
+        color: #6b7280;
+        font-size: 14px;
+        margin: 4px 0 0 0;
+    }
+
+    .info-card {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-left: 4px solid #3b5d50;
+    }
+
+    .info-card-title {
+        color: #374151;
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #e5e7eb;
+        align-items: flex-start;
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        color: #6b7280;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .info-value {
+        color: #111827;
+        font-weight: 500;
+        font-size: 14px;
+        text-align: right;
+        word-break: break-word;
+        max-width: 60%;
+    }
+
+    .product-row {
+        display: flex;
+        align-items: center;
+        padding: 16px 0;
+        border-bottom: 1px solid #e5e7eb;
+        transition: background-color 0.2s ease;
+    }
+
+    .product-row:hover {
+        background-color: #f9fafb;
+        border-radius: 8px;
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .product-row:last-child {
+        border-bottom: none;
+    }
+
+    .product-image {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        object-fit: cover;
+        margin-right: 16px;
+        border: 1px solid #e5e7eb;
+    }
+
+    .product-name {
+        flex: 1;
+        color: #374151;
+        font-weight: 500;
+        font-size: 15px;
+        line-height: 1.4;
+    }
+
+    .product-qty {
+        color: #6b7280;
+        font-size: 14px;
+        margin-right: 24px;
+        background: #f3f4f6;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-weight: 500;
+    }
+
+    .product-price {
+        color: #3b5d50;
+        font-weight: 600;
+        font-size: 16px;
+        min-width: 100px;
+        text-align: right;
+    }
+
+    .total-section {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 24px;
+        border: 1px solid #e5e7eb;
+    }
+
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        align-items: center;
+    }
+
+    .total-row.grand-total {
+        border-top: 2px solid #3b5d50;
+        margin-top: 12px;
+        padding-top: 16px;
+        font-weight: 700;
+        color: #3b5d50;
+        font-size: 20px;
+    }
+
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .status-received {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .status-verified {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-processing {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-shipped {
+        background: #f3e8ff;
+        color: #6b21a8;
+    }
+
+    .status-completed {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-cancelled {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .order-number {
+        background: #3b5d50;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 12px;
+        display: inline-block;
+    }
+
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .timeline-item {
+        position: relative;
+        padding-bottom: 20px;
+    }
+
+    .timeline-item:last-child {
+        padding-bottom: 0;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: -30px;
+        top: 0;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 3px solid white;
+        z-index: 2;
+    }
+
+    .timeline-item.completed .timeline-marker {
+        background-color: #28a745 !important;
+    }
+
+    .timeline-item:not(.completed) .timeline-marker {
+        background-color: #e9ecef !important;
+    }
+
+    .timeline-item:not(:last-child):after {
+        content: '';
+        position: absolute;
+        left: -23px;
+        top: 16px;
+        bottom: -20px;
+        width: 2px;
+        background-color: #e9ecef;
+        z-index: 1;
+    }
+
+    .timeline-item.completed:not(:last-child):after {
+        background-color: #28a745;
+    }
+
+    .timeline-content h6 {
+        font-size: 0.9rem;
+        margin-bottom: 2px;
+        font-weight: 600;
+    }
+
+    .timeline-content small {
+        font-size: 0.8rem;
+        color: #6b7280;
+    }
+
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 24px;
+    }
+
+    .action-buttons .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .table-responsive {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .table thead {
+        background: #f8fafc;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f9fafb;
+    }
+
+    @@media (max-width: 768px) {
+        .order-detail-header {
+            padding: 16px !important;
+        }
+
+        .order-detail-body {
+            padding: 16px !important;
+        }
+
+        .product-row {
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .product-image {
+            width: 60px;
+            height: 60px;
+        }
+
+        .product-name {
+            flex: 1 1 100%;
+            margin-top: 8px;
+        }
+
+        .info-item {
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .info-value {
+            text-align: left;
+            max-width: 100%;
+        }
+    }
+</style>
 <br />
 <br />
 <br />
-<br />
-<div class="container-fluid px-4">
+
+<div class="container-fluid px-4 py-4">
+    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="h3 mb-1 text-gray-800">Order Details</h1>
-        </div>
-        <div>
-            <a asp-action="Index" class="btn btn-outline-secondary me-2">
+            <a asp-action="Index" class="text-decoration-none text-muted mb-2 d-inline-block">
                 <i class="fas fa-arrow-left me-2"></i>Back to Orders
             </a>
-
+            <h1 class="h3 fw-bold text-dark mb-1">Order Details</h1>
+            <div class="d-flex align-items-center gap-2">
+                <span class="order-number">#ORD@(Model.OrderId.ToString("D6"))</span>
+                <span class="text-muted">• @Model.OrderDate.ToString("MMM dd, yyyy • hh:mm tt")</span>
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary" onclick="updateStatus(@Model.OrderId, '@Model.Status')">
+                <i class="fas fa-edit me-2"></i>Update Status
+            </button>
+            <button class="btn btn-outline-secondary" onclick="printOrder()">
+                <i class="fas fa-print me-2"></i>Print
+            </button>
             @if (Model.Status == OrderStatus.Cancelled || Model.Status == OrderStatus.Received)
             {
-                <form asp-action="DeleteOrder" method="post"
-                      onsubmit="return confirm('Are you sure you want to delete this order? This action cannot be undone.');"
-                      class="d-inline">
-                    <input type="hidden" name="id" value="@Model.OrderId" />
-                    @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-danger flex-grow-1">
-                        <i class="fas fa-trash me-2"></i>Delete Order
-                    </button>
-                </form>
+                <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="fas fa-trash me-2"></i>Delete
+                </button>
             }
-            <a href="/Home/Product" class="btn btn-primary flex-grow-1">
-                <i class="fas fa-shopping-bag me-2"></i>Shop Again
-            </a>
         </div>
     </div>
 
-    <div class="row">
+    <div class="row g-4">
+        <!-- Left Column: Order Items & Summary -->
         <div class="col-lg-8">
             <!-- Order Summary Card -->
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0">Order Summary</h5>
+            <div class="order-detail-card mb-4">
+                <div class="order-detail-header">
+                    <h2 class="order-detail-title">Order Summary</h2>
+                    <p class="order-detail-subtitle">Complete order information</p>
                 </div>
-                <div class="card-body">
+                <div class="order-detail-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label text-muted small mb-1">Order ID</label>
-                                <p class="fw-bold mb-0">#ORD@(Model.OrderId.ToString("D6"))</p>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label text-muted small mb-1">Order Date</label>
-                                <p class="mb-0">@Model.OrderDate.ToString("MMMM dd, yyyy 'at' h:mm tt")</p>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label text-muted small mb-1">Customer</label>
-                                <p class="mb-0">@Model.User.UserName</p>
-                                <small class="text-muted">@Model.User.Email</small>
+                            <div class="info-card">
+                                <div class="info-card-title">Order Information</div>
+                                <div class="info-item">
+                                    <span class="info-label">Order ID</span>
+                                    <span class="info-value">#ORD@(Model.OrderId.ToString("D6"))</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Order Date</span>
+                                    <span class="info-value">@Model.OrderDate.ToString("MMMM dd, yyyy 'at' h:mm tt")</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Status</span>
+                                    <span class="info-value">
+                                        <span class="status-badge @("status-" + Model.Status.ToString().ToLower())">
+                                            <i class="fas fa-circle" style="font-size: 8px;"></i>
+                                            @Model.Status
+                                        </span>
+                                    </span>
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label text-muted small mb-1">Total Amount</label>
-                                <p class="h5 text-success fw-bold mb-0">@Model.TotalAmount.ToString("C")</p>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label text-muted small mb-1">Status</label>
-                                <div>
-                                    @{
-                                        var statusClass = Model.Status switch
-                                        {
-                                            OrderStatus.Received => "badge bg-primary",
-                                            OrderStatus.Verified => "badge bg-info",
-                                            OrderStatus.Processing => "badge bg-warning",
-                                            OrderStatus.Shipped => "badge bg-secondary",
-                                            OrderStatus.Completed => "badge bg-success",
-                                            OrderStatus.Cancelled => "badge bg-danger",
-                                            _ => "badge bg-primary"
-                                        };
-                                    }
-                                    <span class="@statusClass">@Model.Status</span>
+                            <div class="info-card">
+                                <div class="info-card-title">Customer Information</div>
+                                <div class="info-item">
+                                    <span class="info-label">Customer</span>
+                                    <span class="info-value">@Model.User?.UserName</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Email</span>
+                                    <span class="info-value">@Model.User?.Email</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Phone</span>
+                                    <span class="info-value">@Model.PhoneNumber</span>
                                 </div>
                             </div>
-                            @if (!string.IsNullOrEmpty(Model.TrackingNumber) && Model.TrackingNumber != "N/A")
-                            {
-                                <div class="mb-3">
-                                    <label class="form-label text-muted small mb-1">Tracking Number</label>
-                                    <p class="mb-0 font-monospace">@Model.TrackingNumber</p>
-                                    <small class="text-muted">Carrier: @Model.Carrier</small>
-                                </div>
-                            }
                         </div>
                     </div>
+
+                    @if (!string.IsNullOrEmpty(Model.TrackingNumber) && Model.TrackingNumber != "N/A")
+                    {
+                        <div class="alert alert-info mt-3">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-truck me-2"></i>
+                                <div>
+                                    <strong>Tracking Number:</strong> <span class="font-monospace">@Model.TrackingNumber</span>
+                                    @if (!string.IsNullOrEmpty(Model.Carrier))
+                                    {
+                                        <div class="small">Carrier: @Model.Carrier</div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
                 </div>
             </div>
 
             <!-- Order Items Card -->
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0">Order Items (@Model.OrderDetails.Sum(od => od.Quantity) items)</h5>
+            <div class="order-detail-card">
+                <div class="order-detail-header">
+                    <h2 class="order-detail-title">Order Items</h2>
+                    <p class="order-detail-subtitle">@Model.OrderDetails.Sum(od => od.Quantity) items in this order</p>
                 </div>
-                <div class="card-body p-0">
+                <div class="order-detail-body">
                     <div class="table-responsive">
                         <table class="table table-hover mb-0">
                             <thead class="table-light">
                                 <tr>
                                     <th class="border-0">Product</th>
                                     <th class="border-0">Price</th>
-                                    <th class="border-0">Quantity</th>
+                                    <th class="border-0 text-center">Quantity</th>
                                     <th class="border-0 text-end">Total</th>
                                 </tr>
                             </thead>
@@ -114,36 +461,39 @@
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                <div class="flex-shrink-0">
-                                                    <img src="~/Product/@item.Product.ProImage"
-                                                         alt="@item.Product.ProName"
-                                                         class="rounded"
-                                                         style="width: 50px; height: 50px; object-fit: cover;">
-                                                </div>
-                                                <div class="flex-grow-1 ms-3">
+                                                <img src="~/Product/@item.Product.ProImage"
+                                                     alt="@item.Product.ProName"
+                                                     class="product-image me-3">
+                                                <div>
                                                     <h6 class="mb-0">@item.Product.ProName</h6>
                                                     <small class="text-muted">@item.Product.Category?.CatName</small>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>@item.Price.ToString("C")</td>
-                                        <td>@item.Quantity</td>
-                                        <td class="text-end fw-bold">@((item.Price * item.Quantity).ToString("C"))</td>
+                                        <td class="align-middle">€@item.Price.ToString("N2")</td>
+                                        <td class="text-center align-middle">
+                                            <span class="product-qty">@item.Quantity</span>
+                                        </td>
+                                        <td class="text-end align-middle fw-bold">€@((item.Price * item.Quantity).ToString("N2"))</td>
                                     </tr>
                                 }
                             </tbody>
                             <tfoot class="table-light">
                                 <tr>
                                     <td colspan="3" class="text-end fw-bold">Subtotal:</td>
-                                    <td class="text-end fw-bold">@Model.TotalAmount.ToString("C")</td>
+                                    <td class="text-end fw-bold">€@subtotalWithoutVat.ToString("N2")</td>
                                 </tr>
                                 <tr>
                                     <td colspan="3" class="text-end fw-bold">Shipping:</td>
                                     <td class="text-end text-success">Free</td>
                                 </tr>
                                 <tr>
-                                    <td colspan="3" class="text-end fw-bold">Total:</td>
-                                    <td class="text-end fw-bold text-success">@Model.TotalAmount.ToString("C")</td>
+                                    <td colspan="3" class="text-end fw-bold">VAT (18%):</td>
+                                    <td class="text-end fw-bold">€@vatAmount.ToString("N2")</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" class="text-end fw-bold h5 mb-0">Total:</td>
+                                    <td class="text-end fw-bold h5 mb-0 text-success">€@Model.TotalAmount.ToString("N2")</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -152,50 +502,57 @@
             </div>
         </div>
 
+        <!-- Right Column: Shipping & Timeline -->
         <div class="col-lg-4">
             <!-- Shipping Information Card -->
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0">Shipping Information</h5>
+            <div class="order-detail-card mb-4">
+                <div class="order-detail-header">
+                    <h2 class="order-detail-title">Shipping Information</h2>
                 </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <label class="form-label text-muted small mb-1">Shipping Address</label>
-                        <p class="mb-0">@Model.ShippingAddress</p>
+                <div class="order-detail-body">
+                    <div class="info-card">
+                        <div class="info-card-title">Delivery Address</div>
+                        <div class="info-item">
+                            <span class="info-label">Address</span>
+                            <span class="info-value">@Model.ShippingAddress</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">City</span>
+                            <span class="info-value">@Model.City</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Phone</span>
+                            <span class="info-value">@Model.PhoneNumber</span>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label text-muted small mb-1">City</label>
-                        <p class="mb-0">@Model.City</p>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label text-muted small mb-1">Phone Number</label>
-                        <p class="mb-0">@Model.PhoneNumber</p>
-                    </div>
+
                     @if (!string.IsNullOrEmpty(Model.Comment))
                     {
-                        <div class="mb-3">
-                            <label class="form-label text-muted small mb-1">Customer Comment</label>
+                        <div class="alert alert-light mt-3">
+                            <div class="info-card-title mb-2">Customer Comment</div>
                             <p class="mb-0 text-muted">@Model.Comment</p>
                         </div>
                     }
+
                     @if (!string.IsNullOrEmpty(Model.AdminNotes))
                     {
-                        <div class="mb-3">
-                            <label class="form-label text-muted small mb-1">Admin Notes</label>
-                            <p class="mb-0 text-muted">@Model.AdminNotes</p>
+                        <div class="alert alert-warning mt-3">
+                            <div class="info-card-title mb-2">Admin Notes</div>
+                            <p class="mb-0">@Model.AdminNotes</p>
                         </div>
                     }
                 </div>
             </div>
 
             <!-- Order Timeline Card -->
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0">Order Timeline</h5>
+            <div class="order-detail-card mb-4">
+                <div class="order-detail-header">
+                    <h2 class="order-detail-title">Order Timeline</h2>
+                    <p class="order-detail-subtitle">Track order progress</p>
                 </div>
-                <div class="card-body">
+                <div class="order-detail-body">
                     <div class="timeline">
-                        <div class="timeline-item @(Model.OrderDate != null ? "completed" : "")">
+                        <div class="timeline-item completed">
                             <div class="timeline-marker bg-primary"></div>
                             <div class="timeline-content">
                                 <h6 class="mb-1">Order Placed</h6>
@@ -209,6 +566,16 @@
                                 <div class="timeline-content">
                                     <h6 class="mb-1">Order Verified</h6>
                                     <small class="text-muted">@Model.VerifiedDate.Value.ToString("MMM dd, yyyy hh:mm tt")</small>
+                                </div>
+                            </div>
+                        }
+                        @if (Model.ProcessingDate != null)
+                        {
+                            <div class="timeline-item completed">
+                                <div class="timeline-marker bg-warning"></div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-1">Processing</h6>
+                                    <small class="text-muted">@Model.ProcessingDate.Value.ToString("MMM dd, yyyy hh:mm tt")</small>
                                 </div>
                             </div>
                         }
@@ -232,40 +599,18 @@
                                 </div>
                             </div>
                         }
+                        @if (Model.CancelledDate != null)
+                        {
+                            <div class="timeline-item completed">
+                                <div class="timeline-marker bg-danger"></div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-1">Order Cancelled</h6>
+                                    <small class="text-muted">@Model.CancelledDate.Value.ToString("MMM dd, yyyy hh:mm tt")</small>
+                                </div>
+                            </div>
+                        }
                     </div>
                 </div>
-            </div>
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel">Delete Order #ORD@(Model.OrderId.ToString("D6"))</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    <strong>Warning:</strong> This action cannot be undone!
-                </div>
-                <p>Are you sure you want to delete this order?</p>
-                <ul class="text-danger">
-                    <li>Order details will be permanently removed</li>
-                    <li>Tracking information will be deleted</li>
-                    <li>This action cannot be reversed</li>
-                </ul>
-                <div class="form-check mt-3">
-                    <input class="form-check-input" type="checkbox" id="confirmDeleteCheck">
-                    <label class="form-check-label" for="confirmDeleteCheck">
-                        I understand this action is permanent
-                    </label>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" id="confirmDeleteBtn" disabled>
-                    <i class="fas fa-trash me-2"></i>Delete Order
-                </button>
             </div>
         </div>
     </div>
@@ -280,256 +625,278 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <input type="hidden" id="orderIdForStatus">
+                <input type="hidden" id="orderIdForStatus" value="@Model.OrderId">
                 <div class="mb-3">
                     <label class="form-label">New Status</label>
                     <select class="form-select" id="newStatus">
-                        <option value="Received">Received</option>
-                        <option value="Verified">Verified</option>
-                        <option value="Processing">Processing</option>
-                        <option value="Shipped">Shipped</option>
-                        <option value="Completed">Completed</option>
-                        <option value="Cancelled">Cancelled</option>
+                        @foreach (OrderStatus status in System.Enum.GetValues(typeof(OrderStatus)))
+                        {
+                            if (status == Model.Status)
+                            {
+                                <option value="@status" selected>@status</option>
+                            }
+                            else
+                            {
+                                <option value="@status">@status</option>
+                            }
+                        }
                     </select>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Tracking Number (if shipping)</label>
-                    <input type="text" class="form-control" id="trackingNumber" placeholder="Enter tracking number">
+                    <input type="text" class="form-control" id="trackingNumber" 
+                           value="@(Model.TrackingNumber != "N/A" ? Model.TrackingNumber : "")" 
+                           placeholder="Enter tracking number">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Carrier</label>
+                    <input type="text" class="form-control" id="carrier" 
+                           value="@(Model.Carrier ?? "Standard Shipping")" 
+                           placeholder="Enter carrier name">
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Admin Notes</label>
-                    <textarea class="form-control" id="adminNotes" rows="3" placeholder="Add internal notes..."></textarea>
+                    <textarea class="form-control" id="adminNotes" rows="3" 
+                              placeholder="Add internal notes...">@Model.AdminNotes</textarea>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="updateStatusBtn">Update Status</button>
+                <button type="button" class="btn btn-primary" id="updateStatusBtn">
+                    <i class="fas fa-save me-2"></i>Update Status
+                </button>
             </div>
         </div>
     </div>
 </div>
 
-@section Styles {
-    <style>
-        .timeline {
-            position: relative;
-            padding-left: 30px;
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Delete Order #ORD@(Model.OrderId.ToString("D6"))
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger border-0">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-exclamation-triangle fa-2x me-3 mt-1"></i>
+                        <div>
+                            <h6 class="alert-heading mb-2">Warning: This action cannot be undone!</h6>
+                            <p class="mb-2">Are you sure you want to permanently delete this order?</p>
+                            <hr class="my-2">
+                            <ul class="mb-0 ps-3">
+                                <li>All order details will be permanently removed</li>
+                                <li>All tracking information will be deleted</li>
+                                <li>All order items will be removed</li>
+                                <li>This action cannot be reversed</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card bg-light border-0 mb-3">
+                    <div class="card-body">
+                        <div class="row g-2 small">
+                            <div class="col-6">
+                                <strong>Order ID:</strong><br>
+                                <span class="text-muted">#ORD@(Model.OrderId.ToString("D6"))</span>
+                            </div>
+                            <div class="col-6">
+                                <strong>Customer:</strong><br>
+                                <span class="text-muted">@Model.User?.UserName</span>
+                            </div>
+                            <div class="col-6">
+                                <strong>Total Amount:</strong><br>
+                                <span class="text-muted">€@Model.TotalAmount.ToString("N2")</span>
+                            </div>
+                            <div class="col-6">
+                                <strong>Status:</strong><br>
+                                <span class="text-muted">@Model.Status</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="confirmDeleteCheck" required>
+                    <label class="form-check-label fw-semibold" for="confirmDeleteCheck">
+                        I understand this action is permanent and cannot be undone
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn" disabled>
+                    <i class="fas fa-trash me-2"></i>Delete Order Permanently
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+<script>
+    // Enable delete button when checkbox is checked
+    document.addEventListener('DOMContentLoaded', function() {
+        const confirmCheck = document.getElementById('confirmDeleteCheck');
+        const deleteBtn = document.getElementById('confirmDeleteBtn');
+        
+        if (confirmCheck && deleteBtn) {
+            confirmCheck.addEventListener('change', function() {
+                deleteBtn.disabled = !this.checked;
+            });
+
+            // Handle delete confirmation
+            deleteBtn.addEventListener('click', function() {
+                if (confirmCheck.checked) {
+                    deleteOrder(@Model.OrderId);
+                }
+            });
+        }
+    });
+
+    function deleteOrder(orderId) {
+        const deleteButton = document.getElementById('confirmDeleteBtn');
+        const originalText = deleteButton.innerHTML;
+
+        deleteButton.disabled = true;
+        deleteButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Deleting...';
+
+        // Get anti-forgery token
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+        if (!token) {
+            showNotification('Security token not found. Please refresh the page.', 'error');
+            deleteButton.disabled = false;
+            deleteButton.innerHTML = originalText;
+            return;
         }
 
-        .timeline-item {
-            position: relative;
-            padding-bottom: 20px;
-        }
-
-            .timeline-item:last-child {
-                padding-bottom: 0;
-            }
-
-        .timeline-marker {
-            position: absolute;
-            left: -30px;
-            top: 0;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            border: 3px solid white;
-            z-index: 2;
-        }
-
-        .timeline-item.completed .timeline-marker {
-            background-color: #28a745 !important;
-        }
-
-        .timeline-item:not(.completed) .timeline-marker {
-            background-color: #e9ecef !important;
-        }
-
-        .timeline-item:not(:last-child):after {
-            content: '';
-            position: absolute;
-            left: -23px;
-            top: 16px;
-            bottom: -20px;
-            width: 2px;
-            background-color: #e9ecef;
-            z-index: 1;
-        }
-
-        .timeline-item.completed:not(:last-child):after {
-            background-color: #28a745;
-        }
-
-        .timeline-content h6 {
-            font-size: 0.9rem;
-            margin-bottom: 2px;
-        }
-
-        .timeline-content small {
-            font-size: 0.8rem;
-        }
-
-        .badge {
-            font-size: 0.75rem;
-            font-weight: 500;
-            padding: 0.35em 0.65em;
-        }
-
-        .font-monospace {
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-        }
-    </style>
-}
-
-@section Scripts {
-    <script>
-        // Enable delete button when checkbox is checked
-        document.getElementById('confirmDeleteCheck')?.addEventListener('change', function() {
-            document.getElementById('confirmDeleteBtn').disabled = !this.checked;
-        });
-
-        // Handle delete confirmation
-        document.getElementById('confirmDeleteBtn')?.addEventListener('click', function() {
-            deleteOrder(@Model.OrderId);
-        });
-
-        function deleteOrder(orderId) {
-            const deleteButton = document.getElementById('confirmDeleteBtn');
-            const originalText = deleteButton.innerHTML;
-
-            // Show loading state
-            deleteButton.disabled = true;
-            deleteButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Deleting...';
-
-            // Get anti-forgery token
-            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
-
-            fetch('@Url.Action("DeleteOrder", "Orders", new { area = "Admin" })', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'RequestVerificationToken': token
-                },
-                body: `id=${orderId}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Show success message
-                    showNotification('Order deleted successfully! Redirecting...', 'success');
-
-                    // Close modal
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
-                    modal.hide();
-
-                    // Redirect to orders list after a short delay
-                    setTimeout(() => {
-                        window.location.href = '@Url.Action("Index", "Orders", new { area = "Admin" })';
-                    }, 1500);
-                } else {
-                    showNotification(data.message || 'Error deleting order', 'error');
+        fetch('@Url.Action("DeleteOrder", "Orders", new { area = "Admin" })', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'RequestVerificationToken': token
+            },
+            body: `id=${orderId}&__RequestVerificationToken=${encodeURIComponent(token)}`
+        })
+        .then(response => {
+            if (response.redirected) {
+                // Success - redirect to orders list
+                showNotification('Order deleted successfully!', 'success');
+                setTimeout(() => {
+                    window.location.href = '@Url.Action("Index", "Orders", new { area = "Admin" })';
+                }, 1000);
+            } else if (response.ok) {
+                return response.json().then(data => {
+                    if (data && data.success) {
+                        showNotification(data.message || 'Order deleted successfully!', 'success');
+                        setTimeout(() => {
+                            window.location.href = '@Url.Action("Index", "Orders", new { area = "Admin" })';
+                        }, 1000);
+                    } else {
+                        showNotification(data.message || 'Error deleting order', 'error');
+                        deleteButton.disabled = false;
+                        deleteButton.innerHTML = originalText;
+                    }
+                });
+            } else {
+                return response.text().then(text => {
+                    showNotification('Error deleting order. Please try again.', 'error');
                     deleteButton.disabled = false;
                     deleteButton.innerHTML = originalText;
-                }
-            })
-            .catch(error => {
-                showNotification('Error deleting order: ' + error.message, 'error');
-                deleteButton.disabled = false;
-                deleteButton.innerHTML = originalText;
-            });
-        }
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Delete error:', error);
+            showNotification('Error deleting order: ' + error.message, 'error');
+            deleteButton.disabled = false;
+            deleteButton.innerHTML = originalText;
+        });
+    }
 
-        function updateStatus(orderId, currentStatus) {
-            document.getElementById('orderIdForStatus').value = orderId;
-            document.getElementById('newStatus').value = currentStatus;
+    function updateStatus(orderId, currentStatus) {
+        document.getElementById('orderIdForStatus').value = orderId;
+        document.getElementById('newStatus').value = currentStatus;
 
-            const modal = new bootstrap.Modal(document.getElementById('statusModal'));
-            modal.show();
-        }
+        const modal = new bootstrap.Modal(document.getElementById('statusModal'));
+        modal.show();
+    }
 
-        // Handle status update
-        document.getElementById('updateStatusBtn')?.addEventListener('click', function() {
-            const orderId = document.getElementById('orderIdForStatus').value;
-            const status = document.getElementById('newStatus').value;
-            const trackingNumber = document.getElementById('trackingNumber').value;
-            const adminNotes = document.getElementById('adminNotes').value;
+    // Handle status update
+    document.getElementById('updateStatusBtn')?.addEventListener('click', function() {
+        const orderId = document.getElementById('orderIdForStatus').value;
+        const status = document.getElementById('newStatus').value;
+        const trackingNumber = document.getElementById('trackingNumber').value;
+        const carrier = document.getElementById('carrier').value;
+        const adminNotes = document.getElementById('adminNotes').value;
 
-            const updateButton = this;
-            const originalText = updateButton.innerHTML;
+        const updateButton = this;
+        const originalText = updateButton.innerHTML;
 
-            // Show loading state
-            updateButton.disabled = true;
-            updateButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Updating...';
+        updateButton.disabled = true;
+        updateButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Updating...';
 
-            // Get anti-forgery token
-            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
 
-            fetch('@Url.Action("UpdateStatus", "Orders", new { area = "Admin" })', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'RequestVerificationToken': token
-                },
-                body: `id=${orderId}&status=${status}&trackingNumber=${encodeURIComponent(trackingNumber)}&adminNotes=${encodeURIComponent(adminNotes)}&carrier=Standard Shipping`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showNotification('Order status updated successfully!', 'success');
-
-                    // Close modal and refresh page
-                    setTimeout(() => {
-                        bootstrap.Modal.getInstance(document.getElementById('statusModal')).hide();
-                        location.reload();
-                    }, 1500);
-                } else {
-                    showNotification(data.message || 'Error updating status', 'error');
-                    updateButton.disabled = false;
-                    updateButton.innerHTML = originalText;
-                }
-            })
-            .catch(error => {
-                showNotification('Error updating status: ' + error.message, 'error');
+        fetch('@Url.Action("UpdateStatus", "Orders", new { area = "Admin" })', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'RequestVerificationToken': token
+            },
+            body: `id=${orderId}&status=${status}&trackingNumber=${encodeURIComponent(trackingNumber)}&adminNotes=${encodeURIComponent(adminNotes)}&carrier=${encodeURIComponent(carrier)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Order status updated successfully!', 'success');
+                setTimeout(() => {
+                    bootstrap.Modal.getInstance(document.getElementById('statusModal')).hide();
+                    location.reload();
+                }, 1500);
+            } else {
+                showNotification(data.message || 'Error updating status', 'error');
                 updateButton.disabled = false;
                 updateButton.innerHTML = originalText;
-            });
+            }
+        })
+        .catch(error => {
+            showNotification('Error updating status: ' + error.message, 'error');
+            updateButton.disabled = false;
+            updateButton.innerHTML = originalText;
         });
+    });
 
-        function printOrder() {
-            window.print();
-        }
+    function printOrder() {
+        window.print();
+    }
 
-        function showNotification(message, type) {
-            // Create toast notification
-            const toast = document.createElement('div');
-            toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0 position-fixed top-0 end-0 m-3`;
-            toast.style.zIndex = '1060';
-            toast.innerHTML = `
-                <div class="d-flex">
-                    <div class="toast-body">${message}</div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                </div>
-            `;
-            document.body.appendChild(toast);
+    function showNotification(message, type) {
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0 position-fixed top-0 end-0 m-3`;
+        toast.style.zIndex = '1060';
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">${message}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        document.body.appendChild(toast);
 
-            const bsToast = new bootstrap.Toast(toast);
-            bsToast.show();
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
 
-            // Remove toast after hiding
-            toast.addEventListener('hidden.bs.toast', () => {
-                toast.remove();
-            });
-        }
-
-        // Auto-hide notifications after 5 seconds
-        setTimeout(() => {
-            const toasts = document.querySelectorAll('.toast');
-            toasts.forEach(toast => {
-                const bsToast = bootstrap.Toast.getInstance(toast);
-                if (bsToast) {
-                    bsToast.hide();
-                }
-            });
-        }, 5000);
-    </script>
-}
+        toast.addEventListener('hidden.bs.toast', () => {
+            toast.remove();
+        });
+    }
+</script>

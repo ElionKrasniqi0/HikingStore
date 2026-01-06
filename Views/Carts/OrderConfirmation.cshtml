@@ -1,5 +1,6 @@
 ﻿@model Order
-
+<br />
+<br />
 <div class="hero">
     <div class="container">
         <div class="row justify-content-between">
@@ -9,6 +10,31 @@
                 </div>
             </div>
             <div class="col-lg-7">
+                <!-- Steps indicator -->
+                <div class="checkout-steps d-flex justify-content-end">
+                    <div class="step completed">
+                        <div class="step-number">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="step-label">Cart</div>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-number">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="step-label">Details</div>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-number">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="step-label">Payment</div>
+                    </div>
+                    <div class="step active">
+                        <div class="step-number">4</div>
+                        <div class="step-label">Complete</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -65,4 +91,125 @@
         </div>
     </div>
 </div>
+
+<style>
+    /* Checkout Steps */
+    .checkout-steps {
+        gap: 2rem;
+    }
+
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        cursor: default;
+    }
+
+        .step:not(:last-child):after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 60px;
+            width: 60px;
+            height: 2px;
+            background: #dee2e6;
+            transition: background 0.3s ease;
+        }
+
+        .step.active:not(:last-child):after,
+        .step.completed:not(:last-child):after {
+            background: #3b5d50;
+        }
+
+    .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #dee2e6;
+        color: #6c757d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+    }
+
+    .step.active .step-number {
+        background: #3b5d50;
+        color: white;
+        box-shadow: 0 4px 12px rgba(59, 93, 80, 0.3);
+        transform: scale(1.1);
+    }
+
+    .step.completed .step-number {
+        background: #28a745;
+        color: white;
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+
+    .step.completed .step-number i {
+        font-size: 0.875rem;
+    }
+
+    .step-label {
+        font-size: 0.875rem;
+        color: #6c757d;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .step.active .step-label {
+        color: #3b5d50;
+        font-weight: 600;
+    }
+
+    .step.completed .step-label {
+        color: #28a745;
+        font-weight: 600;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .checkout-steps {
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .step:not(:last-child):after {
+            width: 30px;
+            left: 45px;
+        }
+
+        .step-number {
+            width: 35px;
+            height: 35px;
+            font-size: 0.875rem;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .step:not(:last-child):after {
+            display: none;
+        }
+
+        .checkout-steps {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .step {
+            flex-direction: row;
+            width: 100%;
+        }
+
+        .step-number {
+            margin-right: 1rem;
+            margin-bottom: 0;
+        }
+    }
+</style>
 

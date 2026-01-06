@@ -728,11 +728,10 @@ namespace HikingStore.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteOrder(int id)
         {
-            var userId = _userManager.GetUserId(User);
             var order = await _context.Orders
                 .Include(o => o.OrderDetails)
                 .Include(o => o.TrackingEvents)
-                .FirstOrDefaultAsync(o => o.OrderId == id && o.UserId == userId);
+                .FirstOrDefaultAsync(o => o.OrderId == id);
 
             if (order == null)
             {

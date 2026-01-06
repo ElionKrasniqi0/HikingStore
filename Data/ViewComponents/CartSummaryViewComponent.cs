@@ -1,4 +1,5 @@
 ﻿using HikingStore.Data;
+using HikingStore.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -9,11 +10,13 @@ namespace HikingStore.Data.ViewComponents
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<CartSummaryViewComponent> _logger;
+        private readonly SessionCartService _sessionCartService;
 
-        public CartSummaryViewComponent(ApplicationDbContext context, ILogger<CartSummaryViewComponent> logger)
+        public CartSummaryViewComponent(ApplicationDbContext context, ILogger<CartSummaryViewComponent> logger, SessionCartService sessionCartService)
         {
             _context = context;
             _logger = logger;
+            _sessionCartService = sessionCartService;
         }
 
         public async Task<IViewComponentResult> InvokeAsync()
@@ -23,7 +26,9 @@ namespace HikingStore.Data.ViewComponents
                 var userId = UserClaimsPrincipal?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
                 if (string.IsNullOrEmpty(userId))
                 {
-                    return View(0);
+                    // Anonymous user - get count from session cart
+                    var sessionCartCount = _sessionCartService.GetSessionCartCount();
+                    return View(sessionCartCount);
                 }
 
                 var cartItems = await _context.ShoppingCarts

@@ -23,6 +23,21 @@ namespace HikingStore.Controllers
         {
             var userId = _userManager.GetUserId(User);
 
+            // Get all orders for the user (for status counts)
+            var allOrdersQuery = _context.Orders
+                .Where(o => o.UserId == userId);
+
+            // Get status counts from all orders (not filtered)
+            var statusCounts = new Dictionary<OrderStatus, int>();
+            foreach (OrderStatus orderStatus in System.Enum.GetValues(typeof(OrderStatus)))
+            {
+                statusCounts[orderStatus] = await allOrdersQuery
+                    .CountAsync(o => o.Status == orderStatus);
+            }
+
+            var totalCount = await allOrdersQuery.CountAsync();
+
+            // Now filter the query if status is provided
             var query = _context.Orders
                 .Include(o => o.User)
                 .Include(o => o.OrderDetails)
@@ -43,8 +58,8 @@ namespace HikingStore.Controllers
                 .ToListAsync();
 
             ViewBag.CurrentStatus = status;
-
-            // FIXED: Use System.Enum explicitly
+            ViewBag.StatusCounts = statusCounts;
+            ViewBag.TotalCount = totalCount;
             ViewBag.StatusList = System.Enum.GetValues(typeof(OrderStatus)).Cast<OrderStatus>();
 
             return View(orders);

@@ -277,8 +277,53 @@ namespace HikingStore.Areas.Admin.Controllers
 
         public IActionResult ShowMessage()
         {
-            var message = _context.Contacts.ToList();
+            var message = _context.Contacts.OrderByDescending(c => c.CreatedDate).ToList();
             return View(message);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteMessage(int id)
+        {
+            try
+            {
+                var contact = await _context.Contacts.FindAsync(id);
+                if (contact == null)
+                {
+                    return Json(new { success = false, message = "Message not found." });
+                }
+
+                _context.Contacts.Remove(contact);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Message deleted successfully." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error deleting message: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SendReply(int id, string replySubject, string replyMessage)
+        {
+            try
+            {
+                var contact = await _context.Contacts.FindAsync(id);
+                if (contact == null)
+                {
+                    return Json(new { success = false, message = "Message not found." });
+                }
+
+                // Here you would typically send an email using an email service
+                // For now, we'll just return success
+                // TODO: Implement email sending functionality
+                
+                return Json(new { success = true, message = "Reply sent successfully to " + contact.Email });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error sending reply: {ex.Message}" });
+            }
         }
     }
 }

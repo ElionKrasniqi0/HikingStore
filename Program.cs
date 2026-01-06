@@ -102,6 +102,7 @@ else
     builder.Services.AddTransient<IEmailSender, EmailSender>();
 }
 builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+builder.Services.AddScoped<HikingStore.Services.SessionCartService>();
 // Session and caching
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
