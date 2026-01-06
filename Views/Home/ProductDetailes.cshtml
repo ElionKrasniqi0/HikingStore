@@ -1,44 +1,15 @@
 @model Product
 
-@{
-    ViewData["Title"] = Model?.ProName ?? "Product details";
-    var maxStock = Model?.StockQuantity ?? 0;
-}
-
-<nav class="bg-light border-bottom py-2" aria-label="breadcrumb">
-    <div class="container">
-        <ol class="breadcrumb mb-0 small">
-            <li class="breadcrumb-item">
-                <a class="text-decoration-none" asp-controller="Home" asp-action="Index">Home</a>
-            </li>
-            <li class="breadcrumb-item">
-                <a class="text-decoration-none" asp-controller="Home" asp-action="Shop">Shop</a>
-            </li>
-            @if (Model?.Category != null)
-            {
-                <li class="breadcrumb-item">
-                    <a class="text-decoration-none" href="/Home/ProductCategory/@Model.Category.CatId">@Model.Category.CatName</a>
-                </li>
-            }
-            <li class="breadcrumb-item active" aria-current="page">@Model?.ProName</li>
-        </ol>
-    </div>
-</nav>
-
 <!-- Product Details -->
 <section class="py-4">
     <div class="container">
         <div class="row g-4">
-            <!-- Product Image -->
+            <!-- Product Image with more space -->
             <div class="col-lg-6">
                 <div class="product-image-container text-center">
                     <img src="~/Product/@Model.ProImage" alt="@Model.ProName"
                          class="img-fluid rounded-3 product-main-image"
-                         loading="eager"
-                         fetchpriority="high"
-                         decoding="async"
-                         width="900"
-                         height="900">
+                         style="max-height: 400px; object-fit: contain; padding: 20px;">
                 </div>
             </div>
 
@@ -47,7 +18,7 @@
                 <div class="product-info">
                     <!-- Category -->
                     <div class="mb-2">
-                        <span class="badge bg-primary bg-opacity-10 text-primary px-2 py-1 small">
+                        <span class="badge bg-opacity-10 text-primary px-2 py-1 small">
                             @Model.Category?.CatName
                         </span>
                     </div>
@@ -134,39 +105,44 @@
                         </div>
                     </div>
 
-                    <!-- Add to Cart Form -->
+                    <!-- Add to Cart Form - FIXED: Quantity and Add to Cart in parallel -->
                     @if (Model.IsInStock)
                     {
-                        <form id="addToCartForm" method="post">
-                            @Html.AntiForgeryToken()
-                            <div class="row g-2 align-items-end">
+                        <form id="addToCartForm" method="post" class="mb-4">
+                            <div class="row g-2 align-items-center">
                                 <div class="col-auto">
-                                    <label class="form-label small fw-semibold mb-1">Qty</label>
-                                    <div class="quantity-controls d-flex border rounded-2">
+                                    <label class="form-label small fw-semibold mb-1">Quantity</label>
+                                </div>
+                            </div>
+                            <div class="row g-2 align-items-center">
+                                <!-- Quantity Controls -->
+                                <div class="col-auto">
+                                    <div class="quantity-controls d-flex border rounded-2" style="width: 120px;">
                                         <button type="button" class="btn btn-light btn-quantity border-0">
                                             <i class="fas fa-minus small"></i>
                                         </button>
-                                        <input type="number" id="qtyInput" name="qty"
+                                        <input type="text" id="qtyInput" name="qty"
                                                class="form-control border-0 text-center shadow-none quantity-input"
-                                               value="1"
-                                               min="1"
-                                               max="@Model.StockQuantity"
-                                               step="1"
-                                               inputmode="numeric"
-                                               style="width: 56px;">
+                                               value="1" style="width: 50px;" max="@Model.StockQuantity">
                                         <button type="button" class="btn btn-light btn-quantity border-0">
                                             <i class="fas fa-plus small"></i>
                                         </button>
                                     </div>
-                                    <small class="text-muted">Max: @Model.StockQuantity</small>
+                                    <small class="text-muted d-block mt-1">Max: @Model.StockQuantity</small>
                                 </div>
+
+                                <!-- Add to Cart Button -->
                                 <div class="col">
-                                    <button type="submit" class="btn btn-primary w-100 add-to-cart-btn">
+                                    <button type="submit" class="btn btn-primary w-100 add-to-cart-btn"
+                                            style="height: 38px;">
                                         <i class="fas fa-shopping-cart me-2"></i>Add to Cart
                                     </button>
                                 </div>
+
+                                <!-- Wishlist Button -->
                                 <div class="col-auto">
-                                    <button type="button" class="btn btn-outline-primary wishlist-btn">
+                                    <button type="button" class="btn btn-outline-primary wishlist-btn"
+                                            style="width: 38px; height: 38px;">
                                         <i class="far fa-heart"></i>
                                     </button>
                                 </div>
@@ -175,7 +151,7 @@
                     }
                     else
                     {
-                        <div class="alert alert-secondary">
+                        <div class="alert alert-secondary mb-4">
                             <div class="d-flex align-items-center">
                                 <i class="fas fa-bell me-3 text-warning fa-lg"></i>
                                 <div>
@@ -233,7 +209,6 @@
         </div>
     </div>
 </section>
-
 
 <!-- Compact Tabs -->
 <section class="py-4 bg-light">
@@ -294,25 +269,33 @@
 </section>
 
 <style>
-    /* Compact Styles */
-    .breadcrumb {
-        background: transparent;
-        padding: 0;
-        font-size: 0.8rem;
+    /* Product Image Styling - Added more space */
+    .product-image-container {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 20px;
     }
 
     .product-main-image {
-        height: 350px;
-        object-fit: cover;
+        max-height: 400px;
+        width: auto;
+        object-fit: contain;
+        transition: transform 0.3s ease;
     }
 
-    .rating-stars {
-        color: #ffc107;
+    .product-image-container:hover .product-main-image {
+        transform: scale(1.02);
     }
 
-    /* Quantity Controls */
+    /* Quantity and Add to Cart in parallel layout */
+    #addToCartForm .row {
+        margin-bottom: 10px;
+    }
+
     .quantity-controls {
-        max-width: 120px;
+        width: 120px;
+        background: white;
     }
 
     .btn-quantity {
@@ -322,57 +305,89 @@
         align-items: center;
         justify-content: center;
         padding: 0;
+        transition: all 0.2s ease;
     }
+
+        .btn-quantity:hover {
+            background: #f8f9fa;
+        }
 
     .quantity-input {
         height: 35px;
         font-weight: 600;
         font-size: 0.9rem;
         background: transparent;
+        border: none;
     }
 
-    /* Buttons */
     .add-to-cart-btn {
-        height: 35px;
+        height: 38px;
         font-size: 0.9rem;
         font-weight: 600;
+        transition: all 0.3s ease;
     }
 
+        .add-to-cart-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 93, 80, 0.3);
+        }
+
     .wishlist-btn {
-        width: 35px;
-        height: 35px;
+        width: 38px;
+        height: 38px;
         display: flex;
         align-items: center;
         justify-content: center;
+        border-radius: 8px;
+        transition: all 0.3s ease;
     }
 
-    /* Success Message */
-    .alert {
-        border-radius: 6px;
-        border: none;
-    }
-
-    /* Tabs */
-    .nav-tabs .nav-link {
-        border: none;
-        padding: 0.5rem 1rem;
-        color: var(--gray-light);
-        border-radius: 6px;
-        font-size: 0.85rem;
-    }
-
-        .nav-tabs .nav-link.active {
+        .wishlist-btn:hover {
+            background: #3b5d50;
             color: white;
         }
 
-        .nav-tabs .nav-link:hover {
-            color: var(--primary-light);
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        .product-image-container {
+            padding: 20px;
         }
 
-    /* Responsive */
-    @@media (max-width: 768px) {
         .product-main-image {
-            height: 280px;
+            max-height: 300px;
+        }
+        /* Stack vertically on mobile */
+        #addToCartForm .row.g-2 {
+            flex-direction: column;
+        }
+
+        #addToCartForm .col-auto,
+        #addToCartForm .col,
+        #addToCartForm .col-auto {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .quantity-controls {
+            width: 100%;
+            max-width: 200px;
+            margin: 0 auto;
+        }
+
+        .add-to-cart-btn,
+        .wishlist-btn {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .product-image-container {
+            padding: 15px;
+        }
+
+        .product-main-image {
+            max-height: 250px;
         }
 
         .h4 {
@@ -384,38 +399,30 @@
         }
     }
 
-    @@media (max-width: 576px) {
-        .product-main-image {
-            height: 220px;
+    /* Success and Error Messages */
+    .alert {
+        border-radius: 8px;
+        border: none;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
         }
 
-        .quantity-controls {
-            max-width: 110px;
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
+    }
 
-        .btn-quantity {
-            width: 32px;
-            height: 32px;
-        }
-
-        .quantity-input {
-            height: 32px;
-            width: 45px;
-        }
-
-        .add-to-cart-btn {
-            height: 32px;
-            font-size: 0.85rem;
-        }
-
-        .wishlist-btn {
-            width: 32px;
-            height: 32px;
-        }
-
-        .col-6 {
-            margin-bottom: 0.5rem;
-        }
+    /* Loading spinner for button */
+    .spinner-border-sm {
+        width: 1rem;
+        height: 1rem;
+        border-width: 0.2em;
     }
 </style>
 
@@ -448,97 +455,115 @@
             if (icon.classList.contains('far')) {
                 icon.classList.remove('far');
                 icon.classList.add('fas', 'text-danger');
+                this.setAttribute('data-bs-original-title', 'Remove from wishlist');
             } else {
                 icon.classList.remove('fas', 'text-danger');
                 icon.classList.add('far');
+                this.setAttribute('data-bs-original-title', 'Add to wishlist');
             }
+
+            // Initialize tooltip if not already
+            if (!this._tooltip) {
+                this._tooltip = new bootstrap.Tooltip(this);
+            }
+            this._tooltip.show();
         });
+
+        // Initialize tooltip for wishlist button
+        if (wishlistBtn) {
+            new bootstrap.Tooltip(wishlistBtn);
+        }
 
         // Add to cart functionality
-         const addToCartForm = document.getElementById('addToCartForm');
-    const successMessage = document.getElementById('successMessage');
-    const errorMessage = document.getElementById('errorMessage');
-    const errorText = document.getElementById('errorText');
+        const addToCartForm = document.getElementById('addToCartForm');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
 
-    addToCartForm?.addEventListener('submit', function(e) {
-        e.preventDefault(); // Prevent form submission
+        if (addToCartForm) {
+            addToCartForm.addEventListener('submit', function(e) {
+                e.preventDefault();
 
-        const quantity = parseInt(qtyInput.value);
-        const productId = @Model.ProId;
-        const maxStock = @Model.StockQuantity;
+                const quantity = parseInt(qtyInput.value) || 1;
+                const productId = @Model.ProId;
+                const maxStock = @Model.StockQuantity;
 
-        // Validate quantity
-        if (quantity < 1) {
-            showError('Please enter a valid quantity.');
-            return;
-        }
+                // Validate quantity
+                if (quantity < 1) {
+                    showError('Please enter a valid quantity.');
+                    return;
+                }
 
-        if (quantity > maxStock) {
-            showError(`Only ${maxStock} items available in stock.`);
-            return;
-        }
+                if (quantity > maxStock) {
+                    showError(`Only ${maxStock} items available in stock.`);
+                    return;
+                }
 
-        // Show loading state
-        const submitBtn = this.querySelector('.add-to-cart-btn');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Adding...';
-        submitBtn.disabled = true;
+                // Show loading state
+                const submitBtn = this.querySelector('.add-to-cart-btn');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Adding...';
+                submitBtn.disabled = true;
 
-        // Submit via AJAX
-        fetch('/Carts/AddToCart?ProId=' + productId + '&qty=' + quantity, {
-            method: 'POST',
-            headers: {
-                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value,
-                'Content-Type': 'application/x-www-form-urlencoded',
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Show success message
-                successMessage.style.display = 'block';
-                errorMessage.style.display = 'none';
+                // Get anti-forgery token
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
 
-                // Update cart count in header
-                updateCartCount(data.cartItemCount);
+                // Submit via AJAX
+                fetch('/Carts/AddToCart?ProId=' + productId + '&qty=' + quantity, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': token
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message
+                        successMessage.style.display = 'block';
+                        errorMessage.style.display = 'none';
 
-                // Reset button
-                setTimeout(() => {
+                        // Update cart count in header
+                        updateCartCount(data.cartItemCount);
+
+                        // Reset button after 1 second
+                        setTimeout(() => {
+                            submitBtn.innerHTML = originalText;
+                            submitBtn.disabled = false;
+                        }, 1000);
+
+                        // Hide success message after 5 seconds
+                        setTimeout(() => {
+                            successMessage.style.display = 'none';
+                        }, 5000);
+                    } else {
+                        showError(data.message || 'Failed to add to cart');
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError('Failed to add item to cart. Please try again.');
                     submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
-                }, 1000);
+                });
+            });
+        }
 
-                // Hide success message after 5 seconds
-                setTimeout(() => {
-                    successMessage.style.display = 'none';
-                }, 5000);
-            } else {
-                showError(data.message || 'Failed to add to cart');
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showError('Failed to add item to cart. Please try again.');
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
-        });
-    });
+        // Function to show error messages
+        function showError(message) {
+            errorText.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
 
-    // Function to show error messages
-    function showError(message) {
-        errorText.textContent = message;
-        errorMessage.style.display = 'block';
-        successMessage.style.display = 'none';
+            // Hide error after 5 seconds
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
 
-        // Hide error after 5 seconds
-        setTimeout(() => {
-            errorMessage.style.display = 'none';
-        }, 5000);
-    }
-
-        // Function to update cart count
+        // Function to update cart count in header
         function updateCartCount(count) {
             const cartCountElements = document.querySelectorAll('.cart-count');
             cartCountElements.forEach(element => {
@@ -557,4 +582,3 @@
         });
     });
 </script>
-
