@@ -1,4 +1,29 @@
-﻿@model Product
+@model Product
+
+@{
+    ViewData["Title"] = Model?.ProName ?? "Product details";
+    var maxStock = Model?.StockQuantity ?? 0;
+}
+
+<nav class="bg-light border-bottom py-2" aria-label="breadcrumb">
+    <div class="container">
+        <ol class="breadcrumb mb-0 small">
+            <li class="breadcrumb-item">
+                <a class="text-decoration-none" asp-controller="Home" asp-action="Index">Home</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a class="text-decoration-none" asp-controller="Home" asp-action="Shop">Shop</a>
+            </li>
+            @if (Model?.Category != null)
+            {
+                <li class="breadcrumb-item">
+                    <a class="text-decoration-none" href="/Home/ProductCategory/@Model.Category.CatId">@Model.Category.CatName</a>
+                </li>
+            }
+            <li class="breadcrumb-item active" aria-current="page">@Model?.ProName</li>
+        </ol>
+    </div>
+</nav>
 
 <!-- Product Details -->
 <section class="py-4">
@@ -8,7 +33,12 @@
             <div class="col-lg-6">
                 <div class="product-image-container text-center">
                     <img src="~/Product/@Model.ProImage" alt="@Model.ProName"
-                         class="img-fluid rounded-3 product-main-image">
+                         class="img-fluid rounded-3 product-main-image"
+                         loading="eager"
+                         fetchpriority="high"
+                         decoding="async"
+                         width="900"
+                         height="900">
                 </div>
             </div>
 
@@ -17,7 +47,7 @@
                 <div class="product-info">
                     <!-- Category -->
                     <div class="mb-2">
-                        <span class="badge bg-opacity-10 text-primary px-2 py-1 small">
+                        <span class="badge bg-primary bg-opacity-10 text-primary px-2 py-1 small">
                             @Model.Category?.CatName
                         </span>
                     </div>
@@ -108,6 +138,7 @@
                     @if (Model.IsInStock)
                     {
                         <form id="addToCartForm" method="post">
+                            @Html.AntiForgeryToken()
                             <div class="row g-2 align-items-end">
                                 <div class="col-auto">
                                     <label class="form-label small fw-semibold mb-1">Qty</label>
@@ -115,9 +146,14 @@
                                         <button type="button" class="btn btn-light btn-quantity border-0">
                                             <i class="fas fa-minus small"></i>
                                         </button>
-                                        <input type="text" id="qtyInput" name="qty"
+                                        <input type="number" id="qtyInput" name="qty"
                                                class="form-control border-0 text-center shadow-none quantity-input"
-                                               value="1" style="width: 50px;" max="@Model.StockQuantity">
+                                               value="1"
+                                               min="1"
+                                               max="@Model.StockQuantity"
+                                               step="1"
+                                               inputmode="numeric"
+                                               style="width: 56px;">
                                         <button type="button" class="btn btn-light btn-quantity border-0">
                                             <i class="fas fa-plus small"></i>
                                         </button>
@@ -199,7 +235,6 @@
 </section>
 
 
-</script>
 <!-- Compact Tabs -->
 <section class="py-4 bg-light">
     <div class="container">
