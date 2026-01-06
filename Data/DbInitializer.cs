@@ -68,6 +68,23 @@ namespace HikingStore.Data
                 {
                     await userManager.AddToRoleAsync(adminUser, adminRoleName);
                 }
+                
+                // Reset password to ensure it matches the configuration
+                // Check if current password is correct, if not, reset it
+                var passwordCheck = await userManager.CheckPasswordAsync(adminUser, adminPassword);
+                if (!passwordCheck)
+                {
+                    var token = await userManager.GeneratePasswordResetTokenAsync(adminUser);
+                    var passwordResult = await userManager.ResetPasswordAsync(adminUser, token, adminPassword);
+                    // Note: If password reset fails, the existing password will remain
+                }
+                
+                // Ensure email is confirmed
+                if (!adminUser.EmailConfirmed)
+                {
+                    adminUser.EmailConfirmed = true;
+                    await userManager.UpdateAsync(adminUser);
+                }
             }
         }
     }

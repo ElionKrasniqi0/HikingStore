@@ -16,6 +16,7 @@ namespace HikingStore.Areas.Admin.Controllers
 {
 
     [Area("Admin")]
+    [Authorize(Roles = "Admin")]
     public class HomeController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -30,7 +31,6 @@ namespace HikingStore.Areas.Admin.Controllers
             _roleManager = roleManager;
             _signInManager = signInManager;
         }
-        [Authorize]
         [HttpGet]
         public async Task<IActionResult> Index()
         {
