@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Mail;
 using System.Text;
@@ -187,6 +188,9 @@ namespace HikingStore.Controllers
                 return View("Checkout", order);
             }
 
+            // Calculate total amount once
+            var totalAmount = cartItems.Sum(c => c.Product.Price * c.Qty);
+
             // Deduct stock quantities
             foreach (var cartItem in cartItems)
             {
@@ -197,50 +201,81 @@ namespace HikingStore.Controllers
 
             order.UserId = userId;
             order.OrderDate = DateTime.Now;
-            order.TotalAmount = cartItems.Sum(c => c.Product.Price * c.Qty);
+            order.TotalAmount = totalAmount;
             order.Status = OrderStatus.Received;
             order.TrackingNumber = "N/A";
             order.AdminNotes = "Order created";
 
             _context.Orders.Add(order);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(); // Need OrderId for order details
 
+            // Prepare order details in batch
+            var orderDetails = new List<OrderDetail>();
             foreach (var cartItem in cartItems)
             {
-                var orderDetail = new OrderDetail
+                orderDetails.Add(new OrderDetail
                 {
                     OrderId = order.OrderId,
                     ProId = cartItem.ProId,
                     Quantity = cartItem.Qty,
                     Price = cartItem.Product.Price
-                };
-                _context.OrderDetails.Add(orderDetail);
+                });
             }
+            _context.OrderDetails.AddRange(orderDetails);
 
             _context.ShoppingCarts.RemoveRange(cartItems);
             await _context.SaveChangesAsync();
 
-            // Send order confirmation email
-            try
+            // Get user email before redirecting
+            var user = await _userManager.GetUserAsync(User);
+            var userEmail = user?.Email;
+
+            // Send order confirmation email asynchronously (fire-and-forget to not block response)
+            if (!string.IsNullOrEmpty(userEmail))
             {
-                var user = await _userManager.GetUserAsync(User);
-                await SendOrderConfirmationEmail(user.Email, order, cartItems);
-                TempData["EmailSent"] = "Order confirmation email has been sent to your email address.";
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to send confirmation email: {ex.Message}");
-                // Don't fail the order if email fails
+                // Capture data needed for email before redirect
+                var orderForEmail = new Order
+                {
+                    OrderId = order.OrderId,
+                    OrderDate = order.OrderDate,
+                    TotalAmount = order.TotalAmount,
+                    ShippingAddress = order.ShippingAddress,
+                    City = order.City,
+                    PhoneNumber = order.PhoneNumber,
+                    Comment = order.Comment
+                };
+
+                var cartItemsForEmail = cartItems.Select(c => new ShoppingCart
+                {
+                    Qty = c.Qty,
+                    Product = new Product { ProName = c.Product.ProName, Price = c.Product.Price }
+                }).ToList();
+
+                // Capture configuration before background task
+                var emailConfig = _configuration;
+
+                // Fire and forget - don't wait for email to complete
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await SendOrderConfirmationEmailAsync(emailConfig, userEmail, orderForEmail, cartItemsForEmail);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Failed to send confirmation email: {ex.Message}");
+                    }
+                });
             }
 
             return RedirectToAction("OrderConfirmation", new { id = order.OrderId });
         }
 
-        private async Task SendOrderConfirmationEmail(string userEmail, Order order, List<ShoppingCart> cartItems)
+        private static async Task SendOrderConfirmationEmailAsync(IConfiguration configuration, string userEmail, Order order, List<ShoppingCart> cartItems)
         {
             try
             {
-                var emailSettings = _configuration.GetSection("EmailSettings");
+                var emailSettings = configuration.GetSection("EmailSettings");
 
                 var fromEmail = emailSettings["SenderEmail"];
                 var fromPassword = emailSettings["SenderPassword"];
@@ -289,7 +324,7 @@ namespace HikingStore.Controllers
             }
         }
 
-        private string BuildOrderConfirmationEmail(Order order, List<ShoppingCart> cartItems)
+        private static string BuildOrderConfirmationEmail(Order order, List<ShoppingCart> cartItems)
         {
             var sb = new StringBuilder();
 
