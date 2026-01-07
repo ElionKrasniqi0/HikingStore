@@ -4,29 +4,127 @@
     ViewData["Title"] = "Register";
 }
 
-<h1>@ViewData["Title"]</h1>
-<h2 id="external-login-title">Associate your @Model.ProviderDisplayName account.</h2>
-<hr />
+<div class="min-vh-100 d-flex align-items-center justify-content-center bg-light py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-5 col-md-7">
+                <!-- External Login Card -->
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                    <!-- Card Header -->
+                    <div class="card-header bg-gradient-primary text-white text-center py-4 border-0">
+                        <div class="icon-wrapper bg-opacity-20 rounded-circle p-3 mx-auto mb-3">
+                            <i class="fab fa-@(Model.ProviderDisplayName.ToLower()) fa-lg text-white"></i>
+                        </div>
+                        <h2 class="h4 fw-bold mb-2" id="external-login-title">Associate Your @Model.ProviderDisplayName Account</h2>
+                        <p class="mb-0 opacity-75">Complete your registration</p>
+                    </div>
 
-<p id="external-login-description" class="text-info">
-    You've successfully authenticated with <strong>@Model.ProviderDisplayName</strong>.
-    Please enter an email address for this site below and click the Register button to finish
-    logging in.
-</p>
+                    <!-- Card Body -->
+                    <div class="card-body p-4">
+                        <div class="alert alert-success border-0 rounded-3 mb-4">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-check-circle fa-lg me-3 text-success"></i>
+                                <div class="text-start">
+                                    <strong class="d-block mb-1">Authentication Successful!</strong>
+                                    <small id="external-login-description">
+                                        You've successfully authenticated with <strong>@Model.ProviderDisplayName</strong>.
+                                        Please enter an email address below to complete your registration.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
 
-<div class="row">
-    <div class="col-md-4">
-        <form asp-page-handler="Confirmation" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Input.Email"></label>
-                <input asp-for="Input.Email" class="form-control" />
-                <span asp-validation-for="Input.Email" class="text-danger"></span>
+                        <form asp-page-handler="Confirmation" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="needs-validation" novalidate>
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 rounded-2 mb-4 small"></div>
+
+                            <!-- Email Field -->
+                            <div class="form-group mb-4">
+                                <label asp-for="Input.Email" class="form-label fw-semibold text-dark mb-2">Email Address</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-envelope text-muted"></i>
+                                    </span>
+                                    <input asp-for="Input.Email" 
+                                           class="form-control border-start-0 py-3"
+                                           placeholder="Enter your email address"
+                                           autocomplete="email" />
+                                </div>
+                                <span asp-validation-for="Input.Email" class="text-danger small mt-1 d-block"></span>
+                                <div class="form-text mt-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        We'll use this email for account notifications
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button type="submit" class="btn btn-primary btn-lg w-100 py-3 fw-semibold mb-3">
+                                <i class="fas fa-user-plus me-2"></i>Complete Registration
+                            </button>
+                        </form>
+
+                        <!-- Back Link -->
+                        <div class="text-center pt-3 border-top">
+                            <a asp-page="./Login" class="text-primary small fw-semibold text-decoration-none">
+                                <i class="fas fa-arrow-left me-1"></i>Back to Login
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary">Register</button>
-        </form>
+        </div>
     </div>
 </div>
+
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #3b5d50 0%, #2d4a3f 100%);
+    }
+
+    .icon-wrapper {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .form-control:focus {
+        border-color: #3b5d50;
+        box-shadow: 0 0 0 0.2rem rgba(59, 93, 80, 0.25);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #3b5d50 0%, #2d4a3f 100%);
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #2d4a3f 0%, #1e3329 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 93, 80, 0.3);
+    }
+
+    .input-group-text {
+        border-color: #dee2e6;
+    }
+
+    .card {
+        transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, #d1f2eb 0%, #a8e6cf 100%);
+        border-left: 4px solid #28a745;
+    }
+</style>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
