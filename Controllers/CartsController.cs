@@ -330,97 +330,372 @@ namespace HikingStore.Controllers
 
             sb.AppendLine($@"
 <!DOCTYPE html>
-<html>
+<html lang=""en"">
 <head>
+    <meta charset=""UTF-8"">
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
     <style>
-        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-        .header {{ background: #3b5d50; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }}
-        .content {{ background: #f9f9f9; padding: 20px; }}
-        .order-details {{ background: white; padding: 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #3b5d50; }}
-        .product-table {{ width: 100%; border-collapse: collapse; margin: 15px 0; }}
-        .product-table th, .product-table td {{ padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }}
-        .product-table th {{ background: #f8f9fa; }}
-        .total-row {{ font-weight: bold; background: #f8f9fa; }}
-        .footer {{ text-align: center; margin-top: 20px; padding: 20px; background: #f1f1f1; border-radius: 0 0 5px 5px; }}
-        .thank-you {{ color: #3b5d50; font-size: 18px; margin-bottom: 10px; }}
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        body {{ 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; 
+            line-height: 1.6; 
+            color: #333333; 
+            background-color: #f5f5f5;
+        }}
+        .email-wrapper {{ 
+            max-width: 650px; 
+            margin: 0 auto; 
+            background-color: #ffffff;
+        }}
+        .header {{ 
+            background: linear-gradient(135deg, #3b5d50 0%, #2d4a3f 100%); 
+            color: #ffffff; 
+            padding: 30px 25px; 
+            text-align: center;
+        }}
+        .header h1 {{
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }}
+        .header .subtitle {{
+            font-size: 14px;
+            opacity: 0.95;
+            font-weight: 400;
+        }}
+        .content {{ 
+            padding: 30px 25px; 
+            background-color: #ffffff;
+        }}
+        .success-badge {{
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            text-align: center;
+            margin-bottom: 24px;
+            font-size: 15px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+        }}
+        .greeting {{
+            font-size: 14px;
+            color: #555555;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }}
+        .info-card {{
+            background: #f8f9fa;
+            border-left: 4px solid #3b5d50;
+            padding: 18px;
+            margin: 20px 0;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }}
+        .info-card h3 {{
+            color: #3b5d50;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }}
+        .info-card h3::before {{
+            content: '';
+            display: inline-block;
+            width: 3px;
+            height: 16px;
+            background: #3b5d50;
+            margin-right: 10px;
+            border-radius: 2px;
+        }}
+        .info-row {{
+            display: flex;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }}
+        .info-row:last-child {{
+            border-bottom: none;
+        }}
+        .info-label {{
+            font-weight: 600;
+            color: #495057;
+            min-width: 120px;
+            font-size: 13px;
+        }}
+        .info-value {{
+            color: #212529;
+            flex: 1;
+            font-size: 13px;
+        }}
+        .order-number {{
+            font-size: 16px;
+            font-weight: 700;
+            color: #3b5d50;
+            letter-spacing: 0.5px;
+        }}
+        .product-table-wrapper {{
+            margin: 24px 0;
+            overflow-x: auto;
+        }}
+        .product-table {{
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }}
+        .product-table thead {{
+            background: linear-gradient(135deg, #3b5d50 0%, #2d4a3f 100%);
+            color: white;
+        }}
+        .product-table th {{
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }}
+        .product-table td {{
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 13px;
+            color: #495057;
+        }}
+        .product-table tbody tr:hover {{
+            background-color: #f8f9fa;
+        }}
+        .product-table tbody tr:last-child td {{
+            border-bottom: none;
+        }}
+        .product-name {{
+            font-weight: 600;
+            color: #212529;
+        }}
+        .total-row {{
+            background: #f8f9fa !important;
+            font-weight: 700;
+        }}
+        .total-row td {{
+            font-size: 14px;
+            color: #3b5d50;
+            padding: 14px 12px;
+        }}
+        .next-steps {{
+            background: linear-gradient(135deg, #e7f5ff 0%, #d0ebff 100%);
+            border-left: 4px solid #3b5d50;
+            padding: 18px;
+            margin: 24px 0;
+            border-radius: 6px;
+        }}
+        .next-steps h3 {{
+            color: #3b5d50;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }}
+        .next-steps ul {{
+            list-style: none;
+            padding: 0;
+        }}
+        .next-steps li {{
+            padding: 6px 0;
+            padding-left: 20px;
+            position: relative;
+            color: #495057;
+            font-size: 13px;
+        }}
+        .next-steps li::before {{
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #3b5d50;
+            font-weight: bold;
+            font-size: 16px;
+        }}
+        .contact-info {{
+            background: #ffffff;
+            border: 1px solid #e9ecef;
+            padding: 16px;
+            margin: 24px 0;
+            border-radius: 6px;
+            text-align: center;
+        }}
+        .contact-info p {{
+            color: #6c757d;
+            font-size: 13px;
+            margin: 6px 0;
+        }}
+        .contact-info a {{
+            color: #3b5d50;
+            text-decoration: none;
+            font-weight: 600;
+        }}
+        .contact-info a:hover {{
+            text-decoration: underline;
+        }}
+        .footer {{
+            background: #2d4a3f;
+            color: #ffffff;
+            padding: 30px;
+            text-align: center;
+            font-size: 13px;
+        }}
+        .footer p {{
+            margin: 6px 0;
+            opacity: 0.9;
+        }}
+        .footer a {{
+            color: #ffffff;
+            text-decoration: underline;
+        }}
+        .footer .company-name {{
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            opacity: 1;
+        }}
+        @media only screen and (max-width: 600px) {{
+            .content {{ padding: 24px 20px; }}
+            .header {{ padding: 30px 20px; }}
+            .header h1 {{ font-size: 26px; }}
+            .info-row {{
+                flex-direction: column;
+            }}
+            .info-label {{
+                margin-bottom: 4px;
+            }}
+            .product-table {{
+                font-size: 12px;
+            }}
+            .product-table th,
+            .product-table td {{
+                padding: 12px 8px;
+            }}
+        }}
     </style>
 </head>
 <body>
-    <div class='container'>
-        <div class='header'>
+    <div class=""email-wrapper"">
+            <div class=""header"">
             <h1>HikingStore</h1>
-            <h2>Order Confirmation</h2>
+            <div class=""subtitle"">Order Confirmation</div>
         </div>
         
-        <div class='content'>
-            <div class='thank-you'>Thank you for your order!</div>
-            <p>Dear Customer,</p>
-            <p>We're pleased to confirm that we've received your order and it's being processed. Here are your order details:</p>
+        <div class=""content"">
+            <div class=""success-badge"">
+                ✓ Order Confirmed Successfully!
+            </div>
             
-            <div class='order-details'>
+            <div class=""greeting"">
+                <p>Dear Valued Customer,</p>
+                <p>Thank you for your purchase! We're excited to confirm that we've received your order and it's now being processed. We'll send you another email once your order ships.</p>
+            </div>
+            
+            <div class=""info-card"">
                 <h3>Order Information</h3>
-                <p><strong>Order Number:</strong> #ORD{order.OrderId:D6}</p>
-                <p><strong>Order Date:</strong> {order.OrderDate.ToString("MMMM dd, yyyy 'at' hh:mm tt")}</p>
-                <p><strong>Total Amount:</strong> €{order.TotalAmount:N2}</p>
+                <div class=""info-row"">
+                    <div class=""info-label"">Order Number:</div>
+                    <div class=""info-value""><span class=""order-number"">#ORD{order.OrderId:D6}</span></div>
+                </div>
+                <div class=""info-row"">
+                    <div class=""info-label"">Order Date:</div>
+                    <div class=""info-value"">{order.OrderDate.ToString("MMMM dd, yyyy 'at' hh:mm tt")}</div>
+                </div>
+                <div class=""info-row"">
+                    <div class=""info-label"">Total Amount:</div>
+                    <div class=""info-value""><strong style=""color: #3b5d50; font-size: 16px;"">€{order.TotalAmount:N2}</strong></div>
+                </div>
             </div>
 
-            <div class='order-details'>
+            <div class=""info-card"">
                 <h3>Shipping Information</h3>
-                <p><strong>Address:</strong> {order.ShippingAddress}</p>
-                <p><strong>City:</strong> {order.City}</p>
-                <p><strong>Phone:</strong> {order.PhoneNumber}</p>
-                {(!string.IsNullOrEmpty(order.Comment) ? $"<p><strong>Order Notes:</strong> {order.Comment}</p>" : "")}
+                <div class=""info-row"">
+                    <div class=""info-label"">Delivery Address:</div>
+                    <div class=""info-value"">{order.ShippingAddress}</div>
+                </div>
+                <div class=""info-row"">
+                    <div class=""info-label"">City:</div>
+                    <div class=""info-value"">{order.City}, Kosovo</div>
+                </div>
+                <div class=""info-row"">
+                    <div class=""info-label"">Phone Number:</div>
+                    <div class=""info-value"">+383 {order.PhoneNumber}</div>
+                </div>
+                {(!string.IsNullOrEmpty(order.Comment) ? $@"
+                <div class=""info-row"">
+                    <div class=""info-label"">Order Notes:</div>
+                    <div class=""info-value"">{order.Comment}</div>
+                </div>" : "")}
             </div>
 
-            <h3>Order Items</h3>
-            <table class='product-table'>
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Quantity</th>
-                        <th>Price</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody>");
+            <div class=""product-table-wrapper"">
+                <table class=""product-table"">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th style=""text-align: center;"">Quantity</th>
+                            <th style=""text-align: right;"">Unit Price</th>
+                            <th style=""text-align: right;"">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>");
 
             foreach (var item in cartItems)
             {
                 sb.AppendLine($@"
-                    <tr>
-                        <td>{item.Product?.ProName ?? "Product"}</td>
-                        <td>{item.Qty}</td>
-                        <td>€{item.Product?.Price:N2 ?? 0:N2}</td>
-                        <td>€{(item.Product?.Price * item.Qty ?? 0):N2}</td>
-                    </tr>");
+                        <tr>
+                            <td class=""product-name"">{item.Product?.ProName ?? "Product"}</td>
+                            <td style=""text-align: center;"">{item.Qty}</td>
+                            <td style=""text-align: right;"">€{(item.Product?.Price ?? 0):N2}</td>
+                            <td style=""text-align: right; font-weight: 600;"">€{((item.Product?.Price ?? 0) * item.Qty):N2}</td>
+                        </tr>");
             }
 
             sb.AppendLine($@"
-                    <tr class='total-row'>
-                        <td colspan='3' style='text-align: right;'><strong>Grand Total:</strong></td>
-                        <td><strong>€{order.TotalAmount:N2}</strong></td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div class='order-details'>
-                <h3>What's Next?</h3>
-                <p>• You'll receive another email when your order ships</p>
-                <p>• Expected delivery: 3-5 business days</p>
-                <p>• Track your order by visiting your account dashboard</p>
+                        <tr class=""total-row"">
+                            <td colspan=""3"" style=""text-align: right; padding-right: 12px;"">Grand Total:</td>
+                            <td style=""text-align: right; font-size: 16px;"">€{order.TotalAmount:N2}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
-            <p>If you have any questions about your order, please contact our customer service team at support@HikingStore.com or call us at +38345804555.</p>
-            
-            <p>Thank you for choosing HikingStore!</p>
+            <div class=""next-steps"">
+                <h3>What Happens Next?</h3>
+                <ul>
+                    <li>Your order is being prepared and will be shipped soon</li>
+                    <li>You'll receive a shipping confirmation email with tracking information</li>
+                    <li>Expected delivery: 3-5 business days</li>
+                    <li>Track your order anytime from your account dashboard</li>
+                </ul>
+            </div>
+
+            <div class=""contact-info"">
+                <p><strong>Need Help?</strong></p>
+                <p>If you have any questions about your order, our customer service team is here to help.</p>
+                <p>📧 <a href=""mailto:support@HikingStore.com"">support@HikingStore.com</a> | 📞 <a href=""tel:+38345804555"">+383 (458) 04-555</a></p>
+                <p style=""margin-top: 12px; font-size: 12px; color: #868e96;"">We typically respond within 24 hours</p>
+            </div>
+
+            <p style=""text-align: center; margin-top: 24px; color: #6c757d; font-size: 13px;"">
+                Thank you for choosing <strong style=""color: #3b5d50;"">HikingStore</strong>! We appreciate your business.
+            </p>
         </div>
         
-        <div class='footer'>
-            <p><strong>HikingStore</strong></p>
-            <p>Rr Prshtina Re</p>
-            <p>Email: support@HikingStore.com | Phone:+383 (458) 04-555</p>
-            <p><a href='https://yourwebsite.com' style='color: #3b5d50;'>Visit our website</a></p>
+        <div class=""footer"">
+            <p class=""company-name"">HikingStore</p>
+            <p>Rr Prshtina Re, Kosovo</p>
+            <p>📧 support@HikingStore.com | 📞 +383 (458) 04-555</p>
+            <p style=""margin-top: 16px; opacity: 0.7;"">
+                <a href=""#"">Visit our website</a> | <a href=""#"">Privacy Policy</a> | <a href=""#"">Terms of Service</a>
+            </p>
+            <p style=""margin-top: 16px; font-size: 11px; opacity: 0.6;"">
+                © {DateTime.Now.Year} HikingStore. All rights reserved.
+            </p>
         </div>
     </div>
 </body>

@@ -330,84 +330,168 @@ namespace HikingStore.Areas.Admin.Controllers
 
             var sb = new StringBuilder();
 
+            // Get status color and icon
+            var statusColor = newStatus switch
+            {
+                OrderStatus.Received => "#3b5d50",
+                OrderStatus.Verified => "#17a2b8",
+                OrderStatus.Processing => "#ffc107",
+                OrderStatus.Shipped => "#28a745",
+                OrderStatus.Completed => "#28a745",
+                OrderStatus.Cancelled => "#dc3545",
+                _ => "#6c757d"
+            };
+
+            var statusIcon = newStatus switch
+            {
+                OrderStatus.Received => "📦",
+                OrderStatus.Verified => "✓",
+                OrderStatus.Processing => "⚙️",
+                OrderStatus.Shipped => "🚚",
+                OrderStatus.Completed => "✅",
+                OrderStatus.Cancelled => "❌",
+                _ => "📋"
+            };
+
             sb.AppendLine($@"
 <!DOCTYPE html>
-<html>
+<html lang=""en"">
 <head>
-    <meta charset='UTF-8'>
+    <meta charset=""UTF-8"">
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
     <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
         body {{ 
-            font-family: 'Segoe UI', Arial, sans-serif; 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; 
             line-height: 1.6; 
-            color: #333; 
-            margin: 0;
-            padding: 0;
-            background-color: #f8f9fa;
+            color: #333333; 
+            background-color: #f5f5f5;
         }}
-        .email-container {{
-            max-width: 600px;
-            margin: 0 auto;
-            background: #ffffff;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        .email-wrapper {{ 
+            max-width: 650px; 
+            margin: 0 auto; 
+            background-color: #ffffff;
         }}
-        .header {{
-            background: linear-gradient(135deg, #3b5d50 0%, #2d473d 100%);
-            color: white;
-            padding: 30px 20px;
+        .header {{ 
+            background: linear-gradient(135deg, #3b5d50 0%, #2d4a3f 100%); 
+            color: #ffffff; 
+            padding: 30px 25px; 
             text-align: center;
         }}
         .header h1 {{
-            margin: 0;
-            font-size: 28px;
-            font-weight: 700;
-        }}
-        .content {{
-            padding: 30px;
-        }}
-        .status-card {{
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 25px;
-            margin: 20px 0;
-            border-left: 5px solid #3b5d50;
-            text-align: center;
-        }}
-        .current-status {{
             font-size: 24px;
             font-weight: 700;
-            color: #3b5d50;
-            margin: 10px 0;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }}
+        .header .subtitle {{
+            font-size: 14px;
+            opacity: 0.95;
+            font-weight: 400;
+        }}
+        .content {{ 
+            padding: 30px 25px; 
+            background-color: #ffffff;
+        }}
+        .status-badge-large {{
+            background: linear-gradient(135deg, {statusColor} 0%, {statusColor}dd 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }}
+        .status-icon {{
+            font-size: 48px;
+            margin-bottom: 12px;
+        }}
+        .status-title {{
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
         }}
         .status-description {{
-            color: #6a6a6a;
-            font-size: 16px;
-            margin-top: 10px;
+            font-size: 14px;
+            opacity: 0.95;
+            margin-top: 8px;
         }}
-        .order-details {{
-            background: white;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 20px;
+        .status-change {{
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed rgba(255,255,255,0.3);
+            font-size: 12px;
+            opacity: 0.9;
+        }}
+        .greeting {{
+            font-size: 14px;
+            color: #555555;
+            margin-bottom: 24px;
+            line-height: 1.8;
+        }}
+        .info-card {{
+            background: #f8f9fa;
+            border-left: 4px solid #3b5d50;
+            padding: 18px;
             margin: 20px 0;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }}
-        .detail-row {{
+        .info-card h3 {{
+            color: #3b5d50;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
             display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #f1f3f4;
+            align-items: center;
         }}
-        .detail-row:last-child {{
+        .info-card h3::before {{
+            content: '';
+            display: inline-block;
+            width: 3px;
+            height: 16px;
+            background: #3b5d50;
+            margin-right: 10px;
+            border-radius: 2px;
+        }}
+        .info-row {{
+            display: flex;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }}
+        .info-row:last-child {{
             border-bottom: none;
         }}
+        .info-label {{
+            font-weight: 600;
+            color: #495057;
+            min-width: 120px;
+            font-size: 13px;
+        }}
+        .info-value {{
+            color: #212529;
+            flex: 1;
+            font-size: 13px;
+        }}
+        .order-number {{
+            font-size: 16px;
+            font-weight: 700;
+            color: #3b5d50;
+            letter-spacing: 0.5px;
+        }}
         .tracking-box {{
-            background: #e8f5e8;
+            background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
             border: 2px solid #28a745;
             border-radius: 8px;
             padding: 20px;
-            margin: 20px 0;
+            margin: 24px 0;
             text-align: center;
+        }}
+        .tracking-box h3 {{
+            color: #28a745;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
         }}
         .tracking-number {{
             font-family: 'Courier New', monospace;
@@ -415,80 +499,161 @@ namespace HikingStore.Areas.Admin.Controllers
             font-weight: bold;
             color: #2d473d;
             background: white;
-            padding: 10px;
-            border-radius: 5px;
+            padding: 12px 20px;
+            border-radius: 6px;
             display: inline-block;
-            margin: 10px 0;
+            margin: 12px 0;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }}
-        .action-button {{
-            background: #3b5d50;
-            color: white;
-            padding: 12px 30px;
+        .next-steps {{
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border-left: 4px solid #ffc107;
+            padding: 18px;
+            margin: 24px 0;
+            border-radius: 6px;
+        }}
+        .next-steps h3 {{
+            color: #856404;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }}
+        .next-steps ul {{
+            list-style: none;
+            padding: 0;
+        }}
+        .next-steps li {{
+            padding: 6px 0;
+            padding-left: 20px;
+            position: relative;
+            color: #856404;
+            font-size: 13px;
+        }}
+        .next-steps li::before {{
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #ffc107;
+            font-weight: bold;
+            font-size: 16px;
+        }}
+        .action-buttons {{
+            text-align: center;
+            margin: 30px 0;
+        }}
+        .btn {{
+            display: inline-block;
+            padding: 12px 28px;
+            margin: 8px;
             text-decoration: none;
             border-radius: 6px;
             font-weight: 600;
-            display: inline-block;
-            margin: 10px 5px;
-        }}
-        .footer {{
-            background: #2d473d;
-            color: white;
-            padding: 25px;
-            text-align: center;
             font-size: 14px;
+            transition: all 0.3s ease;
         }}
-        .status-badge {{
+        .btn-primary {{
             background: #3b5d50;
             color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
+        }}
+        .btn-secondary {{
+            background: #6c757d;
+            color: white;
+        }}
+        .contact-info {{
+            background: #ffffff;
+            border: 1px solid #e9ecef;
+            padding: 16px;
+            margin: 24px 0;
+            border-radius: 6px;
+            text-align: center;
+        }}
+        .contact-info p {{
+            color: #6c757d;
+            font-size: 13px;
+            margin: 6px 0;
+        }}
+        .contact-info a {{
+            color: #3b5d50;
+            text-decoration: none;
             font-weight: 600;
-            font-size: 14px;
-            display: inline-block;
-            margin: 5px;
+        }}
+        .contact-info a:hover {{
+            text-decoration: underline;
+        }}
+        .footer {{
+            background: #2d4a3f;
+            color: #ffffff;
+            padding: 24px;
+            text-align: center;
+            font-size: 12px;
+        }}
+        .footer p {{
+            margin: 5px 0;
+            opacity: 0.9;
+        }}
+        .footer .company-name {{
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            opacity: 1;
+        }}
+        @media only screen and (max-width: 600px) {{
+            .content {{ padding: 24px 20px; }}
+            .header {{ padding: 24px 20px; }}
+            .header h1 {{ font-size: 22px; }}
+            .info-row {{
+                flex-direction: column;
+            }}
+            .info-label {{
+                margin-bottom: 4px;
+            }}
+            .btn {{
+                display: block;
+                margin: 8px 0;
+            }}
         }}
     </style>
 </head>
 <body>
-    <div class='email-container'>
-        <div class='header'>
+    <div class=""email-wrapper"">
+        <div class=""header"">
             <h1>HikingStore</h1>
-            <div style='opacity: 0.9; margin-top: 5px;'>Order Status Update</div>
+            <div class=""subtitle"">Order Status Update</div>
         </div>
         
-        <div class='content'>
-            <p>Dear {order.User?.UserName ?? "Customer"},</p>
-            <p>Your order status has been updated. Here are the details:</p>
-            
-            <div class='status-card'>
-                <div style='font-size: 16px; color: #6a6a6a;'>Current order status</div>
-                <div class='current-status'>{statusDisplay}</div>
-                <div class='status-description'>{statusDescriptions[newStatus]}</div>
-                
-                <div style='margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ddd;'>
-                    <small style='color: #6a6a6a;'>
-                        Previous status: <span class='status-badge' style='background: #6c757d;'>{oldStatusDisplay}</span>
-                    </small>
+        <div class=""content"">
+            <div class=""status-badge-large"">
+                <div class=""status-icon"">{statusIcon}</div>
+                <div class=""status-title"">{statusDisplay}</div>
+                <div class=""status-description"">{statusDescriptions[newStatus]}</div>
+                <div class=""status-change"">
+                    Status changed from <strong>{oldStatusDisplay}</strong>
                 </div>
             </div>
-
-            <div class='order-details'>
-                <h3 style='color: #2d473d; margin-top: 0;'>📋 Order Details</h3>
-                <div class='detail-row'>
-                    <span><strong>Order Number: </strong></span>
-                    <span> #ORD{order.OrderId:D6}</span>
+            
+            <div class=""greeting"">
+                <p>Dear {order.User?.UserName ?? "Valued Customer"},</p>
+                <p>We're writing to inform you that your order status has been updated. Here are the current details:</p>
+            </div>
+            
+            <div class=""info-card"">
+                <h3>Order Information</h3>
+                <div class=""info-row"">
+                    <div class=""info-label"">Order Number:</div>
+                    <div class=""info-value""><span class=""order-number"">#ORD{order.OrderId:D6}</span></div>
                 </div>
-                <div class='detail-row'>
-                    <span><strong>Order Date:</strong></span>
-                    <span>{order.OrderDate.ToString("dd.MM.yyyy")}</span>
+                <div class=""info-row"">
+                    <div class=""info-label"">Order Date:</div>
+                    <div class=""info-value"">{order.OrderDate.ToString("MMMM dd, yyyy 'at' hh:mm tt")}</div>
                 </div>
-                <div class='detail-row'>
-                    <span><strong>Total Amount:</strong></span>
-                    <span style='font-weight: bold; color: #3b5d50;'>€{order.TotalAmount:N2}</span>
+                <div class=""info-row"">
+                    <div class=""info-label"">Total Amount:</div>
+                    <div class=""info-value""><strong style=""color: #3b5d50; font-size: 16px;"">€{order.TotalAmount:N2}</strong></div>
                 </div>
-                <div class='detail-row'>
-                    <span><strong>Shipping Address:</strong></span>
-                    <span>{order.ShippingAddress}, {order.City}</span>
+                <div class=""info-row"">
+                    <div class=""info-label"">Shipping Address:</div>
+                    <div class=""info-value"">{order.ShippingAddress}, {order.City}, Kosovo</div>
                 </div>
             </div>");
 
@@ -496,17 +661,16 @@ namespace HikingStore.Areas.Admin.Controllers
             if (newStatus == OrderStatus.Shipped && !string.IsNullOrEmpty(order.TrackingNumber) && order.TrackingNumber != "N/A")
             {
                 sb.AppendLine($@"
-            <div class='tracking-box'>
-                <h3 style='color: #28a745; margin-top: 0;'>🚚 Tracking Information</h3>
-                <div style='margin: 15px 0;'>
-                    <strong>Tracking Number:</strong>
-                    <div class='tracking-number'>{order.TrackingNumber}</div>
+            <div class=""tracking-box"">
+                <h3>🚚 Tracking Information</h3>
+                <div style=""margin: 12px 0;"">
+                    <strong style=""color: #495057; font-size: 13px;"">Tracking Number:</strong>
+                    <div class=""tracking-number"">{order.TrackingNumber}</div>
                 </div>
-                <div style='margin: 10px 0;'>
-                    <strong>Shipping Carrier:</strong>
-                    {order.Carrier}
+                <div style=""margin: 10px 0; color: #495057; font-size: 13px;"">
+                    <strong>Shipping Carrier:</strong> {order.Carrier ?? "Standard Shipping"}
                 </div>
-                <p style='margin-top: 15px;'>
+                <p style=""margin-top: 12px; color: #495057; font-size: 13px;"">
                     You can track your order using the tracking number above on the shipping carrier's website.
                 </p>
             </div>");
@@ -514,70 +678,67 @@ namespace HikingStore.Areas.Admin.Controllers
 
             // Add status-specific next steps
             sb.AppendLine($@"
-            <div style='background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 20px; margin: 20px 0;'>
-                <h3 style='color: #856404; margin-top: 0;'>📝 What's Next?</h3>");
+            <div class=""next-steps"">
+                <h3>📝 What's Next?</h3>
+                <ul>");
 
             switch (newStatus)
             {
                 case OrderStatus.Verified:
                     sb.AppendLine(@"
-                <p>• Your order is being prepared for shipment</p>
-                <p>• You will be notified once the order ships</p>
-                <p>• Expected delivery time: 3-5 business days</p>");
+                    <li>Your order is being prepared for shipment</li>
+                    <li>You will be notified once the order ships</li>
+                    <li>Expected delivery time: 3-5 business days</li>");
                     break;
                 case OrderStatus.Processing:
                     sb.AppendLine(@"
-                <p>• Your products are being carefully packaged</p>
-                <p>• The order will be shipped very soon</p>
-                <p>• You will receive an email with the tracking number</p>");
+                    <li>Your products are being carefully packaged</li>
+                    <li>The order will be shipped very soon</li>
+                    <li>You will receive an email with the tracking number</li>");
                     break;
                 case OrderStatus.Shipped:
                     sb.AppendLine(@"
-                <p>• Your order is on its way to you</p>
-                <p>• Use the tracking number to monitor your order</p>
-                <p>• Expected delivery time: 2-3 business days</p>");
+                    <li>Your order is on its way to you</li>
+                    <li>Use the tracking number to monitor your order</li>
+                    <li>Expected delivery time: 2-3 business days</li>");
                     break;
                 case OrderStatus.Completed:
                     sb.AppendLine(@"
-                <p>• Your order has been successfully delivered</p>
-                <p>• We hope you are satisfied with the products</p>
-                <p>• If you have any questions, please contact us</p>");
+                    <li>Your order has been successfully delivered</li>
+                    <li>We hope you are satisfied with the products</li>
+                    <li>If you have any questions, please contact us</li>");
                     break;
                 case OrderStatus.Cancelled:
                     sb.AppendLine(@"
-                <p>• Your order has been cancelled</p>
-                <p>• If you have questions, please contact us</p>
-                <p>• We hope to serve you again in the future</p>");
+                    <li>Your order has been cancelled</li>
+                    <li>If you have questions, please contact us</li>
+                    <li>We hope to serve you again in the future</li>");
                     break;
             }
 
             sb.AppendLine($@"
-            <div style='text-align: center; margin: 30px 0;'>
-                <a href='https://hikingstore.com/orders/track/{order.OrderId}' 
-                   style='background: #3b5d50; color: white; padding: 12px 30px; 
-                          text-decoration: none; border-radius: 6px; font-weight: 600;
-                          display: inline-block; margin: 10px 5px; border: none;'>
-                   Track Your Order
-                </a>
-                <a href='https://hikingstore.com/contact' 
-                   style='background: #6c757d; color: white; padding: 12px 30px; 
-                          text-decoration: none; border-radius: 6px; font-weight: 600;
-                          display: inline-block; margin: 10px 5px; border: none;'>
-                   Contact Us
-                </a>
+                </ul>
             </div>
 
-            <p>If you have any questions, don't hesitate to contact us at support@hikingstore.com or call +383 (458) 04-555.</p>
-            
-            <p>Best regards,<br>The HikingStore Team</p>
+            <div class=""action-buttons"">
+                <a href=""https://localhost:7183/Orders"" class=""btn btn-primary"">Track Your Order</a>
+                <a href=""https://localhost:7183/Home/Contact"" class=""btn btn-secondary"">Contact Us</a>
+            </div>
+
+            <p style=""text-align: center; margin-top: 24px; color: #6c757d; font-size: 13px;"">
+                Best regards,<br><strong style=""color: #3b5d50;"">The HikingStore Team</strong>
+            </p>
         </div>
         
-        <div class='footer'>
-            <p><strong>HikingStore</strong></p>
-            <p>Rr Prshtina Re, Prishtinë 10000</p>
-            <p>📧 support@hikingstore.com | 📞 +383 (458) 04-555</p>
-            <p style='margin-top: 15px; opacity: 0.8; font-size: 12px;'>
-                &copy; 2025 HikingStore. All rights reserved.
+        <div class=""footer"">
+            <p class=""company-name"">HikingStore</p>
+            <p>Rr Prshtina Re, Kosovo</p>
+            <p>📧 support@HikingStore.com | 📞 +383 (458) 04-555</p>
+            <p style=""margin-top: 16px; opacity: 0.7;"">
+                <a href=""#"" style=""color: #ffffff;"">Visit our website</a> | <a href=""#"" style=""color: #ffffff;"">Privacy Policy</a> | <a href=""#"" style=""color: #ffffff;"">Terms of Service</a>
+            </p>
+            <p style=""margin-top: 16px; font-size: 11px; opacity: 0.6;"">
+                © {DateTime.Now.Year} HikingStore. All rights reserved.
             </p>
         </div>
     </div>
