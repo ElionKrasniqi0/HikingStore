@@ -2,8 +2,6 @@
 @{
     ViewData["Title"] = "Checkout";
 }
-<br />
-<br />
 <div class="hero">
     <div class="container">
         <div class="row justify-content-between">
@@ -16,10 +14,8 @@
             <div class="col-lg-7">
                 <!-- Steps indicator -->
                 <div class="checkout-steps d-flex justify-content-end">
-                    <div class="step completed">
-                        <div class="step-number">
-                            <i class="fas fa-check"></i>
-                        </div>
+                    <div class="step active">
+                        <div class="step-number">1</div>
                         <div class="step-label">Cart</div>
                     </div>
                     <div class="step active">
@@ -434,7 +430,6 @@
         flex-direction: column;
         align-items: center;
         position: relative;
-        cursor: default;
     }
 
         .step:not(:last-child):after {
@@ -445,11 +440,9 @@
             width: 60px;
             height: 2px;
             background: #dee2e6;
-            transition: background 0.3s ease;
         }
 
-        .step.active:not(:last-child):after,
-        .step.completed:not(:last-child):after {
+        .step.active:not(:last-child):after {
             background: #3b5d50;
         }
 
@@ -464,41 +457,22 @@
         justify-content: center;
         font-weight: 600;
         margin-bottom: 0.5rem;
-        transition: all 0.3s ease;
-        font-size: 0.9rem;
     }
 
     .step.active .step-number {
         background: #3b5d50;
         color: white;
         box-shadow: 0 4px 12px rgba(59, 93, 80, 0.3);
-        transform: scale(1.1);
-    }
-
-    .step.completed .step-number {
-        background: #28a745;
-        color: white;
-        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-    }
-
-    .step.completed .step-number i {
-        font-size: 0.875rem;
     }
 
     .step-label {
         font-size: 0.875rem;
         color: #6c757d;
         font-weight: 500;
-        transition: all 0.3s ease;
     }
 
     .step.active .step-label {
         color: #3b5d50;
-        font-weight: 600;
-    }
-
-    .step.completed .step-label {
-        color: #28a745;
         font-weight: 600;
     }
 
