@@ -57,6 +57,7 @@ namespace HikingStore.Areas.Admin.Controllers
             }
 
             var orders = await query
+                .AsNoTracking()
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
 
@@ -75,6 +76,7 @@ namespace HikingStore.Areas.Admin.Controllers
                 .Include(o => o.OrderDetails)
                 .ThenInclude(od => od.Product)
                 .ThenInclude(p => p.Category)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(o => o.OrderId == id);
 
             if (order == null)

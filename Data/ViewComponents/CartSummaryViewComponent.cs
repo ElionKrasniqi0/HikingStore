@@ -31,11 +31,10 @@ namespace HikingStore.Data.ViewComponents
                     return View(sessionCartCount);
                 }
 
-                var cartItems = await _context.ShoppingCarts
+                var totalItems = await _context.ShoppingCarts
                     .Where(c => c.UserId == userId)
-                    .ToListAsync();
-
-                var totalItems = cartItems.Sum(c => c.Qty);
+                    .AsNoTracking()
+                    .SumAsync(c => (int?)c.Qty) ?? 0;
                 return View(totalItems);
             }
             catch (Exception ex)

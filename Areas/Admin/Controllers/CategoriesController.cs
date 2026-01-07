@@ -17,11 +17,12 @@ namespace HikingStore.Areas.Admin.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var categories = _context.Categories
+            var categories = await _context.Categories
                 .Include(c => c.Product)
-                .ToList();
+                .AsNoTracking()
+                .ToListAsync();
             return View(categories);
         }
         [HttpGet]
@@ -49,9 +50,9 @@ namespace HikingStore.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public IActionResult Edit(int? id)
+        public async Task<IActionResult> Edit(int? id)
         {
-            var categories = _context.Categories.Find(id);
+            var categories = await _context.Categories.FindAsync(id);
             return View(categories);
         }
 
@@ -82,13 +83,16 @@ namespace HikingStore.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult Delete(int? id)
+        public async Task<IActionResult> Delete(int? id)
         {
             if (id != null)
             {
-                var cat = _context.Categories.Find(id);
-                _context.Categories.Remove(cat);
-                _context.SaveChanges();
+                var cat = await _context.Categories.FindAsync(id);
+                if (cat != null)
+                {
+                    _context.Categories.Remove(cat);
+                    await _context.SaveChangesAsync();
+                }
                 return RedirectToAction(nameof(Index));
             }
             return View();

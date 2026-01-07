@@ -34,19 +34,30 @@ namespace HikingStore.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var allusers = await _context.Users.ToListAsync();
+            // Optimize: Get all users with their roles in a single query instead of N+1 queries
+            var allusers = await _context.Users
+                .AsNoTracking()
+                .ToListAsync();
+
+            // Get all user-role mappings in a single query
+            var userRolesMap = await (from user in _context.Users
+                                     join userRoles in _context.UserRoles on user.Id equals userRoles.UserId
+                                     join role in _context.Roles on userRoles.RoleId equals role.Id
+                                     select new { UserId = user.Id, RoleName = role.Name })
+                                .AsNoTracking()
+                                .ToListAsync();
+
+            // Group roles by user ID for efficient lookup
+            var rolesByUserId = userRolesMap
+                .GroupBy(x => x.UserId)
+                .ToDictionary(g => g.Key, g => g.Select(x => x.RoleName).ToList());
+
             List<Users_In_Role_ViewModel> model = new();
 
             foreach (var item in allusers)
             {
-                // List of roles for each user
-                var rolesList = await (from user in _context.Users
-                                       join userRoles in _context.UserRoles on user.Id equals userRoles.UserId
-                                       join role in _context.Roles on userRoles.RoleId equals role.Id
-                                       select new { UserId = user.Id, UserName = user.UserName, RoleId = role.Id, RoleName = role.Name })
-                                    .Where(t => t.UserId == item.Id)
-                                    .Select(x => x.RoleName)
-                                    .ToListAsync();
+                // Get roles from dictionary (O(1) lookup instead of database query)
+                var rolesList = rolesByUserId.TryGetValue(item.Id, out var roles) ? roles : new List<string>();
 
                 Users_In_Role_ViewModel tempUsers = new()
                 {
@@ -64,7 +75,7 @@ namespace HikingStore.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> EditRole(Guid UserId)
         {
-            if (UserExists(UserId))
+            if (await UserExists(UserId))
             {
                 List<SelectListItem> roles = _context.Roles.Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Name }).AsNoTracking().ToList();
 
@@ -153,7 +164,7 @@ namespace HikingStore.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> DeleteUser(Guid UserId)
         {
-            if (UserExists(UserId))
+            if (await UserExists(UserId))
             {
                 var userIdString = UserId.ToString();
                 var user = await _userManager.FindByIdAsync(userIdString);
@@ -199,24 +210,17 @@ namespace HikingStore.Areas.Admin.Controllers
             return View("NotFound");
         }
 
-        public bool UserExists(Guid UserId)
+        public async Task<bool> UserExists(Guid UserId)
         {
             if (UserId != Guid.Empty)
             {
-                var user = _context.Users.Where(x => x.Id.Equals(UserId.ToString())).FirstOrDefault();
-                if (user != null)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                var user = await _context.Users
+                    .AsNoTracking()
+                    .Where(x => x.Id.Equals(UserId.ToString()))
+                    .FirstOrDefaultAsync();
+                return user != null;
             }
-            else
-            {
-                return false;
-            }
+            return false;
         }
 
         [HttpGet]
@@ -275,9 +279,12 @@ namespace HikingStore.Areas.Admin.Controllers
             }
         }
 
-        public IActionResult ShowMessage()
+        public async Task<IActionResult> ShowMessage()
         {
-            var message = _context.Contacts.OrderByDescending(c => c.CreatedDate).ToList();
+            var message = await _context.Contacts
+                .AsNoTracking()
+                .OrderByDescending(c => c.CreatedDate)
+                .ToListAsync();
             return View(message);
         }
 

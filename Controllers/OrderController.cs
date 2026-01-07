@@ -23,25 +23,32 @@ namespace HikingStore.Controllers
         {
             var userId = _userManager.GetUserId(User);
 
-            // Get all orders for the user (for status counts)
-            var allOrdersQuery = _context.Orders
-                .Where(o => o.UserId == userId);
+            // Optimize: Get status counts in a single query using GroupBy
+            var statusCountsQuery = await _context.Orders
+                .Where(o => o.UserId == userId)
+                .AsNoTracking()
+                .GroupBy(o => o.Status)
+                .Select(g => new { Status = g.Key, Count = g.Count() })
+                .ToListAsync();
 
-            // Get status counts from all orders (not filtered)
             var statusCounts = new Dictionary<OrderStatus, int>();
             foreach (OrderStatus orderStatus in System.Enum.GetValues(typeof(OrderStatus)))
             {
-                statusCounts[orderStatus] = await allOrdersQuery
-                    .CountAsync(o => o.Status == orderStatus);
+                statusCounts[orderStatus] = 0;
+            }
+            foreach (var item in statusCountsQuery)
+            {
+                statusCounts[item.Status] = item.Count;
             }
 
-            var totalCount = await allOrdersQuery.CountAsync();
+            var totalCount = statusCounts.Values.Sum();
 
             // Now filter the query if status is provided
             var query = _context.Orders
                 .Include(o => o.User)
                 .Include(o => o.OrderDetails)
                 .ThenInclude(od => od.Product)
+                .AsNoTracking()
                 .Where(o => o.UserId == userId);
 
             // Filter by status - FIXED: Use System.Enum explicitly
@@ -74,6 +81,7 @@ namespace HikingStore.Controllers
                 .Include(o => o.OrderDetails)
                 .ThenInclude(od => od.Product)
                 .ThenInclude(p => p.Category)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(o => o.OrderId == id && o.UserId == userId);
 
             if (order == null)

@@ -21,7 +21,7 @@ namespace HikingStore.Controllers
         public async Task<List<Product>> GetPage(IQueryable<Product> result, int pagenumber)
         {
             const int Pagesize = 100;
-            decimal rowCount = await _context.Products.CountAsync();
+            decimal rowCount = await result.CountAsync();
             var pagecount = Math.Ceiling(rowCount / Pagesize);
             if (pagenumber > pagecount)
             {
@@ -30,6 +30,7 @@ namespace HikingStore.Controllers
             pagenumber = pagenumber <= 0 ? 1 : pagenumber;
             int skipCount = (pagenumber - 1) * Pagesize;
             var pageData = await result
+                .AsNoTracking()
                 .Skip(skipCount)
                 .Take(Pagesize)
                 .ToListAsync();
@@ -41,23 +42,28 @@ namespace HikingStore.Controllers
             return pageData;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             var model = new IndexVM
             {
-                Categories = _context.Categories.ToList(),
-                Products = _context.Products
+                Categories = await _context.Categories.AsNoTracking().ToListAsync(),
+                Products = await _context.Products
                     .Include(p => p.Category)
+                    .AsNoTracking()
                     .OrderByDescending(p => p.ProId)
                     .Take(8)
-                    .ToList()
+                    .ToListAsync()
             };
             return View(model);
         }
         public async Task<IActionResult> Shop()
         {
-            var products = await _context.Products.ToListAsync();
-            var categories = await _context.Categories.ToListAsync();
+            var products = await _context.Products
+                .AsNoTracking()
+                .ToListAsync();
+            var categories = await _context.Categories
+                .AsNoTracking()
+                .ToListAsync();
 
             var model = new ShopViewModel
             {
@@ -75,23 +81,25 @@ namespace HikingStore.Controllers
             var model = await GetPage(products, page);
             return View(model);
         }
-        public IActionResult ProductCategory(int id)
+        public async Task<IActionResult> ProductCategory(int id)
         {
-            var products = _context.Products
+            var products = await _context.Products
                 .Where(c => c.CatId == id)
-                .ToList();
+                .AsNoTracking()
+                .ToListAsync();
             return View(products);
         }
         [HttpGet]
-        public IActionResult QuickSearch(string term)
+        public async Task<IActionResult> QuickSearch(string term)
         {
             if (string.IsNullOrWhiteSpace(term) || term.Length < 2)
             {
                 return Json(new { results = new List<object>() });
             }
 
-            var products = _context.Products
+            var products = await _context.Products
                 .Where(p => p.ProName.Contains(term))
+                .AsNoTracking()
                 .Take(5)
                 .Select(p => new
                 {
@@ -100,10 +108,11 @@ namespace HikingStore.Controllers
                     type = "Product",
                     url = $"/Home/ProductDetailes/{p.ProId}"
                 })
-                .ToList();
+                .ToListAsync();
 
-            var categories = _context.Categories
+            var categories = await _context.Categories
                 .Where(c => c.CatName.Contains(term))
+                .AsNoTracking()
                 .Take(5)
                 .Select(c => new
                 {
@@ -112,7 +121,7 @@ namespace HikingStore.Controllers
                     type = "Category",
                     url = $"/Home/ProductCategory/{c.CatId}"
                 })
-                .ToList();
+                .ToListAsync();
 
             var results = products.Concat(categories).ToList();
 
@@ -120,7 +129,7 @@ namespace HikingStore.Controllers
         }
         // Add this method to your HomeController class
         [HttpGet]
-        public IActionResult Search(string query)
+        public async Task<IActionResult> Search(string query)
         {
             if (string.IsNullOrWhiteSpace(query))
             {
@@ -128,16 +137,18 @@ namespace HikingStore.Controllers
             }
 
             // Search in both products and categories
-            var products = _context.Products
+            var products = await _context.Products
                 .Include(p => p.Category)
+                .AsNoTracking()
                 .Where(p => p.ProName.Contains(query) ||
                            p.Descreption.Contains(query) ||
                            p.Category.CatName.Contains(query))
-                .ToList();
+                .ToListAsync();
 
-            var categories = _context.Categories
+            var categories = await _context.Categories
+                .AsNoTracking()
                 .Where(c => c.CatName.Contains(query))
-                .ToList();
+                .ToListAsync();
 
             var model = new SearchResultViewModel
             {
@@ -151,11 +162,12 @@ namespace HikingStore.Controllers
             return View("SearchResults", model);
         }
 
-        public IActionResult ProductDetailes(int? id)
+        public async Task<IActionResult> ProductDetailes(int? id)
         {
-            var product = _context.Products.Include(x => x.Category)
-
-                .FirstOrDefault(p => p.ProId == id);
+            var product = await _context.Products
+                .Include(x => x.Category)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.ProId == id);
             return View(product);
         }
 
@@ -164,13 +176,13 @@ namespace HikingStore.Controllers
             return View();
         }
         [HttpPost]
-        public IActionResult Contact(Contact model)
+        public async Task<IActionResult> Contact(Contact model)
 
         {
             if (ModelState.IsValid)
             {
                 _context.Add(model);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
             return View(model);

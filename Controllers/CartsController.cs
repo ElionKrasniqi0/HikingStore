@@ -705,14 +705,15 @@ namespace HikingStore.Controllers
         }
 
         [Authorize]
-        public IActionResult OrderConfirmation(int id)
+        public async Task<IActionResult> OrderConfirmation(int id)
         {
             var userId = _userManager.GetUserId(User);
-            var order = _context.Orders
+            var order = await _context.Orders
                 .Include(o => o.User)
                 .Include(o => o.OrderDetails)
                 .ThenInclude(od => od.Product)
-                .FirstOrDefault(o => o.OrderId == id && o.UserId == userId);
+                .AsNoTracking()
+                .FirstOrDefaultAsync(o => o.OrderId == id && o.UserId == userId);
 
             if (order == null)
             {
