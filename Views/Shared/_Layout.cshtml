@@ -35,6 +35,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Responsive Styles -->
+    <link rel="stylesheet" href="~/css/responsive.css">
+    <link rel="stylesheet" href="~/css/site.css">
     <link rel="stylesheet" href="~/css/print.css" media="print">
 
     <style>
@@ -405,56 +408,10 @@
             padding: 2rem 0;
         }
 
-        /* Navbar Responsive Adjustments */
-        @@media (max-width: 991.98px) {
-            .navbar-collapse {
-                flex-direction: column;
-                align-items: stretch !important;
-                gap: 1rem;
-                padding-top: 1rem;
-            }
-
-            .navbar-nav.me-auto {
-                flex-direction: column;
-                width: 100%;
-                gap: 0.5rem;
-            }
-
-            .navbar-right-section {
-                width: 100%;
-                justify-content: space-between;
-                flex-wrap: wrap;
-            }
-
-            .navbar-search-form {
-                max-width: 100%;
-                order: -1;
-                width: 100%;
-                margin-bottom: 0.5rem;
-            }
-
-            .nav-link {
-                padding: 0.75rem 1rem !important;
-                width: 100%;
-                text-align: left;
-            }
-
-            .nav-link::after {
-                display: none;
-            }
-        }
-
-        @@media (max-width: 767.98px) {
-            .navbar-brand {
-                font-size: 1.5rem;
-            }
-
-            .navbar {
-                padding: 0.75rem 0;
-            }
-
-            .navbar-right-section {
-                gap: 0.75rem;
+        /* Desktop Navigation Styles */
+        @@media (min-width: 992px) {
+            .mobile-nav-content {
+                display: none !important;
             }
         }
 
@@ -590,36 +547,10 @@
             </button>
 
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" && ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "active" : "")"
-                           asp-controller="Home" asp-action="Index">
-                            <i class="fas fa-home me-1 d-lg-none"></i>Home
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Shop" ? "active" : "")"
-                           asp-controller="Home" asp-action="Shop">
-                            <i class="fas fa-store me-1 d-lg-none"></i>Shop
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Product" ? "active" : "")"
-                           asp-controller="Home" asp-action="Product">
-                            <i class="fas fa-box me-1 d-lg-none"></i>Products
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Contact" ? "active" : "")"
-                           asp-controller="Home" asp-action="Contact">
-                            <i class="fas fa-envelope me-1 d-lg-none"></i>Contact
-                        </a>
-                    </li>
-                </ul>
-
-                <div class="navbar-right-section">
-                    <!-- Search Bar -->
-                    <form class="navbar-search-form d-none d-md-flex" role="search" onsubmit="handleSearch(event)">
+                <!-- Desktop: Right section with search, auth, and cart -->
+                <div class="navbar-right-section d-none d-lg-flex align-items-center">
+                    <!-- Search Bar (Desktop) -->
+                    <form class="navbar-search-form" role="search" onsubmit="handleSearch(event)">
                         <input type="text" class="form-control" placeholder="Search products..."
                                aria-label="Search products" aria-describedby="search-button" 
                                id="navbar-search-input" name="search">
@@ -628,32 +559,88 @@
                         </button>
                     </form>
 
-                    <!-- Mobile Search Button -->
-                    <button class="btn btn-outline-primary d-md-none me-2" type="button" 
-                            data-bs-toggle="collapse" data-bs-target="#mobileSearch" 
-                            aria-expanded="false" aria-controls="mobileSearch"
-                            style="border-radius: 50%; width: 40px; height: 40px; padding: 0;">
-                        <i class="fas fa-search"></i>
-                    </button>
-
-                    <!-- User Authentication -->
+                    <!-- User Authentication (Desktop) -->
                     <partial name="_LoginPartial" />
 
-                    <!-- Cart Summary -->
+                    <!-- Cart Summary (Desktop) -->
                     @await Component.InvokeAsync("CartSummary")
                 </div>
-            </div>
 
-            <!-- Mobile Search Collapse -->
-            <div class="collapse w-100 mt-2" id="mobileSearch">
-                <form class="navbar-search-form" role="search" onsubmit="handleSearch(event)">
-                    <input type="text" class="form-control" placeholder="Search products..."
-                           aria-label="Search products" aria-describedby="mobile-search-button" 
-                           id="mobile-search-input" name="search">
-                    <button class="btn btn-primary" type="submit" id="mobile-search-button" aria-label="Submit search">
-                        <i class="fas fa-search" aria-hidden="true"></i>
-                    </button>
-                </form>
+                <!-- Mobile: Stacked layout -->
+                <div class="mobile-nav-content d-lg-none w-100">
+                    <!-- Mobile Search - Top -->
+                    <form class="mobile-search-form mb-3" role="search" onsubmit="handleSearch(event)">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Search products..."
+                                   aria-label="Search products" id="mobile-search-input" name="search"
+                                   style="font-size: 16px;">
+                            <button class="btn btn-primary" type="submit" aria-label="Submit search">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Navigation Links - Middle -->
+                    <ul class="navbar-nav mobile-nav-links mb-3">
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" && ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "active" : "")"
+                               asp-controller="Home" asp-action="Index">
+                                <i class="fas fa-home me-2"></i>Home
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Shop" ? "active" : "")"
+                               asp-controller="Home" asp-action="Shop">
+                                <i class="fas fa-store me-2"></i>Shop
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Product" ? "active" : "")"
+                               asp-controller="Home" asp-action="Product">
+                                <i class="fas fa-box me-2"></i>Products
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Contact" ? "active" : "")"
+                               asp-controller="Home" asp-action="Contact">
+                                <i class="fas fa-envelope me-2"></i>Contact
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- Mobile Bottom Section: Cart and Auth -->
+                    <div class="mobile-nav-bottom d-flex align-items-center justify-content-between">
+                        <!-- Cart (Mobile) -->
+                        <div class="mobile-cart-wrapper">
+                            @await Component.InvokeAsync("CartSummary")
+                        </div>
+
+                        <!-- User Authentication (Mobile) -->
+                        <div class="mobile-auth-wrapper">
+                            <partial name="_LoginPartial" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Desktop: Navigation Links -->
+                <ul class="navbar-nav me-auto d-none d-lg-flex">
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" && ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "active" : "")"
+                           asp-controller="Home" asp-action="Index">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Shop" ? "active" : "")"
+                           asp-controller="Home" asp-action="Shop">Shop</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Product" ? "active" : "")"
+                           asp-controller="Home" asp-action="Product">Products</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Contact" ? "active" : "")"
+                           asp-controller="Home" asp-action="Contact">Contact</a>
+                    </li>
+                </ul>
             </div>
         </div>
     </nav>

@@ -229,11 +229,11 @@
 <div class="hero-section">
     <div class="container-fluid px-4">
         <div class="row align-items-center">
-            <div class="col-lg-8">
+            <div class="col-12 col-lg-8 mb-3 mb-lg-0">
                 <h1>Product Management</h1>
                 <p>Manage your product catalog, inventory, and pricing</p>
             </div>
-            <div class="col-lg-4 text-end">
+            <div class="col-12 col-lg-4 text-lg-end">
                 <a asp-action="Create" asp-controller="Products" asp-area="Admin"
                    class="btn btn-light btn-lg">
                     <i class="fas fa-plus me-2"></i>Add New Product
@@ -254,7 +254,7 @@
             var categories = Model.Select(p => p.Category?.CatName).Where(c => c != null).Distinct().Count();
         }
 
-        <div class="col-xl-3 col-md-6 mb-3">
+        <div class="col-12 col-xl-3 col-md-6 mb-3">
             <div class="card stat-card bg-primary text-white">
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
@@ -270,7 +270,7 @@
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-3">
+        <div class="col-12 col-xl-3 col-md-6 mb-3">
             <div class="card stat-card bg-success text-white">
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
@@ -286,7 +286,7 @@
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-3">
+        <div class="col-12 col-xl-3 col-md-6 mb-3">
             <div class="card stat-card bg-danger text-white">
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
@@ -302,7 +302,7 @@
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-3">
+        <div class="col-12 col-xl-3 col-md-6 mb-3">
             <div class="card stat-card bg-info text-white">
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
