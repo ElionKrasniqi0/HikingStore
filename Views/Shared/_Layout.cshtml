@@ -9,7 +9,7 @@
     <meta name="author" content="HikingStore">
     <meta name="robots" content="index, follow">
     <meta name="theme-color" content="#2d473d">
-    
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="@(Context.Request.Scheme)://@(Context.Request.Host)">
@@ -412,7 +412,7 @@
         @@media (min-width: 992px) {
             .mobile-nav-content {
                 display: none !important;
-            }
+        }
         }
 
         /* Accessibility */
@@ -582,31 +582,31 @@
 
                     <!-- Navigation Links - Middle -->
                     <ul class="navbar-nav mobile-nav-links mb-3">
-                        <li class="nav-item">
+                    <li class="nav-item">
                             <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" && ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "active" : "")"
                                asp-controller="Home" asp-action="Index">
                                 <i class="fas fa-home me-2"></i>Home
                             </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Shop" ? "active" : "")"
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Shop" ? "active" : "")"
                                asp-controller="Home" asp-action="Shop">
                                 <i class="fas fa-store me-2"></i>Shop
                             </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Product" ? "active" : "")"
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Product" ? "active" : "")"
                                asp-controller="Home" asp-action="Product">
                                 <i class="fas fa-box me-2"></i>Products
                             </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Contact" ? "active" : "")"
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Contact" ? "active" : "")"
                                asp-controller="Home" asp-action="Contact">
                                 <i class="fas fa-envelope me-2"></i>Contact
                             </a>
-                        </li>
-                    </ul>
+                    </li>
+                </ul>
 
                     <!-- Mobile Bottom Section: Cart and Auth -->
                     <div class="mobile-nav-bottom d-flex align-items-center justify-content-between">
@@ -617,10 +617,10 @@
 
                         <!-- User Authentication (Mobile) -->
                         <div class="mobile-auth-wrapper">
-                            <partial name="_LoginPartial" />
-                        </div>
-                    </div>
+                    <partial name="_LoginPartial" />
                 </div>
+            </div>
+        </div>
 
                 <!-- Desktop: Navigation Links -->
                 <ul class="navbar-nav me-auto d-none d-lg-flex">
