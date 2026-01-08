@@ -255,6 +255,19 @@
             box-shadow: none !important;
         }
     }
+
+    /* Hero section styling */
+    .hero {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 3rem 0;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .intro-excerpt h1 {
+        color: #2d473d;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
 </style>
 
 <div class="hero">
@@ -279,15 +292,15 @@
 
     <!-- Status Filters -->
     <div class="status-filter">
-        <a href="@Url.Action("Index", new { status = "" })"
+        <a href="@Url.Action("Index", "Orders", new { status = "" })"
            class="status-filter-btn @(string.IsNullOrEmpty(ViewBag.CurrentStatus?.ToString()) ? "active" : "")">
-            All Orders (@ViewBag.TotalCount)
+            All Orders (@(ViewBag.TotalCount ?? 0))
         </a>
         @foreach (var status in System.Enum.GetValues(typeof(OrderStatus)).Cast<OrderStatus>())
         {
             var statusCounts = ViewBag.StatusCounts as Dictionary<OrderStatus, int>;
             var count = statusCounts != null && statusCounts.ContainsKey(status) ? statusCounts[status] : 0;
-            <a href="@Url.Action("Index", new { status = status })"
+            <a href="@Url.Action("Index", "Orders", new { status = status })"
                class="status-filter-btn @(ViewBag.CurrentStatus?.ToString() == status.ToString() ? "active" : "")">
                 @status (@count)
             </a>
@@ -295,7 +308,7 @@
     </div>
 
     <!-- Orders List -->
-    @if (Model.Any())
+    @if (Model != null && Model.Any())
     {
         <div class="row g-4">
             @foreach (var order in Model)
