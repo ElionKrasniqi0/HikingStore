@@ -3,6 +3,10 @@
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
+@{
+    var orders = Model ?? new List<Order>();
+}
+
 <style>
     /* Hero Section */
     .hero-section {
@@ -221,31 +225,29 @@
 
 <!-- Hero Section -->
 <div class="hero-section">
-    <div class="container-fluid px-4">
-        <div class="row align-items-center">
-            <div class="col-lg-8">
-                <h1>Order Management</h1>
-                <p>Manage and track all customer orders</p>
-            </div>
-            <div class="col-lg-4 text-end">
-                <button class="btn btn-light btn-lg" onclick="exportOrders()">
-                    <i class="fas fa-download me-2"></i>Export Orders
-                </button>
-            </div>
+    <div class="row align-items-center">s
+        <div class="col-lg-8">
+            <h1>Order Management</h1>
+            <p>Manage and track all customer orders</p>
+        </div>
+        <div class="col-lg-4 text-end">
+            <button class="btn btn-light btn-lg" onclick="exportOrders()">
+                <i class="fas fa-download me-2"></i>Export Orders
+            </button>
         </div>
     </div>
 </div>
 
-<div class="container-fluid px-4 pb-5">
+<div class="pb-5">
     <!-- Statistics Cards -->
     <div class="row mb-4">
         @{
             var statusList = Enum.GetValues(typeof(OrderStatus)).Cast<OrderStatus>();
-            var totalOrders = Model.Count;
+            var totalOrders = orders.Count;
         }
         @foreach (var status in statusList)
         {
-            var count = Model.Count(o => o.Status == status);
+            var count = orders.Count(o => o.Status == status);
             var percentage = totalOrders > 0 ? (count * 100.0 / totalOrders) : 0;
             var bgClass = status switch
             {
@@ -327,12 +329,12 @@
                     <h5 class="mb-0 fw-semibold">All Orders</h5>
                 </div>
                 <div class="col-md-6 text-end">
-                    <span class="text-muted">Showing <strong>@Model.Count</strong> @(Model.Count == 1 ? "order" : "orders")</span>
+                    <span class="text-muted">Showing <strong>@orders.Count</strong> @(orders.Count == 1 ? "order" : "orders")</span>
                 </div>
             </div>
         </div>
         <div class="card-body p-0">
-            @if (Model.Any())
+            @if (orders.Any())
             {
                 <div class="table-responsive">
                     <table class="table table-hover mb-0" id="ordersTable">
@@ -348,7 +350,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var order in Model)
+                            @foreach (var order in orders)
                             {
                                 <tr id="order-row-@order.OrderId">
                                     <td class="fw-semibold">#@order.OrderId</td>
@@ -385,7 +387,7 @@
                                     </td>
                                     <td>
                                         <span class="badge bg-light text-dark">
-                                            @order.OrderDetails.Sum(od => od.Quantity) items
+                                            @(order.OrderDetails?.Sum(od => od.Quantity) ?? 0) items
                                         </span>
                                     </td>
                                     <td class="text-end">

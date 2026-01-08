@@ -30,43 +30,56 @@ namespace HikingStore.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index(string status = "", string search = "")
         {
-            var query = _context.Orders
-                .Include(o => o.User)
-                .Include(o => o.OrderDetails)
-                .ThenInclude(od => od.Product)
-                .AsQueryable();
-
-            // Filter by status - FIXED: Use System.Enum explicitly
-            if (!string.IsNullOrEmpty(status))
+            try
             {
-                if (System.Enum.TryParse<OrderStatus>(status, out var orderStatus))
+                var query = _context.Orders
+                    .Include(o => o.User)
+                    .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Product)
+                    .AsQueryable();
+
+                // Filter by status - FIXED: Use System.Enum explicitly
+                if (!string.IsNullOrEmpty(status))
                 {
-                    query = query.Where(o => o.Status == orderStatus);
+                    if (System.Enum.TryParse<OrderStatus>(status, out var orderStatus))
+                    {
+                        query = query.Where(o => o.Status == orderStatus);
+                    }
                 }
-            }
 
-            // Search functionality
-            if (!string.IsNullOrEmpty(search))
+                // Search functionality
+                if (!string.IsNullOrEmpty(search))
+                {
+                    query = query.Where(o =>
+                        o.OrderId.ToString().Contains(search) ||
+                        (o.User != null && o.User.UserName != null && o.User.UserName.Contains(search)) ||
+                        (o.User != null && o.User.Email != null && o.User.Email.Contains(search)) ||
+                        (o.ShippingAddress != null && o.ShippingAddress.Contains(search)) ||
+                        (o.PhoneNumber != null && o.PhoneNumber.Contains(search)));
+                }
+
+                var orders = await query
+                    .AsNoTracking()
+                    .OrderByDescending(o => o.OrderDate)
+                    .ToListAsync();
+
+                ViewBag.CurrentStatus = status;
+                ViewBag.SearchQuery = search;
+                ViewBag.StatusList = System.Enum.GetValues(typeof(OrderStatus)).Cast<OrderStatus>();
+                ViewData["Title"] = "Orders Management";
+
+                return View(orders ?? new List<Order>());
+            }
+            catch (Exception ex)
             {
-                query = query.Where(o =>
-                    o.OrderId.ToString().Contains(search) ||
-                    o.User.UserName.Contains(search) ||
-                    o.User.Email.Contains(search) ||
-                    o.ShippingAddress.Contains(search) ||
-                    o.PhoneNumber.Contains(search));
+                // Log the exception (you might want to use a proper logging framework)
+                // For now, return an empty list to prevent blank page
+                ViewBag.CurrentStatus = status;
+                ViewBag.SearchQuery = search;
+                ViewBag.StatusList = System.Enum.GetValues(typeof(OrderStatus)).Cast<OrderStatus>();
+                ViewData["Title"] = "Orders Management";
+                return View(new List<Order>());
             }
-
-            var orders = await query
-                .AsNoTracking()
-                .OrderByDescending(o => o.OrderDate)
-                .ToListAsync();
-
-            ViewBag.CurrentStatus = status;
-            ViewBag.SearchQuery = search;
-
-            ViewBag.StatusList = System.Enum.GetValues(typeof(OrderStatus)).Cast<OrderStatus>();
-
-            return View(orders);
         }
 
         public async Task<IActionResult> Details(int id)
