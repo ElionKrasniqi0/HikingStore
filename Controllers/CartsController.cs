@@ -783,6 +783,22 @@ namespace HikingStore.Controllers
             });
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetCartCount()
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Json(new { count = 0 });
+            }
+
+            var count = await _context.ShoppingCarts
+                .Where(c => c.UserId == userId)
+                .SumAsync(c => (int?)c.Qty) ?? 0;
+
+            return Json(new { count = count });
+        }
+
         public class CartItemUpdate
         {
             public int CartId { get; set; }

@@ -805,16 +805,87 @@
 
     // Wishlist functions
     function addToWishlist(productId) {
-        // In a real app, make API call to add to wishlist
-        console.log('Adding product', productId, 'to wishlist');
-        showNotification('Added to wishlist', 'success');
+        fetch('/Wishlist/AddToWishlist', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+            },
+            body: `productId=${productId}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification(data.message || 'Added to wishlist', 'success');
+                updateWishlistCount();
+            } else {
+                showNotification(data.message || 'Failed to add to wishlist', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Error adding to wishlist', 'error');
+        });
     }
 
     function removeFromWishlist(productId) {
-        // In a real app, make API call to remove from wishlist
-        console.log('Removing product', productId, 'from wishlist');
-        showNotification('Removed from wishlist', 'info');
+        fetch('/Wishlist/RemoveFromWishlist', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+            },
+            body: `productId=${productId}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification(data.message || 'Removed from wishlist', 'info');
+                updateWishlistCount();
+            } else {
+                showNotification(data.message || 'Failed to remove from wishlist', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Error removing from wishlist', 'error');
+        });
     }
+
+    function updateWishlistCount() {
+        fetch('/Wishlist/GetWishlistCount')
+            .then(response => response.json())
+            .then(data => {
+                const wishlistCountElements = document.querySelectorAll('.wishlist-count');
+                wishlistCountElements.forEach(element => {
+                    element.textContent = data.count || 0;
+                });
+            })
+            .catch(error => console.error('Error updating wishlist count:', error));
+    }
+
+    // Load wishlist status for products on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const wishlistButtons = document.querySelectorAll('.wishlist-btn');
+        wishlistButtons.forEach(button => {
+            const productId = button.getAttribute('data-product-id');
+            if (productId) {
+                fetch(`/Wishlist/IsInWishlist?productId=${productId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.inWishlist) {
+                            const icon = button.querySelector('i');
+                            if (icon) {
+                                icon.classList.remove('far');
+                                icon.classList.add('fas', 'text-danger');
+                                button.setAttribute('data-bs-title', 'Remove from wishlist');
+                            }
+                        }
+                    })
+                    .catch(error => console.error('Error checking wishlist status:', error));
+            }
+        });
+    });
 
     // Update cart count in header
     function updateCartCount(count) {

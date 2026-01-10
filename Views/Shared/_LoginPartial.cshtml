@@ -84,6 +84,16 @@
                         </div>
                     </a>
                 </li>
+                <li>
+                    <a class="dropdown-item d-flex align-items-center"
+                       asp-controller="Wishlist" asp-action="Index">
+                        <i class="fas fa-heart me-3 text-danger"></i>
+                        <div>
+                            <div class="dropdown-item-title">My Wishlist</div>
+                            <small class="text-muted">View your saved products</small>
+                        </div>
+                    </a>
+                </li>
 
                 <!-- Admin Section -->
                 @if (User.IsInRole("Admin"))

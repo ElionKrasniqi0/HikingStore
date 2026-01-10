@@ -33,6 +33,7 @@ namespace HikingStore.Data
         public DbSet<Product> Products { get; set; }
         public DbSet<Contact> Contacts { get; set; }
         public DbSet<ShoppingCart> ShoppingCarts { get; set; }
+        public DbSet<Wishlist> Wishlists { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<TrackingEvent> TrackingEvents { get; set; }

@@ -44,6 +44,7 @@
                                 <!-- Quick Actions -->
                                 <div class="product-actions position-absolute top-0 end-0 m-2">
                                     <button class="btn btn-light btn-xs rounded-circle shadow-sm wishlist-btn"
+                                            data-product-id="@item.ProId"
                                             data-bs-toggle="tooltip" data-bs-placement="left"
                                             data-bs-title="Add to wishlist">
                                         <i class="far fa-heart small"></i>
@@ -362,19 +363,90 @@
 
         // Wishlist functionality
         const wishlistButtons = document.querySelectorAll('.wishlist-btn');
+        
+        // Load wishlist status for products on page load
+        wishlistButtons.forEach(button => {
+            const productId = button.getAttribute('data-product-id');
+            if (productId) {
+                fetch(`/Wishlist/IsInWishlist?productId=${productId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.inWishlist) {
+                            const icon = button.querySelector('i');
+                            if (icon) {
+                                icon.classList.remove('far');
+                                icon.classList.add('fas', 'text-danger');
+                                button.setAttribute('data-bs-title', 'Remove from wishlist');
+                            }
+                        }
+                    })
+                    .catch(error => console.error('Error checking wishlist status:', error));
+            }
+        });
+
         wishlistButtons.forEach(button => {
             button.addEventListener('click', function(e) {
                 e.preventDefault();
+                const productId = this.getAttribute('data-product-id');
+                if (!productId) {
+                    return;
+                }
+                
                 const icon = this.querySelector('i');
+                const isInWishlist = icon.classList.contains('fas');
 
-                if (icon.classList.contains('far')) {
-                    icon.classList.remove('far');
-                    icon.classList.add('fas', 'text-danger');
-                    this.setAttribute('data-bs-title', 'Remove from wishlist');
+                if (isInWishlist) {
+                    // Remove from wishlist
+                    fetch('/Wishlist/RemoveFromWishlist', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                        },
+                        body: `productId=${productId}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            icon.classList.remove('fas', 'text-danger');
+                            icon.classList.add('far');
+                            this.setAttribute('data-bs-title', 'Add to wishlist');
+                            showNotification(data.message || 'Removed from wishlist', 'info');
+                            updateWishlistCount();
+                        } else {
+                            showNotification(data.message || 'Failed to remove from wishlist', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showNotification('Error removing from wishlist', 'error');
+                    });
                 } else {
-                    icon.classList.remove('fas', 'text-danger');
-                    icon.classList.add('far');
-                    this.setAttribute('data-bs-title', 'Add to wishlist');
+                    // Add to wishlist
+                    fetch('/Wishlist/AddToWishlist', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                        },
+                        body: `productId=${productId}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            icon.classList.remove('far');
+                            icon.classList.add('fas', 'text-danger');
+                            this.setAttribute('data-bs-title', 'Remove from wishlist');
+                            showNotification(data.message || 'Added to wishlist', 'success');
+                            updateWishlistCount();
+                        } else {
+                            showNotification(data.message || 'Failed to add to wishlist', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showNotification('Error adding to wishlist', 'error');
+                    });
                 }
 
                 // Update tooltip
@@ -385,6 +457,36 @@
                 }
             });
         });
+
+        function updateWishlistCount() {
+            fetch('/Wishlist/GetWishlistCount')
+                .then(response => response.json())
+                .then(data => {
+                    const wishlistCountElements = document.querySelectorAll('.wishlist-count');
+                    wishlistCountElements.forEach(element => {
+                        element.textContent = data.count || 0;
+                    });
+                })
+                .catch(error => console.error('Error updating wishlist count:', error));
+        }
+
+        function showNotification(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type} border-0 position-fixed bottom-0 end-0 m-3`;
+            toast.style.zIndex = '1060';
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            toast.addEventListener('hidden.bs.toast', () => {
+                toast.remove();
+            });
+        }
 
         // Add hover effects to cards
         const cards = document.querySelectorAll('.product-card');
