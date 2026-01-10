@@ -7,9 +7,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace HikingStore.Areas.Admin.Controllers
 {
@@ -154,9 +157,63 @@ namespace HikingStore.Areas.Admin.Controllers
             order.Status = status;
 
             // Handle null values
-            order.TrackingNumber = trackingNumber ?? string.Empty;
             order.AdminNotes = adminNotes ?? string.Empty;
-            order.Carrier = carrier ?? "Standard Shipping";
+
+            // Automatically generate tracking number and set carrier when status is Processing or Shipped
+            // Processing = order is being prepared for shipment (tracking assigned here)
+            // Shipped = order has been shipped (tracking should already exist, but generate if missing)
+            if (status == OrderStatus.Processing || status == OrderStatus.Shipped)
+            {
+                // Handle tracking number: generate if not provided or empty/placeholder, and order doesn't have a valid one
+                if (!string.IsNullOrWhiteSpace(trackingNumber) && trackingNumber.Trim() != "N/A")
+                {
+                    // User explicitly provided a tracking number, use it
+                    order.TrackingNumber = trackingNumber.Trim();
+                }
+                else if (string.IsNullOrWhiteSpace(order.TrackingNumber) || order.TrackingNumber == "N/A")
+                {
+                    // No tracking number provided and order has placeholder or none - auto-generate
+                    order.TrackingNumber = GenerateTrackingNumber(order.OrderId);
+                }
+                // If order already has a valid tracking number and user didn't provide one, keep existing
+
+                // Handle carrier: auto-determine if not explicitly provided
+                if (!string.IsNullOrWhiteSpace(carrier) && carrier != "Standard Shipping")
+                {
+                    // User explicitly selected a carrier (other than default), use it
+                    order.Carrier = carrier.Trim();
+                }
+                else if (string.IsNullOrWhiteSpace(order.Carrier) || order.Carrier == "Standard Shipping")
+                {
+                    // No carrier set or default carrier - auto-determine based on order value
+                    order.Carrier = DetermineCarrier(order);
+                }
+                // If order already has a specific carrier and user selected default, keep existing
+
+                // Set estimated delivery date when processing/shipping (typically 3-5 business days from now)
+                if (!order.EstimatedDelivery.HasValue)
+                {
+                    order.EstimatedDelivery = DateTime.Now.AddBusinessDays(4);
+                }
+            }
+            else
+            {
+                // For non-processing/shipped statuses, preserve existing values unless explicitly changed
+                if (!string.IsNullOrWhiteSpace(trackingNumber))
+                {
+                    order.TrackingNumber = trackingNumber.Trim();
+                }
+                // Otherwise keep existing tracking number (may remain null/empty for non-processing orders)
+                
+                if (!string.IsNullOrWhiteSpace(carrier))
+                {
+                    order.Carrier = carrier.Trim();
+                }
+                else if (string.IsNullOrWhiteSpace(order.Carrier))
+                {
+                    order.Carrier = "Standard Shipping";
+                }
+            }
 
             // Update status dates
             var now = DateTime.Now;
@@ -1004,6 +1061,68 @@ namespace HikingStore.Areas.Admin.Controllers
                 .ToListAsync();
 
             return PartialView("_OrderListPartial", orders);
+        }
+
+        /// <summary>
+        /// Generates a unique tracking number based on order ID and date
+        /// Format: HS{OrderId:6}{Year}{Month}{Day}{Random:4}
+        /// Example: HS00012320250115A7B9
+        /// </summary>
+        private string GenerateTrackingNumber(int orderId)
+        {
+            var now = DateTime.Now;
+            var datePart = now.ToString("yyyyMMdd");
+            var randomPart = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
+            return $"HS{orderId:D6}{datePart}{randomPart}";
+        }
+
+        /// <summary>
+        /// Determines the appropriate carrier based on order characteristics
+        /// </summary>
+        private string DetermineCarrier(Order order)
+        {
+            // Logic to determine carrier based on order value, weight, or location
+            // For now, use a simple logic based on order value
+            if (order.TotalAmount >= 500)
+            {
+                return "Express Shipping";
+            }
+            else if (order.TotalAmount >= 200)
+            {
+                return "DHL";
+            }
+            else if (order.TotalAmount >= 100)
+            {
+                return "UPS";
+            }
+            else
+            {
+                return "Standard Shipping";
+            }
+        }
+    }
+
+    /// <summary>
+    /// Extension method to add business days to a DateTime
+    /// </summary>
+    public static class DateTimeExtensions
+    {
+        public static DateTime AddBusinessDays(this DateTime date, int days)
+        {
+            var result = date;
+            var addedDays = 0;
+
+            while (addedDays < days)
+            {
+                result = result.AddDays(1);
+                // Skip weekends (Saturday = 6, Sunday = 0)
+                if (result.DayOfWeek != DayOfWeek.Saturday && result.DayOfWeek != DayOfWeek.Sunday)
+                {
+                    addedDays++;
+                }
+            }
+
+            return result;
         }
     }
 }
