@@ -1,0 +1,227 @@
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Identity;
+using HikingStore.Data;
+using HikingStore.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace HikingStore.Hubs
+{
+    public class ChatHub : Hub
+    {
+        private readonly ApplicationDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly ILogger<ChatHub> _logger;
+
+        public ChatHub(ApplicationDbContext context, UserManager<IdentityUser> userManager, ILogger<ChatHub> logger)
+        {
+            _context = context;
+            _userManager = userManager;
+            _logger = logger;
+        }
+
+        public override async Task OnConnectedAsync()
+        {
+            var userId = Context.UserIdentifier;
+            if (userId != null)
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user != null)
+                {
+                    var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+                    if (isAdmin)
+                    {
+                        await Groups.AddToGroupAsync(Context.ConnectionId, "Agents");
+                        await Clients.Group("Agents").SendAsync("AgentConnected", user.UserName);
+                    }
+                    else
+                    {
+                        await Groups.AddToGroupAsync(Context.ConnectionId, userId);
+                    }
+                }
+            }
+            await base.OnConnectedAsync();
+        }
+
+        public override async Task OnDisconnectedAsync(Exception? exception)
+        {
+            var userId = Context.UserIdentifier;
+            if (userId != null)
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user != null)
+                {
+                    var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+                    if (isAdmin)
+                    {
+                        await Groups.RemoveFromGroupAsync(Context.ConnectionId, "Agents");
+                        await Clients.Group("Agents").SendAsync("AgentDisconnected", user.UserName);
+                    }
+                    else
+                    {
+                        await Groups.RemoveFromGroupAsync(Context.ConnectionId, userId);
+                    }
+                }
+            }
+            await base.OnDisconnectedAsync(exception);
+        }
+
+        public async Task SendMessage(int chatRoomId, string message)
+        {
+            try
+            {
+                var userId = Context.UserIdentifier;
+                if (userId == null) return;
+
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null) return;
+
+                var chatRoom = await _context.ChatRooms
+                    .Include(cr => cr.User)
+                    .Include(cr => cr.Agent)
+                    .FirstOrDefaultAsync(cr => cr.Id == chatRoomId);
+
+                if (chatRoom == null) return;
+
+                var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+                var isAgent = isAdmin || chatRoom.AgentId == userId;
+                var isOwner = chatRoom.UserId == userId;
+
+                // Only room owner or assigned agent can send messages
+                if (!isOwner && !isAgent)
+                {
+                    await Clients.Caller.SendAsync("ErrorMessage", "You don't have permission to send messages in this chat room.");
+                    return;
+                }
+
+                // Create message
+                var chatMessage = new ChatMessage
+                {
+                    ChatRoomId = chatRoomId,
+                    SenderId = userId,
+                    Message = message,
+                    IsAgentMessage = isAdmin || isAgent,
+                    SentAt = DateTime.UtcNow,
+                    IsRead = isOwner // If owner sends, mark as read for them
+                };
+
+                _context.ChatMessages.Add(chatMessage);
+
+                // Update room
+                chatRoom.LastMessageAt = DateTime.UtcNow;
+                if (chatRoom.Status == ChatRoomStatus.Open && isAgent)
+                {
+                    chatRoom.Status = ChatRoomStatus.InProgress;
+                    if (chatRoom.AgentId == null)
+                    {
+                        chatRoom.AgentId = userId;
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                // Send to appropriate users
+                var senderName = user.UserName ?? user.Email ?? "Unknown";
+                var messageData = new
+                {
+                    id = chatMessage.Id,
+                    chatRoomId = chatRoomId,
+                    senderId = userId,
+                    senderName = senderName,
+                    message = message,
+                    isAgentMessage = chatMessage.IsAgentMessage,
+                    sentAt = chatMessage.SentAt,
+                    isRead = chatMessage.IsRead
+                };
+
+                // Send to room owner
+                await Clients.Group(chatRoom.UserId).SendAsync("ReceiveMessage", messageData);
+
+                // Send to agent if assigned
+                if (chatRoom.AgentId != null)
+                {
+                    await Clients.Group(chatRoom.AgentId).SendAsync("ReceiveMessage", messageData);
+                }
+
+                // If message is from agent, notify all agents about new activity
+                if (isAgent)
+                {
+                    await Clients.Group("Agents").SendAsync("RoomUpdated", new
+                    {
+                        chatRoomId = chatRoomId,
+                        lastMessageAt = chatRoom.LastMessageAt
+                    });
+                }
+                else
+                {
+                    // If message is from user, notify all agents
+                    await Clients.Group("Agents").SendAsync("NewUserMessage", new
+                    {
+                        chatRoomId = chatRoomId,
+                        userId = chatRoom.UserId,
+                        userName = chatRoom.User?.UserName ?? chatRoom.User?.Email ?? "Unknown",
+                        message = message
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending message");
+                await Clients.Caller.SendAsync("ErrorMessage", "An error occurred while sending your message.");
+            }
+        }
+
+        public async Task JoinRoom(int chatRoomId)
+        {
+            var userId = Context.UserIdentifier;
+            if (userId == null) return;
+
+            var chatRoom = await _context.ChatRooms.FindAsync(chatRoomId);
+            if (chatRoom == null) return;
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return;
+
+            var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+            var isOwner = chatRoom.UserId == userId;
+            var isAgent = chatRoom.AgentId == userId || isAdmin;
+
+            if (isOwner || isAgent)
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, $"Room_{chatRoomId}");
+                
+                // Mark messages as read
+                var unreadMessages = await _context.ChatMessages
+                    .Where(m => m.ChatRoomId == chatRoomId && 
+                                m.SenderId != userId && 
+                                !m.IsRead)
+                    .ToListAsync();
+
+                foreach (var msg in unreadMessages)
+                {
+                    msg.IsRead = true;
+                    msg.ReadAt = DateTime.UtcNow;
+                }
+
+                await _context.SaveChangesAsync();
+
+                await Clients.Group($"Room_{chatRoomId}").SendAsync("MessagesRead", chatRoomId);
+            }
+        }
+
+        public async Task Typing(int chatRoomId, bool isTyping)
+        {
+            var userId = Context.UserIdentifier;
+            if (userId == null) return;
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return;
+
+            await Clients.Group($"Room_{chatRoomId}").SendAsync("UserTyping", new
+            {
+                userId = userId,
+                userName = user.UserName ?? user.Email ?? "Unknown",
+                isTyping = isTyping
+            });
+        }
+    }
+}

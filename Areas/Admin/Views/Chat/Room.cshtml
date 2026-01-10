@@ -1,0 +1,343 @@
+@model HikingStore.Models.ChatRoom
+@{
+    ViewData["Title"] = $"Chat Room - {Model.Subject}";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mt-4">
+            <i class="fas fa-comment-dots text-primary me-2"></i>Chat Room
+        </h1>
+        <a href="@Url.Action("Index", "Chat", new { area = "Admin" })" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Chat Rooms
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-0">
+                            <i class="fas fa-comment-dots me-2"></i>@Model.Subject
+                        </h5>
+                        <small>
+                            <i class="fas fa-user me-1"></i>User: @(Model.User?.UserName ?? Model.User?.Email ?? "Unknown")
+                            @if (Model.Agent != null)
+                            {
+                                <span class="ms-3">
+                                    <i class="fas fa-user-headset me-1"></i>Agent: @Model.Agent.UserName
+                                </span>
+                            }
+                        </small>
+                    </div>
+                    <div>
+                        <span class="badge bg-light text-dark">@Model.Status</span>
+                        @if (Model.Status == ChatRoomStatus.InProgress || Model.Status == ChatRoomStatus.Open)
+                        {
+                            <form asp-action="ResolveRoom" method="post" class="d-inline ms-2">
+                                <input type="hidden" name="id" value="@Model.Id" />
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    <i class="fas fa-check me-1"></i>Mark Resolved
+                                </button>
+                            </form>
+                            <form asp-action="CloseRoom" method="post" class="d-inline ms-2">
+                                <input type="hidden" name="id" value="@Model.Id" />
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to close this chat?');">
+                                    <i class="fas fa-times me-1"></i>Close
+                                </button>
+                            </form>
+                        }
+                    </div>
+                </div>
+
+                <div class="card-body p-0" style="height: 700px; display: flex; flex-direction: column;">
+                    <!-- Messages Container -->
+                    <div id="messagesContainer" class="flex-grow-1 overflow-auto p-4" style="background: #f8f9fa;">
+                        <div id="messagesList">
+                            @foreach (var message in Model.Messages ?? Enumerable.Empty<ChatMessage>())
+                            {
+                                var isMyMessage = message.IsAgentMessage;
+                                <div class="d-flex mb-3 @(isMyMessage ? "justify-content-end" : "justify-content-start")">
+                                    <div class="message-bubble @(isMyMessage ? "message-sent" : "message-received")">
+                                        <div class="message-header">
+                                            <strong>@(message.IsAgentMessage ? "You (Agent)" : "User")</strong>
+                                            <small class="text-muted ms-2">@message.SentAt.ToString("MMM dd, HH:mm")</small>
+                                        </div>
+                                        <div class="message-content">@message.Message</div>
+                                        @if (isMyMessage && message.IsRead)
+                                        {
+                                            <div class="message-read">
+                                                <i class="fas fa-check-double text-primary"></i>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div id="typingIndicator" class="d-none">
+                            <div class="d-flex justify-content-start mb-3">
+                                <div class="message-bubble message-received">
+                                    <div class="typing-dots">
+                                        <span></span><span></span><span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input Area -->
+                    @if (Model.Status != ChatRoomStatus.Closed && Model.Status != ChatRoomStatus.Resolved)
+                    {
+                        <div class="border-top p-3 bg-white">
+                            <form id="messageForm" class="d-flex gap-2">
+                                <input type="hidden" id="chatRoomId" value="@Model.Id" />
+                                <input type="text" id="messageInput" class="form-control" placeholder="Type your message..." autocomplete="off" />
+                                <button type="submit" class="btn btn-primary" id="sendButton">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </form>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="border-top p-3 bg-light text-center text-muted">
+                            <i class="fas fa-lock me-2"></i>This chat has been closed
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .message-bubble {
+        max-width: 70%;
+        padding: 12px 16px;
+        border-radius: 18px;
+        word-wrap: break-word;
+    }
+
+    .message-sent {
+        background: linear-gradient(135deg, #3b5d50, #2d473d);
+        color: white;
+        border-bottom-right-radius: 4px;
+    }
+
+    .message-received {
+        background: white;
+        color: #2c3e50;
+        border: 1px solid #e0e0e0;
+        border-bottom-left-radius: 4px;
+    }
+
+    .message-header {
+        font-size: 0.85rem;
+        margin-bottom: 4px;
+        opacity: 0.9;
+    }
+
+    .message-content {
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+    .message-read {
+        text-align: right;
+        margin-top: 4px;
+        font-size: 0.75rem;
+    }
+
+    .typing-dots {
+        display: flex;
+        gap: 4px;
+        padding: 8px 0;
+    }
+
+    .typing-dots span {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #999;
+        animation: typing 1.4s infinite;
+    }
+
+    .typing-dots span:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .typing-dots span:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    @@keyframes typing {
+        0%, 60%, 100% {
+            transform: translateY(0);
+            opacity: 0.7;
+        }
+        30% {
+            transform: translateY(-10px);
+            opacity: 1;
+        }
+    }
+
+    #messagesContainer {
+        scrollbar-width: thin;
+        scrollbar-color: #3b5d50 #f8f9fa;
+    }
+
+    #messagesContainer::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    #messagesContainer::-webkit-scrollbar-track {
+        background: #f8f9fa;
+    }
+
+    #messagesContainer::-webkit-scrollbar-thumb {
+        background: #3b5d50;
+        border-radius: 4px;
+    }
+
+    #messagesContainer::-webkit-scrollbar-thumb:hover {
+        background: #2d473d;
+    }
+</style>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .withAutomaticReconnect()
+            .build();
+
+        const chatRoomId = @Model.Id;
+        const currentUserId = "@User.Identity.Name";
+        let isTyping = false;
+        let typingTimeout;
+
+        connection.start().then(function () {
+            connection.invoke("JoinRoom", chatRoomId).catch(function (err) {
+                return console.error(err.toString());
+            });
+        }).catch(function (err) {
+            return console.error(err.toString());
+        });
+
+        connection.on("ReceiveMessage", function (message) {
+            const messagesList = document.getElementById("messagesList");
+            const messageDiv = document.createElement("div");
+            const isMyMessage = message.isAgentMessage;
+            
+            messageDiv.className = `d-flex mb-3 ${isMyMessage ? "justify-content-end" : "justify-content-start"}`;
+            
+            const sentDate = new Date(message.sentAt);
+            const timeString = sentDate.toLocaleDateString("en-US", { month: "short", day: "numeric" }) + 
+                             ", " + sentDate.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+            
+            messageDiv.innerHTML = `
+                <div class="message-bubble ${isMyMessage ? "message-sent" : "message-received"}">
+                    <div class="message-header">
+                        <strong>${message.isAgentMessage ? "You (Agent)" : "User"}</strong>
+                        <small class="${isMyMessage ? "text-white-50" : "text-muted"} ms-2">${timeString}</small>
+                    </div>
+                    <div class="message-content">${escapeHtml(message.message)}</div>
+                    ${isMyMessage ? '<div class="message-read"><i class="fas fa-check-double text-white-50"></i></div>' : ''}
+                </div>
+            `;
+            
+            messagesList.appendChild(messageDiv);
+            scrollToBottom();
+            hideTypingIndicator();
+        });
+
+        connection.on("UserTyping", function (data) {
+            if (!data.isTyping || data.userId === currentUserId) {
+                hideTypingIndicator();
+                return;
+            }
+            showTypingIndicator();
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(hideTypingIndicator, 3000);
+        });
+
+        connection.on("NewUserMessage", function (data) {
+            // Notification could be shown here
+            console.log("New user message in room:", data.chatRoomId);
+        });
+
+        connection.on("ErrorMessage", function (message) {
+            alert(message);
+        });
+
+        document.getElementById("messageForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+            const messageInput = document.getElementById("messageInput");
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                connection.invoke("SendMessage", chatRoomId, message).catch(function (err) {
+                    return console.error(err.toString());
+                });
+                messageInput.value = "";
+                stopTyping();
+            }
+        });
+
+        const messageInput = document.getElementById("messageInput");
+        messageInput.addEventListener("input", function () {
+            if (!isTyping) {
+                isTyping = true;
+                connection.invoke("Typing", chatRoomId, true).catch(function (err) {
+                    return console.error(err.toString());
+                });
+            }
+            
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(stopTyping, 1000);
+        });
+
+        function stopTyping() {
+            if (isTyping) {
+                isTyping = false;
+                connection.invoke("Typing", chatRoomId, false).catch(function (err) {
+                    return console.error(err.toString());
+                });
+            }
+        }
+
+        function scrollToBottom() {
+            const container = document.getElementById("messagesContainer");
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            document.getElementById("typingIndicator").classList.remove("d-none");
+            scrollToBottom();
+        }
+
+        function hideTypingIndicator() {
+            document.getElementById("typingIndicator").classList.add("d-none");
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // Scroll to bottom on load
+        window.addEventListener("load", scrollToBottom);
+        
+        // Auto-focus input
+        messageInput.focus();
+    </script>
+}

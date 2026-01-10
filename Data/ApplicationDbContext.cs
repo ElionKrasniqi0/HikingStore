@@ -37,6 +37,8 @@ namespace HikingStore.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<TrackingEvent> TrackingEvents { get; set; }
+        public DbSet<ChatRoom> ChatRooms { get; set; }
+        public DbSet<ChatMessage> ChatMessages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

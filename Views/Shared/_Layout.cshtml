@@ -458,6 +458,108 @@
             top: 0;
         }
 
+        /* Chat Widget */
+        .chat-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1050;
+        }
+
+        .chat-widget-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+            color: var(--white);
+            border: none;
+            box-shadow: 0 4px 20px rgba(59, 93, 80, 0.4);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .chat-widget-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(59, 93, 80, 0.5);
+        }
+
+        .chat-widget-button:active {
+            transform: scale(0.95);
+        }
+
+        .chat-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--accent-color);
+            color: var(--white);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            border: 2px solid var(--white);
+        }
+
+        .chat-widget-panel {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 350px;
+            max-width: calc(100vw - 40px);
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            overflow: hidden;
+            animation: slideUp 0.3s ease;
+        }
+
+        @@keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-widget-header {
+            background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+            color: var(--white);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-widget-body {
+            padding: 1.5rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        @@media (max-width: 768px) {
+            .chat-widget {
+                bottom: 15px;
+                right: 15px;
+            }
+
+            .chat-widget-panel {
+                width: 300px;
+                max-width: calc(100vw - 30px);
+            }
+        }
+
         /* Focus states for accessibility */
         button:focus,
         a:focus,
@@ -650,6 +752,41 @@
         @RenderBody()
     </main>
 
+    <!-- Chat Widget -->
+    @if (User.Identity?.IsAuthenticated == true && !User.IsInRole("Admin"))
+    {
+        <div id="chatWidget" class="chat-widget">
+            <button id="chatWidgetToggle" class="chat-widget-button" aria-label="Open chat">
+                <i class="fas fa-comments"></i>
+                <span class="chat-badge d-none" id="chatBadge">0</span>
+            </button>
+            <div id="chatWidgetPanel" class="chat-widget-panel d-none">
+                <div class="chat-widget-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-headset me-2"></i>Live Support
+                    </h6>
+                    <button type="button" class="btn-close btn-close-white" id="chatWidgetClose" aria-label="Close chat"></button>
+                </div>
+                <div class="chat-widget-body">
+                    <div class="text-center py-4">
+                        <i class="fas fa-comments fa-3x text-primary mb-3"></i>
+                        <h6>Need Help?</h6>
+                        <p class="text-muted small mb-3">Start a conversation with our support team</p>
+                        <a href="@Url.Action("Index", "Chat")" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus me-2"></i>Start New Chat
+                        </a>
+                    </div>
+                    <hr class="my-3">
+                    <div>
+                        <a href="@Url.Action("Index", "Chat")" class="btn btn-outline-primary btn-sm w-100">
+                            <i class="fas fa-inbox me-2"></i>View All Chats
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
@@ -793,6 +930,31 @@
             });
         });
             document.querySelector("#year").textContent = new Date().getFullYear();
+
+        // Chat Widget
+        const chatWidgetToggle = document.getElementById('chatWidgetToggle');
+        const chatWidgetPanel = document.getElementById('chatWidgetPanel');
+        const chatWidgetClose = document.getElementById('chatWidgetClose');
+
+        if (chatWidgetToggle && chatWidgetPanel) {
+            chatWidgetToggle.addEventListener('click', function() {
+                chatWidgetPanel.classList.toggle('d-none');
+            });
+        }
+
+        if (chatWidgetClose && chatWidgetPanel) {
+            chatWidgetClose.addEventListener('click', function() {
+                chatWidgetPanel.classList.add('d-none');
+            });
+        }
+
+        // Close chat panel when clicking outside
+        document.addEventListener('click', function(event) {
+            const chatWidget = document.getElementById('chatWidget');
+            if (chatWidget && chatWidgetPanel && !chatWidget.contains(event.target)) {
+                chatWidgetPanel.classList.add('d-none');
+            }
+        });
 
     </script>
 

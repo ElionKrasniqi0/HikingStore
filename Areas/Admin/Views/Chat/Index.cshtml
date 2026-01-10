@@ -1,0 +1,152 @@
+@model IEnumerable<HikingStore.Models.ChatRoom>
+@{
+    ViewData["Title"] = "Chat Support";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+<br />
+<br />
+<br />
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mt-4">
+            <i class="fas fa-headset text-primary me-2"></i>Chat Support
+        </h1>
+        <div id="unreadBadge" class="badge bg-danger fs-6" style="display: none;">
+            <span id="unreadCount">0</span> Unread
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Active Chat Rooms
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model != null && Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Subject</th>
+                                        <th>User</th>
+                                        <th>Agent</th>
+                                        <th>Status</th>
+                                        <th>Last Message</th>
+                                        <th>Unread</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var room in Model)
+                                    {
+                                        var lastMessage = room.Messages?.OrderByDescending(m => m.SentAt).FirstOrDefault();
+                                        var unreadCount = room.Messages?.Count(m => !m.IsRead && !m.IsAgentMessage) ?? 0;
+                                        var statusBadge = room.Status switch
+                                        {
+                                            ChatRoomStatus.Open => "badge bg-info",
+                                            ChatRoomStatus.InProgress => "badge bg-warning",
+                                            ChatRoomStatus.Resolved => "badge bg-success",
+                                            ChatRoomStatus.Closed => "badge bg-secondary",
+                                            _ => "badge bg-secondary"
+                                        };
+
+                                        <tr class="@(unreadCount > 0 ? "table-warning" : "")">
+                                            <td>
+                                                <strong>@room.Subject</strong>
+                                            </td>
+                                            <td>
+                                                <i class="fas fa-user me-1"></i>
+                                                @(room.User?.UserName ?? room.User?.Email ?? "Unknown")
+                                            </td>
+                                            <td>
+                                                @if (room.Agent != null)
+                                                {
+                                                    <i class="fas fa-user-headset me-1 text-primary"></i>
+                                                    @room.Agent.UserName
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">
+                                                        <i class="fas fa-clock me-1"></i>Unassigned
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="@statusBadge">@room.Status</span>
+                                            </td>
+                                            <td>
+                                                @if (lastMessage != null)
+                                                {
+                                                    <small class="text-muted">
+                                                        @lastMessage.SentAt.ToString("MMM dd, yyyy HH:mm")
+                                                    </small>
+                                                }
+                                                else
+                                                {
+                                                    <small class="text-muted">No messages</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (unreadCount > 0)
+                                                {
+                                                    <span class="badge bg-danger">@unreadCount</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <a href="@Url.Action("Room", "Chat", new { area = "Admin", id = room.Id })" 
+                                                   class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-comment-dots me-1"></i>Open
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-comments fa-4x text-muted mb-3"></i>
+                            <h5 class="text-muted">No chat rooms yet</h5>
+                            <p class="text-muted">Chat rooms will appear here when users start conversations</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-refresh unread count every 10 seconds
+        function updateUnreadCount() {
+            fetch('/Admin/Chat/GetUnreadCount')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.getElementById('unreadBadge');
+                    const countSpan = document.getElementById('unreadCount');
+                    if (data.count > 0) {
+                        countSpan.textContent = data.count;
+                        badge.style.display = 'block';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Update on load and every 10 seconds
+        updateUnreadCount();
+        setInterval(updateUnreadCount, 10000);
+    </script>
+}

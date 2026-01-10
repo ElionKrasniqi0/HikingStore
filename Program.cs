@@ -121,6 +121,9 @@ builder.Services.AddResponseCompression(options =>
     options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProvider>();
 });
 
+// SignalR
+builder.Services.AddSignalR();
+
 // Controllers and Razor Pages
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
@@ -199,6 +202,9 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapRazorPages();
+
+// SignalR Hub
+app.MapHub<HikingStore.Hubs.ChatHub>("/chatHub");
 
 // Seed database with initial data
 try
