@@ -121,8 +121,12 @@ builder.Services.AddResponseCompression(options =>
     options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProvider>();
 });
 
-// SignalR
-builder.Services.AddSignalR();
+// SignalR with authentication
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = true;
+    options.MaximumReceiveMessageSize = 1024 * 1024; // 1MB
+});
 
 // Controllers and Razor Pages
 builder.Services.AddControllersWithViews();

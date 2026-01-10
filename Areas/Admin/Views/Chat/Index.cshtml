@@ -16,6 +16,21 @@
         </div>
     </div>
 
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     <div class="row mb-4">
         <div class="col-md-12">
             <div class="card shadow-sm">
@@ -101,10 +116,23 @@
                                                 }
                                             </td>
                                             <td>
-                                                <a href="@Url.Action("Room", "Chat", new { area = "Admin", id = room.Id })" 
-                                                   class="btn btn-sm btn-primary">
-                                                    <i class="fas fa-comment-dots me-1"></i>Open
-                                                </a>
+                                                <div class="d-flex gap-1">
+                                                    <a href="@Url.Action("Room", "Chat", new { area = "Admin", id = room.Id })" 
+                                                       class="btn btn-sm btn-primary">
+                                                        <i class="fas fa-comment-dots me-1"></i>Open
+                                                    </a>
+                                                    @if (room.Status == ChatRoomStatus.Resolved || room.Status == ChatRoomStatus.Closed)
+                                                    {
+                                                        <form asp-action="DeleteRoom" method="post" class="d-inline" asp-antiforgery="true">
+                                                            <input type="hidden" name="id" value="@room.Id" />
+                                                            <button type="submit" class="btn btn-sm btn-danger" 
+                                                                    onclick="return confirm('Are you sure you want to permanently delete this chat room? This action cannot be undone!');"
+                                                                    title="Delete Chat Room">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    }
+                                                </div>
                                             </td>
                                         </tr>
                                     }

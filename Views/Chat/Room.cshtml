@@ -73,24 +73,22 @@
                     </div>
 
                     <!-- Input Area -->
-                    @if (Model.Status != ChatRoomStatus.Closed && Model.Status != ChatRoomStatus.Resolved)
-                    {
-                        <div class="border-top p-3 bg-white">
-                            <form id="messageForm" class="d-flex gap-2">
-                                <input type="hidden" id="chatRoomId" value="@Model.Id" />
-                                <input type="text" id="messageInput" class="form-control" placeholder="Type your message..." autocomplete="off" />
-                                <button type="submit" class="btn btn-primary" id="sendButton">
-                                    <i class="fas fa-paper-plane"></i>
-                                </button>
-                            </form>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="border-top p-3 bg-light text-center text-muted">
-                            <i class="fas fa-lock me-2"></i>This chat has been closed
-                        </div>
-                    }
+                    <div class="border-top p-3 bg-white">
+                        @if (Model.Status == ChatRoomStatus.Closed || Model.Status == ChatRoomStatus.Resolved)
+                        {
+                            <div class="alert alert-info alert-dismissible fade show mb-2" role="alert">
+                                <i class="fas fa-info-circle me-2"></i>This chat is @(Model.Status == ChatRoomStatus.Closed ? "closed" : "resolved"). Sending a message will reopen it.
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        }
+                        <form id="messageForm" class="d-flex gap-2">
+                            <input type="hidden" id="chatRoomId" value="@Model.Id" />
+                            <input type="text" id="messageInput" class="form-control" placeholder="Type your message..." autocomplete="off" />
+                            <button type="submit" class="btn btn-primary" id="sendButton">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
 
@@ -201,21 +199,77 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
     <script>
         const connection = new signalR.HubConnectionBuilder()
-            .withUrl("/chatHub")
-            .withAutomaticReconnect()
+            .withUrl("/chatHub", {
+                transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.LongPolling,
+                accessTokenFactory: () => {
+                    // SignalR will automatically use cookies for authentication in ASP.NET Core
+                    return "";
+                }
+            })
+            .withAutomaticReconnect({
+                nextRetryDelayInMilliseconds: retryContext => {
+                    if (retryContext.elapsedMilliseconds < 60000) {
+                        return 2000;
+                    } else {
+                        return null;
+                    }
+                }
+            })
+            .configureLogging(signalR.LogLevel.Information)
             .build();
 
         const chatRoomId = @Model.Id;
         let isTyping = false;
         let typingTimeout;
+        let reconnectAttempts = 0;
 
-        connection.start().then(function () {
-            connection.invoke("JoinRoom", chatRoomId).catch(function (err) {
-                return console.error(err.toString());
-            });
-        }).catch(function (err) {
-            return console.error(err.toString());
+        // Connection status handling
+        connection.onreconnecting((error) => {
+            console.log("Connection lost. Reconnecting...", error);
+            reconnectAttempts++;
         });
+
+        connection.onreconnected((connectionId) => {
+            console.log("Connection reestablished. Connection ID: " + connectionId);
+            reconnectAttempts = 0;
+            // Rejoin room after reconnection
+            connection.invoke("JoinRoom", chatRoomId).catch(function (err) {
+                console.error("Error rejoining room:", err.toString());
+            });
+        });
+
+        connection.onclose((error) => {
+            console.log("Connection closed", error);
+            if (error) {
+                console.error("Connection closed with error:", error);
+            }
+            // Attempt to restart connection
+            setTimeout(() => {
+                startConnection();
+            }, 5000);
+        });
+
+        function startConnection() {
+            connection.start().then(function () {
+                console.log("SignalR Connected");
+                reconnectAttempts = 0;
+                connection.invoke("JoinRoom", chatRoomId).catch(function (err) {
+                    console.error("Error joining room:", err.toString());
+                });
+            }).catch(function (err) {
+                console.error("Error starting connection:", err.toString());
+                if (reconnectAttempts < 10) {
+                    setTimeout(() => {
+                        startConnection();
+                    }, 3000);
+                } else {
+                    alert("Unable to connect to chat server. Please refresh the page.");
+                }
+            });
+        }
+
+        // Start connection
+        startConnection();
 
         connection.on("ReceiveMessage", function (message) {
             const messagesList = document.getElementById("messagesList");
@@ -245,10 +299,16 @@
         });
 
         connection.on("UserTyping", function (data) {
+            if (!data.isTyping) {
+                hideTypingIndicator();
+                return;
+            }
             if (data.userId !== "@Model.UserId") {
                 showTypingIndicator();
                 clearTimeout(typingTimeout);
                 typingTimeout = setTimeout(hideTypingIndicator, 3000);
+            } else {
+                hideTypingIndicator();
             }
         });
 
@@ -266,11 +326,24 @@
             const message = messageInput.value.trim();
             
             if (message) {
-                connection.invoke("SendMessage", chatRoomId, message).catch(function (err) {
-                    return console.error(err.toString());
-                });
-                messageInput.value = "";
-                stopTyping();
+                const sendButton = document.getElementById("sendButton");
+                const originalHTML = sendButton.innerHTML;
+                sendButton.disabled = true;
+                sendButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                
+                connection.invoke("SendMessage", chatRoomId, message)
+                    .then(() => {
+                        messageInput.value = "";
+                        stopTyping();
+                    })
+                    .catch(function (err) {
+                        console.error("Error sending message:", err.toString());
+                        alert("Failed to send message. Please try again.");
+                    })
+                    .finally(() => {
+                        sendButton.disabled = false;
+                        sendButton.innerHTML = originalHTML;
+                    });
             }
         });
 

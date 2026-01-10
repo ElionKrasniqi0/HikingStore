@@ -1,11 +1,14 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 using HikingStore.Data;
 using HikingStore.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace HikingStore.Hubs
 {
+    [Authorize]
     public class ChatHub : Hub
     {
         private readonly ApplicationDbContext _context;
@@ -22,6 +25,11 @@ namespace HikingStore.Hubs
         public override async Task OnConnectedAsync()
         {
             var userId = Context.UserIdentifier;
+            if (userId == null)
+            {
+                userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            }
+
             if (userId != null)
             {
                 var user = await _userManager.FindByIdAsync(userId);
@@ -31,7 +39,7 @@ namespace HikingStore.Hubs
                     if (isAdmin)
                     {
                         await Groups.AddToGroupAsync(Context.ConnectionId, "Agents");
-                        await Clients.Group("Agents").SendAsync("AgentConnected", user.UserName);
+                        await Clients.OthersInGroup("Agents").SendAsync("AgentConnected", user.UserName);
                     }
                     else
                     {
@@ -45,6 +53,11 @@ namespace HikingStore.Hubs
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
             var userId = Context.UserIdentifier;
+            if (userId == null)
+            {
+                userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            }
+
             if (userId != null)
             {
                 var user = await _userManager.FindByIdAsync(userId);
@@ -54,7 +67,7 @@ namespace HikingStore.Hubs
                     if (isAdmin)
                     {
                         await Groups.RemoveFromGroupAsync(Context.ConnectionId, "Agents");
-                        await Clients.Group("Agents").SendAsync("AgentDisconnected", user.UserName);
+                        await Clients.OthersInGroup("Agents").SendAsync("AgentDisconnected", user.UserName);
                     }
                     else
                     {
@@ -70,7 +83,16 @@ namespace HikingStore.Hubs
             try
             {
                 var userId = Context.UserIdentifier;
-                if (userId == null) return;
+                if (userId == null)
+                {
+                    userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+                }
+                
+                if (userId == null)
+                {
+                    await Clients.Caller.SendAsync("ErrorMessage", "You must be logged in to send messages.");
+                    return;
+                }
 
                 var user = await _userManager.FindByIdAsync(userId);
                 if (user == null) return;
@@ -106,14 +128,32 @@ namespace HikingStore.Hubs
 
                 _context.ChatMessages.Add(chatMessage);
 
-                // Update room
+                // Update room - reopen if closed/resolved
                 chatRoom.LastMessageAt = DateTime.UtcNow;
+                
+                // Reopen closed/resolved chats when a message is sent
+                if (chatRoom.Status == ChatRoomStatus.Closed || chatRoom.Status == ChatRoomStatus.Resolved)
+                {
+                    chatRoom.Status = ChatRoomStatus.InProgress;
+                    chatRoom.ResolvedAt = null; // Clear resolved date
+                }
+                
                 if (chatRoom.Status == ChatRoomStatus.Open && isAgent)
                 {
                     chatRoom.Status = ChatRoomStatus.InProgress;
                     if (chatRoom.AgentId == null)
                     {
                         chatRoom.AgentId = userId;
+                    }
+                }
+                
+                // Auto-assign agent if message is from agent and no agent assigned
+                if (isAgent && chatRoom.AgentId == null)
+                {
+                    chatRoom.AgentId = userId;
+                    if (chatRoom.Status == ChatRoomStatus.Open)
+                    {
+                        chatRoom.Status = ChatRoomStatus.InProgress;
                     }
                 }
 
@@ -133,19 +173,22 @@ namespace HikingStore.Hubs
                     isRead = chatMessage.IsRead
                 };
 
-                // Send to room owner
+                // Send to all participants in the room via room group
+                await Clients.Group($"Room_{chatRoomId}").SendAsync("ReceiveMessage", messageData);
+                
+                // Also send to individual user groups for reliability
                 await Clients.Group(chatRoom.UserId).SendAsync("ReceiveMessage", messageData);
 
                 // Send to agent if assigned
-                if (chatRoom.AgentId != null)
+                if (chatRoom.AgentId != null && chatRoom.AgentId != userId)
                 {
                     await Clients.Group(chatRoom.AgentId).SendAsync("ReceiveMessage", messageData);
                 }
 
-                // If message is from agent, notify all agents about new activity
+                // If message is from agent, notify all agents about new activity (except sender)
                 if (isAgent)
                 {
-                    await Clients.Group("Agents").SendAsync("RoomUpdated", new
+                    await Clients.OthersInGroup("Agents").SendAsync("RoomUpdated", new
                     {
                         chatRoomId = chatRoomId,
                         lastMessageAt = chatRoom.LastMessageAt
@@ -159,7 +202,8 @@ namespace HikingStore.Hubs
                         chatRoomId = chatRoomId,
                         userId = chatRoom.UserId,
                         userName = chatRoom.User?.UserName ?? chatRoom.User?.Email ?? "Unknown",
-                        message = message
+                        message = message,
+                        timestamp = chatRoom.LastMessageAt
                     });
                 }
             }
@@ -173,6 +217,11 @@ namespace HikingStore.Hubs
         public async Task JoinRoom(int chatRoomId)
         {
             var userId = Context.UserIdentifier;
+            if (userId == null)
+            {
+                userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            }
+            
             if (userId == null) return;
 
             var chatRoom = await _context.ChatRooms.FindAsync(chatRoomId);
@@ -187,7 +236,20 @@ namespace HikingStore.Hubs
 
             if (isOwner || isAgent)
             {
+                // Join the room group
                 await Groups.AddToGroupAsync(Context.ConnectionId, $"Room_{chatRoomId}");
+                
+                // Also ensure user is in their own group for direct messaging
+                if (isOwner)
+                {
+                    await Groups.AddToGroupAsync(Context.ConnectionId, userId);
+                }
+                
+                // If agent, also ensure they're in agents group
+                if (isAgent && !isOwner)
+                {
+                    await Groups.AddToGroupAsync(Context.ConnectionId, "Agents");
+                }
                 
                 // Mark messages as read
                 var unreadMessages = await _context.ChatMessages
@@ -211,12 +273,18 @@ namespace HikingStore.Hubs
         public async Task Typing(int chatRoomId, bool isTyping)
         {
             var userId = Context.UserIdentifier;
+            if (userId == null)
+            {
+                userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            }
+            
             if (userId == null) return;
 
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) return;
 
-            await Clients.Group($"Room_{chatRoomId}").SendAsync("UserTyping", new
+            // Send typing indicator to others in the room (not to self)
+            await Clients.OthersInGroup($"Room_{chatRoomId}").SendAsync("UserTyping", new
             {
                 userId = userId,
                 userName = user.UserName ?? user.Email ?? "Unknown",

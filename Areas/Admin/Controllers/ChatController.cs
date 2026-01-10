@@ -120,6 +120,58 @@ namespace HikingStore.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
+        public async Task<IActionResult> ReopenRoom(int id)
+        {
+            var chatRoom = await _context.ChatRooms.FindAsync(id);
+            if (chatRoom == null)
+            {
+                return NotFound();
+            }
+
+            // Only reopen if closed or resolved
+            if (chatRoom.Status == ChatRoomStatus.Closed || chatRoom.Status == ChatRoomStatus.Resolved)
+            {
+                chatRoom.Status = ChatRoomStatus.InProgress;
+                chatRoom.ResolvedAt = null;
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Room), new { id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteRoom(int id)
+        {
+            var chatRoom = await _context.ChatRooms
+                .Include(cr => cr.Messages)
+                .FirstOrDefaultAsync(cr => cr.Id == id);
+
+            if (chatRoom == null)
+            {
+                return NotFound();
+            }
+
+            // Only allow deletion of resolved or closed chats
+            if (chatRoom.Status != ChatRoomStatus.Resolved && chatRoom.Status != ChatRoomStatus.Closed)
+            {
+                TempData["Error"] = "You can only delete resolved or closed chat rooms.";
+                return RedirectToAction(nameof(Room), new { id });
+            }
+
+            // Delete all messages first (they will be cascade deleted, but being explicit)
+            _context.ChatMessages.RemoveRange(chatRoom.Messages);
+            
+            // Delete the chat room
+            _context.ChatRooms.Remove(chatRoom);
+            
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Chat room has been deleted successfully.";
+            return RedirectToAction(nameof(Index));
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetUnreadCount()
         {
