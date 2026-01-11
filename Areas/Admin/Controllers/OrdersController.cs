@@ -102,6 +102,24 @@ namespace HikingStore.Areas.Admin.Controllers
 
             return View(order);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Invoice(int id)
+        {
+            var order = await _context.Orders
+                .Include(o => o.User)
+                .Include(o => o.OrderDetails)
+                .ThenInclude(od => od.Product)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(o => o.OrderId == id);
+
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            return View(order);
+        }
         [HttpPost]
         public async Task<IActionResult> AddTrackingEvent(int orderId, string location, string status, string description, bool isMilestone = false)
         {

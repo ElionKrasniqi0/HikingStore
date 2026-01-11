@@ -402,6 +402,12 @@
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-end">
                                                 <li>
+                                                    <a class="dropdown-item" asp-action="Invoice" asp-route-id="@order.OrderId" target="_blank">
+                                                        <i class="fas fa-file-invoice me-2"></i>Download Invoice
+                                                    </a>
+                                                </li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
                                                     <a class="dropdown-item" href="#"
                                                        onclick="showStatusModal(@order.OrderId, '@order.Status', @order.TotalAmount, '@(order.Carrier ?? "Standard Shipping")', @((order.Status == OrderStatus.Received && !string.IsNullOrEmpty(order.Carrier)).ToString().ToLower()))">
                                                         <i class="fas fa-sync me-2"></i>Update Status

@@ -353,6 +353,9 @@
             </div>
         </div>
         <div class="d-flex gap-2">
+            <a asp-action="Invoice" asp-route-id="@Model.OrderId" target="_blank" class="btn btn-primary">
+                <i class="fas fa-file-invoice me-2"></i>Download Invoice
+            </a>
             <button class="btn btn-outline-primary" onclick="updateStatus(@Model.OrderId, '@Model.Status')">
                 <i class="fas fa-edit me-2"></i>Update Status
             </button>

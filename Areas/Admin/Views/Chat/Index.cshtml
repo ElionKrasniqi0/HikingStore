@@ -1,4 +1,5 @@
 @model IEnumerable<HikingStore.Models.ChatRoom>
+@using HikingStore.Models
 @{
     ViewData["Title"] = "Chat Support";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
@@ -165,25 +166,42 @@
 </style>
 @section Scripts {
     <script>
-        // Auto-refresh unread count every 10 seconds
-        function updateUnreadCount() {
-            fetch('/Admin/Chat/GetUnreadCount')
-                .then(response => response.json())
-                .then(data => {
-                    const badge = document.getElementById('unreadBadge');
-                    const countSpan = document.getElementById('unreadCount');
-                    if (data.count > 0) {
-                        countSpan.textContent = data.count;
-                        badge.style.display = 'block';
-                    } else {
-                        badge.style.display = 'none';
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-        }
+        // Wait for DOM to be fully loaded before running scripts
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-refresh unread count every 10 seconds
+            function updateUnreadCount() {
+                try {
+                    fetch('/Admin/Chat/GetUnreadCount')
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            const badge = document.getElementById('unreadBadge');
+                            const countSpan = document.getElementById('unreadCount');
+                            if (badge && countSpan) {
+                                if (data.count > 0) {
+                                    countSpan.textContent = data.count;
+                                    badge.style.display = 'block';
+                                } else {
+                                    badge.style.display = 'none';
+                                }
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error updating unread count:', error);
+                            // Silently fail - don't break the page
+                        });
+                } catch (error) {
+                    console.error('Error in updateUnreadCount:', error);
+                }
+            }
 
-        // Update on load and every 10 seconds
-        updateUnreadCount();
-        setInterval(updateUnreadCount, 10000);
+            // Update on load and every 10 seconds
+            updateUnreadCount();
+            setInterval(updateUnreadCount, 10000);
+        });
     </script>
 }
