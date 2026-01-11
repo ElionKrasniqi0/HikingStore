@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HikingStore.Data;
 using HikingStore.Models;
+using System;
+using System.Collections.Generic;
 
 namespace HikingStore.Areas.Admin.Controllers
 {
@@ -22,14 +24,24 @@ namespace HikingStore.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var chatRooms = await _context.ChatRooms
-                .Include(cr => cr.User)
-                .Include(cr => cr.Agent)
-                .Include(cr => cr.Messages.OrderByDescending(m => m.SentAt).Take(1))
-                .OrderByDescending(cr => cr.LastMessageAt)
-                .ToListAsync();
+            try
+            {
+                var chatRooms = await _context.ChatRooms
+                    .Include(cr => cr.User)
+                    .Include(cr => cr.Agent)
+                    .Include(cr => cr.Messages)
+                    .AsNoTracking()
+                    .OrderByDescending(cr => cr.LastMessageAt)
+                    .ToListAsync();
 
-            return View(chatRooms);
+                return View(chatRooms);
+            }
+            catch (Exception ex)
+            {
+                // Log error if needed
+                TempData["Error"] = "An error occurred while loading chat rooms. Please try again.";
+                return View(new List<ChatRoom>());
+            }
         }
 
         [HttpGet]
@@ -44,7 +56,7 @@ namespace HikingStore.Areas.Admin.Controllers
             var chatRoom = await _context.ChatRooms
                 .Include(cr => cr.User)
                 .Include(cr => cr.Agent)
-                .Include(cr => cr.Messages.OrderBy(m => m.SentAt))
+                .Include(cr => cr.Messages)
                 .FirstOrDefaultAsync(cr => cr.Id == id);
 
             if (chatRoom == null)

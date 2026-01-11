@@ -652,15 +652,23 @@
                 </div>
                 <div class="mb-3" id="carrierSection" style="display: none;">
                     <label class="form-label">Carrier</label>
-                    <select class="form-select" id="carrier">
-                        <option value="Standard Shipping">Standard Shipping</option>
-                        <option value="Express Shipping">Express Shipping</option>
-                        <option value="DHL">DHL</option>
-                        <option value="UPS">UPS</option>
-                        <option value="FedEx">FedEx</option>
-                        <option value="Custom">Custom Carrier</option>
-                    </select>
-                    <small class="form-text text-muted">Automatically selected based on order value</small>
+                    @if (!string.IsNullOrEmpty(Model.Carrier) && Model.Status == OrderStatus.Received)
+                    {
+                        <input type="text" class="form-control" id="carrier" value="@Model.Carrier" readonly>
+                        <small class="form-text text-muted">Selected by customer - cannot be changed</small>
+                    }
+                    else
+                    {
+                        <select class="form-select" id="carrier">
+                            <option value="Standard Shipping" selected="@(Model.Carrier == "Standard Shipping")">Standard Shipping</option>
+                            <option value="Express Shipping" selected="@(Model.Carrier == "Express Shipping")">Express Shipping</option>
+                            <option value="DHL" selected="@(Model.Carrier == "DHL")">DHL</option>
+                            <option value="UPS" selected="@(Model.Carrier == "UPS")">UPS</option>
+                            <option value="FedEx" selected="@(Model.Carrier == "FedEx")">FedEx</option>
+                            <option value="Custom" selected="@(Model.Carrier == "Custom")">Custom Carrier</option>
+                        </select>
+                        <small class="form-text text-muted">@(string.IsNullOrEmpty(Model.Carrier) ? "Select carrier for this order" : "Current carrier (can be changed)")</small>
+                    }
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Admin Notes</label>
@@ -862,21 +870,11 @@
                 trackingNumberField.value = generateTrackingNumber();
             }
             
-            // Auto-select carrier based on order total amount
-            const totalAmount = parseFloat(document.getElementById('orderTotalAmount').value) || 0;
-            let selectedCarrier = 'Standard Shipping';
-            
-            if (totalAmount >= 500) {
-                selectedCarrier = 'Express Shipping';
-            } else if (totalAmount >= 200) {
-                selectedCarrier = 'DHL';
-            } else if (totalAmount >= 100) {
-                selectedCarrier = 'UPS';
-            } else {
-                selectedCarrier = 'Standard Shipping';
+            // Carrier is already set from user selection - no auto-selection
+            // If it's a select element, make sure it shows the current value
+            if (carrierField && carrierField.tagName === 'SELECT') {
+                // Value should already be set in the HTML from the model
             }
-            
-            carrierField.value = selectedCarrier;
         } else {
             // Hide tracking and carrier fields for other statuses
             trackingNumberSection.style.display = 'none';

@@ -356,6 +356,20 @@
                                     </h6>
                                     <div class="small">
                                         <div class="d-flex justify-content-between mb-1">
+                                            <span>Shipping Method:</span>
+                                            <span class="fw-semibold">
+                                                @{
+                                                    var cartItemsList = ViewBag.Carts as List<ShoppingCart>;
+                                                    var selectedShipping = cartItemsList?
+                                                        .Where(c => !string.IsNullOrEmpty(c.ShippingOption))
+                                                        .GroupBy(c => c.ShippingOption)
+                                                        .OrderByDescending(g => g.Count())
+                                                        .FirstOrDefault()?.Key ?? cartItemsList?.FirstOrDefault()?.ShippingOption ?? "Standard Shipping";
+                                                }
+                                                @selectedShipping
+                                            </span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-1">
                                             <span>Delivery to:</span>
                                             <span id="previewCity" class="fw-semibold">Select city</span>
                                         </div>

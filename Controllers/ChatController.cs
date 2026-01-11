@@ -29,7 +29,7 @@ namespace HikingStore.Controllers
 
             var chatRooms = await _context.ChatRooms
                 .Include(cr => cr.Agent)
-                .Include(cr => cr.Messages.OrderByDescending(m => m.SentAt).Take(1))
+                .Include(cr => cr.Messages)
                 .Where(cr => cr.UserId == userId)
                 .OrderByDescending(cr => cr.LastMessageAt)
                 .ToListAsync();
@@ -49,7 +49,7 @@ namespace HikingStore.Controllers
             var chatRoom = await _context.ChatRooms
                 .Include(cr => cr.User)
                 .Include(cr => cr.Agent)
-                .Include(cr => cr.Messages.OrderBy(m => m.SentAt))
+                .Include(cr => cr.Messages)
                 .FirstOrDefaultAsync(cr => cr.Id == id);
 
             if (chatRoom == null)

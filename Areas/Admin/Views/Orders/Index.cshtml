@@ -403,7 +403,7 @@
                                             <ul class="dropdown-menu dropdown-menu-end">
                                                 <li>
                                                     <a class="dropdown-item" href="#"
-                                                       onclick="showStatusModal(@order.OrderId, '@order.Status', @order.TotalAmount)">
+                                                       onclick="showStatusModal(@order.OrderId, '@order.Status', @order.TotalAmount, '@(order.Carrier ?? "Standard Shipping")', @((order.Status == OrderStatus.Received && !string.IsNullOrEmpty(order.Carrier)).ToString().ToLower()))">
                                                         <i class="fas fa-sync me-2"></i>Update Status
                                                     </a>
                                                 </li>
@@ -469,7 +469,8 @@
                         <div class="col-md-6">
                             <div class="mb-3" id="carrierSection" style="display: none;">
                                 <label class="form-label">Carrier</label>
-                                <select class="form-select" id="carrier">
+                                <input type="text" class="form-control" id="carrierInput" style="display: none;" readonly>
+                                <select class="form-select" id="carrierSelect">
                                     <option value="Standard Shipping">Standard Shipping</option>
                                     <option value="Express Shipping">Express Shipping</option>
                                     <option value="DHL">DHL</option>
@@ -477,7 +478,7 @@
                                     <option value="FedEx">FedEx</option>
                                     <option value="Custom">Custom Carrier</option>
                                 </select>
-                                <div class="form-text text-muted">Automatically selected based on order value</div>
+                                <div class="form-text text-muted" id="carrierHelp">Select carrier for this order</div>
                             </div>
                         </div>
                     </div>
@@ -626,21 +627,14 @@
                     trackingNumberField.value = generateTrackingNumber();
                 }
                 
-                // Auto-select carrier based on order total amount
-                const totalAmount = parseFloat(document.getElementById('orderTotalAmount').value) || 0;
-                let selectedCarrier = 'Standard Shipping';
-                
-                if (totalAmount >= 500) {
-                    selectedCarrier = 'Express Shipping';
-                } else if (totalAmount >= 200) {
-                    selectedCarrier = 'DHL';
-                } else if (totalAmount >= 100) {
-                    selectedCarrier = 'UPS';
-                } else {
-                    selectedCarrier = 'Standard Shipping';
+                // Check if carrier is read-only (user-selected)
+                const carrierInput = document.getElementById('carrierInput');
+                const carrierSelect = document.getElementById('carrierSelect');
+                if (carrierInput && carrierInput.style.display !== 'none') {
+                    // Carrier is read-only (user-selected), do nothing
+                } else if (carrierSelect) {
+                    // Carrier can be changed, but value is already set from modal initialization
                 }
-                
-                carrierField.value = selectedCarrier;
             } else {
                 trackingFields.style.display = 'none';
                 carrierSection.style.display = 'none';
@@ -664,15 +658,23 @@
             const adminNotes = document.getElementById('adminNotes').value;
             
             // For Processing or Shipped status, let server auto-generate tracking number (send empty)
-            // Send selected carrier to server - server will use it or auto-determine
+            // Send selected carrier to server
             let trackingNumber = '';
             let carrier = '';
             
             if (status === 'Processing' || status === 'Shipped') {
                 // Let server auto-generate tracking number - send empty string to trigger auto-generation
                 trackingNumber = '';
-                // Get selected carrier from dropdown
-                carrier = document.getElementById('carrier').value || 'Standard Shipping';
+                // Get carrier from either input (read-only) or select (editable)
+                const carrierInput = document.getElementById('carrierInput');
+                const carrierSelect = document.getElementById('carrierSelect');
+                if (carrierInput && carrierInput.style.display !== 'none') {
+                    carrier = carrierInput.value || 'Standard Shipping';
+                } else if (carrierSelect) {
+                    carrier = carrierSelect.value || 'Standard Shipping';
+                } else {
+                    carrier = 'Standard Shipping';
+                }
             } else {
                 // For other statuses, send empty values
                 trackingNumber = '';
@@ -793,13 +795,32 @@
             window.location.href = '@Url.Action("Index", "Orders", new { area = "Admin" })';
         }
 
-        function showStatusModal(orderId, currentStatus, totalAmount) {
+        function showStatusModal(orderId, currentStatus, totalAmount, carrier, isUserSelected) {
             document.getElementById('orderId').value = orderId;
             document.getElementById('orderStatus').value = currentStatus;
             document.getElementById('orderTotalAmount').value = totalAmount || 0;
             document.getElementById('trackingNumber').value = '';
             document.getElementById('adminNotes').value = '';
-            document.getElementById('carrier').value = 'Standard Shipping';
+            
+            // Handle carrier field - read-only if user-selected, editable otherwise
+            const carrierInput = document.getElementById('carrierInput');
+            const carrierSelect = document.getElementById('carrierSelect');
+            const carrierHelp = document.getElementById('carrierHelp');
+            const carrierValue = carrier || 'Standard Shipping';
+            
+            if (isUserSelected && currentStatus === 'Received') {
+                // User selected carrier - make it read-only
+                carrierInput.value = carrierValue;
+                carrierInput.style.display = 'block';
+                carrierSelect.style.display = 'none';
+                carrierHelp.textContent = 'Selected by customer - cannot be changed';
+            } else {
+                // Admin can change carrier
+                carrierInput.style.display = 'none';
+                carrierSelect.style.display = 'block';
+                carrierSelect.value = carrierValue;
+                carrierHelp.textContent = carrierValue ? 'Current carrier (can be changed)' : 'Select carrier for this order';
+            }
 
             const modal = new bootstrap.Modal(document.getElementById('statusModal'));
             modal.show();

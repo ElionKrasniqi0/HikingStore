@@ -177,18 +177,18 @@ namespace HikingStore.Areas.Admin.Controllers
                 }
                 // If order already has a valid tracking number and user didn't provide one, keep existing
 
-                // Handle carrier: auto-determine if not explicitly provided
-                if (!string.IsNullOrWhiteSpace(carrier) && carrier != "Standard Shipping")
+                // Handle carrier: preserve user-selected carrier unless admin explicitly changes it
+                if (!string.IsNullOrWhiteSpace(carrier))
                 {
-                    // User explicitly selected a carrier (other than default), use it
+                    // Admin explicitly selected a carrier, use it
                     order.Carrier = carrier.Trim();
                 }
-                else if (string.IsNullOrWhiteSpace(order.Carrier) || order.Carrier == "Standard Shipping")
+                else if (string.IsNullOrWhiteSpace(order.Carrier))
                 {
-                    // No carrier set or default carrier - auto-determine based on order value
+                    // No carrier set - auto-determine based on order value (for backwards compatibility with old orders)
                     order.Carrier = DetermineCarrier(order);
                 }
-                // If order already has a specific carrier and user selected default, keep existing
+                // If order already has a carrier set (from user selection), preserve it
 
                 // Set estimated delivery date when processing/shipping (typically 3-5 business days from now)
                 if (!order.EstimatedDelivery.HasValue)

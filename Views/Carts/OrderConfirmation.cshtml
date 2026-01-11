@@ -69,6 +69,7 @@
                         <h4 class="text-primary">Order #@Model.OrderId</h4>
                         <p><strong>Order Date:</strong> @Model.OrderDate.ToString("MMMM dd, yyyy")</p>
                         <p><strong>Total Amount:</strong> €@Model.TotalAmount.ToString("N2")</p>
+                        <p><strong>Shipping Method:</strong> @(Model.Carrier ?? "Standard Shipping")</p>
                         <p><strong>Shipping To:</strong> @Model.ShippingAddress, @Model.City</p>
 
                         @if (!string.IsNullOrEmpty(Model.Comment))

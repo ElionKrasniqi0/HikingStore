@@ -133,6 +133,17 @@
                             <!-- Shipping Information -->
                             <div class="shipping-section mb-3">
                                 <h6 class="fw-semibold mb-1" style="font-size: 0.9rem;">Shipping</h6>
+                                <div class="mb-2">
+                                    <label class="form-label small fw-semibold mb-1">Select Shipping Method</label>
+                                    <select id="shippingOption" name="shippingOption" class="form-select form-select-sm" style="font-size: 0.85rem;">
+                                        <option value="Standard Shipping">Standard Shipping</option>
+                                        <option value="Express Shipping">Express Shipping</option>
+                                        <option value="DHL">DHL</option>
+                                        <option value="UPS">UPS</option>
+                                        <option value="FedEx">FedEx</option>
+                                        <option value="Custom">Custom Carrier</option>
+                                    </select>
+                                </div>
                                 <p class="text-muted small mb-1" style="font-size: 0.85rem;">
                                     Delivery date for this product is uncertain. However, you can pre-order, and we will do our best to deliver it as soon as possible.
                                 </p>
@@ -727,6 +738,7 @@
             const quantity = parseInt(qtyInput.value) || 1;
             const productId = @Model.ProId;
             const maxStock = @Model.StockQuantity;
+            const shippingOption = document.getElementById('shippingOption')?.value || 'Standard Shipping';
 
             // Validate quantity
             if (quantity < 1) {
@@ -749,7 +761,7 @@
             const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
 
             // Submit via AJAX
-            fetch('/Carts/AddToCart?ProId=' + productId + '&qty=' + quantity, {
+            fetch('/Carts/AddToCart?ProId=' + productId + '&qty=' + quantity + '&shippingOption=' + encodeURIComponent(shippingOption), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',

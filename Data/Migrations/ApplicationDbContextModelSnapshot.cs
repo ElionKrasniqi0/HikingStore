@@ -72,6 +72,86 @@ namespace HikingStore.Data.Migrations
                     b.ToTable("Contacts");
                 });
 
+            modelBuilder.Entity("HikingStore.Models.ChatMessage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ChatRoomId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsAgentMessage")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("SenderId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChatRoomId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("ChatMessages");
+                });
+
+            modelBuilder.Entity("HikingStore.Models.ChatRoom", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AgentId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("LastMessageAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AgentId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ChatRooms");
+                });
+
             modelBuilder.Entity("HikingStore.Models.Order", b =>
                 {
                     b.Property<int>("OrderId")
@@ -220,6 +300,32 @@ namespace HikingStore.Data.Migrations
                     b.HasIndex("OrderId");
 
                     b.ToTable("TrackingEvents");
+                });
+
+            modelBuilder.Entity("HikingStore.Models.Wishlist", b =>
+                {
+                    b.Property<int>("WishlistId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WishlistId"));
+
+                    b.Property<DateTime>("AddedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ProId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("WishlistId");
+
+                    b.HasIndex("ProId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Wishlists");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -467,6 +573,9 @@ namespace HikingStore.Data.Migrations
                     b.Property<int>("Qty")
                         .HasColumnType("int");
 
+                    b.Property<string>("ShippingOption")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
@@ -479,110 +588,40 @@ namespace HikingStore.Data.Migrations
                     b.ToTable("ShoppingCarts");
                 });
 
-            modelBuilder.Entity("HikingStore.Models.Wishlist", b =>
+            modelBuilder.Entity("HikingStore.Models.ChatMessage", b =>
                 {
-                    b.Property<int>("WishlistId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.HasOne("HikingStore.Models.ChatRoom", "ChatRoom")
+                        .WithMany("Messages")
+                        .HasForeignKey("ChatRoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WishlistId"));
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<DateTime>("AddedDate")
-                        .HasColumnType("datetime2");
+                    b.Navigation("ChatRoom");
 
-                    b.Property<int>("ProId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("WishlistId");
-
-                    b.HasIndex("ProId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Wishlists");
+                    b.Navigation("Sender");
                 });
 
             modelBuilder.Entity("HikingStore.Models.ChatRoom", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Agent")
+                        .WithMany()
+                        .HasForeignKey("AgentId");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<string>("AgentId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Navigation("Agent");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("LastMessageAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("ResolvedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Subject")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AgentId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ChatRooms");
-                });
-
-            modelBuilder.Entity("HikingStore.Models.ChatMessage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ChatRoomId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsAgentMessage")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ReadAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("SenderId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("SentAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ChatRoomId");
-
-                    b.HasIndex("SenderId");
-
-                    b.ToTable("ChatMessages");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("HikingStore.Models.Order", b =>
@@ -616,6 +655,23 @@ namespace HikingStore.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("HikingStore.Models.Wishlist", b =>
+                {
+                    b.HasOne("HikingStore.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "IdentityUser")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("IdentityUser");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -705,62 +761,14 @@ namespace HikingStore.Data.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("HikingStore.Models.Wishlist", b =>
+            modelBuilder.Entity("Category", b =>
                 {
-                    b.HasOne("HikingStore.Models.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "IdentityUser")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("IdentityUser");
-
                     b.Navigation("Product");
                 });
 
             modelBuilder.Entity("HikingStore.Models.ChatRoom", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Agent")
-                        .WithMany()
-                        .HasForeignKey("AgentId");
-
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Agent");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("HikingStore.Models.ChatMessage", b =>
-                {
-                    b.HasOne("HikingStore.Models.ChatRoom", "ChatRoom")
-                        .WithMany("Messages")
-                        .HasForeignKey("ChatRoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Sender")
-                        .WithMany()
-                        .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("ChatRoom");
-
-                    b.Navigation("Sender");
-                });
-
-            modelBuilder.Entity("Category", b =>
-                {
-                    b.Navigation("Product");
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("HikingStore.Models.Order", b =>
@@ -768,11 +776,6 @@ namespace HikingStore.Data.Migrations
                     b.Navigation("OrderDetails");
 
                     b.Navigation("TrackingEvents");
-                });
-
-            modelBuilder.Entity("HikingStore.Models.ChatRoom", b =>
-                {
-                    b.Navigation("Messages");
                 });
 #pragma warning restore 612, 618
         }

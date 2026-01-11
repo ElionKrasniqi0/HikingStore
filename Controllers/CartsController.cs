@@ -47,7 +47,7 @@ namespace HikingStore.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddToCart(int ProId, int qty = 1)
+        public async Task<IActionResult> AddToCart(int ProId, int qty = 1, string shippingOption = "Standard Shipping")
         {
             var userId = _userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId))
@@ -71,18 +71,25 @@ namespace HikingStore.Controllers
                 return Json(new { success = false, message = "Insufficient stock." });
             }
 
+            // Validate shipping option
+            if (string.IsNullOrWhiteSpace(shippingOption))
+            {
+                shippingOption = "Standard Shipping";
+            }
+
             // Check if item already exists in cart
             var existingCartItem = await _context.ShoppingCarts
                 .FirstOrDefaultAsync(c => c.UserId == userId && c.ProId == ProId);
 
             if (existingCartItem != null)
             {
-                // Update quantity
+                // Update quantity and shipping option
                 existingCartItem.Qty += qty;
                 if (existingCartItem.Qty > product.StockQuantity)
                 {
                     existingCartItem.Qty = product.StockQuantity;
                 }
+                existingCartItem.ShippingOption = shippingOption;
             }
             else
             {
@@ -91,7 +98,8 @@ namespace HikingStore.Controllers
                 {
                     ProId = ProId,
                     UserId = userId,
-                    Qty = qty
+                    Qty = qty,
+                    ShippingOption = shippingOption
                 };
                 _context.ShoppingCarts.Add(cartItem);
             }
@@ -199,12 +207,20 @@ namespace HikingStore.Controllers
                 _context.Products.Update(product);
             }
 
+            // Get the most common shipping option from cart items, or default to first one
+            var shippingOption = cartItems
+                .Where(c => !string.IsNullOrEmpty(c.ShippingOption))
+                .GroupBy(c => c.ShippingOption)
+                .OrderByDescending(g => g.Count())
+                .FirstOrDefault()?.Key ?? cartItems.FirstOrDefault()?.ShippingOption ?? "Standard Shipping";
+
             order.UserId = userId;
             order.OrderDate = DateTime.Now;
             order.TotalAmount = totalAmount;
             order.Status = OrderStatus.Received;
             order.TrackingNumber = "N/A";
             order.AdminNotes = "Order created";
+            order.Carrier = shippingOption;
 
             _context.Orders.Add(order);
             await _context.SaveChangesAsync(); // Need OrderId for order details
@@ -251,15 +267,16 @@ namespace HikingStore.Controllers
                     Product = new Product { ProName = c.Product.ProName, Price = c.Product.Price }
                 }).ToList();
 
-                // Capture configuration before background task
+                // Capture configuration and base URL before background task
                 var emailConfig = _configuration;
+                var baseUrl = $"{Request.Scheme}://{Request.Host}";
 
                 // Fire and forget - don't wait for email to complete
                 _ = Task.Run(async () =>
                 {
                     try
                     {
-                        await SendOrderConfirmationEmailAsync(emailConfig, userEmail, orderForEmail, cartItemsForEmail);
+                        await SendOrderConfirmationEmailAsync(emailConfig, userEmail, orderForEmail, cartItemsForEmail, baseUrl);
                     }
                     catch (Exception ex)
                     {
@@ -271,7 +288,7 @@ namespace HikingStore.Controllers
             return RedirectToAction("OrderConfirmation", new { id = order.OrderId });
         }
 
-        private static async Task SendOrderConfirmationEmailAsync(IConfiguration configuration, string userEmail, Order order, List<ShoppingCart> cartItems)
+        private static async Task SendOrderConfirmationEmailAsync(IConfiguration configuration, string userEmail, Order order, List<ShoppingCart> cartItems, string baseUrl = "https://hikingstore.com")
         {
             try
             {
@@ -297,7 +314,7 @@ namespace HikingStore.Controllers
                 var subject = $"Order Confirmation - #ORD{order.OrderId:D6}";
 
                 // Build email body
-                var emailBody = BuildOrderConfirmationEmail(order, cartItems);
+                var emailBody = BuildOrderConfirmationEmail(order, cartItems, baseUrl);
 
                 var message = new MailMessage
                 {
@@ -324,7 +341,7 @@ namespace HikingStore.Controllers
             }
         }
 
-        private static string BuildOrderConfirmationEmail(Order order, List<ShoppingCart> cartItems)
+        private static string BuildOrderConfirmationEmail(Order order, List<ShoppingCart> cartItems, string baseUrl = "https://hikingstore.com")
         {
             var sb = new StringBuilder();
 
@@ -672,6 +689,16 @@ namespace HikingStore.Controllers
                     <li>Expected delivery: 3-5 business days</li>
                     <li>Track your order anytime from your account dashboard</li>
                 </ul>
+            </div>
+
+            <div style=""text-align: center; margin: 30px 0; padding: 20px; background: #f8f9fa; border-radius: 8px;"">
+                <h3 style=""color: #3b5d50; margin-bottom: 15px;"">📄 Download Your Invoice</h3>
+                <p style=""margin-bottom: 20px; color: #495057;"">Download your order invoice for your records.</p>
+                <a href=""{baseUrl}/Orders/Invoice/{order.OrderId}?download=true"" 
+                   style=""display: inline-block; background: #3b5d50; color: white; padding: 12px 30px; 
+                          text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px;"">
+                    Download Invoice
+                </a>
             </div>
 
             <div class=""contact-info"">

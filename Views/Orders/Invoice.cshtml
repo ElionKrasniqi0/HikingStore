@@ -1,0 +1,330 @@
+@using HikingStore.Enum
+@model Order
+@{
+    ViewData["Title"] = "Invoice";
+    var vatRate = 0.18m;
+    var subtotalWithoutVat = Model.TotalAmount / (1 + vatRate);
+    var vatAmount = Model.TotalAmount - subtotalWithoutVat;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice #ORD@Model.OrderId.ToString("D6") - HikingStore</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Arial", "Helvetica", sans-serif;
+            font-size: 9pt;
+            line-height: 1.3;
+            color: #000;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .invoice-container {
+            max-width: 210mm;
+            margin: 0 auto;
+            background: #fff;
+            padding: 15mm;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Invoice Header */
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15pt;
+            padding-bottom: 10pt;
+            border-bottom: 2pt solid #000;
+        }
+
+        .company-info {
+            flex: 1;
+        }
+
+        .company-name {
+            font-size: 16pt;
+            font-weight: bold;
+            margin-bottom: 5pt;
+            color: #000;
+        }
+
+        .company-details {
+            font-size: 7.5pt;
+            line-height: 1.4;
+            color: #333;
+        }
+
+        .invoice-info {
+            text-align: right;
+            flex: 1;
+        }
+
+        .invoice-label {
+            font-size: 9pt;
+            font-weight: bold;
+            margin-bottom: 5pt;
+            color: #000;
+        }
+
+        .invoice-number {
+            font-size: 14pt;
+            font-weight: bold;
+            margin-bottom: 6pt;
+            color: #000;
+        }
+
+        .invoice-date {
+            font-size: 7.5pt;
+            color: #333;
+        }
+
+        /* Two Column Layout */
+        .invoice-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15pt;
+            gap: 15pt;
+        }
+
+        .detail-section {
+            flex: 1;
+        }
+
+        .detail-title {
+            font-size: 8pt;
+            font-weight: bold;
+            margin-bottom: 6pt;
+            text-transform: uppercase;
+            letter-spacing: 0.5pt;
+            border-bottom: 0.5pt solid #000;
+            padding-bottom: 3pt;
+        }
+
+        .detail-item {
+            font-size: 7.5pt;
+            margin-bottom: 3pt;
+            line-height: 1.4;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* Products Table */
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12pt 0;
+            font-size: 8pt;
+        }
+
+        .products-table th {
+            background: #f0f0f0;
+            border: 0.5pt solid #000;
+            padding: 4pt 6pt;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .products-table th.text-right {
+            text-align: right;
+        }
+
+        .products-table td {
+            border: 0.5pt solid #000;
+            padding: 4pt 6pt;
+        }
+
+        .products-table td.text-right {
+            text-align: right;
+        }
+
+        .products-table .product-name {
+            font-weight: 600;
+        }
+
+        /* Totals */
+        .totals-section {
+            margin-top: 10pt;
+            padding-top: 8pt;
+            border-top: 1pt solid #000;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 2pt 0;
+            font-size: 8pt;
+        }
+
+        .grand-total {
+            border-top: 1pt solid #000;
+            font-weight: bold;
+            font-size: 9pt;
+            margin-top: 4pt;
+            padding-top: 4pt;
+        }
+
+        /* Footer */
+        .invoice-footer {
+            margin-top: 20pt;
+            padding-top: 8pt;
+            border-top: 0.5pt solid #ccc;
+            font-size: 7pt;
+            color: #666;
+            text-align: center;
+        }
+
+        /* Download Button */
+        .download-button {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .btn-download {
+            display: inline-block;
+            background: #3b5d50;
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-download:hover {
+            background: #2d4a3f;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <!-- Invoice Header -->
+        <div class="invoice-header">
+            <div class="company-info">
+                <div class="company-name">HikingStore</div>
+                <div class="company-details">
+                    Rr Prshtina Re, Kosovo<br>
+                    Email: support@hikingstore.com<br>
+                    Phone: +383 (458) 04-555
+                </div>
+            </div>
+            <div class="invoice-info">
+                <div class="invoice-label">INVOICE</div>
+                <div class="invoice-number">#ORD@Model.OrderId.ToString("D6")</div>
+                <div class="invoice-date">Date: @Model.OrderDate.ToString("MMMM dd, yyyy")</div>
+            </div>
+        </div>
+
+        <!-- Invoice Details -->
+        <div class="invoice-details">
+            <div class="detail-section">
+                <div class="detail-title">Bill To</div>
+                <div class="detail-item">
+                    <span class="detail-label">Name:</span> @Model.User.UserName
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Email:</span> @Model.User.Email
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Phone:</span> @Model.PhoneNumber
+                </div>
+            </div>
+            <div class="detail-section">
+                <div class="detail-title">Ship To</div>
+                <div class="detail-item">
+                    <span class="detail-label">Address:</span> @Model.ShippingAddress
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">City:</span> @Model.City, Kosovo
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Shipping:</span> @(Model.Carrier ?? "Standard Shipping")
+                </div>
+                @if (Model.Status == OrderStatus.Shipped && !string.IsNullOrEmpty(Model.TrackingNumber) && Model.TrackingNumber != "N/A")
+                {
+                    <div class="detail-item">
+                        <span class="detail-label">Tracking:</span> @Model.TrackingNumber
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Products Table -->
+        <table class="products-table">
+            <thead>
+                <tr>
+                    <th style="width: 5%;">#</th>
+                    <th style="width: 50%;">Product</th>
+                    <th style="width: 10%;" class="text-right">Qty</th>
+                    <th style="width: 17.5%;" class="text-right">Unit Price</th>
+                    <th style="width: 17.5%;" class="text-right">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int itemNumber = 1;
+                }
+                @foreach (var item in Model.OrderDetails)
+                {
+                    <tr>
+                        <td>@itemNumber</td>
+                        <td class="product-name">@item.Product.ProName</td>
+                        <td class="text-right">@item.Quantity</td>
+                        <td class="text-right">€@item.Price.ToString("N2")</td>
+                        <td class="text-right">€@((item.Price * item.Quantity).ToString("N2"))</td>
+                    </tr>
+                    itemNumber++;
+                }
+            </tbody>
+        </table>
+
+        <!-- Totals -->
+        <div class="totals-section">
+            <div class="total-row">
+                <span>Subtotal (excl. VAT)</span>
+                <span>€@subtotalWithoutVat.ToString("N2")</span>
+            </div>
+            <div class="total-row">
+                <span>Shipping</span>
+                <span>FREE</span>
+            </div>
+            <div class="total-row">
+                <span>VAT (18%)</span>
+                <span>€@vatAmount.ToString("N2")</span>
+            </div>
+            <div class="total-row grand-total">
+                <span>TOTAL</span>
+                <span>€@Model.TotalAmount.ToString("N2")</span>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="invoice-footer">
+            <p>Thank you for your business!</p>
+            <p>This is an official invoice for your records.</p>
+            <p>For questions, contact us at support@hikingstore.com or +383 (458) 04-555</p>
+        </div>
+
+        <!-- Download Button -->
+        <div class="download-button">
+            <a href="@Url.Action("Invoice", "Orders", new { id = Model.OrderId, download = true })" class="btn-download">
+                Download Invoice
+            </a>
+        </div>
+    </div>
+</body>
+</html>

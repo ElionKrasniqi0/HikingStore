@@ -16,6 +16,8 @@ public class ShoppingCart
     [Range(1, int.MaxValue, ErrorMessage = "From 1")]
     public int Qty { get; set; }
 
+    public string? ShippingOption { get; set; }
+
     public string? UserId { get; set; }
     [ForeignKey("UserId")]
 
