@@ -102,7 +102,14 @@
             </div>
 
             <!-- Login Button -->
-            <button type="submit" class="login-submit-btn">Log in</button>
+            <button type="submit" class="login-submit-btn" id="loginSubmitBtn">
+                <span class="btn-text">
+                    <i class="fas fa-sign-in-alt me-2"></i>Log in
+                </span>
+                <span class="btn-spinner d-none">
+                    <i class="fas fa-spinner fa-spin me-2"></i>Logging in...
+                </span>
+            </button>
         </form>
 
         <!-- Register Link -->
@@ -352,16 +359,28 @@
         cursor: pointer;
         transition: all 0.2s ease;
         margin-bottom: 1.5rem;
+        position: relative;
+        min-height: 48px;
     }
 
-    .login-submit-btn:hover {
-            background: #29453a;
+    .login-submit-btn:hover:not(:disabled) {
+        background: #29453a;
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        box-shadow: 0 4px 12px rgba(59, 93, 80, 0.3);
     }
 
-    .login-submit-btn:active {
+    .login-submit-btn:active:not(:disabled) {
         transform: translateY(0);
+    }
+
+    .login-submit-btn:disabled {
+        opacity: 0.8;
+        cursor: not-allowed;
+    }
+
+    .btn-spinner {
+        display: inline-flex;
+        align-items: center;
     }
 
     /* Register Link Section */
@@ -440,6 +459,31 @@
                     this.classList.remove('fa-eye-slash');
                     this.classList.add('fa-eye');
                 }
+            });
+        }
+
+        // ⚡ PERFORMANCE: Instant UI feedback and prevent double submission
+        const loginForm = document.getElementById('account');
+        const loginSubmitBtn = document.getElementById('loginSubmitBtn');
+        let isSubmitting = false;
+
+        if (loginForm && loginSubmitBtn) {
+            loginForm.addEventListener('submit', function(e) {
+                // Prevent double submission
+                if (isSubmitting) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                // Show loading state immediately (optimistic UI)
+                isSubmitting = true;
+                loginSubmitBtn.disabled = true;
+                const btnText = loginSubmitBtn.querySelector('.btn-text');
+                const btnSpinner = loginSubmitBtn.querySelector('.btn-spinner');
+                if (btnText) btnText.classList.add('d-none');
+                if (btnSpinner) btnSpinner.classList.remove('d-none');
+                
+                // Form will submit normally, but UI shows instant feedback
             });
         }
     });

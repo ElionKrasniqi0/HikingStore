@@ -124,7 +124,14 @@
             </div>
 
             <!-- Register Button -->
-            <button type="submit" class="login-submit-btn">Continue</button>
+            <button type="submit" class="login-submit-btn" id="registerSubmitBtn">
+                <span class="btn-text">
+                    <i class="fas fa-user-plus me-2"></i>Continue
+                </span>
+                <span class="btn-spinner d-none">
+                    <i class="fas fa-spinner fa-spin me-2"></i>Creating account...
+                </span>
+            </button>
         </form>
 
         <!-- Login Link -->
@@ -172,6 +179,8 @@
             // Form validation - ensure terms checkbox is checked
             const registerForm = document.getElementById('registerForm');
             const termsCheckbox = document.getElementById('termsCheckbox');
+            const registerSubmitBtn = document.getElementById('registerSubmitBtn');
+            let isSubmitting = false;
             
             if (registerForm && termsCheckbox) {
                 registerForm.addEventListener('submit', function(e) {
@@ -179,6 +188,22 @@
                         e.preventDefault();
                         alert('Please accept the Terms and Conditions and Privacy Policy to continue.');
                         return false;
+                    }
+
+                    // ⚡ PERFORMANCE: Prevent double submission
+                    if (isSubmitting) {
+                        e.preventDefault();
+                        return false;
+                    }
+
+                    // ⚡ PERFORMANCE: Show loading state immediately (optimistic UI)
+                    isSubmitting = true;
+                    if (registerSubmitBtn) {
+                        registerSubmitBtn.disabled = true;
+                        const btnText = registerSubmitBtn.querySelector('.btn-text');
+                        const btnSpinner = registerSubmitBtn.querySelector('.btn-spinner');
+                        if (btnText) btnText.classList.add('d-none');
+                        if (btnSpinner) btnSpinner.classList.remove('d-none');
                     }
                 });
             }
@@ -426,16 +451,28 @@
         transition: all 0.2s ease;
         margin-bottom: 1.5rem;
         margin-top: 0.5rem;
+        position: relative;
+        min-height: 48px;
     }
 
-    .login-submit-btn:hover {
+    .login-submit-btn:hover:not(:disabled) {
         background: #29453a;
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(59, 93, 80, 0.3);
     }
 
-    .login-submit-btn:active {
+    .login-submit-btn:active:not(:disabled) {
         transform: translateY(0);
+    }
+
+    .login-submit-btn:disabled {
+        opacity: 0.8;
+        cursor: not-allowed;
+    }
+
+    .btn-spinner {
+        display: inline-flex;
+        align-items: center;
     }
 
     /* Register Link Section */

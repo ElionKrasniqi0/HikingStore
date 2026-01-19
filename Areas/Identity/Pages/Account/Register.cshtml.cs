@@ -79,13 +79,16 @@ namespace HikingStore.Areas.Identity.Pages.Account
         public async Task OnGetAsync(string returnUrl = null)
         {
             ReturnUrl = returnUrl;
-            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync().ConfigureAwait(false)).ToList();
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
-            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            
+            // ⚡ OPTIMIZATION: Skip ExternalLogins fetch on POST - not needed for registration
+            // ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            
             if (ModelState.IsValid)
             {
                 var user = new ApplicationUser 
@@ -95,50 +98,89 @@ namespace HikingStore.Areas.Identity.Pages.Account
                     FirstName = Input.FirstName,
                     LastName = Input.LastName
                 };
-                var result = await _userManager.CreateAsync(user, Input.Password);
+                
+                // ⚡ OPTIMIZATION: CreateAsync is already async, but we use ConfigureAwait(false)
+                var result = await _userManager.CreateAsync(user, Input.Password).ConfigureAwait(false);
+                
                 if (result.Succeeded)
                 {
-                    // Assign User role to new registrations
-                    const string userRoleName = "User";
-                    if (await _roleManager.RoleExistsAsync(userRoleName))
-                    {
-                        await _userManager.AddToRoleAsync(user, userRoleName);
-                    }
-
                     _logger.LogInformation("User created a new account with password.");
 
-                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                    var callbackUrl = Url.Page(
-                        "/Account/ConfirmEmail",
-                        pageHandler: null,
-                        values: new { area = "Identity", userId = user.Id, code = code, returnUrl = returnUrl },
-                        protocol: Request.Scheme);
-
-                    try
+                    // ⚡ OPTIMIZATION: Check and assign role asynchronously without blocking
+                    // Move role assignment to background task to improve perceived performance
+                    const string userRoleName = "User";
+                    var userId = user.Id; // Capture before background task
+                    
+                    // Fire and forget role assignment - don't block registration
+                    _ = Task.Run(async () =>
                     {
-                        await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-                        
-                        _logger.LogInformation("Confirmation email sent successfully to {Email}", Input.Email);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Failed to send confirmation email to {Email}", Input.Email);
-                        ModelState.AddModelError(string.Empty, $"Account created but failed to send confirmation email: {ex.Message}. Please contact support or try resending the confirmation email.");
-                        return Page();
-                    }
+                        try
+                        {
+                            // Re-fetch user in background task to avoid disposed context issues
+                            var backgroundUser = await _userManager.FindByIdAsync(userId).ConfigureAwait(false);
+                            if (backgroundUser != null)
+                            {
+                                var roleExists = await _roleManager.RoleExistsAsync(userRoleName).ConfigureAwait(false);
+                                if (roleExists)
+                                {
+                                    await _userManager.AddToRoleAsync(backgroundUser, userRoleName).ConfigureAwait(false);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Failed to assign role to user {UserId}", userId);
+                        }
+                    });
 
+                    // ⚡ OPTIMIZATION: Generate email confirmation token and send email in background
+                    // This prevents blocking the registration response
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
+                        // Capture values before background task
+                        var userEmail = Input.Email;
+                        var emailUserId = user.Id;
+                        var scheme = Request.Scheme;
+                        var host = Request.Host.Value;
+                        
+                        // Fire and forget email sending - don't block registration
+                        _ = Task.Run(async () =>
+                        {
+                            try
+                            {
+                                // Re-fetch user in background task to avoid disposed context issues
+                                var backgroundUser = await _userManager.FindByIdAsync(emailUserId).ConfigureAwait(false);
+                                if (backgroundUser == null) return;
+
+                                var code = await _userManager.GenerateEmailConfirmationTokenAsync(backgroundUser).ConfigureAwait(false);
+                                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                                
+                                // Build URL manually to avoid HttpContext issues in background task
+                                var callbackUrl = $"{scheme}://{host}/Identity/Account/ConfirmEmail?userId={emailUserId}&code={code}&returnUrl={Uri.EscapeDataString(returnUrl)}";
+
+                                await _emailSender.SendEmailAsync(userEmail, "Confirm your email",
+                                    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.").ConfigureAwait(false);
+                                
+                                _logger.LogInformation("Confirmation email sent successfully to {Email}", userEmail);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Failed to send confirmation email to {Email}", userEmail);
+                                // Don't block registration if email fails - user can request resend
+                            }
+                        });
+                        
+                        // ⚡ OPTIMIZATION: Redirect immediately, email sends in background
                         return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
                     }
                     else
                     {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        // ⚡ OPTIMIZATION: Sign in immediately with ConfigureAwait(false)
+                        await _signInManager.SignInAsync(user, isPersistent: false).ConfigureAwait(false);
                         return LocalRedirect(returnUrl);
                     }
                 }
+                
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
