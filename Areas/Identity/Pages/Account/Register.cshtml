@@ -1,414 +1,497 @@
 ﻿@page
 @model RegisterModel
 @{
+    Layout = null;
     ViewData["Title"] = "Register";
 }
 
-<div class="d-flex align-items-center justify-content-center bg-light py-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-5 col-md-7">
-                <!-- Register Card -->
-                <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
-                    <!-- Card Header -->
-                    <div class="card-header bg-gradient-primary text-white text-center py-4 border-0">
-                        <div class="icon-wrapper bg-opacity-20 rounded-circle p-3 mx-auto mb-3">
-                            <i class="fas fa-user-plus fa-lg text-white"></i>
-                        </div>
-                        <h2 class="h4 fw-bold mb-2">Create Your Account</h2>
-                        <p class="mb-0 opacity-75">Join our community of outdoor enthusiasts</p>
-                    </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - HikingStore</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+@Html.Raw("<body>")
+<div class="login-page-wrapper">
+    <div class="login-container">
+        <!-- Logo -->
+        <div class="login-logo">
+            <i class="fas fa-mountain"></i>
+            <span class="logo-text">HikingStore</span>
+        </div>
 
-                    <!-- Card Body -->
-                    <div class="card-body p-4">
-                        <form asp-route-returnUrl="@Model.ReturnUrl" method="post" id="registerForm">
-                            <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 rounded-2 mb-4 small"></div>
+        <!-- Heading -->
+        <h1 class="login-heading">Create your account</h1>
 
-                            <!-- First Name Field -->
-                            <div class="form-group mb-3">
-                                <label asp-for="Input.FirstName" class="form-label fw-semibold text-dark mb-2">First Name</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0">
-                                        <i class="fas fa-user text-muted"></i>
-                                    </span>
-                                    <input asp-for="Input.FirstName" type="text" class="form-control border-start-0 py-3"
-                                           placeholder="Enter your first name" />
-                                </div>
-                                <span asp-validation-for="Input.FirstName" class="text-danger small mt-1 d-block"></span>
-                            </div>
-
-                            <!-- Last Name Field -->
-                            <div class="form-group mb-3">
-                                <label asp-for="Input.LastName" class="form-label fw-semibold text-dark mb-2">Last Name</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0">
-                                        <i class="fas fa-user text-muted"></i>
-                                    </span>
-                                    <input asp-for="Input.LastName" type="text" class="form-control border-start-0 py-3"
-                                           placeholder="Enter your last name" />
-                                </div>
-                                <span asp-validation-for="Input.LastName" class="text-danger small mt-1 d-block"></span>
-                            </div>
-
-                            <!-- Email Field -->
-                            <div class="form-group mb-3">
-                                <label asp-for="Input.Email" class="form-label fw-semibold text-dark mb-2">Email Address</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0">
-                                        <i class="fas fa-envelope text-muted"></i>
-                                    </span>
-                                    <input asp-for="Input.Email" type="email" class="form-control border-start-0 py-3"
-                                           placeholder="Enter your email address" />
-                                </div>
-                                <span asp-validation-for="Input.Email" class="text-danger small mt-1 d-block"></span>
-                            </div>
-
-                            <!-- Password Field -->
-                            <div class="form-group mb-3">
-                                <label asp-for="Input.Password" class="form-label fw-semibold text-dark mb-2">Password</label>
-                                <div class="input-group">
-                                    <span class="input-group-text border-end-0">
-                                        <i class="fas fa-lock text-muted"></i>
-                                    </span>
-                                    <input asp-for="Input.Password" type="password" class="form-control border-start-0 py-3"
-                                           placeholder="Create a strong password" />
-                                </div>
-                                <span asp-validation-for="Input.Password" class="text-danger small mt-1 d-block"></span>
-                            </div>
-
-                            <!-- Confirm Password Field -->
-                            <div class="form-group mb-4">
-                                <label asp-for="Input.ConfirmPassword" class="form-label fw-semibold text-dark mb-2">Confirm Password</label>
-                                <div class="input-group">
-                                    <span class="input-group-text border-end-0">
-                                        <i class="fas fa-lock text-muted"></i>
-                                    </span>
-                                    <input asp-for="Input.ConfirmPassword" type="password" class="form-control border-start-0 py-3"
-                                           placeholder="Confirm your password" />
-                                </div>
-                                <span asp-validation-for="Input.ConfirmPassword" class="text-danger small mt-1 d-block"></span>
-                            </div>
-
-                            <!-- Register Button -->
-                            <button type="submit" class="btn btn-primary btn-lg w-100 py-3 fw-semibold mb-4 register-btn">
-                                <i class="fas fa-user-plus me-2"></i>Create Account
-                            </button>
-                        </form>
-
-                        <!-- Divider -->
-                        <div class="divider d-flex align-items-center mb-4">
-                            <div class="border-top flex-grow-1"></div>
-                            <span class="px-3 text-muted small">or continue with</span>
-                            <div class="border-top flex-grow-1"></div>
-                        </div>
-
-                        <!-- External Login -->
-                        <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                            <div class="text-center">
-                                <p class="text-muted small mb-3">Sign up using your social account</p>
-                                <div class="d-flex justify-content-center gap-3">
-                                    @foreach (var provider in Model.ExternalLogins)
-                                    {
-                                        <button type="submit" class="btn btn-outline-danger btn-lg rounded-circle social-btn"
-                                                name="provider" value="@provider.Name"
-                                                title="Log in using your @provider.DisplayName account">
-                                            <i class="fab fa-google"></i>
-                                        </button>
-                                    }
-                                </div>
-                            </div>
-                        </form>
-
-                        <!-- Login Link -->
-                        <div class="text-center mt-4 pt-3 border-top">
-                            <p class="text-muted mb-0">
-                                Already have an account?
-                                <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="text-primary fw-semibold text-decoration-none">
-                                    Sign in here
-                                </a>
-                            </p>
-                        </div>
-                    </div>
+        <!-- Social Login Buttons -->
+        @if (Model.ExternalLogins?.Count > 0)
+        {
+            <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                <div class="social-login-buttons">
+                    @foreach (var provider in Model.ExternalLogins)
+                    {
+                        <button type="submit" class="social-login-btn" name="provider" value="@provider.Name">
+                            @if (provider.Name == "Google")
+                            {
+                                <i class="fab fa-google"></i>
+                                <span>Register with Google</span>
+                            }
+                            else if (provider.Name == "Facebook")
+                            {
+                                <i class="fab fa-facebook-f"></i>
+                                <span>Register with Facebook</span>
+                            }
+                            else if (provider.Name == "Apple")
+                            {
+                                <i class="fab fa-apple"></i>
+                                <span>Register with Apple</span>
+                            }
+                            else
+                            {
+                                <i class="fas fa-sign-in-alt"></i>
+                                <span>Register with @provider.DisplayName</span>
+                            }
+                        </button>
+                    }
                 </div>
+            </form>
 
-                <!-- Trust Badges -->
-                <div class="text-center mt-4">
-                    <div class="row g-3">
-                        <div class="col-4">
-                            <div class="trust-item">
-                                <i class="fas fa-shield-alt text-primary mb-1 d-block"></i>
-                                <small class="text-muted">Secure</small>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="trust-item">
-                                <i class="fas fa-user-lock text-primary mb-1 d-block"></i>
-                                <small class="text-muted">Private</small>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="trust-item">
-                                <i class="fas fa-bolt text-primary mb-1 d-block"></i>
-                                <small class="text-muted">Fast</small>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Separator -->
+            <div class="login-separator">
+                <div class="separator-line"></div>
+                <span class="separator-text">Or</span>
+                <div class="separator-line"></div>
+            </div>
+        }
+
+        <!-- Register Form -->
+        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="login-form">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3"></div>
+
+            <!-- First Name Field -->
+            <div class="form-group">
+                <label asp-for="Input.FirstName" class="form-label">First Name</label>
+                <input asp-for="Input.FirstName" class="form-control" placeholder="Enter your first name" />
+                <span asp-validation-for="Input.FirstName" class="text-danger small"></span>
+            </div>
+
+            <!-- Last Name Field -->
+            <div class="form-group">
+                <label asp-for="Input.LastName" class="form-label">Last Name</label>
+                <input asp-for="Input.LastName" class="form-control" placeholder="Enter your last name" />
+                <span asp-validation-for="Input.LastName" class="text-danger small"></span>
+            </div>
+
+            <!-- Email Field -->
+            <div class="form-group">
+                <label asp-for="Input.Email" class="form-label">Email</label>
+                <input asp-for="Input.Email" class="form-control" placeholder="Enter your email address" autocomplete="email" />
+                <span asp-validation-for="Input.Email" class="text-danger small"></span>
+            </div>
+
+            <!-- Password Field -->
+            <div class="form-group">
+                <label asp-for="Input.Password" class="form-label">Password</label>
+                <div class="password-input-wrapper">
+                    <input asp-for="Input.Password" class="form-control" placeholder="Create a password" autocomplete="new-password" id="password-input" />
+                    <i class="fas fa-eye password-toggle" id="password-toggle"></i>
+                </div>
+                <span asp-validation-for="Input.Password" class="text-danger small"></span>
+            </div>
+
+            <!-- Confirm Password Field (Hidden but still validated) -->
+            <input type="hidden" asp-for="Input.ConfirmPassword" value="" id="confirm-password-hidden" />
+
+            <!-- Terms and Conditions -->
+            <div class="form-group terms-checkbox-group">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="termsCheckbox" required />
+                    <label class="form-check-label" for="termsCheckbox">
+                        By registering an account, you accept the 
+                        <a href="/Home/Services" target="_blank" class="terms-link">Terms and conditions</a> 
+                        and 
+                        <a href="/Home/Privacy" target="_blank" class="terms-link">Privacy Policy</a>
+                        <span class="required-asterisk">*</span>
+                    </label>
                 </div>
             </div>
+
+            <!-- Register Button -->
+            <button type="submit" class="login-submit-btn">Continue</button>
+        </form>
+
+        <!-- Login Link -->
+        <div class="register-link-section">
+            <span>Do you have an account? </span>
+            <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="register-link">Log in</a>
         </div>
     </div>
 </div>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+<!-- Validation Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.12/dist/jquery.validate.unobtrusive.min.js"></script>
+
+<script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Password toggle functionality
+            const passwordToggle = document.getElementById('password-toggle');
+            const passwordInput = document.getElementById('password-input');
+            const confirmPasswordHidden = document.getElementById('confirm-password-hidden');
+
+            if (passwordToggle && passwordInput) {
+                passwordToggle.addEventListener('click', function () {
+                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordInput.setAttribute('type', type);
+                    
+                    if (type === 'text') {
+                        this.classList.remove('fa-eye');
+                        this.classList.add('fa-eye-slash');
+                    } else {
+                        this.classList.remove('fa-eye-slash');
+                        this.classList.add('fa-eye');
+                    }
+                });
+            }
+
+            // Sync confirm password with password (since we're hiding the confirm field)
+            if (passwordInput && confirmPasswordHidden) {
+                passwordInput.addEventListener('input', function() {
+                    confirmPasswordHidden.value = this.value;
+                });
+            }
+
+            // Form validation - ensure terms checkbox is checked
+            const registerForm = document.getElementById('registerForm');
+            const termsCheckbox = document.getElementById('termsCheckbox');
+            
+            if (registerForm && termsCheckbox) {
+                registerForm.addEventListener('submit', function(e) {
+                    if (!termsCheckbox.checked) {
+                        e.preventDefault();
+                        alert('Please accept the Terms and Conditions and Privacy Policy to continue.');
+                        return false;
+                    }
+                });
+            }
+        });
+    </script>
 }
 
 <style>
-    /* Elegant Color Scheme */
-    .bg-gradient-primary {
-        background: linear-gradient(135deg, #2d473d 0%, #3b5d50 50%, #4a7565 100%);
-    }
-
-    /* Card Design */
-    .card {
-        border: 1px solid rgba(0,0,0,0.08);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(0,0,0,0.1) !important;
-        }
-
-    /* Icon Wrapper */
-    .icon-wrapper {
-        width: 52px;
-        height: 52px;
+    /* Login Page Wrapper */
+    .login-page-wrapper {
+        min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
+        background-color: #ffffff;
+        padding: 2rem 1rem;
     }
 
-    /* Form Enhancements */
-    .form-control {
-        border: 1px solid #e9ecef;
-        transition: all 0.3s ease;
-        font-weight: 500;
+    /* Login Container */
+    .login-container {
+        width: 100%;
+        max-width: 450px;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        padding: 3rem 2.5rem;
     }
 
-        .form-control:focus {
-            border-color: #3b5d50;
-            box-shadow: 0 0 0 0.2rem rgba(59, 93, 80, 0.15);
-        }
-
-    .input-group-text {
-        background: #f8f9fa;
-        border: 1px solid #e9ecef;
-        transition: all 0.3s ease;
+    /* Logo */
+    .login-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
     }
 
-    /* Focus state for input-group when input inside is focused */
-    .input-group.focused .input-group-text {
-        border-color: #3b5d50;
-        background: #f8f9fa;
+    .login-logo i {
+        font-size: 2rem;
+        color: #3b5d50;
     }
 
-    /* Button Enhancements */
-    .btn {
-        border-radius: 8px;
+    .login-logo .logo-text {
+        font-size: 1.75rem;
         font-weight: 600;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
+        color: #6d7175;
+        letter-spacing: -0.5px;
     }
 
-    .btn-primary {
-        border: none;
-        box-shadow: 0 4px 15px rgba(59, 93, 80, 0.3);
+    /* Heading */
+    .login-heading {
+        font-size: 1.5rem;
+        font-weight: 500;
+        color: #6d7175;
+        text-align: center;
+        margin-bottom: 2rem;
     }
 
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #2d473d, #1a2f26);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(59, 93, 80, 0.4);
-        }
+    /* Social Login Buttons */
+    .social-login-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
 
-    .social-btn {
-        width: 50px;
-        height: 50px;
+    .social-login-btn {
         display: flex;
         align-items: center;
         justify-content: center;
-        border: 2px solid #dc3545;
-        transition: all 0.3s ease;
+        gap: 0.75rem;
+        width: 100%;
+        padding: 0.875rem 1.25rem;
+        background: #ffffff;
+        border: 1px solid #e1e3e5;
+        border-radius: 8px;
+        color: #6d7175;
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
     }
 
-        .social-btn:hover {
-            background: #dc3545;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
-        }
-
-    /* Divider */
-    .divider .border-top {
-        border-color: #e9ecef !important;
+    .social-login-btn:hover {
+        background: #f6f6f7;
+        border-color: #d1d5db;
     }
 
-    /* Trust Items */
-    .trust-item {
-        padding: 0.5rem;
+    .social-login-btn i {
+        font-size: 1.25rem;
     }
 
-        .trust-item i {
-            font-size: 1.25rem;
-        }
-
-    /* Link Styling */
-    a.text-primary {
-        transition: all 0.3s ease;
+    .social-login-btn i.fa-google {
+        background: linear-gradient(45deg, #4285F4, #34A853, #FBBC05, #EA4335);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
-        a.text-primary:hover {
-            color: #2d473d !important;
-            text-decoration: underline !important;
-        }
-
-    /* Loading Animation */
-    .btn-loading {
-        position: relative;
-        color: transparent !important;
+    .social-login-btn i.fa-facebook-f {
+        color: #1877F2;
     }
 
-        .btn-loading::after {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            top: 50%;
-            left: 50%;
-            margin-left: -10px;
-            margin-top: -10px;
-            border: 2px solid transparent;
-            border-top-color: currentColor;
-            border-radius: 50%;
-            animation: button-spinner 0.8s linear infinite;
-        }
-
-    @@keyframes button-spinner {
-        from {
-            transform: rotate(0turn);
-        }
-
-        to {
-            transform: rotate(1turn);
-        }
+    .social-login-btn i.fa-apple {
+        color: #000000;
     }
 
-    /* Form Validation Styling */
-    .input-validation-error {
-        border-color: #dc3545 !important;
+    /* Separator */
+    .login-separator {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin: 1.5rem 0;
     }
 
-    .field-validation-error {
+    .separator-line {
+        flex: 1;
+        height: 1px;
+        background: #e1e3e5;
+    }
+
+    .separator-text {
+        color: #8c9196;
         font-size: 0.875rem;
     }
 
-    /* Responsive Design */
-    @@media (max-width: 768px) {
-        .min-vh-100 {
-            min-height: auto;
-            padding: 2rem 0;
-        }
-
-        .card-body {
-            padding: 1.5rem !important;
-        }
-
-        .btn-lg {
-            padding: 0.75rem 1.5rem;
-            font-size: 1rem;
-        }
-
-        .social-btn {
-            width: 45px;
-            height: 45px;
-        }
+    /* Form */
+    .login-form {
+        margin-top: 1.5rem;
     }
 
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #202223;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 1px solid #e1e3e5;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        color: #202223;
+        transition: all 0.2s ease;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #29453a;
+        box-shadow: 0 0 0 3px rgba(41, 69, 58, 0.1);
+    }
+
+    /* Password Input Wrapper */
+    .password-input-wrapper {
+        position: relative;
+    }
+
+    .password-input-wrapper .form-control {
+        padding-right: 3rem;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #8c9196;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: color 0.2s ease;
+    }
+
+    .password-toggle:hover {
+        color: #202223;
+    }
+
+    /* Terms and Conditions Checkbox */
+    .terms-checkbox-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .terms-checkbox-group .form-check {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .terms-checkbox-group .form-check-input {
+        margin-top: 0.25rem;
+        width: 1.1em;
+        height: 1.1em;
+        border: 1.5px solid #e1e3e5;
+        border-radius: 4px;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .terms-checkbox-group .form-check-input:checked {
+        background-color: #3b5d50;
+        border-color: #3b5d50;
+    }
+
+    .terms-checkbox-group .form-check-label {
+        font-size: 0.875rem;
+        color: #6d7175;
+        line-height: 1.5;
+        cursor: pointer;
+    }
+
+    .terms-link {
+        color: #3b5d50;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .terms-link:hover {
+        color: #29453a;
+        text-decoration: underline;
+    }
+
+    .required-asterisk {
+        color: #c33;
+        margin-left: 2px;
+    }
+
+    /* Register Submit Button */
+    .login-submit-btn {
+        width: 100%;
+        padding: 0.875rem 1.25rem;
+        background: #3b5d50;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-bottom: 1.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .login-submit-btn:hover {
+        background: #29453a;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 93, 80, 0.3);
+    }
+
+    .login-submit-btn:active {
+        transform: translateY(0);
+    }
+
+    /* Register Link Section */
+    .register-link-section {
+        text-align: center;
+        font-size: 0.875rem;
+        color: #6d7175;
+    }
+
+    .register-link {
+        color: #3b5d50;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .register-link:hover {
+        color: #29453a;
+        text-decoration: underline;
+    }
+
+    /* Alert */
+    .alert-danger {
+        background: #fee;
+        border: 1px solid #fcc;
+        color: #c33;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+    }
+
+    .text-danger {
+        color: #c33;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    /* Responsive */
     @@media (max-width: 576px) {
-        .container {
-            padding: 0 1rem;
+        .login-container {
+            padding: 2rem 1.5rem;
         }
 
-        .card-header {
-            padding: 1.5rem !important;
+        .login-logo .logo-text {
+            font-size: 1.5rem;
         }
 
-        .icon-wrapper {
-            width: 50px;
-            height: 50px;
-        }
-
-        .h4 {
+        .login-heading {
             font-size: 1.25rem;
         }
-    }
 
-    /* Focus States */
-    .btn:focus,
-    .form-control:focus,
-    .social-btn:focus {
-        box-shadow: 0 0 0 3px rgba(59, 93, 80, 0.25) !important;
+        .terms-checkbox-group .form-check-label {
+            font-size: 0.8rem;
+        }
     }
 </style>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const registerForm = document.getElementById('registerForm');
-        const registerBtn = document.querySelector('.register-btn');
-
-        registerForm?.addEventListener('submit', function (e) {
-            // Show loading state
-            const originalText = registerBtn.innerHTML;
-            registerBtn.disabled = true;
-            registerBtn.classList.add('btn-loading');
-            registerBtn.innerHTML = 'Creating Account...';
-
-            // Re-enable button after form validation fail (client side)
-            setTimeout(() => {
-                if (!registerForm.checkValidity()) {
-                    registerBtn.disabled = false;
-                    registerBtn.classList.remove('btn-loading');
-                    registerBtn.innerHTML = originalText;
-                }
-            }, 2000);
-        });
-
-        // Add input focus effects on input-group wrapper
-        const inputs = document.querySelectorAll('.form-control');
-        inputs.forEach(input => {
-            input.addEventListener('focus', function () {
-                this.closest('.input-group').classList.add('focused');
-            });
-
-            input.addEventListener('blur', function () {
-                if (this.value === '') {
-                    this.closest('.input-group').classList.remove('focused');
-                }
-            });
-        });
-
-        // Enhanced social button interactions
-        const socialBtns = document.querySelectorAll('.social-btn');
-        socialBtns.forEach(btn => {
-            btn.addEventListener('mouseenter', function () {
-                this.style.transform = 'translateY(-2px) scale(1.05)';
-            });
-
-            btn.addEventListener('mouseleave', function () {
-                this.style.transform = 'translateY(0) scale(1)';
-            });
-        });
-    });
-</script>
+@Html.Raw("</body>")
+@Html.Raw("</html>")

@@ -150,22 +150,13 @@
     }
     else
     {
-        <!-- Professional Parallel Authentication Buttons -->
-        <div class="d-flex align-items-center auth-buttons-container">
-            <!-- Register Button -->
-            <a class="btn btn-outline-primary auth-btn register-btn me-2"
-               asp-area="Identity" asp-page="/Account/Register">
-                <i class="fas fa-user-plus me-2"></i>
-                <span class="auth-btn-text">Register</span>
-            </a>
-
-            <!-- Login Button -->
-            <a class="btn btn-primary auth-btn login-btn"
-               asp-area="Identity" asp-page="/Account/Login">
-                <i class="fas fa-sign-in-alt me-2"></i>
-                <span class="auth-btn-text">Login</span>
-            </a>
-        </div>
+        <!-- Single Login Button (like gjirafa50.com style) -->
+        <a class="auth-button d-flex align-items-center" 
+           asp-area="Identity" asp-page="/Account/Login"
+           aria-label="Login">
+            <i class="fas fa-user me-2"></i>
+            <span class="auth-button-text">Login</span>
+        </a>
     }
 </div>
 
@@ -314,86 +305,47 @@
         padding: 0;
     }
 
-    /* Professional Authentication Buttons */
-    .auth-buttons-container {
-        gap: 0.75rem;
-    }
-
-    .auth-btn {
+    /* Single Login Button (like gjirafa50.com style) */
+    .auth-button {
         display: inline-flex;
         align-items: center;
-        justify-content: center;
-        padding: 0.625rem 1.5rem;
+        padding: 0.5rem 1rem;
+        background-color: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         border-radius: 8px;
-        font-weight: 600;
-        font-size: 0.9rem;
+        color: var(--dark-text);
+        font-size: 0.95rem;
+        font-weight: 500;
         text-decoration: none;
-        transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease !important;
-        border: 2px solid;
-        position: relative;
-        overflow: hidden;
-        min-width: 100px;
+        transition: all 0.2s ease;
+        cursor: pointer;
     }
 
-    /* Register Button - Outline Style */
-    .register-btn {
-        background: transparent;
-        border-color: var(--primary-light);
-        color: var(--primary-light);
-        box-shadow: 0 2px 8px rgba(59, 93, 80, 0.15);
-    }
-
-        .register-btn:hover {
-            background: var(--primary-light);
-            color: white;
-            box-shadow: 0 4px 15px rgba(59, 93, 80, 0.3);
-            border-color: var(--primary-light);
-            animation: none !important;
-            transform: none !important;
+        .auth-button:hover {
+            background-color: rgba(59, 93, 80, 0.1);
+            border-color: rgba(59, 93, 80, 0.3);
+            color: var(--primary-color);
+            text-decoration: none;
         }
 
-        .register-btn:active {
-            box-shadow: 0 2px 8px rgba(59, 93, 80, 0.2);
-            animation: none !important;
-            transform: none !important;
+        .auth-button:focus {
+            outline: 2px solid var(--primary-light);
+            outline-offset: 2px;
         }
 
-    /* Login Button - Solid Style */
-    .login-btn {
-        background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
-        border-color: var(--primary-light);
-        color: white;
-        box-shadow: 0 2px 12px rgba(59, 93, 80, 0.25);
+    .auth-button i {
+        font-size: 1.1rem;
+        color: var(--dark-text);
+        transition: color 0.2s ease;
     }
 
-        .login-btn:hover {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-            box-shadow: 0 6px 20px rgba(59, 93, 80, 0.4);
-            color: white;
-            border-color: var(--primary-color);
-            animation: none !important;
-            transform: none !important;
-        }
-
-        .login-btn:active {
-            box-shadow: 0 2px 12px rgba(59, 93, 80, 0.3);
-            animation: none !important;
-            transform: none !important;
-        }
-
-    .auth-btn-text {
-        font-weight: 600;
-        letter-spacing: 0.25px;
+    .auth-button:hover i {
+        color: var(--primary-color);
     }
 
-    /* Button Icons */
-    .auth-btn i {
-        font-size: 0.8rem;
-        transition: transform 0.3s ease;
-    }
-
-    .auth-btn:hover i {
-        transform: none !important;
+    .auth-button-text {
+        font-weight: 500;
+        letter-spacing: 0;
     }
 
     /* Dropdown Arrow Animation */
@@ -413,38 +365,18 @@
 
     /* Focus States for Accessibility */
     .user-dropdown-toggle:focus,
-    .auth-btn:focus,
+    .auth-button:focus,
     .dropdown-item:focus,
     .logout-button:focus {
         outline: 2px solid var(--primary-light);
         outline-offset: 2px;
     }
 
-    /* Prevent vibration/shake effects - Remove ALL transforms */
-    .auth-btn,
-    .logout-button,
-    .dropdown-item,
-    .user-dropdown-toggle,
-    .auth-btn:hover,
-    .auth-btn:active,
-    .logout-button:hover,
-    .logout-button:active,
-    .dropdown-item:hover,
-    .dropdown-item:active {
-        animation: none !important;
-        transform: none !important;
-    }
-
     /* Responsive Design - Tablet */
     @@media (max-width: 991.98px) {
-        .auth-buttons-container {
-            gap: 0.5rem;
-        }
-
-        .auth-btn {
-            padding: 0.5rem 1.25rem;
-            font-size: 0.85rem;
-            min-width: 90px;
+        .auth-button {
+            padding: 0.45rem 0.875rem;
+            font-size: 0.9rem;
         }
 
         .user-info {
@@ -464,26 +396,32 @@
             font-size: 0.875rem;
         }
 
-        .auth-btn {
-            padding: 0.5rem 1rem;
-            font-size: 0.8rem;
-            min-width: 80px;
+        .auth-button {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.85rem;
         }
 
-        .auth-btn i {
-            margin-right: 0.25rem;
+        .auth-button i {
+            font-size: 1rem;
         }
 
-        .auth-btn-text {
-            font-size: 0.8rem;
+        .auth-button-text {
+            font-size: 0.85rem;
         }
     }
 
     /* Responsive Design - Small Mobile */
     @@media (max-width: 575.98px) {
-        .auth-btn {
-            width: 100%;
-            justify-content: center;
+        .auth-button {
+            padding: 0.4rem 0.65rem;
+        }
+
+        .auth-button-text {
+            display: none;
+        }
+
+        .auth-button i {
+            margin-right: 0;
         }
     }
 
@@ -502,43 +440,6 @@
         }
     }
 
-    /* Button Press - No vibration, no transform */
-    .auth-btn:active {
-        animation: none !important;
-        transform: none !important;
-        transition: background-color 0.15s ease, box-shadow 0.15s ease !important;
-    }
-
-    /* Loading State for Buttons (if needed later) */
-    .auth-btn.loading {
-        pointer-events: none;
-        opacity: 0.7;
-    }
-
-        .auth-btn.loading .auth-btn-text {
-            visibility: hidden;
-        }
-
-        .auth-btn.loading::after {
-            content: '';
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            border: 2px solid transparent;
-            border-top: 2px solid currentColor;
-            border-radius: 50%;
-            animation: buttonSpin 1s linear infinite;
-        }
-
-    @@keyframes buttonSpin {
-        0% {
-            transform: rotate(0deg);
-        }
-
-        100% {
-            transform: rotate(360deg);
-        }
-    }
 </style>
 
 <script>
@@ -577,16 +478,15 @@
             });
         });
 
-        // Ensure all auth buttons navigate smoothly without vibration
-        const authButtons = document.querySelectorAll('.auth-btn');
-        authButtons.forEach(button => {
-            button.addEventListener('click', function(e) {
+        // Ensure auth button navigates smoothly
+        const authButton = document.querySelector('.auth-button');
+        if (authButton) {
+            authButton.addEventListener('click', function(e) {
                 // Allow default navigation - no preventDefault
-                // Remove any vibration effects and transforms
-                this.style.animation = 'none';
-                this.style.transform = 'none';
+                // Smooth visual feedback
+                this.style.opacity = '0.8';
             });
-        });
+        }
 
         // Smooth dropdown item navigation - no transforms
         const dropdownItems = document.querySelectorAll('.dropdown-item[href]');
@@ -599,21 +499,5 @@
             });
         });
 
-        // Prevent any transform animations on all interactive elements
-        const interactiveElements = document.querySelectorAll('.auth-btn, .logout-button, .dropdown-item, .user-dropdown-toggle');
-        interactiveElements.forEach(element => {
-            element.addEventListener('mouseenter', function() {
-                this.style.transform = 'none';
-            });
-            element.addEventListener('mouseleave', function() {
-                this.style.transform = 'none';
-            });
-            element.addEventListener('mousedown', function() {
-                this.style.transform = 'none';
-            });
-            element.addEventListener('mouseup', function() {
-                this.style.transform = 'none';
-            });
-        });
     });
 </script>
