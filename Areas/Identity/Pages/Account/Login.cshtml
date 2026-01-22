@@ -73,7 +73,7 @@
 
         <!-- Login Form -->
         <form id="account" method="post" class="login-form">
-            <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3"></div>
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" style="display: none;"></div>
 
             <!-- Email Field -->
             <div class="form-group">
@@ -412,6 +412,11 @@
         font-size: 0.875rem;
     }
 
+    /* Hide empty validation summary to prevent flash */
+    .alert-danger:empty {
+        display: none !important;
+    }
+
     .text-danger {
         color: #c33;
         font-size: 0.75rem;
@@ -442,7 +447,37 @@
 </style>
 
 <script>
+    // Show validation summary only if it has content (prevents flash on page load)
+    (function() {
+        function checkAndShowValidationSummary() {
+            const validationSummary = document.querySelector('.alert-danger');
+            if (validationSummary) {
+                // Check if it has actual visible content
+                const text = validationSummary.textContent.trim();
+                const hasList = validationSummary.querySelector('ul') !== null;
+                const hasListItems = validationSummary.querySelector('li') !== null;
+                
+                if (text || hasList || hasListItems) {
+                    validationSummary.style.display = '';
+                } else {
+                    validationSummary.style.display = 'none';
+                }
+            }
+        }
+        
+        // Check immediately
+        checkAndShowValidationSummary();
+        
+        // Also check after DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', checkAndShowValidationSummary);
+        } else {
+            checkAndShowValidationSummary();
+        }
+    })();
+
     document.addEventListener('DOMContentLoaded', function () {
+
         // Password toggle functionality
         const passwordToggle = document.getElementById('password-toggle');
         const passwordInput = document.getElementById('password-input');
