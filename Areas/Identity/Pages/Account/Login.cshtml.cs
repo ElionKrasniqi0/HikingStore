@@ -92,6 +92,13 @@ namespace HikingStore.Areas.Identity.Pages.Account
                     return Page();
                 }
 
+                // Check if email is confirmed before attempting sign in
+                if (!await _userManager.IsEmailConfirmedAsync(user).ConfigureAwait(false))
+                {
+                    ModelState.AddModelError(string.Empty, "You must confirm your email address before logging in. Please check your email for a confirmation link.");
+                    return Page();
+                }
+
                 // ⚡ OPTIMIZATION: PasswordSignInAsync is already optimized, but we use ConfigureAwait(false)
                 // This doesn't count login failures towards account lockout
                 var result = await _signInManager.PasswordSignInAsync(
