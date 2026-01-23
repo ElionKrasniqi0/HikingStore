@@ -38,11 +38,25 @@
             connection.on("CartUpdated", function(data) {
                 console.log("Cart updated:", data);
                 
-                // Update cart count in UI
-                const cartBadge = document.querySelector('.cart-badge, .cart-count, [data-cart-count]');
-                if (cartBadge && data.cartItemCount !== undefined) {
-                    cartBadge.textContent = data.cartItemCount;
-                    cartBadge.style.display = data.cartItemCount > 0 ? 'inline' : 'none';
+                // Update cart count using global function
+                if (typeof window.updateCartCount === 'function' && data.cartItemCount !== undefined) {
+                    window.updateCartCount(data.cartItemCount);
+                } else {
+                    // Fallback: Update cart badge directly
+                    const cartBadge = document.querySelector('.cart-qty');
+                    if (cartBadge && data.cartItemCount !== undefined) {
+                        if (data.cartItemCount > 0) {
+                            cartBadge.textContent = data.cartItemCount;
+                            cartBadge.style.display = 'flex';
+                        } else {
+                            cartBadge.style.display = 'none';
+                        }
+                    }
+                }
+
+                // Update flyout cart without page reload
+                if (typeof window.updateCartFlyout === 'function') {
+                    window.updateCartFlyout();
                 }
 
                 // Show notification if message provided

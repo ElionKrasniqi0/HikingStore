@@ -1,4 +1,4 @@
-﻿using HikingStore.Data;
+using HikingStore.Data;
 using HikingStore.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -83,19 +83,67 @@ namespace HikingStore.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id != null)
+            if (id == null)
             {
-                var cat = await _context.Categories.FindAsync(id);
-                if (cat != null)
-                {
-                    _context.Categories.Remove(cat);
-                    await _context.SaveChangesAsync();
-                }
+                TempData["Error"] = "Category ID is required.";
                 return RedirectToAction(nameof(Index));
             }
-            return View();
+
+            var cat = await _context.Categories
+                .Include(c => c.Product)
+                .FirstOrDefaultAsync(c => c.CatId == id);
+
+            if (cat == null)
+            {
+                TempData["Error"] = "Category not found.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            try
+            {
+                // Delete the category image file if it exists
+                if (!string.IsNullOrEmpty(cat.CatPhoto))
+                {
+                    string imagePath = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\category", cat.CatPhoto);
+                    if (System.IO.File.Exists(imagePath))
+                    {
+                        System.IO.File.Delete(imagePath);
+                    }
+                }
+
+                // Delete associated product images (products will be cascade deleted by database)
+                if (cat.Product != null && cat.Product.Any())
+                {
+                    foreach (var product in cat.Product)
+                    {
+                        if (!string.IsNullOrEmpty(product.ProImage))
+                        {
+                            string productImagePath = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\Product", product.ProImage);
+                            if (System.IO.File.Exists(productImagePath))
+                            {
+                                System.IO.File.Delete(productImagePath);
+                            }
+                        }
+                    }
+                }
+
+                // Remove the category (products will be cascade deleted)
+                string categoryName = cat.CatName;
+                _context.Categories.Remove(cat);
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = $"Category '{categoryName}' has been deleted successfully.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "An error occurred while deleting the category. Please try again.";
+                return RedirectToAction(nameof(Index));
+            }
         }
     }
 }

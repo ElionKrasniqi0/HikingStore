@@ -1,4 +1,4 @@
-﻿@using HikingStore.ViewModels
+@using HikingStore.ViewModels
 @model ShopViewModel
 
 <!-- Hero Section -->
@@ -776,8 +776,20 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Update cart count
-                    updateCartCount(data.cartItemCount);
+                    // Update cart count immediately using global function
+                    if (data.cartItemCount !== undefined) {
+                        if (typeof window.updateCartCount === 'function') {
+                            window.updateCartCount(data.cartItemCount);
+                        } else {
+                            // Fallback if global function not available
+                            const cartLink = document.getElementById('topcartlink');
+                            const cartBadge = cartLink ? cartLink.querySelector('span.cart-qty:not(.qty-input)') : null;
+                            if (cartBadge) {
+                                cartBadge.textContent = data.cartItemCount;
+                                cartBadge.style.display = 'flex';
+                            }
+                        }
+                    }
 
                     // Show success state
                     this.innerHTML = '<i class="fas fa-check me-2"></i>Added!';
@@ -887,13 +899,8 @@
         });
     });
 
-    // Update cart count in header
-    function updateCartCount(count) {
-        const cartCountElements = document.querySelectorAll('.cart-count');
-        cartCountElements.forEach(element => {
-            element.textContent = count;
-        });
-    }
+    // Use global updateCartCount function
+    // No local function needed - use window.updateCartCount directly
 
     // Show notification
     function showNotification(message, type) {

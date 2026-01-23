@@ -1,4 +1,4 @@
-﻿using HikingStore.Data;
+using HikingStore.Data;
 using HikingStore.Enum;
 using HikingStore.Models;
 using HikingStore.ViewModels;
@@ -17,6 +17,8 @@ using System.Net;
 using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
+using OfficeOpenXml;
+using System.Drawing;
 
 namespace HikingStore.Areas.Admin.Controllers
 {
@@ -1158,6 +1160,122 @@ namespace HikingStore.Areas.Admin.Controllers
                 .ToListAsync();
 
             return PartialView("_OrderListPartial", orders);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ExportToExcel(string status = "", string search = "")
+        {
+            try
+            {
+                // Set license context for EPPlus (required for non-commercial use)
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+                var query = _context.Orders
+                    .Include(o => o.User)
+                    .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Product)
+                    .AsQueryable();
+
+                // Apply the same filters as Index action
+                if (!string.IsNullOrEmpty(status))
+                {
+                    if (System.Enum.TryParse<OrderStatus>(status, out var orderStatus))
+                    {
+                        query = query.Where(o => o.Status == orderStatus);
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(search))
+                {
+                    query = query.Where(o =>
+                        o.OrderId.ToString().Contains(search) ||
+                        (o.User != null && o.User.UserName != null && o.User.UserName.Contains(search)) ||
+                        (o.User != null && o.User.Email != null && o.User.Email.Contains(search)) ||
+                        (o.ShippingAddress != null && o.ShippingAddress.Contains(search)) ||
+                        (o.PhoneNumber != null && o.PhoneNumber.Contains(search)));
+                }
+
+                var orders = await query
+                    .OrderByDescending(o => o.OrderDate)
+                    .ToListAsync();
+
+                // Create Excel package
+                using (var package = new ExcelPackage())
+                {
+                    var worksheet = package.Workbook.Worksheets.Add("Orders");
+
+                    // Set header row
+                    worksheet.Cells[1, 1].Value = "Order ID";
+                    worksheet.Cells[1, 2].Value = "Order Date";
+                    worksheet.Cells[1, 3].Value = "Customer Name";
+                    worksheet.Cells[1, 4].Value = "Customer Email";
+                    worksheet.Cells[1, 5].Value = "Phone Number";
+                    worksheet.Cells[1, 6].Value = "Shipping Address";
+                    worksheet.Cells[1, 7].Value = "City";
+                    worksheet.Cells[1, 8].Value = "Status";
+                    worksheet.Cells[1, 9].Value = "Total Amount";
+                    worksheet.Cells[1, 10].Value = "Tracking Number";
+                    worksheet.Cells[1, 11].Value = "Carrier";
+                    worksheet.Cells[1, 12].Value = "Products";
+                    worksheet.Cells[1, 13].Value = "Comment";
+                    worksheet.Cells[1, 14].Value = "Admin Notes";
+
+                    // Style header row
+                    using (var range = worksheet.Cells[1, 1, 1, 14])
+                    {
+                        range.Style.Font.Bold = true;
+                        range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                        range.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(59, 93, 80));
+                        range.Style.Font.Color.SetColor(Color.White);
+                        range.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                    }
+
+                    // Populate data
+                    int row = 2;
+                    foreach (var order in orders)
+                    {
+                        worksheet.Cells[row, 1].Value = order.OrderId;
+                        worksheet.Cells[row, 2].Value = order.OrderDate.ToString("yyyy-MM-dd HH:mm:ss");
+                        worksheet.Cells[row, 3].Value = order.User?.UserName ?? "N/A";
+                        worksheet.Cells[row, 4].Value = order.User?.Email ?? "N/A";
+                        worksheet.Cells[row, 5].Value = order.PhoneNumber ?? "N/A";
+                        worksheet.Cells[row, 6].Value = order.ShippingAddress ?? "N/A";
+                        worksheet.Cells[row, 7].Value = order.City ?? "N/A";
+                        worksheet.Cells[row, 8].Value = order.Status.ToString();
+                        worksheet.Cells[row, 9].Value = order.TotalAmount;
+                        worksheet.Cells[row, 9].Style.Numberformat.Format = "#,##0.00";
+                        worksheet.Cells[row, 10].Value = order.TrackingNumber ?? "N/A";
+                        worksheet.Cells[row, 11].Value = order.Carrier ?? "Standard Shipping";
+                        
+                        // Products list
+                        var productsList = string.Join("; ", order.OrderDetails.Select(od => 
+                            $"{od.Product?.ProName ?? "N/A"} (Qty: {od.Quantity}, Price: {od.Price:C})"));
+                        worksheet.Cells[row, 12].Value = productsList;
+                        
+                        worksheet.Cells[row, 13].Value = order.Comment ?? "";
+                        worksheet.Cells[row, 14].Value = order.AdminNotes ?? "";
+
+                        row++;
+                    }
+
+                    // Auto-fit columns
+                    worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
+
+                    // Generate file name
+                    var fileName = $"Orders_Export_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+                    var fileBytes = package.GetAsByteArray();
+
+                    return File(fileBytes, 
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
+                        fileName);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting orders to Excel");
+                TempData["ErrorMessage"] = "An error occurred while exporting orders. Please try again.";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         /// <summary>

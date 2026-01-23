@@ -1,4 +1,4 @@
-﻿using HikingStore.Data;
+using HikingStore.Data;
 using HikingStore.Enum;
 using HikingStore.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -134,6 +134,82 @@ namespace HikingStore.Controllers
 
             return Json(new { success = true, message = "Item added to cart!", cartItemCount = cartItemCount });
         }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetCartFlyoutContent()
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Json(new { success = false, html = "", itemCount = 0, totalAmount = 0 });
+            }
+
+            var cartItems = await _context.ShoppingCarts
+                .Include(c => c.Product)
+                .Where(c => c.UserId == userId)
+                .AsNoTracking()
+                .ToListAsync();
+
+            var totalItems = cartItems.Sum(c => c.Qty);
+            var totalAmount = cartItems.Sum(c => c.Product.Price * c.Qty);
+
+            // Generate HTML for flyout
+            var html = "";
+            if (totalItems > 0)
+            {
+                html += $@"<section class=""flex w-full justify-between count text-sm text-gray-600 border-b border-gray-300 p-3"">
+                    <a href=""/Carts"">&nbsp;{totalItems} product{(totalItems == 1 ? "" : "s")}&nbsp;</a>
+                    <button name=""updatecart"" class=""text-primary remove-all font-medium hover:underline cursor-pointer"" onclick=""removeAllFromCart()"">Remove All</button>
+                </section>
+                <section class=""w-full p-2 flex flex-col gap-1 overflow-y-auto md:max-h-[240px]"">";
+
+                foreach (var item in cartItems)
+                {
+                    var productImage = !string.IsNullOrEmpty(item.Product.ProImage) 
+                        ? $"/Product/{item.Product.ProImage}" 
+                        : "";
+                    var imageHtml = !string.IsNullOrEmpty(item.Product.ProImage)
+                        ? $@"<img class=""max-h-full max-w-full object-contain mix-blend-darken"" alt=""{item.Product.ProName}"" src=""{productImage}"" title=""{item.Product.ProName}"" width=""40"" height=""40"">"
+                        : @"<div class=""w-10 h-10 bg-gray-200 flex items-center justify-center""><i class=""fas fa-image text-gray-400""></i></div>";
+
+                    html += $@"<article class=""group item first flex justify-between items-center p-2 rounded hover:bg-gray-100 cart-item"" id=""cart-item-{item.CartId}"">
+                        <a class=""w-10 h-10 relative flex justify-center items-center small-image-container mr-4"" href=""/Home/ProductDetailes/{item.ProId}"" title=""Show details for {item.Product.ProName}"">
+                            {imageHtml}
+                        </a>
+                        <div class=""name flex flex-col w-4/5 mr-4 text-gray-600 text-xs overflow-hidden"">
+                            <a title=""{item.Product.ProName}"" class=""font-medium text-sm text-gray-700 truncate hover:underline w-full mb-1"" href=""/Home/ProductDetailes/{item.ProId}"">{item.Product.ProName}</a>
+                            <div class=""price mb-1"">Unit price: <span class=""text-gray-700 font-bold"">€{item.Product.Price:N2}</span></div>
+                            <div class=""quantity cart-quantity flex items-center gap-1"">
+                                <input type=""button"" value=""-"" class=""flyout-qty-click-input qtyminus minus bg-white h-5 w-5 rounded-full border text-xs flex items-center justify-center hover:border-primary hover:text-primary focus:text-primary"" style=""height:24px; width:24px"" onclick=""updateFlyoutQuantity({item.CartId}, {item.Qty - 1})"">
+                                <input name=""itemquantity{item.CartId}"" id=""itemquantity{item.CartId}"" type=""number"" value=""{item.Qty}"" class=""qty qty-input cart-qty text-gray-700"" aria-label=""Quantity"" data-productid=""{item.ProId}"" data-itemid=""{item.CartId}"" min=""1"" max=""1000"" disabled="""">
+                                <input type=""button"" value=""+"" class=""flyout-qty-click-input qtyplus plus bg-white h-5 w-5 rounded-full border text-xs flex items-center justify-center hover:border-primary hover:text-primary focus:text-primary"" style=""height:24px; width:24px"" onclick=""updateFlyoutQuantity({item.CartId}, {item.Qty + 1})"">
+                            </div>
+                        </div>
+                        <button name=""updatecart"" class=""icon-trash self-start text-xl text-gray-600 icon-line-height group-hover:text-primary"" onclick=""removeFromFlyoutCart({item.CartId})"">
+                            <i class=""fas fa-trash""></i>
+                        </button>
+                    </article>";
+                }
+
+                html += $@"</section>
+                <section class=""buttons flex justify-center p-3 border-t"">
+                    <button type=""button"" class=""cart-button w-full btn btn-primary btn-primary-hover text-sm text-center"" onclick=""window.location.href='/Carts'"">
+                        <span class=""mx-auto"">Go to cart (€{totalAmount:N2})</span>
+                    </button>
+                </section>";
+            }
+            else
+            {
+                html = @"<section class=""w-full p-4 text-center text-gray-500"">
+                    <i class=""fas fa-shopping-cart text-4xl mb-2""></i>
+                    <p>Your cart is empty</p>
+                </section>";
+            }
+
+            return Json(new { success = true, html = html, itemCount = totalItems, totalAmount = totalAmount });
+        }
+
         [AllowAnonymous]
         public IActionResult RequireLogin(string? returnUrl = null)
         {
@@ -144,29 +220,69 @@ namespace HikingStore.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> RemoveFromCart(int CartId)
+        public async Task<IActionResult> RemoveFromCart(int cartId)
         {
             var userId = _userManager.GetUserId(User);
             var cartItem = await _context.ShoppingCarts
-                .FirstOrDefaultAsync(c => c.CartId == CartId && c.UserId == userId);
+                .FirstOrDefaultAsync(c => c.CartId == cartId && c.UserId == userId);
 
-            if (cartItem != null)
+            if (cartItem == null)
             {
-                _context.ShoppingCarts.Remove(cartItem);
-                await _context.SaveChangesAsync();
+                return Json(new { success = false, message = "Cart item not found." });
+            }
 
-                // Get updated cart count
-                var cartItemCount = await _context.ShoppingCarts
-                    .Where(c => c.UserId == userId)
-                    .SumAsync(c => c.Qty);
+            _context.ShoppingCarts.Remove(cartItem);
+            await _context.SaveChangesAsync();
+
+            // Get updated cart count
+            var cartItemCount = await _context.ShoppingCarts
+                .Where(c => c.UserId == userId)
+                .SumAsync(c => (int?)c.Qty) ?? 0;
+
+            // REAL-TIME: Notify user of cart update
+            _ = _hubContext.Clients.Group($"User_{userId}").SendAsync("CartUpdated", new
+            {
+                cartItemCount = cartItemCount,
+                message = "Item removed from cart."
+            });
+
+            // Return JSON for AJAX calls
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" || Request.ContentType?.Contains("application/json") == true)
+            {
+                return Json(new { success = true, message = "Item removed from cart.", cartItemCount = cartItemCount });
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> RemoveAll()
+        {
+            var userId = _userManager.GetUserId(User);
+            var cartItems = await _context.ShoppingCarts
+                .Where(c => c.UserId == userId)
+                .ToListAsync();
+
+            if (cartItems.Any())
+            {
+                _context.ShoppingCarts.RemoveRange(cartItems);
+                await _context.SaveChangesAsync();
 
                 // REAL-TIME: Notify user of cart update
                 _ = _hubContext.Clients.Group($"User_{userId}").SendAsync("CartUpdated", new
                 {
-                    cartItemCount = cartItemCount,
-                    message = "Item removed from cart."
+                    cartItemCount = 0,
+                    message = "All items removed from cart."
                 });
             }
+
+            // Return JSON for AJAX calls
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" || Request.ContentType?.Contains("application/json") == true)
+            {
+                return Json(new { success = true, message = "All items removed from cart.", cartItemCount = 0 });
+            }
+
             return RedirectToAction(nameof(Index));
         }
 

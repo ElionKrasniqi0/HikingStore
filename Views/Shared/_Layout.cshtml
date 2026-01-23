@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
@@ -904,11 +904,83 @@
             }
         });
 
+        // Global cart count update function (available on all pages)
+        window.updateCartCount = function(count) {
+            // Find the cart badge (the one inside #topcartlink, not the quantity input)
+            const cartLink = document.getElementById('topcartlink');
+            let cartBadge = null;
+            
+            if (cartLink) {
+                // Find badge as direct child or by class within cart link
+                cartBadge = cartLink.querySelector('span.cart-qty:not(.qty-input)');
+                
+                // If badge doesn't exist, create it
+                if (!cartBadge && count > 0) {
+                    cartBadge = document.createElement('span');
+                    cartBadge.className = 'cart-qty animate-flip bg-primary rounded-full absolute top-0 right-0 text-gray-300 flex';
+                    cartBadge.style.cssText = 'position: absolute; top: 0; right: 0; transform: translate(25%, -25%); background-color: #ff6600; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; z-index: 10;';
+                    cartLink.appendChild(cartBadge);
+                }
+            }
+            
+            if (cartBadge) {
+                if (count > 0) {
+                    cartBadge.textContent = count;
+                    cartBadge.style.display = 'flex';
+                } else {
+                    cartBadge.style.display = 'none';
+                }
+            }
+            
+            // Update flyout cart content via AJAX without page reload
+            if (typeof window.updateCartFlyout === 'function') {
+                window.updateCartFlyout();
+            }
+        };
+
+        // Function to update cart flyout content via AJAX
+        window.updateCartFlyout = function() {
+            const flyoutCart = document.getElementById('flyout-cart');
+            if (!flyoutCart) return;
+
+            fetch('/Carts/GetCartFlyoutContent', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (response.status === 401) {
+                    // User not authenticated, just update count
+                    return null;
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data && data.success) {
+                    flyoutCart.innerHTML = data.html;
+                    
+                    // Update badge count using global function
+                    if (typeof window.updateCartCount === 'function') {
+                        window.updateCartCount(data.itemCount);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error updating cart flyout:', error);
+            });
+        };
+
         // Cart functionality
         function updateCartItem(cartId, quantity) {
             $.post('/Carts/UpdateCartItem', { cartId: cartId, quantity: quantity })
                 .done(function(data) {
-                    location.reload();
+                    if (data.success) {
+                        updateCartCount(data.cartItemCount);
+                        // Reload page to update flyout
+                        location.reload();
+                    }
                 })
                 .fail(function() {
                     alert('Error updating cart item');

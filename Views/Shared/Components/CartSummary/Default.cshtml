@@ -1,219 +1,183 @@
-﻿@model int
+@model CartSummaryViewModel
+@using HikingStore.Data.ViewComponents
 
-<div class="cart-summary-wrapper">
-    <a class="cart-summary-link position-relative text-decoration-none"
+<div class="cart-summary-wrapper" style="position: relative; display: inline-flex; align-items: center; margin-left: 0.25rem;">
+    <a title="Shopping cart" id="topcartlink" class="ico-cart flex items-center bg-blur-hover-effect relative mr-2" 
        asp-controller="Carts" asp-action="Index"
-       aria-label="Shopping cart - @Model items"
-       data-bs-toggle="tooltip"
-       data-bs-placement="bottom"
-       data-bs-title="View your shopping cart">
-
-        <!-- Cart Icon Container -->
-        <div class="cart-icon-container">
-            <!-- Main Cart Icon -->
-            <div class="cart-icon-main">
-                <i class="fas fa-shopping-bag"></i>
-            </div>
-
-            <!-- Cart Badge with Count -->
-            @if (Model > 0)
-            {
-                <div class="cart-badge" aria-live="polite" aria-atomic="true">
-                    <span class="cart-count">@Model</span>
-                    <div class="cart-pulse"></div>
-                </div>
-
-                <!-- Mini Cart Preview (Desktop only) -->
-                <div class="cart-preview-indicator"></div>
-            }
-            else
-            {
-                <div class="cart-badge empty" aria-label="Cart is empty">
-                    <span class="cart-count">0</span>
-                </div>
-            }
-        </div>
-
-        <!-- Cart Text (Desktop only) -->
-        <div class="cart-text d-none d-md-block">
-            <div class="cart-label">Cart</div>
-            @if (Model > 0)
-            {
-                <div class="cart-items-count">@Model item@(Model == 1 ? "" : "s")</div>
-            }
-            else
-            {
-                <div class="cart-items-count empty">Empty</div>
-            }
-        </div>
+       aria-label="Shopping cart - @Model.ItemCount items">
+        <span class="icon-cart-shopping text-3xl">
+            <i class="fas fa-shopping-cart"></i>
+        </span>
+        <span class="cart-qty animate-flip bg-primary rounded-full absolute top-0 right-0 text-gray-300 flex" style="@(Model.ItemCount > 0 ? "" : "display: none;")">@Model.ItemCount</span>
     </a>
 
-    <!-- Cart Preview Dropdown (Desktop only) -->
-    @if (Model > 0)
-    {
-        <div class="cart-preview-dropdown">
-            <div class="cart-preview-header">
-                <h6 class="mb-0">Your Cart</h6>
-                <span class="cart-preview-count">@Model item@(Model == 1 ? "" : "s")</span>
-            </div>
-            <div class="cart-preview-content">
-                <div class="cart-preview-message">
-                    <i class="fas fa-shopping-bag me-2"></i>
-                    <span>Items added to your cart</span>
-                </div>
-            </div>
-            <div class="cart-preview-footer">
-                <a asp-controller="Carts" asp-action="Index" class="btn btn-primary btn-sm w-100">
-                    View Cart & Checkout
-                </a>
-            </div>
-        </div>
-    }
+    <aside id="flyout-cart" class="flyout-cart hidden md:rounded bg-white shadow-md">
+        @if (Model.ItemCount > 0)
+        {
+            <section class="flex w-full justify-between count text-sm text-gray-600 border-b border-gray-300 p-3">
+                <a href="/Carts" style="text-decoration: none; color: #4b5563;">&nbsp;@Model.ItemCount product@(Model.ItemCount == 1 ? "" : "s")&nbsp;</a>
+                <button name="updatecart" class="remove-all font-medium hover:underline cursor-pointer" onclick="removeAllFromCart()">Remove All</button>
+            </section>
+
+            <section class="w-full p-2 flex flex-col gap-1 overflow-y-auto md:max-h-[240px]">
+                @foreach (var item in Model.CartItems)
+                {
+                    <article class="group item first flex justify-between items-center p-2 rounded hover:bg-gray-100 cart-item" id="cart-item-@item.CartId">
+                        <a class="w-10 h-10 relative flex justify-center items-center small-image-container mr-4" 
+                           href="@Url.Action("ProductDetailes", "Home", new { id = item.ProductId })" 
+                           title="Show details for @item.ProductName">
+                            @if (!string.IsNullOrEmpty(item.ProductImage))
+                            {
+                                <img class="max-h-full max-w-full object-contain mix-blend-darken" 
+                                     alt="@item.ProductName" 
+                                     src="~/Product/@item.ProductImage" 
+                                     title="@item.ProductName" 
+                                     width="40" height="40">
+                            }
+                            else
+                            {
+                                <div class="w-10 h-10 bg-gray-200 flex items-center justify-center">
+                                    <i class="fas fa-image text-gray-400"></i>
+                                </div>
+                            }
+                        </a>
+                        <div class="name flex flex-col w-4/5 mr-4 text-gray-600 text-xs overflow-hidden">
+                            <a title="@item.ProductName" 
+                               class="font-medium text-sm text-gray-700 truncate hover:underline w-full mb-1" 
+                               href="@Url.Action("ProductDetailes", "Home", new { id = item.ProductId })">@item.ProductName</a>
+                            <div class="price mb-1">Unit price: <span class="text-gray-700 font-bold">€@item.Price.ToString("N2")</span></div>
+                            <div class="quantity cart-quantity flex items-center gap-1">
+                                <input type="button" value="-" 
+                                       class="flyout-qty-click-input qtyminus minus bg-white h-5 w-5 rounded-full border text-xs flex items-center justify-center hover:border-primary hover:text-primary focus:text-primary" 
+                                       style="height:24px; width:24px" 
+                                       data-cart-id="@item.CartId"
+                                       data-quantity="decrease"
+                                       onclick="updateFlyoutQuantity(@item.CartId, @item.Quantity - 1)">
+
+                                <input name="itemquantity@(item.CartId)" 
+                                       id="itemquantity@(item.CartId)" 
+                                       type="number" 
+                                       value="@item.Quantity" 
+                                       class="qty qty-input cart-qty text-gray-700" 
+                                       aria-label="Quantity" 
+                                       data-productid="@item.ProductId" 
+                                       data-itemid="@item.CartId" 
+                                       min="1" 
+                                       max="1000" 
+                                       disabled="">
+
+                                <input type="button" value="+" 
+                                       class="flyout-qty-click-input qtyplus plus bg-white h-5 w-5 rounded-full border text-xs flex items-center justify-center hover:border-primary hover:text-primary focus:text-primary" 
+                                       style="height:24px; width:24px" 
+                                       data-cart-id="@item.CartId"
+                                       data-quantity="increase"
+                                       onclick="updateFlyoutQuantity(@item.CartId, @item.Quantity + 1)">
+                            </div>
+                        </div>
+
+                        <button name="updatecart" 
+                                type="button"
+                                class="icon-trash self-start" 
+                                onclick="removeFromFlyoutCart(@item.CartId)"
+                                title="Remove item from cart"
+                                aria-label="Remove @item.ProductName from cart">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </article>
+                }
+            </section>
+            <section class="buttons flex justify-center p-3 border-t">
+                <button type="button" class="cart-button w-full text-sm text-center" onclick="window.location.href='/Carts'">
+                    <span class="mx-auto">Go to cart (€@Model.TotalAmount.ToString("N2"))</span>
+                </button>
+            </section>
+        }
+        else
+        {
+            <section class="w-full p-4 text-center text-gray-500">
+                <i class="fas fa-shopping-cart text-4xl mb-2"></i>
+                <p>Your cart is empty</p>
+            </section>
+        }
+    </aside>
 </div>
 
 <style>
     /* Cart Summary Wrapper */
     .cart-summary-wrapper {
         position: relative;
-        display: inline-block;
-    }
-
-    /* Cart Summary Link */
-    .cart-summary-link {
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        gap: 0.75rem;
-        padding: 0.5rem 1rem;
-        border-radius: 10px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border: 1px solid transparent;
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(10px);
-        color: var(--dark-text);
     }
 
-        .cart-summary-link:hover {
-            background: var(--white);
-            border-color: rgba(59, 93, 80, 0.2);
-            box-shadow: 0 4px 15px rgba(59, 93, 80, 0.15);
-            transform: translateY(-1px);
-            color: var(--primary-light);
-            text-decoration: none;
-        }
-
-        .cart-summary-link:active {
-            transform: translateY(0);
-        }
-
-    /* Cart Icon Container */
-    .cart-icon-container {
+    /* Cart Icon Styles - Matching gjirafa50.com */
+    .ico-cart {
         position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem;
+        color: #ffffff;
+        text-decoration: none;
+        transition: opacity 0.2s ease;
+        cursor: pointer;
+        outline: none;
+        border: none;
+        box-shadow: none;
+    }
+
+    .ico-cart:hover {
+        opacity: 0.8;
+    }
+
+    .ico-cart:focus,
+    .ico-cart:active,
+    .ico-cart:focus-visible {
+        outline: none;
+        border: none;
+        box-shadow: none;
+    }
+
+    .icon-cart-shopping {
+        font-size: 1.5rem;
+        color: #000;
         display: flex;
         align-items: center;
         justify-content: center;
     }
 
-    /* Main Cart Icon */
-    .cart-icon-main {
-        width: 44px;
-        height: 44px;
-        background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--white);
-        font-size: 1.1rem;
-        box-shadow: 0 4px 12px rgba(59, 93, 80, 0.25);
-        transition: all 0.3s ease;
-        position: relative;
-        z-index: 2;
-    }
-
-    .cart-summary-link:hover .cart-icon-main {
-        transform: scale(1.05) rotate(-5deg);
-        box-shadow: 0 6px 20px rgba(59, 93, 80, 0.4);
-    }
-
-    /* Cart Badge */
-    .cart-badge {
+    /* Cart Badge - Orange like gjirafa50.com */
+    .cart-qty {
         position: absolute;
-        top: -6px;
-        right: -6px;
-        background: linear-gradient(135deg, #e74c3c, #c0392b);
-        color: var(--white);
-        border-radius: 12px;
-        min-width: 22px;
-        height: 22px;
+        top: 0;
+        right: 0;
+        background: #ff6600;
+        color: #ffffff;
+        border-radius: 50%;
+        min-width: 20px;
+        height: 20px;
+        padding: 0 4px;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 0.7rem;
         font-weight: 700;
-        border: 2px solid var(--white);
-        box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4);
-        z-index: 3;
-        animation: badgeAppear 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        transform: translate(25%, -25%);
+        z-index: 10;
     }
 
-        .cart-badge.empty {
-            background: var(--gray-light);
-            box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
-        }
-
-    .cart-count {
-        line-height: 1;
-        font-variant-numeric: tabular-nums;
-    }
-
-    /* Cart Pulse Animation */
-    .cart-pulse {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        border-radius: 50%;
-        background: inherit;
-        animation: pulse 2s infinite;
-        z-index: -1;
-    }
-
-    /* Cart Text */
-    .cart-text {
-        text-align: left;
-        line-height: 1.2;
-    }
-
-    .cart-label {
-        font-weight: 600;
-        font-size: 0.9rem;
-        color: var(--dark-text);
-        margin-bottom: 0.125rem;
-    }
-
-    .cart-items-count {
-        font-size: 0.75rem;
-        color: var(--gray-light);
-        font-weight: 500;
-    }
-
-        .cart-items-count.empty {
-            font-style: italic;
-            color: var(--gray-light);
-        }
-
-    /* Cart Preview Dropdown */
-    .cart-preview-dropdown {
+    /* Flyout Cart */
+    .flyout-cart {
         position: absolute;
         top: 100%;
         right: 0;
-        width: 320px;
-        background: var(--white);
-        border-radius: 16px;
+        width: 380px;
+        max-width: 90vw;
+        background: #ffffff;
+        border-radius: 8px;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-        border: 1px solid rgba(0, 0, 0, 0.08);
-        margin-top: 0.75rem;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        margin-top: 0.5rem;
         opacity: 0;
         visibility: hidden;
         transform: translateY(-10px);
@@ -222,273 +186,391 @@
         overflow: hidden;
     }
 
-    .cart-summary-wrapper:hover .cart-preview-dropdown {
+    .flyout-cart.show {
         opacity: 1;
         visibility: visible;
         transform: translateY(0);
     }
 
-    .cart-preview-header {
-        padding: 1.25rem 1.5rem 0.75rem;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    .flyout-cart:hover {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
     }
 
-        .cart-preview-header h6 {
-            color: var(--dark-text);
-            font-weight: 700;
-        }
-
-    .cart-preview-count {
-        font-size: 0.8rem;
-        color: var(--primary-light);
-        font-weight: 600;
-    }
-
-    .cart-preview-content {
-        padding: 1.5rem;
-    }
-
-    .cart-preview-message {
+    /* Flyout Header */
+    .flyout-cart section.count {
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        justify-content: center;
-        padding: 1rem;
-        background: rgba(59, 93, 80, 0.05);
-        border-radius: 10px;
-        color: var(--primary-light);
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        background: #ffffff;
+    }
+
+    .flyout-cart section.count a {
+        color: #4b5563;
+        text-decoration: none;
         font-weight: 500;
     }
 
-    .cart-preview-footer {
-        padding: 1rem 1.5rem 1.5rem;
-        border-top: 1px solid rgba(0, 0, 0, 0.06);
+    .flyout-cart section.count a:hover {
+        text-decoration: underline;
+        color: #4b5563;
     }
 
-        .cart-preview-footer .btn {
-            border-radius: 8px;
-            font-weight: 600;
-            padding: 0.75rem 1rem;
-        }
+    .remove-all {
+        color: #ff6600;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        padding: 0;
+        text-decoration: none;
+    }
 
-    /* Preview Indicator */
-    .cart-preview-indicator {
-        position: absolute;
-        bottom: -2px;
-        right: -2px;
-        width: 8px;
-        height: 8px;
-        background: var(--secondary-color);
+    .remove-all:hover {
+        text-decoration: underline;
+        color: #ff6600;
+    }
+
+    /* Cart Items List */
+    .flyout-cart section.w-full {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .cart-item {
+        transition: background-color 0.2s ease;
+    }
+
+    .cart-item:hover {
+        background-color: #f3f4f6;
+    }
+
+    .small-image-container {
+        flex-shrink: 0;
+    }
+
+    .small-image-container img {
+        object-fit: contain;
+    }
+
+    /* Quantity Controls */
+    .cart-quantity {
+        margin-top: 0.5rem;
+    }
+
+    .qtyminus,
+    .qtyplus {
+        cursor: pointer;
+        border: 1px solid #d1d5db;
+        background: #ffffff;
+        transition: all 0.2s ease;
+    }
+
+    .qtyminus:hover,
+    .qtyplus:hover {
+        border-color: #ff6600;
+        color: #ff6600;
+    }
+
+    .qty-input {
+        width: 40px;
+        text-align: center;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        padding: 0.25rem;
+    }
+
+    /* Remove Button - Professional styling */
+    .icon-trash {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        padding: 0.5rem;
+        border: none;
+        background: transparent;
+        color: #9ca3af;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         border-radius: 50%;
-        border: 2px solid var(--white);
-        animation: previewPulse 3s infinite;
+        width: 32px;
+        height: 32px;
+        outline: none;
+    }
+
+    .icon-trash:hover {
+        color: #ff6600;
+        background-color: rgba(255, 102, 0, 0.1);
+        transform: scale(1.1);
+    }
+
+    .icon-trash:active {
+        transform: scale(0.95);
+    }
+
+    .icon-trash:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(255, 102, 0, 0.2);
+    }
+
+    .icon-trash i {
+        font-size: 1rem;
+    }
+
+    /* Footer Button */
+    .flyout-cart section.buttons {
+        border-top: 1px solid #e5e7eb;
+        padding: 0.75rem 1rem;
+    }
+
+    .cart-button {
+        background: #ff6600;
+        color: #ffffff;
+        border: none;
+        border-radius: 6px;
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        width: 100%;
+    }
+
+    .cart-button:hover {
+        background: #e55a00;
+        color: #ffffff;
     }
 
     /* Animations */
-    @@keyframes badgeAppear {
+    @@keyframes animate-flip {
         0% {
-            transform: scale(0) rotate(-180deg);
-            opacity: 0;
+            transform: translate(25%, -25%) scale(1);
         }
-
         50% {
-            transform: scale(1.2) rotate(-90deg);
+            transform: translate(25%, -25%) scale(1.2);
         }
-
         100% {
-            transform: scale(1) rotate(0);
-            opacity: 1;
+            transform: translate(25%, -25%) scale(1);
         }
     }
 
-    @@keyframes pulse {
-        0% {
-            transform: scale(1);
-            opacity: 1;
-        }
-
-        50% {
-            transform: scale(1.8);
-            opacity: 0;
-        }
-
-        100% {
-            transform: scale(2.2);
-            opacity: 0;
-        }
+    .animate-flip {
+        animation: animate-flip 0.3s ease;
     }
 
-    @@keyframes previewPulse {
-        0%, 100% {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        50% {
-            opacity: 0.7;
-            transform: scale(1.2);
-        }
-    }
-
-    /* New Item Animation */
-    .cart-badge.new-item {
-        animation: newItemBounce 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    @@keyframes newItemBounce {
-        0%, 20%, 53%, 80%, 100% {
-            transform: scale(1) translate3d(0,0,0);
-        }
-
-        40%, 43% {
-            transform: scale(1.3) translate3d(0,-8px,0);
-        }
-
-        70% {
-            transform: scale(1.2) translate3d(0,-4px,0);
-        }
-
-        90% {
-            transform: scale(1.1) translate3d(0,-2px,0);
-        }
-    }
-
-    /* Responsive Design */
+    /* Responsive */
     @@media (max-width: 768px) {
-        .cart-summary-link {
-            padding: 0.375rem 0.75rem;
-            gap: 0.5rem;
-        }
-
-        .cart-icon-main {
-            width: 40px;
-            height: 40px;
-            font-size: 1rem;
-            border-radius: 10px;
-        }
-
-        .cart-badge {
-            min-width: 20px;
-            height: 20px;
-            font-size: 0.65rem;
-            top: -4px;
-            right: -4px;
-        }
-
-        .cart-preview-dropdown {
-            width: 280px;
+        .flyout-cart {
+            width: 320px;
             right: -50%;
         }
     }
 
     @@media (max-width: 576px) {
-        .cart-summary-link {
-            padding: 0.25rem 0.5rem;
-        }
-
-        .cart-icon-main {
-            width: 36px;
-            height: 36px;
-            font-size: 0.9rem;
-        }
-
-        .cart-badge {
-            min-width: 18px;
-            height: 18px;
-            font-size: 0.6rem;
-        }
-
-        .cart-text {
-            display: none !important;
-        }
-    }
-
-    /* Focus States for Accessibility */
-    .cart-summary-link:focus {
-        outline: 2px solid var(--primary-light);
-        outline-offset: 2px;
-        background: var(--white);
-        box-shadow: 0 0 0 4px rgba(59, 93, 80, 0.1);
-    }
-
-    /* High Contrast Mode Support */
-    @@media (prefers-contrast: high) {
-        .cart-summary-link {
-            border: 2px solid currentColor;
-        }
-
-        .cart-badge {
-            border: 2px solid var(--white);
-        }
-    }
-
-    /* Reduced Motion Support */
-    @@media (prefers-reduced-motion: reduce) {
-        .cart-summary-link,
-        .cart-icon-main,
-        .cart-badge,
-        .cart-preview-dropdown {
-            transition: none;
-            animation: none;
-        }
-
-        .cart-pulse {
-            display: none;
+        .flyout-cart {
+            width: 280px;
+            right: -100%;
         }
     }
 </style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const cartLink = document.querySelector('.cart-summary-link');
-        const cartBadge = document.querySelector('.cart-badge');
-
-        if (cartLink && cartBadge) {
-            // Add tooltip initialization
-            const tooltip = new bootstrap.Tooltip(cartLink);
-
-            // Handle focus for accessibility
-            cartLink.addEventListener('focus', function() {
-                this.style.outline = '2px solid var(--primary-light)';
-                this.style.outlineOffset = '2px';
-            });
-
-            cartLink.addEventListener('blur', function() {
-                this.style.outline = '';
-            });
-
-            // Add new item animation when count changes
-            const currentCount = @Model;
-            const previousCount = sessionStorage.getItem('previousCartCount');
-
-            if (previousCount && currentCount > parseInt(previousCount)) {
-                cartBadge.classList.add('new-item');
-                setTimeout(() => {
-                    cartBadge.classList.remove('new-item');
-                }, 1000);
+    // Use global updateCartCount from layout if available
+    if (typeof window.updateCartCount !== 'function') {
+        window.updateCartCount = function(count) {
+            const cartBadge = document.querySelector('.cart-qty');
+            if (cartBadge) {
+                if (count > 0) {
+                    cartBadge.textContent = count;
+                    cartBadge.style.display = 'flex';
+                } else {
+                    cartBadge.style.display = 'none';
+                }
             }
+        };
+    }
 
-            // Store current count for next comparison
-            sessionStorage.setItem('previousCartCount', currentCount);
+    // Update quantity in flyout
+    function updateFlyoutQuantity(cartId, newQuantity) {
+        if (newQuantity < 1) {
+            removeFromFlyoutCart(cartId);
+            return;
+        }
 
-            // Keyboard navigation
-            cartLink.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    window.location.href = this.href;
+        fetch('/Carts/UpdateCartItem', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+            },
+            body: `cartId=${cartId}&quantity=${newQuantity}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update cart count
+                if (typeof window.updateCartCount === 'function') {
+                    window.updateCartCount(data.cartItemCount);
+                }
+                // Update flyout without reload
+                if (typeof window.updateCartFlyout === 'function') {
+                    window.updateCartFlyout();
+                }
+            } else {
+                alert(data.message || 'Error updating cart item');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error updating cart item');
+        });
+    }
+
+    // Remove item from flyout cart
+    function removeFromFlyoutCart(cartId) {
+        if (!confirm('Are you sure you want to remove this item from your cart?')) {
+            return;
+        }
+
+        fetch('/Carts/RemoveFromCart?cartId=' + cartId, {
+            method: 'POST',
+            headers: {
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update cart count
+                if (typeof window.updateCartCount === 'function') {
+                    window.updateCartCount(data.cartItemCount);
+                }
+                // Update flyout without reload
+                if (typeof window.updateCartFlyout === 'function') {
+                    window.updateCartFlyout();
+                }
+            } else {
+                alert(data.message || 'Error removing item');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error removing item');
+        });
+    }
+
+    // Remove all items from cart
+    function removeAllFromCart() {
+        if (!confirm('Are you sure you want to remove all items from your cart?')) {
+            return;
+        }
+
+        fetch('/Carts/RemoveAll', {
+            method: 'POST',
+            headers: {
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update cart count
+                if (typeof window.updateCartCount === 'function') {
+                    window.updateCartCount(0);
+                }
+                // Update flyout without reload
+                if (typeof window.updateCartFlyout === 'function') {
+                    window.updateCartFlyout();
+                }
+            } else {
+                alert(data.message || 'Error removing all items');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error removing all items');
+        });
+    }
+
+    // Listen for cart updates
+    window.addEventListener('cartUpdated', function(event) {
+        if (event.detail && event.detail.cartItemCount !== undefined) {
+            if (typeof window.updateCartCount === 'function') {
+                window.updateCartCount(event.detail.cartItemCount);
+            }
+            // Update flyout without reload
+            if (typeof window.updateCartFlyout === 'function') {
+                window.updateCartFlyout();
+            }
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Toggle flyout on click
+        const flyoutCart = document.getElementById('flyout-cart');
+        const cartLink = document.getElementById('topcartlink');
+        const cartWrapper = document.querySelector('.cart-summary-wrapper');
+        
+        if (flyoutCart && cartLink && cartWrapper) {
+            let hoverTimeout;
+            let isOpen = false;
+            
+            function showFlyout() {
+                clearTimeout(hoverTimeout);
+                flyoutCart.classList.remove('hidden');
+                flyoutCart.classList.add('show');
+                isOpen = true;
+            }
+            
+            function hideFlyout() {
+                hoverTimeout = setTimeout(() => {
+                    flyoutCart.classList.remove('show');
+                    flyoutCart.classList.add('hidden');
+                    isOpen = false;
+                }, 200);
+            }
+            
+            // Toggle on click
+            cartLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (isOpen) {
+                    hideFlyout();
+                } else {
+                    showFlyout();
+                }
+            });
+            
+            // Allow navigation when clicking "Go to cart" button
+            const goToCartBtn = flyoutCart.querySelector('.cart-button');
+            if (goToCartBtn) {
+                goToCartBtn.addEventListener('click', function(e) {
+                    window.location.href = '/Carts';
+                });
+            }
+            
+            // Keep open on hover
+            cartWrapper.addEventListener('mouseenter', function() {
+                if (isOpen) {
+                    clearTimeout(hoverTimeout);
+                }
+            });
+            
+            cartWrapper.addEventListener('mouseleave', hideFlyout);
+            flyoutCart.addEventListener('mouseenter', function() {
+                clearTimeout(hoverTimeout);
+            });
+            flyoutCart.addEventListener('mouseleave', hideFlyout);
+            
+            // Close when clicking outside
+            document.addEventListener('click', function(e) {
+                if (isOpen && 
+                    !cartWrapper.contains(e.target) && 
+                    !flyoutCart.contains(e.target)) {
+                    hideFlyout();
                 }
             });
         }
-
-        // Close cart preview when clicking outside
-        document.addEventListener('click', function(e) {
-            const cartWrapper = document.querySelector('.cart-summary-wrapper');
-            const cartPreview = document.querySelector('.cart-preview-dropdown');
-
-            if (cartWrapper && cartPreview && !cartWrapper.contains(e.target)) {
-                cartPreview.style.opacity = '0';
-                cartPreview.style.visibility = 'hidden';
-            }
-        });
     });
 </script>

@@ -775,8 +775,20 @@
                     successMessage.style.display = 'block';
                     errorMessage.style.display = 'none';
 
-                    // Update cart count in header
-                    updateCartCount(data.cartItemCount);
+                    // Update cart count in header immediately using global function
+                    if (data.cartItemCount !== undefined) {
+                        if (typeof window.updateCartCount === 'function') {
+                            window.updateCartCount(data.cartItemCount);
+                        } else {
+                            // Fallback if global function not available
+                            const cartLink = document.getElementById('topcartlink');
+                            const cartBadge = cartLink ? cartLink.querySelector('span.cart-qty:not(.qty-input)') : null;
+                            if (cartBadge) {
+                                cartBadge.textContent = data.cartItemCount;
+                                cartBadge.style.display = 'flex';
+                            }
+                        }
+                    }
 
                     // Reset button after 1 second
                     setTimeout(() => {
@@ -840,12 +852,8 @@
         }
 
         // Function to update cart count in header
-        function updateCartCount(count) {
-            const cartCountElements = document.querySelectorAll('.cart-count');
-            cartCountElements.forEach(element => {
-                element.textContent = count;
-            });
-        }
+        // Use global updateCartCount function
+        // No local function needed - use window.updateCartCount directly
 
         // Input validation
         qtyInput?.addEventListener('change', function() {

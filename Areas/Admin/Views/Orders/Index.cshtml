@@ -1,4 +1,4 @@
-﻿@model List<Order>
+@model List<Order>
 @using HikingStore.Enum
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
@@ -836,7 +836,24 @@
         }
 
         function exportOrders() {
-            alert('Export functionality would be implemented here');
+            // Get current filter parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const status = urlParams.get('status') || '';
+            const search = urlParams.get('search') || '';
+            
+            // Build export URL
+            let exportUrl = '@Url.Action("ExportToExcel", "Orders", new { area = "Admin" })';
+            if (status) {
+                exportUrl += '?status=' + encodeURIComponent(status);
+                if (search) {
+                    exportUrl += '&search=' + encodeURIComponent(search);
+                }
+            } else if (search) {
+                exportUrl += '?search=' + encodeURIComponent(search);
+            }
+            
+            // Trigger download
+            window.location.href = exportUrl;
         }
     </script>
 }
