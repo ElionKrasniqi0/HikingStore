@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace HikingStore.Controllers
 {
@@ -13,11 +14,16 @@ namespace HikingStore.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly ILogger<OrdersController> _logger;
 
-        public OrdersController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public OrdersController(
+            ApplicationDbContext context, 
+            UserManager<IdentityUser> userManager,
+            ILogger<OrdersController> logger)
         {
             _context = context;
             _userManager = userManager;
+            _logger = logger;
         }
 
         public async Task<IActionResult> Index(string status = "")
@@ -346,14 +352,31 @@ namespace HikingStore.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken] // CSRF protection
         public async Task<IActionResult> CancelOrder(int id)
         {
+            // SECURITY: Always get userId from authenticated user, never from request
             var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("SECURITY: CancelOrder attempted without authenticated user. OrderId: {OrderId}, IP: {IP}", 
+                    id, HttpContext.Connection.RemoteIpAddress?.ToString());
+                return Json(new { success = false, message = "Unauthorized." });
+            }
+
+            // SECURITY: Users can only cancel their own orders - verify ownership
             var order = await _context.Orders
                 .FirstOrDefaultAsync(o => o.OrderId == id && o.UserId == userId);
 
             if (order == null)
             {
+                // SECURITY: Check if order exists with different user (potential unauthorized access attempt)
+                var orderExists = await _context.Orders.AnyAsync(o => o.OrderId == id);
+                if (orderExists)
+                {
+                    _logger.LogWarning("SECURITY: Unauthorized order access attempt. User {UserId} attempted to cancel order {OrderId} belonging to another user. IP: {IP}", 
+                        userId, id, HttpContext.Connection.RemoteIpAddress?.ToString());
+                }
                 return Json(new { success = false, message = "Order not found." });
             }
 
@@ -363,11 +386,13 @@ namespace HikingStore.Controllers
                 return Json(new { success = false, message = "Cannot cancel order that has already been shipped." });
             }
 
+            // SECURITY: Set status server-side only, never trust frontend
             order.Status = OrderStatus.Cancelled;
-            order.CancelledDate = DateTime.Now;
+            order.CancelledDate = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
 
+            _logger.LogInformation("Order {OrderId} cancelled by authenticated user {UserId}", id, userId);
             return Json(new { success = true, message = "Order cancelled successfully." });
         }
     }

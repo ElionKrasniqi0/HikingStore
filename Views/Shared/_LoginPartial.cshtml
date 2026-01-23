@@ -3,7 +3,7 @@
 @using Microsoft.EntityFrameworkCore
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
-@inject ApplicationDbContext Context
+@inject ApplicationDbContext DbContext
 
 <div class="navbar-nav align-items-center">
     @if (SignInManager.IsSignedIn(User))
@@ -14,7 +14,7 @@
         
         if (!string.IsNullOrEmpty(userId))
         {
-            var user = await Context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var user = await DbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
             if (user is ApplicationUser appUserType)
             {
                 appUser = appUserType;

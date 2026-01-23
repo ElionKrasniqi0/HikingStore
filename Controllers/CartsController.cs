@@ -4,11 +4,14 @@ using HikingStore.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Mail;
 using System.Text;
+using Microsoft.Extensions.Logging;
+using HikingStore.Hubs;
 
 namespace HikingStore.Controllers
 {
@@ -17,12 +20,21 @@ namespace HikingStore.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IConfiguration _configuration;
+        private readonly ILogger<CartsController> _logger;
+        private readonly IHubContext<RealtimeHub> _hubContext;
 
-        public CartsController(ApplicationDbContext context, UserManager<IdentityUser> userManager, IConfiguration configuration)
+        public CartsController(
+            ApplicationDbContext context, 
+            UserManager<IdentityUser> userManager, 
+            IConfiguration configuration,
+            ILogger<CartsController> logger,
+            IHubContext<RealtimeHub> hubContext)
         {
             _context = context;
             _userManager = userManager;
             _configuration = configuration;
+            _logger = logger;
+            _hubContext = hubContext;
         }
 
         [Authorize]
@@ -111,10 +123,19 @@ namespace HikingStore.Controllers
                 .Where(c => c.UserId == userId)
                 .SumAsync(c => c.Qty);
 
+            // REAL-TIME: Notify user of cart update
+            _ = _hubContext.Clients.Group($"User_{userId}").SendAsync("CartUpdated", new
+            {
+                cartItemCount = cartItemCount,
+                message = "Item added to cart!",
+                productId = ProId,
+                productName = product.ProName
+            });
+
             return Json(new { success = true, message = "Item added to cart!", cartItemCount = cartItemCount });
         }
         [AllowAnonymous]
-        public IActionResult RequireLogin(string returnUrl = null)
+        public IActionResult RequireLogin(string? returnUrl = null)
         {
             // Store the intended URL so we can return after login
             ViewBag.ReturnUrl = returnUrl ?? "/Carts";
@@ -133,6 +154,18 @@ namespace HikingStore.Controllers
             {
                 _context.ShoppingCarts.Remove(cartItem);
                 await _context.SaveChangesAsync();
+
+                // Get updated cart count
+                var cartItemCount = await _context.ShoppingCarts
+                    .Where(c => c.UserId == userId)
+                    .SumAsync(c => c.Qty);
+
+                // REAL-TIME: Notify user of cart update
+                _ = _hubContext.Clients.Group($"User_{userId}").SendAsync("CartUpdated", new
+                {
+                    cartItemCount = cartItemCount,
+                    message = "Item removed from cart."
+                });
             }
             return RedirectToAction(nameof(Index));
         }
@@ -159,7 +192,26 @@ namespace HikingStore.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Checkout(Order order)
         {
+            // SECURITY: Always get userId from authenticated user, never from request
             var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("SECURITY: Checkout attempted without authenticated user. IP: {IP}", 
+                    HttpContext.Connection.RemoteIpAddress?.ToString());
+                return Unauthorized();
+            }
+
+            // SECURITY: Validate and prevent user impersonation
+            // If order.UserId is provided, it must match the authenticated user
+            if (!string.IsNullOrEmpty(order.UserId) && order.UserId != userId)
+            {
+                _logger.LogWarning("SECURITY: User impersonation attempt detected. Authenticated UserId: {AuthUserId}, Provided UserId: {ProvidedUserId}, IP: {IP}", 
+                    userId, order.UserId, HttpContext.Connection.RemoteIpAddress?.ToString());
+                ModelState.AddModelError("", "Invalid request. Security violation detected.");
+                return BadRequest("Invalid request.");
+            }
+
+            // SECURITY: Load cart items only for the authenticated user
             var cartItems = await _context.ShoppingCarts
                 .Include(c => c.Product)
                 .Where(c => c.UserId == userId)
@@ -214,12 +266,14 @@ namespace HikingStore.Controllers
                 .OrderByDescending(g => g.Count())
                 .FirstOrDefault()?.Key ?? cartItems.FirstOrDefault()?.ShippingOption ?? "Standard Shipping";
 
-            order.UserId = userId;
-            order.OrderDate = DateTime.Now;
+            // SECURITY: Always set UserId from authenticated user, ignore any value from request
+            // This prevents user impersonation attacks
+            order.UserId = userId; // Override any UserId that might have been sent from frontend
+            order.OrderDate = DateTime.UtcNow;
             order.TotalAmount = totalAmount;
-            order.Status = OrderStatus.Received;
+            order.Status = OrderStatus.Received; // SECURITY: Status set server-side only
             order.TrackingNumber = "N/A";
-            order.AdminNotes = "Order created";
+            order.AdminNotes = $"Order created by authenticated user {userId}";
             order.Carrier = shippingOption;
 
             _context.Orders.Add(order);
@@ -242,9 +296,21 @@ namespace HikingStore.Controllers
             _context.ShoppingCarts.RemoveRange(cartItems);
             await _context.SaveChangesAsync();
 
+            // SECURITY: Log successful order creation for audit trail
+            _logger.LogInformation("Order {OrderId} created successfully for authenticated user {UserId} with total {TotalAmount}", 
+                order.OrderId, userId, totalAmount);
+
             // Get user email before redirecting
             var user = await _userManager.GetUserAsync(User);
             var userEmail = user?.Email;
+
+            // SECURITY: Verify the user object matches the authenticated user
+            if (user == null || user.Id != userId)
+            {
+                _logger.LogError("SECURITY: User mismatch detected after order creation. OrderId: {OrderId}, Expected UserId: {UserId}", 
+                    order.OrderId, userId);
+                // Order already created, but log the security issue
+            }
 
             // Send order confirmation email asynchronously (fire-and-forget to not block response)
             if (!string.IsNullOrEmpty(userEmail))

@@ -2,10 +2,14 @@
 using HikingStore.Enum;
 using HikingStore.Models;
 using HikingStore.ViewModels;
+using HikingStore.Services;
+using HikingStore.Hubs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,18 +21,27 @@ using System.Threading.Tasks;
 namespace HikingStore.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")] // SECURITY: Strict role-based authorization
     public class OrdersController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly AdminAuditService _auditService;
+        private readonly ILogger<OrdersController> _logger;
+        private readonly IHubContext<RealtimeHub> _hubContext;
 
-
-        public OrdersController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public OrdersController(
+            ApplicationDbContext context, 
+            UserManager<IdentityUser> userManager,
+            AdminAuditService auditService,
+            ILogger<OrdersController> logger,
+            IHubContext<RealtimeHub> hubContext)
         {
             _context = context;
             _userManager = userManager;
-
+            _auditService = auditService;
+            _logger = logger;
+            _hubContext = hubContext;
         }
 
         public async Task<IActionResult> Index(string status = "", string search = "")
@@ -158,8 +171,17 @@ namespace HikingStore.Areas.Admin.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken] // SECURITY: CSRF protection
         public async Task<IActionResult> UpdateStatus(int id, OrderStatus status, string trackingNumber = "", string adminNotes = "", string carrier = "Standard Shipping")
         {
+            // SECURITY: Verify admin role (defense in depth)
+            if (!User.IsInRole("Admin"))
+            {
+                _logger.LogWarning("SECURITY: Unauthorized order status update attempt. User: {User}, OrderId: {OrderId}, IP: {IP}", 
+                    User.Identity?.Name, id, HttpContext.Connection.RemoteIpAddress?.ToString());
+                return Forbid();
+            }
+
             var order = await _context.Orders
                 .Include(o => o.User)
                 .Include(o => o.OrderDetails)
@@ -171,7 +193,20 @@ namespace HikingStore.Areas.Admin.Controllers
                 return Json(new { success = false, message = "Order not found." });
             }
 
+            // SECURITY: Log order status change for audit
             var oldStatus = order.Status;
+            var statusChangeDetails = $"Changed from {oldStatus} to {status}";
+            if (!string.IsNullOrEmpty(trackingNumber))
+            {
+                statusChangeDetails += $", Tracking: {trackingNumber}";
+            }
+            if (!string.IsNullOrEmpty(adminNotes))
+            {
+                statusChangeDetails += $", Notes: {adminNotes}";
+            }
+            await _auditService.LogAdminModificationAsync("Order", id.ToString(), "STATUS_UPDATE", oldStatus, status);
+
+            // Update order status (oldStatus already captured above)
             order.Status = status;
 
             // Handle null values
@@ -255,6 +290,38 @@ namespace HikingStore.Areas.Admin.Controllers
             }
 
             await _context.SaveChangesAsync();
+
+            // SECURITY: Log successful status update
+            _logger.LogInformation("Admin {Admin} updated order {OrderId} status from {OldStatus} to {NewStatus}", 
+                User.Identity?.Name, id, oldStatus, status);
+
+            // REAL-TIME: Notify user and admins of order status update
+            _ = _hubContext.Clients.Group($"User_{order.UserId}").SendAsync("OrderStatusUpdated", new
+            {
+                orderId = order.OrderId,
+                status = status.ToString(),
+                oldStatus = oldStatus.ToString(),
+                trackingNumber = order.TrackingNumber,
+                message = $"Your order status has been updated to {status}"
+            });
+
+            // Notify all admins
+            _ = _hubContext.Clients.Group("Admins").SendAsync("OrderStatusUpdated", new
+            {
+                orderId = order.OrderId,
+                status = status.ToString(),
+                userId = order.UserId,
+                updatedBy = User.Identity?.Name
+            });
+
+            // Notify order-specific group
+            _ = _hubContext.Clients.Group($"Order_{order.OrderId}").SendAsync("OrderStatusUpdated", new
+            {
+                orderId = order.OrderId,
+                status = status.ToString(),
+                oldStatus = oldStatus.ToString(),
+                trackingNumber = order.TrackingNumber
+            });
 
             // Add automated tracking event
             await AddAutomatedTrackingEvent(order.OrderId, oldStatus, status);
@@ -976,9 +1043,17 @@ namespace HikingStore.Areas.Admin.Controllers
 </html>";
         }
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken] // SECURITY: CSRF protection
         public async Task<IActionResult> DeleteOrder(int id)
         {
+            // SECURITY: Verify admin role (defense in depth)
+            if (!User.IsInRole("Admin"))
+            {
+                _logger.LogWarning("SECURITY: Unauthorized order deletion attempt. User: {User}, OrderId: {OrderId}, IP: {IP}", 
+                    User.Identity?.Name, id, HttpContext.Connection.RemoteIpAddress?.ToString());
+                return Forbid();
+            }
+
             var order = await _context.Orders
                 .Include(o => o.OrderDetails)
                 .Include(o => o.TrackingEvents)
@@ -989,6 +1064,10 @@ namespace HikingStore.Areas.Admin.Controllers
                 TempData["ErrorMessage"] = "Order not found.";
                 return RedirectToAction(nameof(Index));
             }
+
+            // SECURITY: Log order deletion attempt for audit
+            var orderDetails = $"Order #{order.OrderId}, Status: {order.Status}, Total: {order.TotalAmount}, User: {order.UserId}";
+            await _auditService.LogAdminDeletionAsync("Order", id.ToString(), orderDetails);
 
             // Only allow deletion of certain statuses (e.g., cancelled or received)
             // You can customize this based on your business rules

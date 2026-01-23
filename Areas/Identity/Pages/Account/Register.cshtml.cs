@@ -65,9 +65,11 @@ namespace HikingStore.Areas.Identity.Pages.Account
             public string Email { get; set; }
 
             [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 8)]
             [DataType(DataType.Password)]
             [Display(Name = "Password")]
+            [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$", 
+                ErrorMessage = "Password must be at least 8 characters and contain uppercase, lowercase, number, and special character.")]
             public string Password { get; set; }
 
             [DataType(DataType.Password)]
@@ -104,7 +106,10 @@ namespace HikingStore.Areas.Identity.Pages.Account
                 
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("User created a new account with password.");
+                    // SECURITY: Log user registration with IP address for audit trail
+                    var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+                    _logger.LogInformation("SECURITY: New user registered - Email: {Email}, IP: {IPAddress}", 
+                        Input.Email, ipAddress);
 
                     // ⚡ OPTIMIZATION: Check and assign role asynchronously without blocking
                     // Move role assignment to background task to improve perceived performance

@@ -41,18 +41,22 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
     options.SignIn.RequireConfirmedAccount = true; // ✅ REQUIRES email confirmation
     options.User.RequireUniqueEmail = true;
 
-    // Password settings
+    // SECURITY: Strong password requirements
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
-    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireNonAlphanumeric = true; // SECURITY: Require special characters
     options.Password.RequireUppercase = true;
-    options.Password.RequiredLength = 6;
-    options.Password.RequiredUniqueChars = 1;
+    options.Password.RequiredLength = 8; // SECURITY: Increased minimum length
+    options.Password.RequiredUniqueChars = 2; // SECURITY: Require more unique characters
 
-    // Lockout settings
-    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+    // SECURITY: Enhanced lockout settings for brute force protection
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15); // SECURITY: Increased lockout time
     options.Lockout.MaxFailedAccessAttempts = 5;
     options.Lockout.AllowedForNewUsers = true;
+    
+    // SECURITY: User account settings
+    options.User.RequireUniqueEmail = true;
+    options.SignIn.RequireConfirmedEmail = true; // SECURITY: Email confirmation required
 })
 .AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -103,6 +107,7 @@ else
 }
 builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 builder.Services.AddScoped<HikingStore.Services.SessionCartService>();
+builder.Services.AddScoped<HikingStore.Services.AdminAuditService>(); // SECURITY: Admin audit logging
 // Session and caching
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -121,16 +126,34 @@ builder.Services.AddResponseCompression(options =>
     options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProvider>();
 });
 
-// SignalR with authentication
+// SignalR with authentication - OPTIMIZED for real-time performance
 builder.Services.AddSignalR(options =>
 {
-    options.EnableDetailedErrors = true;
+    options.EnableDetailedErrors = builder.Environment.IsDevelopment();
     options.MaximumReceiveMessageSize = 1024 * 1024; // 1MB
+    // Real-time optimizations
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15); // Keep connection alive
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30); // Client timeout
+    options.HandshakeTimeout = TimeSpan.FromSeconds(15); // Handshake timeout
+    // Enable compression for better performance
+    options.EnableDetailedErrors = builder.Environment.IsDevelopment();
 });
 
-// Controllers and Razor Pages
-builder.Services.AddControllersWithViews();
+// Controllers and Razor Pages with response caching
+builder.Services.AddControllersWithViews(options =>
+{
+    // Enable response caching for better real-time performance
+    options.CacheProfiles.Add("Default30", new Microsoft.AspNetCore.Mvc.CacheProfile
+    {
+        Duration = 30,
+        Location = Microsoft.AspNetCore.Mvc.ResponseCacheLocation.Any,
+        VaryByQueryKeys = new[] { "*" }
+    });
+});
 builder.Services.AddRazorPages();
+
+// Response caching service
+builder.Services.AddResponseCaching();
 
 // Add Antiforgery for security
 builder.Services.AddAntiforgery(options =>
@@ -177,17 +200,29 @@ app.Use(async (context, next) =>
     context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
     context.Response.Headers.Append("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
     
-    if (!context.Request.IsHttps && !app.Environment.IsDevelopment())
+    // SECURITY: HSTS should only be set for HTTPS requests in production
+    if (context.Request.IsHttps && !app.Environment.IsDevelopment())
     {
-        context.Response.Headers.Append("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+        context.Response.Headers.Append("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
     }
     
     await next();
 });
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    // Cache static files for better performance
+    OnPrepareResponse = ctx =>
+    {
+        ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=31536000");
+    }
+});
 app.UseRouting();
+
+// SECURITY: Rate limiting middleware (after routing to check paths correctly)
+app.UseMiddleware<HikingStore.Middleware.RateLimitingMiddleware>();
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseSession();
@@ -207,8 +242,9 @@ app.MapControllerRoute(
 
 app.MapRazorPages();
 
-// SignalR Hub
+// SignalR Hubs - Real-time communication
 app.MapHub<HikingStore.Hubs.ChatHub>("/chatHub");
+app.MapHub<HikingStore.Hubs.RealtimeHub>("/realtimeHub");
 
 // Seed database with initial data
 try

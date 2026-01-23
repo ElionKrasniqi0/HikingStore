@@ -7,8 +7,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using HikingStore.Data;
 using HikingStore.Areas.Admin.ViewModel;
+using HikingStore.Services;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using HikingStore.Models;
 using HikingStore.Enum;
 
@@ -16,24 +18,45 @@ namespace HikingStore.Areas.Admin.Controllers
 {
 
     [Area("Admin")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")] // SECURITY: Strict role-based authorization
     public class HomeController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly AdminAuditService _auditService;
+        private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ApplicationDbContext context, SignInManager<IdentityUser> signInManager, UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
+        public HomeController(
+            ApplicationDbContext context, 
+            SignInManager<IdentityUser> signInManager, 
+            UserManager<IdentityUser> userManager, 
+            RoleManager<IdentityRole> roleManager,
+            AdminAuditService auditService,
+            ILogger<HomeController> logger)
         {
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
             _signInManager = signInManager;
+            _auditService = auditService;
+            _logger = logger;
         }
         [HttpGet]
         public async Task<IActionResult> Index()
         {
+            // SECURITY: Log admin access to dashboard
+            await _auditService.LogAdminAccessAsync("Admin Dashboard", "VIEW");
+            
+            // SECURITY: Verify admin role again (defense in depth)
+            if (!User.IsInRole("Admin"))
+            {
+                _logger.LogWarning("SECURITY: Unauthorized access attempt to admin dashboard. User: {User}, IP: {IP}", 
+                    User.Identity?.Name, HttpContext.Connection.RemoteIpAddress?.ToString());
+                return Forbid();
+            }
+
             // Optimize: Get all users with their roles in a single query instead of N+1 queries
             var allusers = await _context.Users
                 .AsNoTracking()

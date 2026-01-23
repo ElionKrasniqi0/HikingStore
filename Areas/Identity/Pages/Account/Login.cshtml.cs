@@ -99,18 +99,19 @@ namespace HikingStore.Areas.Identity.Pages.Account
                     return Page();
                 }
 
-                // ⚡ OPTIMIZATION: PasswordSignInAsync is already optimized, but we use ConfigureAwait(false)
-                // This doesn't count login failures towards account lockout
+                // SECURITY: Enable lockout on failure to prevent brute force attacks
                 var result = await _signInManager.PasswordSignInAsync(
                     user.UserName, 
                     Input.Password, 
                     Input.RememberMe, 
-                    lockoutOnFailure: false).ConfigureAwait(false);
+                    lockoutOnFailure: true).ConfigureAwait(false); // SECURITY: Enable lockout
                 
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("User logged in.");
-                    // ⚡ OPTIMIZATION: Use LocalRedirect for immediate redirect (no round-trip)
+                    // SECURITY: Log successful login with IP address for audit trail
+                    var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+                    _logger.LogInformation("SECURITY: User {Email} logged in successfully from IP {IPAddress}", 
+                        Input.Email, ipAddress);
                     return LocalRedirect(returnUrl);
                 }
                 
@@ -121,13 +122,21 @@ namespace HikingStore.Areas.Identity.Pages.Account
                 
                 if (result.IsLockedOut)
                 {
-                    _logger.LogWarning("User account locked out.");
+                    // SECURITY: Log lockout event with IP address
+                    var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+                    _logger.LogWarning("SECURITY: User account {Email} locked out due to multiple failed login attempts from IP {IPAddress}", 
+                        Input.Email, ipAddress);
                     return RedirectToPage("./Lockout");
                 }
                 else
                 {
-                    // ⚡ OPTIMIZATION: Add small delay to prevent timing attacks
-                    await Task.Delay(100).ConfigureAwait(false);
+                    // SECURITY: Log failed login attempt with IP address
+                    var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+                    _logger.LogWarning("SECURITY: Failed login attempt for user {Email} from IP {IPAddress}", 
+                        Input.Email, ipAddress);
+                    
+                    // SECURITY: Add delay to prevent timing attacks and slow down brute force attempts
+                    await Task.Delay(1000).ConfigureAwait(false); // SECURITY: Increased delay
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                     return Page();
                 }
