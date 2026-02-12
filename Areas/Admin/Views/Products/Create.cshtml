@@ -213,18 +213,6 @@
                                 </div>
                                 <span asp-validation-for="File" class="text-danger small"></span>
                             </div>
-
-                            <!-- Additional Photos -->
-                            <div class="col-md-12 mb-4">
-                                <label class="form-label fw-semibold">
-                                    <i class="fas fa-images me-1"></i>Additional Photos
-                                    <span class="badge bg-secondary ms-2">Optional</span>
-                                </label>
-                                <p class="text-muted small mb-2">Add more images so customers can see the product from different angles. First image above is the main one.</p>
-                                <input type="file" name="additionalFiles" id="additionalFiles" class="form-control" accept="image/*" multiple>
-                                <div id="additionalPreviews" class="d-flex flex-wrap gap-2 mt-3"></div>
-                                <div class="form-text mt-2">You can select multiple files at once. Each will be shown in the product gallery.</div>
-                            </div>
                         </div>
 
                         <!-- Form Actions -->
@@ -358,30 +346,6 @@
                 toast.remove();
             });
         }
-
-        // Additional files preview
-        document.getElementById('additionalFiles').addEventListener('change', function() {
-            const container = document.getElementById('additionalPreviews');
-            container.innerHTML = '';
-            if (this.files && this.files.length > 0) {
-                for (let i = 0; i < this.files.length; i++) {
-                    const file = this.files[i];
-                    if (!file.type.startsWith('image/')) continue;
-                    const div = document.createElement('div');
-                    div.className = 'position-relative';
-                    div.style.width = '80px';
-                    const img = document.createElement('img');
-                    img.className = 'img-thumbnail';
-                    img.style.width = '80px'; img.style.height = '80px'; img.style.objectFit = 'cover';
-                    img.alt = file.name;
-                    const reader = new FileReader();
-                    reader.onload = (function(el) { return function(e) { el.src = e.target.result; }; })(img);
-                    reader.readAsDataURL(file);
-                    div.appendChild(img);
-                    container.appendChild(div);
-                }
-            }
-        });
 
         // Form submission
         document.querySelector('form').addEventListener('submit', function(e) {

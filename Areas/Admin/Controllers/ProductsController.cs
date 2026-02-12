@@ -36,14 +36,12 @@ namespace HikingStore.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Product model, IFormFileCollection additionalFiles)
+        public async Task<IActionResult> Create(Product model)
         {
             if (model.File != null && model.File.Length > 0)
             {
-                var ext = Path.GetExtension(model.File.FileName);
-                if (string.IsNullOrEmpty(ext)) ext = ".jpg";
-                string imageName = Guid.NewGuid().ToString() + ext;
-                string filePathImage = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Product", imageName);
+                string imageName = Guid.NewGuid().ToString() + ".jpg";
+                string filePathImage = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\Product", imageName);
                 using (var stream = System.IO.File.Create(filePathImage))
                 {
                     await model.File.CopyToAsync(stream);
@@ -51,25 +49,11 @@ namespace HikingStore.Areas.Admin.Controllers
                 model.ProImage = imageName;
             }
 
-            var additionalNames = new List<string>();
-            if (additionalFiles != null)
-            {
-                foreach (var file in additionalFiles.Where(f => f != null && f.Length > 0))
-                {
-                    var ext = Path.GetExtension(file.FileName);
-                    if (string.IsNullOrEmpty(ext)) ext = ".jpg";
-                    string name = Guid.NewGuid().ToString() + ext;
-                    string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Product", name);
-                    using (var stream = System.IO.File.Create(path))
-                        await file.CopyToAsync(stream);
-                    additionalNames.Add(name);
-                }
-            }
-            if (additionalNames.Count > 0)
-                model.AdditionalImages = string.Join(",", additionalNames);
-
+            // Set default stock if not provided
             if (model.StockQuantity < 0)
+            {
                 model.StockQuantity = 0;
+            }
 
             _context.Add(model);
             await _context.SaveChangesAsync();
@@ -86,46 +70,33 @@ namespace HikingStore.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(int id, Product model, IFormFileCollection additionalFiles)
+        public async Task<IActionResult> Edit(int id, Product model)
         {
-            var existingProduct = await _context.Products.AsNoTracking().FirstOrDefaultAsync(p => p.ProId == id);
-            if (existingProduct == null)
-                return NotFound();
-
             if (model.File != null && model.File.Length > 0)
             {
-                var ext = Path.GetExtension(model.File.FileName);
-                if (string.IsNullOrEmpty(ext)) ext = ".jpg";
-                string imageName = Guid.NewGuid().ToString() + ext;
-                string filePathImage = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Product", imageName);
+                string imageName = Guid.NewGuid().ToString() + ".jpg";
+                string filePathImage = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\Product", imageName);
                 using (var stream = System.IO.File.Create(filePathImage))
+                {
                     await model.File.CopyToAsync(stream);
+                }
                 model.ProImage = imageName;
             }
             else
-                model.ProImage = existingProduct.ProImage;
-
-            var existingAdditional = string.IsNullOrWhiteSpace(model.AdditionalImages)
-                ? new List<string>()
-                : model.AdditionalImages.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).Where(s => s.Length > 0).ToList();
-
-            if (additionalFiles != null)
             {
-                foreach (var file in additionalFiles.Where(f => f != null && f.Length > 0))
+                // Preserve existing image
+                var existingProduct = await _context.Products.AsNoTracking().FirstOrDefaultAsync(p => p.ProId == id);
+                if (existingProduct != null)
                 {
-                    var ext = Path.GetExtension(file.FileName);
-                    if (string.IsNullOrEmpty(ext)) ext = ".jpg";
-                    string name = Guid.NewGuid().ToString() + ext;
-                    string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Product", name);
-                    using (var stream = System.IO.File.Create(path))
-                        await file.CopyToAsync(stream);
-                    existingAdditional.Add(name);
+                    model.ProImage = existingProduct.ProImage;
                 }
             }
-            model.AdditionalImages = existingAdditional.Count > 0 ? string.Join(",", existingAdditional) : null;
 
+            // Ensure stock is not negative
             if (model.StockQuantity < 0)
+            {
                 model.StockQuantity = 0;
+            }
 
             _context.Update(model);
             await _context.SaveChangesAsync();

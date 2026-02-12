@@ -123,7 +123,6 @@
                     <form asp-action="Edit" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                         <input type="hidden" asp-for="ProId" />
                         <input type="hidden" asp-for="ProImage" />
-                        <input type="hidden" asp-for="AdditionalImages" id="additionalImagesValue" />
 
                         <div class="row">
                             <!-- Product Name -->
@@ -244,39 +243,6 @@
                                     Leave empty to keep current image. Recommended: JPG, PNG, or GIF. Max size: 2MB.
                                 </div>
                             </div>
-
-                            <!-- Current additional photos -->
-                            @{
-                                var additionalList = string.IsNullOrWhiteSpace(Model.AdditionalImages)
-                                    ? new List<string>()
-                                    : Model.AdditionalImages.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).Where(s => s.Length > 0).ToList();
-                            }
-                            @if (additionalList.Any())
-                            {
-                                <div class="col-md-12 mb-4">
-                                    <label class="form-label fw-semibold">Additional gallery images</label>
-                                    <div class="d-flex flex-wrap gap-2 align-items-center" id="currentAdditionalList">
-                                        @foreach (var img in additionalList)
-                                        {
-                                            <div class="additional-item position-relative" data-filename="@Html.Raw(System.Net.WebUtility.HtmlEncode(img))">
-                                                <img src="~/Product/@img" alt="Gallery" class="img-thumbnail" style="width:70px;height:70px;object-fit:cover;">
-                                                <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 translate-middle remove-additional-btn" style="padding:0.1rem 0.35rem;" title="Remove" data-filename="@Html.Raw(System.Net.WebUtility.HtmlEncode(img))">&times;</button>
-                                            </div>
-                                        }
-                                    </div>
-                                    <small class="text-muted">Click × to remove from product. New uploads below will be added.</small>
-                                </div>
-                            }
-
-                            <!-- Upload more additional photos -->
-                            <div class="col-md-12 mb-4">
-                                <label class="form-label fw-semibold">
-                                    <i class="fas fa-images me-1"></i>@(additionalList.Any() ? "Add more photos" : "Additional photos")
-                                    <span class="badge bg-secondary ms-2">Optional</span>
-                                </label>
-                                <input type="file" name="additionalFiles" id="additionalFiles" class="form-control" accept="image/*" multiple>
-                                <div id="additionalPreviews" class="d-flex flex-wrap gap-2 mt-3"></div>
-                            </div>
                         </div>
 
                         <!-- Form Actions -->
@@ -301,47 +267,6 @@
 
 @section Scripts {
     <script>
-        var additionalImagesList = @Html.Raw(string.IsNullOrWhiteSpace(Model.AdditionalImages) ? "[]" : "[\"" + string.Join("\",\"", Model.AdditionalImages.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim().Replace("\\", "\\\\").Replace("\"", "\\\""))) + "\"]");
-
-        function removeAdditionalImage(filename) {
-            additionalImagesList = additionalImagesList.filter(function(f) { return f !== filename; });
-            document.getElementById('additionalImagesValue').value = additionalImagesList.join(',');
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('additionalImagesValue').value = additionalImagesList.join(',');
-            document.querySelectorAll('.remove-additional-btn').forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    var filename = this.getAttribute('data-filename');
-                    if (this.closest) this.closest('.additional-item').remove();
-                    removeAdditionalImage(filename);
-                });
-            });
-        });
-
-        document.getElementById('additionalFiles').addEventListener('change', function() {
-            var container = document.getElementById('additionalPreviews');
-            container.innerHTML = '';
-            if (this.files && this.files.length > 0) {
-                for (var i = 0; i < this.files.length; i++) {
-                    (function(file) {
-                        if (!file.type.startsWith('image/')) return;
-                        var div = document.createElement('div');
-                        div.className = 'position-relative';
-                        div.style.width = '80px';
-                        var img = document.createElement('img');
-                        img.className = 'img-thumbnail';
-                        img.style.width = '80px'; img.style.height = '80px'; img.style.objectFit = 'cover';
-                        var reader = new FileReader();
-                        reader.onload = function(e) { img.src = e.target.result; };
-                        reader.readAsDataURL(file);
-                        div.appendChild(img);
-                        container.appendChild(div);
-                    })(this.files[i]);
-                }
-            }
-        });
-
         // Drag and drop functionality
         function handleDragOver(e) {
             e.preventDefault();
