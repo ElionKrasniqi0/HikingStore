@@ -14,70 +14,63 @@
     <aside id="flyout-cart" class="flyout-cart hidden md:rounded bg-white shadow-md">
         @if (Model.ItemCount > 0)
         {
-            <section class="flex w-full justify-between count text-sm text-gray-600 border-b border-gray-300 p-3">
-                <a href="/Carts" style="text-decoration: none; color: #4b5563;">&nbsp;@Model.ItemCount product@(Model.ItemCount == 1 ? "" : "s")&nbsp;</a>
-                <button name="updatecart" class="remove-all font-medium hover:underline cursor-pointer" onclick="removeAllFromCart()">Remove All</button>
+            <section class="flyout-cart-header">
+                <span class="flyout-cart-count">@Model.ItemCount product@(Model.ItemCount == 1 ? "" : "s")</span>
+                <button type="button" name="updatecart" class="flyout-remove-all" onclick="removeAllFromCart()">Remove All</button>
             </section>
 
-            <section class="w-full p-2 flex flex-col gap-1 overflow-y-auto md:max-h-[240px]">
+            <section class="flyout-cart-items">
                 @foreach (var item in Model.CartItems)
                 {
-                    <article class="group item first flex justify-between items-center p-2 rounded hover:bg-gray-100 cart-item" id="cart-item-@item.CartId">
-                        <a class="w-10 h-10 relative flex justify-center items-center small-image-container mr-4"
+                    <article class="flyout-cart-item cart-item" id="cart-item-@item.CartId">
+                        <a class="flyout-item-image"
                            href="@Url.Action("ProductDetailes", "Home", new { id = item.ProductId })"
                            title="Show details for @item.ProductName">
                             @if (!string.IsNullOrEmpty(item.ProductImage))
                             {
-                                <img class="max-h-full max-w-full object-contain mix-blend-darken"
-                                     alt="@item.ProductName"
+                                <img alt="@item.ProductName"
                                      src="~/Product/@item.ProductImage"
                                      title="@item.ProductName"
                                      width="40" height="40">
                             }
                             else
                             {
-                                <div class="w-10 h-10 bg-gray-200 flex items-center justify-center">
-                                    <i class="fas fa-image text-gray-400"></i>
+                                <div class="flyout-item-placeholder">
+                                    <i class="fas fa-image"></i>
                                 </div>
                             }
                         </a>
-                        <div class="name flex flex-col w-4/5 mr-4 text-gray-600 text-xs overflow-hidden">
-                            <a title="@item.ProductName"
-                               class="font-medium text-sm text-gray-700 truncate hover:underline w-full mb-1"
+                        <div class="flyout-item-details">
+                            <a class="flyout-item-name" title="@item.ProductName"
                                href="@Url.Action("ProductDetailes", "Home", new { id = item.ProductId })">@item.ProductName</a>
-                            <div class="price mb-1">Unit price: <span class="text-gray-700 font-bold">€@item.Price.ToString("N2")</span></div>
-                            <div class="quantity cart-quantity flex items-center gap-1">
+                            <div class="flyout-item-price">Unit price: <strong>€@item.Price.ToString("N2")</strong></div>
+                            <div class="flyout-item-qty">
                                 <input type="button" value="-"
-                                       class="flyout-qty-click-input qtyminus minus bg-white h-5 w-5 rounded-full border text-xs flex items-center justify-center hover:border-primary hover:text-primary focus:text-primary"
-                                       style="height:24px; width:24px"
+                                       class="flyout-qty-btn flyout-qty-minus"
                                        data-cart-id="@item.CartId"
                                        data-quantity="decrease"
-                                       onclick="updateFlyoutQuantity(@item.CartId, @item.Quantity - 1)">
-
+                                       onclick="updateFlyoutQuantity(@item.CartId, @item.Quantity - 1)"
+                                       aria-label="Decrease quantity">
                                 <input name="itemquantity@(item.CartId)"
                                        id="itemquantity@(item.CartId)"
                                        type="number"
                                        value="@item.Quantity"
-                                       class="qty qty-input cart-qty text-gray-700"
+                                       class="flyout-qty-input cart-qty"
                                        aria-label="Quantity"
                                        data-productid="@item.ProductId"
                                        data-itemid="@item.CartId"
                                        min="1"
                                        max="1000"
                                        disabled="">
-
                                 <input type="button" value="+"
-                                       class="flyout-qty-click-input qtyplus plus bg-white h-5 w-5 rounded-full border text-xs flex items-center justify-center hover:border-primary hover:text-primary focus:text-primary"
-                                       style="height:24px; width:24px"
+                                       class="flyout-qty-btn flyout-qty-plus"
                                        data-cart-id="@item.CartId"
                                        data-quantity="increase"
-                                       onclick="updateFlyoutQuantity(@item.CartId, @item.Quantity + 1)">
+                                       onclick="updateFlyoutQuantity(@item.CartId, @item.Quantity + 1)"
+                                       aria-label="Increase quantity">
                             </div>
                         </div>
-
-                        <button name="updatecart"
-                                type="button"
-                                class="icon-trash self-start"
+                        <button type="button" name="updatecart" class="flyout-item-remove"
                                 onclick="removeFromFlyoutCart(@item.CartId)"
                                 title="Remove item from cart"
                                 aria-label="Remove @item.ProductName from cart">
@@ -86,16 +79,16 @@
                     </article>
                 }
             </section>
-            <section class="buttons flex justify-center p-3 border-t">
-                <button type="button" class="cart-button w-full text-sm text-center" onclick="window.location.href='/Carts'">
-                    <span class="mx-auto">Go to cart (€@Model.TotalAmount.ToString("N2"))</span>
+            <section class="flyout-cart-footer">
+                <button type="button" class="flyout-cart-cta" onclick="window.location.href='/Carts'">
+                    Go to cart (€@Model.TotalAmount.ToString("N2"))
                 </button>
             </section>
         }
         else
         {
-            <section class="w-full p-4 text-center text-gray-500">
-                <i class="fas fa-shopping-cart text-4xl mb-2"></i>
+            <section class="flyout-cart-empty">
+                <i class="fas fa-shopping-cart"></i>
                 <p>Your cart is empty</p>
             </section>
         }
@@ -103,14 +96,21 @@
 </div>
 
 <style>
-    /* Cart Summary Wrapper */
+    /* App primary color */
+    :root {
+        --flyout-primary: #3b5d50;
+        --flyout-primary-hover: #2d473d;
+        --flyout-text: #1f2937;
+        --flyout-text-muted: #6b7280;
+        --flyout-border: #e5e7eb;
+    }
+
     .cart-summary-wrapper {
         position: relative;
         display: inline-flex;
         align-items: center;
     }
 
-    /* Cart Icon Styles - Matching gjirafa50.com */
     .ico-cart {
         position: relative;
         display: inline-flex;
@@ -130,9 +130,7 @@
             opacity: 0.8;
         }
 
-        .ico-cart:focus,
-        .ico-cart:active,
-        .ico-cart:focus-visible {
+        .ico-cart:focus, .ico-cart:active, .ico-cart:focus-visible {
             outline: none;
             border: none;
             box-shadow: none;
@@ -146,12 +144,11 @@
         justify-content: center;
     }
 
-    /* Cart Badge - Orange like gjirafa50.com */
     .cart-qty {
         position: absolute;
         top: 0;
         right: 0;
-        background: #3b5d50;
+        background: var(--flyout-primary);
         color: #ffffff;
         border-radius: 50%;
         min-width: 20px;
@@ -166,183 +163,310 @@
         z-index: 10;
     }
 
-    /* Flyout Cart */
+    /* Flyout panel - gjirafa50-style layout */
     .flyout-cart {
         position: absolute;
         top: 100%;
         right: 0;
         width: 380px;
         max-width: 90vw;
-        background: #ffffff;
+        background: #fff;
         border-radius: 8px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-        border: 1px solid rgba(0, 0, 0, 0.1);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+        border: 1px solid var(--flyout-border);
         margin-top: 0.5rem;
         opacity: 0;
         visibility: hidden;
-        transform: translateY(-10px);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transform: translateY(-8px);
+        transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
         z-index: 1000;
         overflow: hidden;
     }
 
-        .flyout-cart.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
+        .flyout-cart.show,
         .flyout-cart:hover {
             opacity: 1;
             visibility: visible;
             transform: translateY(0);
         }
 
-        /* Flyout Header */
-        .flyout-cart section.count {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid #e5e7eb;
-            background: #ffffff;
-        }
+    /* Header: count + Remove All */
+    .flyout-cart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--flyout-border);
+        background: #fff;
+    }
 
-            .flyout-cart section.count a {
-                color: #4b5563;
-                text-decoration: none;
-                font-weight: 500;
-            }
+    .flyout-cart-count {
+        font-size: 0.875rem;
+        color: var(--flyout-text-muted);
+    }
 
-                .flyout-cart section.count a:hover {
-                    text-decoration: underline;
-                    color: #4b5563;
-                }
-
-    .remove-all {
-        color: #3b5d50;
+    .flyout-remove-all {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--flyout-primary);
         background: none;
         border: none;
         cursor: pointer;
-        font-weight: 500;
         padding: 0;
         text-decoration: none;
+        transition: color 0.15s ease;
     }
 
-        .remove-all:hover {
+        .flyout-remove-all:hover {
             text-decoration: underline;
-            color: #3b5d50;
+            color: var(--flyout-primary-hover);
         }
 
-    /* Cart Items List */
-    .flyout-cart section.w-full {
-        max-height: 300px;
+        .flyout-remove-all:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+    /* Scrollable items list */
+    .flyout-cart-items {
+        max-height: 240px;
         overflow-y: auto;
-    }
-
-    .cart-item {
-        transition: background-color 0.2s ease;
-    }
-
-        .cart-item:hover {
-            background-color: #f3f4f6;
-        }
-
-    .small-image-container {
-        flex-shrink: 0;
-    }
-
-        .small-image-container img {
-            object-fit: contain;
-        }
-
-    /* Quantity Controls */
-    .cart-quantity {
-        margin-top: 0.5rem;
-    }
-
-    .qtyminus,
-    .qtyplus {
-        cursor: pointer;
-        border: 1px solid #d1d5db;
-        background: #ffffff;
-        transition: all 0.2s ease;
-    }
-
-        .qtyminus:hover,
-        .qtyplus:hover {
-            border-color: #3b5d50;
-            color: #3b5d50;
-        }
-
-    .qty-input {
-        width: 40px;
-        text-align: center;
-        border: 1px solid #d1d5db;
-        border-radius: 4px;
-        padding: 0.25rem;
-    }
-
-    /* Remove Button - Professional styling */
-    .icon-trash {
-        cursor: pointer;
-        transition: all 0.2s ease;
         padding: 0.5rem;
-        border: none;
-        background: transparent;
-        color: #9ca3af;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .flyout-cart-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border-radius: 6px;
+        transition: background-color 0.15s ease;
+    }
+
+        .flyout-cart-item:hover {
+            background-color: #f9fafb;
+        }
+
+    .flyout-item-image {
+        flex-shrink: 0;
+        width: 40px;
+        height: 40px;
         display: flex;
         align-items: center;
         justify-content: center;
+        overflow: hidden;
+        border-radius: 4px;
+        background: #f3f4f6;
+    }
+
+        .flyout-item-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            mix-blend-mode: darken;
+        }
+
+    .flyout-item-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #9ca3af;
+        font-size: 1rem;
+    }
+
+    .flyout-item-details {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .flyout-item-name {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--flyout-text);
+        text-decoration: none;
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        line-height: 1.3;
+    }
+
+        .flyout-item-name:hover {
+            text-decoration: underline;
+            color: var(--flyout-primary);
+        }
+
+    .flyout-item-price {
+        font-size: 0.75rem;
+        color: var(--flyout-text-muted);
+    }
+
+        .flyout-item-price strong {
+            color: var(--flyout-text);
+            font-weight: 600;
+        }
+
+    .flyout-item-qty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        margin-top: 0.25rem;
+    }
+
+    .flyout-qty-btn {
+        width: 26px;
+        height: 26px;
+        min-width: 26px;
+        min-height: 26px;
         border-radius: 50%;
-        width: 32px;
-        height: 32px;
-        outline: none;
+        border: 1px solid var(--flyout-border);
+        background: #fff;
+        color: var(--flyout-text-muted);
+        font-size: 0.875rem;
+        font-weight: 600;
+        line-height: 1;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+        -webkit-appearance: none;
+        appearance: none;
     }
 
-        .icon-trash:hover {
-            color: #3b5d50;
-            background-color: rgba(255, 102, 0, 0.1);
-            transform: scale(1.1);
+        .flyout-qty-btn:hover {
+            border-color: var(--flyout-primary);
+            color: var(--flyout-primary);
+            background: rgba(59, 93, 80, 0.06);
         }
 
-        .icon-trash:active {
-            transform: scale(0.95);
-        }
-
-        .icon-trash:focus {
+        .flyout-qty-btn:focus {
             outline: none;
-            box-shadow: 0 0 0 2px rgba(255, 102, 0, 0.2);
+            box-shadow: 0 0 0 2px rgba(59, 93, 80, 0.2);
         }
 
-        .icon-trash i {
-            font-size: 1rem;
-        }
-
-    /* Footer Button */
-    .flyout-cart section.buttons {
-        border-top: 1px solid #e5e7eb;
-        padding: 0.75rem 1rem;
+    .flyout-qty-input {
+        width: 2.25rem;
+        min-width: 2.25rem;
+        height: 26px;
+        text-align: center;
+        border: 1px solid var(--flyout-border);
+        border-radius: 4px;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: var(--flyout-text);
+        background: #fff;
+        padding: 0 2px;
+        -moz-appearance: textfield;
+        appearance: textfield;
+        display: inline-block;
+        box-sizing: border-box;
     }
 
-    .cart-button {
-        background: #3b5d50;
-        color: #ffffff;
+        .flyout-qty-input::-webkit-outer-spin-button,
+        .flyout-qty-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        /* Keep disabled quantity input clearly visible (read-only display) */
+        .flyout-qty-input:disabled {
+            opacity: 1;
+            cursor: default;
+            background: #f9fafb;
+        }
+
+    /* Remove item: trash icon only, right-aligned in row */
+    .flyout-item-remove {
+        flex-shrink: 0;
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        min-height: 36px;
+        border: none;
+        background: transparent;
+        color: var(--flyout-text-muted);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        padding: 0;
+        transition: color 0.15s ease, background 0.15s ease;
+        align-self: flex-start;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+
+        .flyout-item-remove:hover {
+            color: var(--flyout-primary);
+            background: rgba(59, 93, 80, 0.08);
+        }
+
+        .flyout-item-remove:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(59, 93, 80, 0.2);
+        }
+
+        .flyout-item-remove i {
+            font-size: 0.9375rem;
+            display: inline-block;
+        }
+
+    /* Footer CTA - full-width primary button */
+    .flyout-cart-footer {
+        padding: 0.75rem 1rem;
+        border-top: 1px solid var(--flyout-border);
+        background: #fff;
+    }
+
+    .flyout-cart-cta {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        color: #fff;
+        background: var(--flyout-primary);
         border: none;
         border-radius: 6px;
-        padding: 0.75rem 1rem;
-        font-weight: 600;
         cursor: pointer;
         transition: background-color 0.2s ease;
-        width: 100%;
     }
 
-        .cart-button:hover {
-            background: #3b5d50;
-            color: #ffffff;
+        .flyout-cart-cta:hover {
+            background: var(--flyout-primary-hover);
+            color: #fff;
         }
 
-    /* Animations */
+    /* Empty state */
+    .flyout-cart-empty {
+        padding: 1.5rem 1rem;
+        text-align: center;
+        color: var(--flyout-text-muted);
+    }
+
+        .flyout-cart-empty i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+            opacity: 0.6;
+        }
+
+        .flyout-cart-empty p {
+            margin: 0;
+            font-size: 0.875rem;
+        }
+
     @@keyframes animate-flip {
         0% {
             transform: translate(25%, -25%) scale(1);
@@ -361,7 +485,6 @@
         animation: animate-flip 0.3s ease;
     }
 
-    /* Responsive */
     @@media (max-width: 768px) {
         .flyout-cart {
             width: 320px;
@@ -545,7 +668,7 @@
             });
 
             // Allow navigation when clicking "Go to cart" button
-            const goToCartBtn = flyoutCart.querySelector('.cart-button');
+            const goToCartBtn = flyoutCart.querySelector('.flyout-cart-cta');
             if (goToCartBtn) {
                 goToCartBtn.addEventListener('click', function(e) {
                     window.location.href = '/Carts';

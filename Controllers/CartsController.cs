@@ -24,8 +24,8 @@ namespace HikingStore.Controllers
         private readonly IHubContext<RealtimeHub> _hubContext;
 
         public CartsController(
-            ApplicationDbContext context, 
-            UserManager<IdentityUser> userManager, 
+            ApplicationDbContext context,
+            UserManager<IdentityUser> userManager,
             IConfiguration configuration,
             ILogger<CartsController> logger,
             IHubContext<RealtimeHub> hubContext)
@@ -154,55 +154,56 @@ namespace HikingStore.Controllers
             var totalItems = cartItems.Sum(c => c.Qty);
             var totalAmount = cartItems.Sum(c => c.Product.Price * c.Qty);
 
-            // Generate HTML for flyout
+            // Generate HTML for flyout (must match CartSummary/Default.cshtml structure and classes)
             var html = "";
             if (totalItems > 0)
             {
-                html += $@"<section class=""flex w-full justify-between count text-sm text-gray-600 border-b border-gray-300 p-3"">
-                    <a href=""/Carts"">&nbsp;{totalItems} product{(totalItems == 1 ? "" : "s")}&nbsp;</a>
-                    <button name=""updatecart"" class=""text-primary remove-all font-medium hover:underline cursor-pointer"" onclick=""removeAllFromCart()"">Remove All</button>
+                html += $@"<section class=""flyout-cart-header"">
+                    <span class=""flyout-cart-count"">{totalItems} product{(totalItems == 1 ? "" : "s")}</span>
+                    <button type=""button"" name=""updatecart"" class=""flyout-remove-all"" onclick=""removeAllFromCart()"">Remove All</button>
                 </section>
-                <section class=""w-full p-2 flex flex-col gap-1 overflow-y-auto md:max-h-[240px]"">";
+                <section class=""flyout-cart-items"">";
 
                 foreach (var item in cartItems)
                 {
-                    var productImage = !string.IsNullOrEmpty(item.Product.ProImage) 
-                        ? $"/Product/{item.Product.ProImage}" 
+                    var productImage = !string.IsNullOrEmpty(item.Product.ProImage)
+                        ? $"/Product/{item.Product.ProImage}"
                         : "";
                     var imageHtml = !string.IsNullOrEmpty(item.Product.ProImage)
-                        ? $@"<img class=""max-h-full max-w-full object-contain mix-blend-darken"" alt=""{item.Product.ProName}"" src=""{productImage}"" title=""{item.Product.ProName}"" width=""40"" height=""40"">"
-                        : @"<div class=""w-10 h-10 bg-gray-200 flex items-center justify-center""><i class=""fas fa-image text-gray-400""></i></div>";
+                        ? $@"<img alt=""{item.Product.ProName}"" src=""{productImage}"" title=""{item.Product.ProName}"" width=""40"" height=""40"">"
+                        : @"<div class=""flyout-item-placeholder""><i class=""fas fa-image""></i></div>";
 
-                    html += $@"<article class=""group item first flex justify-between items-center p-2 rounded hover:bg-gray-100 cart-item"" id=""cart-item-{item.CartId}"">
-                        <a class=""w-10 h-10 relative flex justify-center items-center small-image-container mr-4"" href=""/Home/ProductDetailes/{item.ProId}"" title=""Show details for {item.Product.ProName}"">
+                    var productName = item.Product.ProName;
+                    html += $@"<article class=""flyout-cart-item cart-item"" id=""cart-item-{item.CartId}"">
+                        <a class=""flyout-item-image"" href=""/Home/ProductDetailes/{item.ProId}"" title=""Show details for {productName}"">
                             {imageHtml}
                         </a>
-                        <div class=""name flex flex-col w-4/5 mr-4 text-gray-600 text-xs overflow-hidden"">
-                            <a title=""{item.Product.ProName}"" class=""font-medium text-sm text-gray-700 truncate hover:underline w-full mb-1"" href=""/Home/ProductDetailes/{item.ProId}"">{item.Product.ProName}</a>
-                            <div class=""price mb-1"">Unit price: <span class=""text-gray-700 font-bold"">€{item.Product.Price:N2}</span></div>
-                            <div class=""quantity cart-quantity flex items-center gap-1"">
-                                <input type=""button"" value=""-"" class=""flyout-qty-click-input qtyminus minus bg-white h-5 w-5 rounded-full border text-xs flex items-center justify-center hover:border-primary hover:text-primary focus:text-primary"" style=""height:24px; width:24px"" onclick=""updateFlyoutQuantity({item.CartId}, {item.Qty - 1})"">
-                                <input name=""itemquantity{item.CartId}"" id=""itemquantity{item.CartId}"" type=""number"" value=""{item.Qty}"" class=""qty qty-input cart-qty text-gray-700"" aria-label=""Quantity"" data-productid=""{item.ProId}"" data-itemid=""{item.CartId}"" min=""1"" max=""1000"" disabled="""">
-                                <input type=""button"" value=""+"" class=""flyout-qty-click-input qtyplus plus bg-white h-5 w-5 rounded-full border text-xs flex items-center justify-center hover:border-primary hover:text-primary focus:text-primary"" style=""height:24px; width:24px"" onclick=""updateFlyoutQuantity({item.CartId}, {item.Qty + 1})"">
+                        <div class=""flyout-item-details"">
+                            <a class=""flyout-item-name"" title=""{productName}"" href=""/Home/ProductDetailes/{item.ProId}"">{productName}</a>
+                            <div class=""flyout-item-price"">Unit price: <strong>€{item.Product.Price:N2}</strong></div>
+                            <div class=""flyout-item-qty"">
+                                <input type=""button"" value=""-"" class=""flyout-qty-btn flyout-qty-minus"" onclick=""updateFlyoutQuantity({item.CartId}, {item.Qty - 1})"" aria-label=""Decrease quantity"">
+                                <input name=""itemquantity{item.CartId}"" id=""itemquantity{item.CartId}"" type=""number"" value=""{item.Qty}"" class=""flyout-qty-input cart-qty"" aria-label=""Quantity"" data-productid=""{item.ProId}"" data-itemid=""{item.CartId}"" min=""1"" max=""1000"" disabled="""">
+                                <input type=""button"" value=""+"" class=""flyout-qty-btn flyout-qty-plus"" onclick=""updateFlyoutQuantity({item.CartId}, {item.Qty + 1})"" aria-label=""Increase quantity"">
                             </div>
                         </div>
-                        <button name=""updatecart"" class=""icon-trash self-start text-xl text-gray-600 icon-line-height group-hover:text-primary"" onclick=""removeFromFlyoutCart({item.CartId})"">
+                        <button type=""button"" name=""updatecart"" class=""flyout-item-remove"" onclick=""removeFromFlyoutCart({item.CartId})"" title=""Remove item from cart"" aria-label=""Remove {productName} from cart"">
                             <i class=""fas fa-trash""></i>
                         </button>
                     </article>";
                 }
 
                 html += $@"</section>
-                <section class=""buttons flex justify-center p-3 border-t"">
-                    <button type=""button"" class=""cart-button w-full btn btn-primary btn-primary-hover text-sm text-center"" onclick=""window.location.href='/Carts'"">
-                        <span class=""mx-auto"">Go to cart (€{totalAmount:N2})</span>
+                <section class=""flyout-cart-footer"">
+                    <button type=""button"" class=""flyout-cart-cta"" onclick=""window.location.href='/Carts'"">
+                        Go to cart (€{totalAmount:N2})
                     </button>
                 </section>";
             }
             else
             {
-                html = @"<section class=""w-full p-4 text-center text-gray-500"">
-                    <i class=""fas fa-shopping-cart text-4xl mb-2""></i>
+                html = @"<section class=""flyout-cart-empty"">
+                    <i class=""fas fa-shopping-cart""></i>
                     <p>Your cart is empty</p>
                 </section>";
             }
@@ -312,7 +313,7 @@ namespace HikingStore.Controllers
             var userId = _userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId))
             {
-                _logger.LogWarning("SECURITY: Checkout attempted without authenticated user. IP: {IP}", 
+                _logger.LogWarning("SECURITY: Checkout attempted without authenticated user. IP: {IP}",
                     HttpContext.Connection.RemoteIpAddress?.ToString());
                 return Unauthorized();
             }
@@ -321,7 +322,7 @@ namespace HikingStore.Controllers
             // If order.UserId is provided, it must match the authenticated user
             if (!string.IsNullOrEmpty(order.UserId) && order.UserId != userId)
             {
-                _logger.LogWarning("SECURITY: User impersonation attempt detected. Authenticated UserId: {AuthUserId}, Provided UserId: {ProvidedUserId}, IP: {IP}", 
+                _logger.LogWarning("SECURITY: User impersonation attempt detected. Authenticated UserId: {AuthUserId}, Provided UserId: {ProvidedUserId}, IP: {IP}",
                     userId, order.UserId, HttpContext.Connection.RemoteIpAddress?.ToString());
                 ModelState.AddModelError("", "Invalid request. Security violation detected.");
                 return BadRequest("Invalid request.");
@@ -413,7 +414,7 @@ namespace HikingStore.Controllers
             await _context.SaveChangesAsync();
 
             // SECURITY: Log successful order creation for audit trail
-            _logger.LogInformation("Order {OrderId} created successfully for authenticated user {UserId} with total {TotalAmount}", 
+            _logger.LogInformation("Order {OrderId} created successfully for authenticated user {UserId} with total {TotalAmount}",
                 order.OrderId, userId, totalAmount);
 
             // Get user email before redirecting
@@ -423,7 +424,7 @@ namespace HikingStore.Controllers
             // SECURITY: Verify the user object matches the authenticated user
             if (user == null || user.Id != userId)
             {
-                _logger.LogError("SECURITY: User mismatch detected after order creation. OrderId: {OrderId}, Expected UserId: {UserId}", 
+                _logger.LogError("SECURITY: User mismatch detected after order creation. OrderId: {OrderId}, Expected UserId: {UserId}",
                     order.OrderId, userId);
                 // Order already created, but log the security issue
             }
