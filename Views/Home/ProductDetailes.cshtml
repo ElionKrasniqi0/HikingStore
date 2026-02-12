@@ -7,6 +7,16 @@
     var monthlyInstallment24 = priceWithVat / 24;
     var monthlyInstallment36 = priceWithVat / 36;
     var protectionPlanPrice = priceWithVat * 0.0477m; // ~4.77% of price
+
+    // All product images: main first, then additional (comma-separated in DB). Use for gallery.
+    var productImages = Model.AllImagePaths
+        .Select(path => Url.Content("~/Product/" + path))
+        .ToList();
+    if (productImages.Count == 0 && !string.IsNullOrEmpty(Model.ProImage))
+    {
+        productImages.Add(Url.Content("~/Product/" + Model.ProImage));
+    }
+    var imageCount = productImages.Count;
 }
 
 <!-- Breadcrumbs -->
@@ -39,28 +49,66 @@
                     </span>
                 </div>
 
-                <!-- Main Product Image -->
-                <div class="product-image-container text-center mb-2">
-                    <img id="mainProductImage" src="~/Product/@Model.ProImage" alt="@Model.ProName"
-                         class="img-fluid rounded-3 product-main-image"
-                         style="max-height: 350px; object-fit: contain; padding: 15px;">
+                <!-- Main Product Image (click to zoom) -->
+                <div class="product-image-container text-center mb-2 position-relative" id="mainImageWrap">
+                    @if (imageCount > 0)
+                    {
+                        <img id="mainProductImage" src="@productImages[0]" alt="@Model.ProName"
+                             class="img-fluid rounded-3 product-main-image product-image-zoom"
+                             style="max-height: 350px; object-fit: contain; padding: 15px; cursor: pointer;">
+                    }
+                    else
+                    {
+                        <img id="mainProductImage" src="~/Product/@Model.ProImage" alt="@Model.ProName"
+                             class="img-fluid rounded-3 product-main-image product-image-zoom"
+                             style="max-height: 350px; object-fit: contain; padding: 15px; cursor: pointer;">
+                    }
+                    <div class="position-absolute bottom-0 start-50 translate-middle-x mb-2">
+                        <span class="badge bg-dark bg-opacity-75 px-2 py-1 small"><i class="fas fa-search-plus me-1"></i>Click to zoom</span>
+                    </div>
                 </div>
 
-                <!-- Thumbnail Gallery -->
-                <div class="thumbnail-gallery">
-                    <div class="d-flex gap-2 flex-wrap">
-                        <div class="thumbnail-item active" data-image="~/Product/@Model.ProImage">
-                            <img src="~/Product/@Model.ProImage" alt="Thumbnail 1" class="img-fluid rounded">
+                <!-- Zoom lightbox modal -->
+                <div class="modal fade" id="productZoomModal" tabindex="-1" aria-labelledby="productZoomModalLabel" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
+                    <div class="modal-dialog modal-dialog-centered modal-xl modal-fullscreen-lg-down">
+                        <div class="modal-content bg-dark bg-opacity-90 border-0">
+                            <div class="modal-header border-0 pb-0">
+                                <h5 class="modal-title text-white" id="productZoomModalLabel">@Model.ProName</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body position-relative d-flex align-items-center justify-content-center min-vh-50 py-4">
+                                <button type="button" class="btn btn-light btn-lg position-absolute start-0 top-50 translate-middle-y ms-2 z-1 d-none" id="zoomPrevBtn" aria-label="Previous image"><i class="fas fa-chevron-left"></i></button>
+                                <img id="zoomModalImage" src="" alt="@Model.ProName" class="img-fluid max-vh-75" style="max-height: 75vh; object-fit: contain;">
+                                <button type="button" class="btn btn-light btn-lg position-absolute end-0 top-50 translate-middle-y me-2 z-1 d-none" id="zoomNextBtn" aria-label="Next image"><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                            <div class="modal-footer border-0 pt-0 justify-content-center">
+                                <span class="text-white-50 small" id="zoomImageCounter"></span>
+                            </div>
                         </div>
-                        @for (int i = 2; i <= 6; i++)
+                    </div>
+                </div>
+
+                <!-- Thumbnail Gallery (one thumbnail per product image) -->
+                <div class="thumbnail-gallery">
+                    <div class="d-flex gap-2 flex-wrap justify-content-center">
+                        @if (imageCount > 0)
                         {
-                            <div class="thumbnail-item" data-image="~/Product/@Model.ProImage">
-                                <img src="~/Product/@Model.ProImage" alt="Thumbnail @i" class="img-fluid rounded">
+                            @for (var i = 0; i < imageCount; i++)
+                            {
+                                <div class="thumbnail-item @(i == 0 ? "active" : "")" data-image="@productImages[i]" role="button" tabindex="0" aria-label="View image @(i + 1) of @imageCount">
+                                    <img src="@productImages[i]" alt="@(Model.ProName) - image @(i + 1)" class="img-fluid rounded">
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="thumbnail-item active" data-image="@Url.Content("~/Product/" + Model.ProImage)" role="button" tabindex="0" aria-label="Product image">
+                                <img src="~/Product/@Model.ProImage" alt="@Model.ProName" class="img-fluid rounded">
                             </div>
                         }
                     </div>
                     <div class="text-center mt-2">
-                        <small class="text-muted">1/10</small>
+                        <small class="text-muted" id="thumbnailCounter">1/@(imageCount > 0 ? imageCount : 1)</small>
                     </div>
                 </div>
             </div>
@@ -563,24 +611,104 @@
 </style>
 
 <script>
+    var productImagesForZoom = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(productImages));
     document.addEventListener('DOMContentLoaded', function() {
         // Thumbnail gallery functionality
         const thumbnailItems = document.querySelectorAll('.thumbnail-item');
         const mainImage = document.getElementById('mainProductImage');
+        const thumbnailCounter = document.getElementById('thumbnailCounter');
+        const totalImages = thumbnailItems.length;
 
-        thumbnailItems.forEach(item => {
+        function updateMainImage(index) {
+            const item = thumbnailItems[index];
+            if (!item || !mainImage) return;
+            const imageSrc = item.getAttribute('data-image');
+            if (imageSrc) {
+                mainImage.src = imageSrc;
+            }
+            thumbnailItems.forEach(function(t, i) {
+                t.classList.toggle('active', i === index);
+            });
+            if (thumbnailCounter && totalImages > 0) {
+                thumbnailCounter.textContent = (index + 1) + '/' + totalImages;
+            }
+        }
+
+        thumbnailItems.forEach(function(item, index) {
             item.addEventListener('click', function() {
-                // Remove active class from all thumbnails
-                thumbnailItems.forEach(t => t.classList.remove('active'));
-                // Add active class to clicked thumbnail
-                this.classList.add('active');
-                // Update main image
-                const imageSrc = this.getAttribute('data-image');
-                if (mainImage && imageSrc) {
-                    mainImage.src = imageSrc;
+                updateMainImage(index);
+                openZoomModal(index);
+            });
+            item.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    updateMainImage(index);
+                    openZoomModal(index);
                 }
             });
         });
+
+        // Zoom lightbox
+        var zoomModal = document.getElementById('productZoomModal');
+        var zoomModalImage = document.getElementById('zoomModalImage');
+        var zoomPrevBtn = document.getElementById('zoomPrevBtn');
+        var zoomNextBtn = document.getElementById('zoomNextBtn');
+        var zoomImageCounter = document.getElementById('zoomImageCounter');
+        var currentZoomIndex = 0;
+
+        function openZoomModal(index) {
+            if (!productImagesForZoom || productImagesForZoom.length === 0) return;
+            currentZoomIndex = typeof index === 'number' ? index : 0;
+            if (zoomModalImage) zoomModalImage.src = productImagesForZoom[currentZoomIndex];
+            if (zoomPrevBtn) {
+                zoomPrevBtn.classList.toggle('d-none', productImagesForZoom.length <= 1);
+            }
+            if (zoomNextBtn) {
+                zoomNextBtn.classList.toggle('d-none', productImagesForZoom.length <= 1);
+            }
+            if (zoomImageCounter) {
+                zoomImageCounter.textContent = (currentZoomIndex + 1) + ' / ' + productImagesForZoom.length;
+            }
+            var modal = new bootstrap.Modal(zoomModal);
+            modal.show();
+        }
+
+        if (mainImage) {
+            mainImage.addEventListener('click', function() {
+                var idx = 0;
+                thumbnailItems.forEach(function(t, i) {
+                    if (t.classList.contains('active')) idx = i;
+                });
+                openZoomModal(idx);
+            });
+        }
+
+        if (zoomPrevBtn) {
+            zoomPrevBtn.addEventListener('click', function() {
+                currentZoomIndex = (currentZoomIndex - 1 + productImagesForZoom.length) % productImagesForZoom.length;
+                zoomModalImage.src = productImagesForZoom[currentZoomIndex];
+                zoomImageCounter.textContent = (currentZoomIndex + 1) + ' / ' + productImagesForZoom.length;
+            });
+        }
+        if (zoomNextBtn) {
+            zoomNextBtn.addEventListener('click', function() {
+                currentZoomIndex = (currentZoomIndex + 1) % productImagesForZoom.length;
+                zoomModalImage.src = productImagesForZoom[currentZoomIndex];
+                zoomImageCounter.textContent = (currentZoomIndex + 1) + ' / ' + productImagesForZoom.length;
+            });
+        }
+
+        if (zoomModal) {
+            zoomModal.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowLeft') {
+                    zoomPrevBtn.click();
+                } else if (e.key === 'ArrowRight') {
+                    zoomNextBtn.click();
+                } else if (e.key === 'Escape') {
+                    bootstrap.Modal.getInstance(zoomModal).hide();
+                }
+            });
+        }
 
         // Quantity controls
         const qtyInput = document.getElementById('qtyInput');
