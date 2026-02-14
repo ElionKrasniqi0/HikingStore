@@ -181,6 +181,7 @@ namespace HikingStore.Controllers
                         <div class=""flyout-item-details"">
                             <a class=""flyout-item-name"" title=""{productName}"" href=""/Home/ProductDetailes/{item.ProId}"">{productName}</a>
                             <div class=""flyout-item-price"">Unit price: <strong>€{item.Product.Price:N2}</strong></div>
+                            <div class=""flyout-item-linetotal"">Line total: <strong>€{(item.Product.Price * item.Qty):N2}</strong></div>
                             <div class=""flyout-item-qty"">
                                 <input type=""button"" value=""-"" class=""flyout-qty-btn flyout-qty-minus"" onclick=""updateFlyoutQuantity({item.CartId}, {item.Qty - 1})"" aria-label=""Decrease quantity"">
                                 <input name=""itemquantity{item.CartId}"" id=""itemquantity{item.CartId}"" type=""number"" value=""{item.Qty}"" class=""flyout-qty-input cart-qty"" aria-label=""Quantity"" data-productid=""{item.ProId}"" data-itemid=""{item.CartId}"" min=""1"" max=""1000"" disabled="""">

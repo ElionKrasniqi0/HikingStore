@@ -632,6 +632,8 @@
     </script>
 </head>
 <body>
+    @* Hidden form so __RequestVerificationToken is available for cart flyout +/- and other AJAX POSTs *@
+    <form method="post" id="antiforgery-form" style="display: none;" aria-hidden="true"></form>
     <!-- Skip to main content for accessibility -->
     <a href="#main-content" class="sr-only sr-only-focusable skip-link">Skip to main content</a>
     <!-- Navigation -->
@@ -938,21 +940,21 @@
             }
         };
 
-        // Function to update cart flyout content via AJAX
+        // Function to update cart flyout content via AJAX (cache-busted so dropdown shows current cart)
         window.updateCartFlyout = function() {
             const flyoutCart = document.getElementById('flyout-cart');
             if (!flyoutCart) return;
 
-            fetch('/Carts/GetCartFlyoutContent', {
+            fetch('/Carts/GetCartFlyoutContent?_=' + Date.now(), {
                 method: 'GET',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
                 },
-                credentials: 'same-origin'
+                credentials: 'same-origin',
+                cache: 'no-store'
             })
             .then(response => {
                 if (response.status === 401) {
-                    // User not authenticated, just update count
                     return null;
                 }
                 return response.json();
@@ -960,10 +962,17 @@
             .then(data => {
                 if (data && data.success) {
                     flyoutCart.innerHTML = data.html;
-                    
-                    // Update badge count using global function
-                    if (typeof window.updateCartCount === 'function') {
-                        window.updateCartCount(data.itemCount);
+                    // Update badge only (do not call updateCartCount here to avoid double fetch)
+                    const cartLink = document.getElementById('topcartlink');
+                    const cartBadge = cartLink ? cartLink.querySelector('span.cart-qty:not(.qty-input)') : null;
+                    if (cartBadge) {
+                        const count = data.itemCount || 0;
+                        if (count > 0) {
+                            cartBadge.textContent = count;
+                            cartBadge.style.display = 'flex';
+                        } else {
+                            cartBadge.style.display = 'none';
+                        }
                     }
                 }
             })
@@ -977,9 +986,12 @@
             $.post('/Carts/UpdateCartItem', { cartId: cartId, quantity: quantity })
                 .done(function(data) {
                     if (data.success) {
-                        updateCartCount(data.cartItemCount);
-                        // Reload page to update flyout
-                        location.reload();
+                        if (typeof window.updateCartCount === 'function') {
+                            window.updateCartCount(data.cartItemCount);
+                        }
+                        if (typeof window.updateCartFlyout === 'function') {
+                            window.updateCartFlyout();
+                        }
                     }
                 })
                 .fail(function() {

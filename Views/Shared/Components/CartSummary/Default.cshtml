@@ -44,6 +44,7 @@
                             <a class="flyout-item-name" title="@item.ProductName"
                                href="@Url.Action("ProductDetailes", "Home", new { id = item.ProductId })">@item.ProductName</a>
                             <div class="flyout-item-price">Unit price: <strong>€@item.Price.ToString("N2")</strong></div>
+                            <div class="flyout-item-linetotal">Line total: <strong>€@((item.Price * item.Quantity).ToString("N2"))</strong></div>
                             <div class="flyout-item-qty">
                                 <input type="button" value="-"
                                        class="flyout-qty-btn flyout-qty-minus"
@@ -314,6 +315,17 @@
             font-weight: 600;
         }
 
+    .flyout-item-linetotal {
+        font-size: 0.75rem;
+        color: var(--flyout-text-muted);
+        margin-top: 0.125rem;
+    }
+
+        .flyout-item-linetotal strong {
+            color: var(--flyout-primary);
+            font-weight: 600;
+        }
+
     .flyout-item-qty {
         display: inline-flex;
         align-items: center;
@@ -516,62 +528,78 @@
         };
     }
 
-    // Update quantity in flyout
-    function updateFlyoutQuantity(cartId, newQuantity) {
+    // Helper so flyout POSTs have anti-forgery token (from layout's hidden form)
+    function getRequestVerificationToken() {
+        var input = document.querySelector('input[name="__RequestVerificationToken"]');
+        return input ? input.value : '';
+    }
+
+    // Update quantity in flyout — in-place update so the product row does not move
+    window.updateFlyoutQuantity = function(cartId, newQuantity) {
         if (newQuantity < 1) {
-            removeFromFlyoutCart(cartId);
+            window.removeFromFlyoutCart(cartId);
             return;
         }
-
+        var token = getRequestVerificationToken();
+        var body = 'cartId=' + encodeURIComponent(cartId) + '&quantity=' + encodeURIComponent(newQuantity) + '&__RequestVerificationToken=' + encodeURIComponent(token);
         fetch('/Carts/UpdateCartItem', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-            },
-            body: `cartId=${cartId}&quantity=${newQuantity}`
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: body
         })
-        .then(response => response.json())
-        .then(data => {
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
             if (data.success) {
-                // Update cart count
                 if (typeof window.updateCartCount === 'function') {
                     window.updateCartCount(data.cartItemCount);
                 }
-                // Update flyout without reload
-                if (typeof window.updateCartFlyout === 'function') {
-                    window.updateCartFlyout();
+                // Update flyout in place so the list doesn't re-render and items don't move
+                var article = document.getElementById('cart-item-' + cartId);
+                if (article) {
+                    var qtyInput = article.querySelector('.flyout-qty-input');
+                    if (qtyInput) qtyInput.value = newQuantity;
+                    var minusBtn = article.querySelector('.flyout-qty-minus');
+                    if (minusBtn) minusBtn.setAttribute('onclick', 'updateFlyoutQuantity(' + cartId + ', ' + (newQuantity - 1) + ')');
+                    var plusBtn = article.querySelector('.flyout-qty-plus');
+                    if (plusBtn) plusBtn.setAttribute('onclick', 'updateFlyoutQuantity(' + cartId + ', ' + (newQuantity + 1) + ')');
+                }
+                var countEl = document.querySelector('.flyout-cart-count');
+                if (countEl) countEl.textContent = data.cartItemCount + ' product' + (data.cartItemCount === 1 ? '' : 's');
+                var ctaBtn = document.querySelector('.flyout-cart-cta');
+                if (ctaBtn) ctaBtn.textContent = 'Go to cart (€' + (typeof data.totalAmount === 'number' ? data.totalAmount.toFixed(2) : data.totalAmount) + ')';
+                // Update this item's line total (+ adds unit price, - removes unit price)
+                var lineTotalEl = article ? article.querySelector('.flyout-item-linetotal') : null;
+                if (lineTotalEl && data.itemTotal != null) {
+                    var val = typeof data.itemTotal === 'number' ? data.itemTotal.toFixed(2) : data.itemTotal;
+                    lineTotalEl.innerHTML = 'Line total: <strong>€' + val + '</strong>';
                 }
             } else {
                 alert(data.message || 'Error updating cart item');
             }
         })
-        .catch(error => {
+        .catch(function(error) {
             console.error('Error:', error);
             alert('Error updating cart item');
         });
-    }
+    };
 
     // Remove item from flyout cart
-    function removeFromFlyoutCart(cartId) {
+    window.removeFromFlyoutCart = function(cartId) {
         if (!confirm('Are you sure you want to remove this item from your cart?')) {
             return;
         }
-
-        fetch('/Carts/RemoveFromCart?cartId=' + cartId, {
+        var token = getRequestVerificationToken();
+        fetch('/Carts/RemoveFromCart', {
             method: 'POST',
-            headers: {
-                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-            }
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'cartId=' + encodeURIComponent(cartId) + '&__RequestVerificationToken=' + encodeURIComponent(token)
         })
-        .then(response => response.json())
-        .then(data => {
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
             if (data.success) {
-                // Update cart count
                 if (typeof window.updateCartCount === 'function') {
                     window.updateCartCount(data.cartItemCount);
                 }
-                // Update flyout without reload
                 if (typeof window.updateCartFlyout === 'function') {
                     window.updateCartFlyout();
                 }
@@ -579,32 +607,29 @@
                 alert(data.message || 'Error removing item');
             }
         })
-        .catch(error => {
+        .catch(function(error) {
             console.error('Error:', error);
             alert('Error removing item');
         });
-    }
+    };
 
     // Remove all items from cart
-    function removeAllFromCart() {
+    window.removeAllFromCart = function() {
         if (!confirm('Are you sure you want to remove all items from your cart?')) {
             return;
         }
-
+        var token = getRequestVerificationToken();
         fetch('/Carts/RemoveAll', {
             method: 'POST',
-            headers: {
-                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-            }
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: '__RequestVerificationToken=' + encodeURIComponent(token)
         })
-        .then(response => response.json())
-        .then(data => {
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
             if (data.success) {
-                // Update cart count
                 if (typeof window.updateCartCount === 'function') {
                     window.updateCartCount(0);
                 }
-                // Update flyout without reload
                 if (typeof window.updateCartFlyout === 'function') {
                     window.updateCartFlyout();
                 }
@@ -612,11 +637,11 @@
                 alert(data.message || 'Error removing all items');
             }
         })
-        .catch(error => {
+        .catch(function(error) {
             console.error('Error:', error);
             alert('Error removing all items');
         });
-    }
+    };
 
     // Listen for cart updates
     window.addEventListener('cartUpdated', function(event) {
