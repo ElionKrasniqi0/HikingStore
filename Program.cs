@@ -1,5 +1,6 @@
 using HikingStore.Data;
 using HikingStore.Services;
+using HikingStore.Services.Payments;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -80,6 +81,15 @@ builder.Services.AddScoped<SessionCartService>();
 builder.Services.AddScoped<CouponService>();
 builder.Services.AddScoped<CartService>();
 builder.Services.AddScoped<OrderService>();
+
+// Card payments: provider keys/secrets come from user-secrets or environment variables (see docs/payments.md).
+builder.Services.Configure<PaymentOptions>(builder.Configuration.GetSection(PaymentOptions.SectionName));
+builder.Services.AddSingleton(sp => new PaymentProviderRegistry(
+    sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<PaymentOptions>>(),
+    sp.GetRequiredService<IWebHostEnvironment>(),
+    sp.GetRequiredService<ILoggerFactory>()));
+builder.Services.AddScoped<PaymentService>();
+builder.Services.AddHostedService<PendingPaymentSweeper>();
 builder.Services.AddScoped<CatalogService>();
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<ImageUploadService>();

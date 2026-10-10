@@ -40,7 +40,14 @@
         <ul>
             <li><i class="fa-solid fa-truck-fast" aria-hidden="true"></i><div><strong>Free standard shipping</strong><span>On orders over @store.FormatPrice(store.FreeShippingThreshold)</span></div></li>
             <li><i class="fa-solid fa-rotate-left" aria-hidden="true"></i><div><strong>@store.ReturnDays-day returns</strong><span><a asp-action="Returns">How returns work</a></span></div></li>
-            <li><i class="fa-solid fa-money-bill-wave" aria-hidden="true"></i><div><strong>Cash on delivery</strong><span>Pay when your order arrives</span></div></li>
+            @if (PaymentProviders.ActiveProvider != null)
+            {
+                <li><i class="fa-solid fa-lock" aria-hidden="true"></i><div><strong>Secure card payment</strong><span>@(PaymentProviders.CashOnDeliveryEnabled ? "Or pay cash on delivery" : "Debit and credit cards")</span></div></li>
+            }
+            else
+            {
+                <li><i class="fa-solid fa-money-bill-wave" aria-hidden="true"></i><div><strong>Cash on delivery</strong><span>Pay when your order arrives</span></div></li>
+            }
             <li><i class="fa-solid fa-headset" aria-hidden="true"></i><div><strong>Real people, real advice</strong><span>@(string.IsNullOrEmpty(store.SupportPhone) ? "Contact our team" : store.SupportPhone)</span></div></li>
         </ul>
     </div>

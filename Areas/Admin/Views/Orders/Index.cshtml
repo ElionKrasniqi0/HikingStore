@@ -80,7 +80,7 @@
                             </td>
                             <td class="text-nowrap">@o.OrderDate.ToString("d MMM yyyy")<div class="small text-muted">@o.OrderDate.ToString("HH:mm")</div></td>
                             <td>@o.OrderDetails.Sum(d => d.Quantity)</td>
-                            <td class="text-nowrap small">@PaymentMethods.DisplayName(o.PaymentMethod)<div class="text-muted">@o.PaymentStatus</div></td>
+                            <td class="text-nowrap small">@PaymentMethods.DisplayName(o.PaymentMethod)<div class="@(o.PaymentStatus is PaymentStatuses.RefundDue or PaymentStatuses.RequiresReview ? "text-danger fw-semibold" : "text-muted")">@o.PaymentStatusLabel</div></td>
                             <td><partial name="_StatusBadge" model="o.Status" /></td>
                             <td class="text-end text-nowrap fw-semibold">@store.FormatPrice(o.TotalAmount)</td>
                         </tr>

@@ -40,7 +40,8 @@ namespace HikingStore.Controllers
             }
 
             var orders = _context.OrderDetails.Where(d => d.ProId == product.ProId && d.Order!.UserId == userId);
-            if (!await orders.AnyAsync(d => d.Order!.Status != OrderStatus.Cancelled))
+            if (!await orders.AnyAsync(d => d.Order!.Status != OrderStatus.Cancelled
+                && (d.Order.PaymentMethod != HikingStore.Models.PaymentMethods.Card || d.Order.PaymentStatus == HikingStore.Models.PaymentStatuses.Paid)))
             {
                 TempData["Error"] = "Only customers who bought this product can review it.";
                 return LocalRedirect(redirect);

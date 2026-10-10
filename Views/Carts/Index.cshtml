@@ -158,7 +158,14 @@
                     }
 
                     <ul class="trust-list">
-                        <li><i class="fa-solid fa-money-bill-wave" aria-hidden="true"></i>Pay with cash on delivery</li>
+                        @if (PaymentProviders.ActiveProvider != null)
+                        {
+                            <li><i class="fa-solid fa-lock" aria-hidden="true"></i>Secure card payment</li>
+                        }
+                        @if (PaymentProviders.CashOnDeliveryEnabled)
+                        {
+                            <li><i class="fa-solid fa-money-bill-wave" aria-hidden="true"></i>Pay with cash on delivery</li>
+                        }
                         <li><i class="fa-solid fa-rotate-left" aria-hidden="true"></i>@store.ReturnDays-day returns</li>
                     </ul>
                 </div>

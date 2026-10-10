@@ -2,8 +2,10 @@
 @using HikingStore.Models
 @using HikingStore.ViewModels
 @using HikingStore.Services
+@using HikingStore.Services.Payments
 @using HikingStore.Data
 @using HikingStore.Enum
 @using Microsoft.Extensions.Options
 @using Microsoft.AspNetCore.Routing
+@inject PaymentProviderRegistry PaymentProviders
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

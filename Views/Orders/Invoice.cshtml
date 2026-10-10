@@ -65,7 +65,11 @@
                 <strong>Payment</strong>
                 <div class="muted" style="margin-top:6px">
                     @PaymentMethods.DisplayName(Model.PaymentMethod)<br />
-                    Status: @Model.PaymentStatus<br />
+                    Status: @Model.PaymentStatusLabel<br />
+                    @if (Model.PaidAt.HasValue)
+                    {
+                        <text>Paid: @Model.PaidAt.Value.ToString("d MMM yyyy") @(string.IsNullOrEmpty(Model.PaymentTransactionId) ? "" : $"· Ref. {Model.PaymentTransactionId}")<br /></text>
+                    }
                     Order status: @OrderEmailService.StatusLabel(Model.Status)
                 </div>
             </section>

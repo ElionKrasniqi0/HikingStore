@@ -1,7 +1,8 @@
-using HikingStore.Data;
+﻿using HikingStore.Data;
 using HikingStore.Hubs;
 using HikingStore.Models;
 using HikingStore.Services;
+using HikingStore.Services.Payments;
 using HikingStore.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -22,6 +23,8 @@ namespace HikingStore.Controllers
         private readonly OrderEmailService _orderEmails;
         private readonly StoreSettings _settings;
         private readonly IHubContext<RealtimeHub> _hubContext;
+        private readonly PaymentService _paymentService;
+        private readonly PaymentProviderRegistry _paymentRegistry;
         private readonly ILogger<CartsController> _logger;
 
         public CartsController(
@@ -33,8 +36,12 @@ namespace HikingStore.Controllers
             OrderEmailService orderEmails,
             IOptions<StoreSettings> settings,
             IHubContext<RealtimeHub> hubContext,
+            PaymentService paymentService,
+            PaymentProviderRegistry paymentRegistry,
             ILogger<CartsController> logger)
         {
+            _paymentService = paymentService;
+            _paymentRegistry = paymentRegistry;
             _context = context;
             _userManager = userManager;
             _cartService = cartService;
@@ -171,6 +178,7 @@ namespace HikingStore.Controllers
                 PostalCode = address?.PostalCode,
                 Country = address?.Country ?? "Kosovo",
                 ShippingMethod = _settings.DefaultShippingMethod.Code,
+                PaymentMethod = model.CashOnDeliveryAvailable || model.CardProviderName == null ? PaymentMethods.CashOnDelivery : PaymentMethods.Card,
                 SaveAddress = model.SavedAddresses.Count == 0
             };
             return View(model);
@@ -202,10 +210,31 @@ namespace HikingStore.Controllers
                     result = PlaceOrderResult.Fail("We couldn't place your order. Please try again.");
                 }
 
+                if (result.Success && input.PaymentMethod == PaymentMethods.Card)
+                {
+                    if (result.AlreadyPlaced)
+                    {
+                        return RedirectToAction("Status", "Payments", new { id = result.OrderId });
+                    }
+                    await NotifyCartChangedAsync(userId, 0);
+                    var baseUrl = PaymentsController.ResolveBaseUrl(_paymentRegistry, Request);
+                    var start = await _paymentService.StartPaymentAsync(result.OrderId, userId,
+                        PaymentsController.BuildUrls(Url, baseUrl, result.OrderId), HttpContext.RequestAborted);
+                    if (!start.Success)
+                    {
+                        TempData["PaymentError"] = start.Message;
+                        return RedirectToAction("Status", "Payments", new { id = result.OrderId });
+                    }
+                    return PaymentsController.RedirectToProvider(this, start.Redirect!);
+                }
+
                 if (result.Success)
                 {
-                    await NotifyCartChangedAsync(userId, 0);
-                    _orderEmails.QueueOrderConfirmation(result.OrderId, $"{Request.Scheme}://{Request.Host}");
+                    if (!result.AlreadyPlaced)
+                    {
+                        await NotifyCartChangedAsync(userId, 0);
+                        _orderEmails.QueueOrderConfirmation(result.OrderId, $"{Request.Scheme}://{Request.Host}");
+                    }
                     return RedirectToAction(nameof(OrderConfirmation), new { id = result.OrderId });
                 }
 
@@ -240,7 +269,12 @@ namespace HikingStore.Controllers
                 .Include(o => o.OrderDetails).ThenInclude(od => od.Product)
                 .FirstOrDefaultAsync(o => o.OrderId == id && o.UserId == userId);
 
-            return order == null ? NotFound() : View(order);
+            if (order == null) return NotFound();
+            if (order.IsCardPayment && order.PaymentStatus != PaymentStatuses.Paid)
+            {
+                return RedirectToAction("Status", "Payments", new { id });
+            }
+            return View(order);
         }
 
         [AllowAnonymous]
@@ -256,7 +290,11 @@ namespace HikingStore.Controllers
                 SavedAddresses = await _context.Addresses.AsNoTracking()
                     .Where(a => a.UserId == userId)
                     .OrderByDescending(a => a.IsDefault).ThenBy(a => a.AddressId)
-                    .ToListAsync()
+                    .ToListAsync(),
+                CashOnDeliveryAvailable = _paymentRegistry.CashOnDeliveryEnabled,
+                CardProviderName = _paymentRegistry.ActiveProvider?.DisplayName,
+                CardTestMode = _paymentRegistry.ActiveProvider?.IsTestMode == true,
+                CardPaymentTimeoutMinutes = _paymentRegistry.Options.EffectiveTimeoutMinutes
             };
         }
 

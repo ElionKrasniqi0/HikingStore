@@ -12,7 +12,8 @@ The About, Services, Help/FAQ, shipping, returns, privacy and terms pages contai
 
 ## Limitations
 
-- **No online payment.** Orders are paid by cash on delivery or at store pickup. No payment provider is integrated, and the app never collects or stores card data. Adding one means integrating a provider (for example Stripe), confirming payment through its webhook, and only then setting `PaymentStatus` to `Paid`.
+- **Card payments need a merchant account.** Stripe and bank hosted-page integrations are implemented but stay off until configured, see [Card payments](payments.md). Stripe live mode requires a business registered in a Stripe-supported country, and Kosovo is not one. The bank integration uses a generic signed-form protocol that must be adapted to the chosen bank's specification. Neither has been run end to end against a real provider account yet.
+- **Refunds are manual.** Paid orders that are cancelled become `RefundDue`; staff refund them in the provider dashboard, and the order becomes `Refunded` when Stripe's `charge.refunded` webhook arrives. Partial refunds are not reflected on the order.
 - **Variant stock is shared.** Sizes and colors are chosen per cart line, but stock is tracked per product (`Product.StockQuantity`), not per variant.
 - **Rate limiting is basic.** `Middleware/RateLimitingMiddleware.cs` counts every POST to login (5 per 15 min) and register (3 per hour), including successful ones. It keeps the counters in memory per process and keys them by `RemoteIpAddress`. Without forwarded-headers configuration, every user behind a reverse proxy shares one counter.
 - **Emails are fire-and-forget.** `OrderEmailService` and the registration confirmation send in a background `Task.Run`. A failure is logged, but the email is not retried or persisted in a queue.

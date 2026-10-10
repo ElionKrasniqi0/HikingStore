@@ -4,6 +4,7 @@ using HikingStore.Enum;
 using HikingStore.Hubs;
 using HikingStore.Models;
 using HikingStore.Services;
+using HikingStore.Services.Payments;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -23,6 +24,7 @@ namespace HikingStore.Areas.Admin.Controllers
         private readonly OrderEmailService _orderEmails;
         private readonly ILogger<OrdersController> _logger;
         private readonly IHubContext<RealtimeHub> _hubContext;
+        private readonly PaymentService _paymentService;
 
         public OrdersController(
             ApplicationDbContext context,
@@ -30,8 +32,10 @@ namespace HikingStore.Areas.Admin.Controllers
             OrderService orderService,
             OrderEmailService orderEmails,
             ILogger<OrdersController> logger,
-            IHubContext<RealtimeHub> hubContext)
+            IHubContext<RealtimeHub> hubContext,
+            PaymentService paymentService)
         {
+            _paymentService = paymentService;
             _context = context;
             _auditService = auditService;
             _orderService = orderService;
@@ -122,6 +126,32 @@ namespace HikingStore.Areas.Admin.Controllers
                 return Json(new { success = false, message = "Unknown status." });
             }
 
+            var current = await _context.Orders.AsNoTracking().FirstOrDefaultAsync(o => o.OrderId == id);
+            if (current != null && current.IsCardPayment && current.Status != OrderStatus.Cancelled)
+            {
+                if (status is not (OrderStatus.Received or OrderStatus.Cancelled) && current.PaymentStatus != PaymentStatuses.Paid)
+                {
+                    return Json(new { success = false, message = $"This card order can't be moved to {status} because its payment is \"{current.PaymentStatusLabel}\". Only orders whose payment the provider has confirmed can be fulfilled." });
+                }
+                if (status == OrderStatus.Cancelled && current.IsAwaitingCardPayment)
+                {
+                    bool closed;
+                    try
+                    {
+                        closed = await _paymentService.TryCloseSessionForOrderAsync(current, HttpContext.RequestAborted);
+                    }
+                    catch (Exception ex) when (ex is not OperationCanceledException)
+                    {
+                        _logger.LogError(ex, "Could not close the payment session of order {OrderId}", id);
+                        return Json(new { success = false, message = "The payment provider couldn't be reached to stop the customer's payment. Try again in a moment." });
+                    }
+                    if (!closed)
+                    {
+                        return Json(new { success = false, message = "The customer has just completed payment and it's being confirmed. Wait for the confirmation, then cancel the order (a refund will be flagged)." });
+                    }
+                }
+            }
+
             var strategy = _context.Database.CreateExecutionStrategy();
             var outcome = await strategy.ExecuteAsync(async () =>
             {
@@ -164,6 +194,8 @@ namespace HikingStore.Areas.Admin.Controllers
                     case OrderStatus.Cancelled:
                         order.CancelledDate ??= now;
                         if (order.PaymentStatus == PaymentStatuses.Pending) order.PaymentStatus = PaymentStatuses.Cancelled;
+                        else if (order.IsCardPayment && order.PaymentStatus is PaymentStatuses.Paid or PaymentStatuses.RequiresReview)
+                            order.PaymentStatus = PaymentStatuses.RefundDue;
                         break;
                 }
 
@@ -214,6 +246,10 @@ namespace HikingStore.Areas.Admin.Controllers
             {
                 _orderEmails.QueueStatusUpdate(updated.OrderId, $"{Request.Scheme}://{Request.Host}", notifyAdmin: false);
                 message = "Order updated. The customer is being emailed about the new status.";
+            }
+            if (updated.PaymentStatus == PaymentStatuses.RefundDue)
+            {
+                message += $" This order was paid by card: refund payment {updated.PaymentTransactionId} in the {updated.PaymentProvider} dashboard.";
             }
             return Json(new { success = true, message });
         }

@@ -329,7 +329,14 @@
                         <li><a asp-area="" asp-controller="Home" asp-action="Terms">Terms &amp; conditions</a></li>
                     </ul>
                     <p class="mt-3 small mb-1">We accept</p>
-                    <p class="small m-0"><i class="fa-solid fa-money-bill-wave me-2" aria-hidden="true"></i>Cash on delivery</p>
+                    @if (PaymentProviders.ActiveProvider != null)
+                    {
+                        <p class="small mb-1"><i class="fa-regular fa-credit-card me-2" aria-hidden="true"></i>Visa, Mastercard &amp; debit cards</p>
+                    }
+                    @if (PaymentProviders.CashOnDeliveryEnabled)
+                    {
+                        <p class="small m-0"><i class="fa-solid fa-money-bill-wave me-2" aria-hidden="true"></i>Cash on delivery</p>
+                    }
                 </div>
             </div>
         </div>

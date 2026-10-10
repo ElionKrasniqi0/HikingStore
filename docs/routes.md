@@ -53,10 +53,22 @@ The cart works for guests (session) and signed-in users (database). `lineKey` is
 | POST | `/Carts/ApplyCoupon` (`code`) | Public (a guest gets an error toast) | Redirect to `/Carts` |
 | POST | `/Carts/RemoveCoupon` | Public | Redirect to `/Carts` |
 | GET | `/Carts/Checkout` | User | Checkout form (`CheckoutViewModel`); redirects to `/Carts` if the cart is empty |
-| POST | `/Carts/Checkout` (`Input.*` fields of `CheckoutInput`, including `Input.CheckoutToken`) | User | Redirect to `/Carts/OrderConfirmation/{id}`, or the form with errors |
+| POST | `/Carts/Checkout` (`Input.*` fields of `CheckoutInput`, including `Input.CheckoutToken` and `Input.PaymentMethod`) | User | Cash: redirect to `/Carts/OrderConfirmation/{id}`. Card: redirect to the provider's hosted page, or to `/Payments/Status/{id}` if it can't be reached. Or the form with errors |
 | GET | `/Carts/CheckoutSummary?shippingMethod=` | User | Partial `_OrderSummary` with recalculated totals |
-| GET | `/Carts/OrderConfirmation/{id}` | User (own order, else 404) | Confirmation page |
+| GET | `/Carts/OrderConfirmation/{id}` | User (own order, else 404) | Confirmation page; unpaid card orders redirect to `/Payments/Status/{id}` |
 | GET | `/Carts/RequireLogin?returnUrl=` | Public (`[AllowAnonymous]`) | Redirect to `/Identity/Account/Login` (default `returnUrl` is `/Carts`) |
+
+### `PaymentsController`
+
+See [Card payments](payments.md). Returning to the store never changes an order's payment state.
+
+| Method | Route | Auth | Returns |
+| --- | --- | --- | --- |
+| GET | `/Payments/Status/{id}?result=success\|cancelled` | User (own, else 404) | Payment status page (confirming / awaiting payment / cancelled / needs attention). Redirects to `/Carts/OrderConfirmation/{id}` once paid |
+| GET | `/Payments/StatusJson/{id}` | User (own, else 404) | JSON `{ paymentStatus, cancelled, failureReason }`, `Cache-Control: no-store` (polled by the status page) |
+| POST | `/Payments/Pay/{id}` | User (own) | Opens a new hosted session (closing the previous one) and redirects to the provider. On error, redirects to the status page with the message |
+| POST | `/Payments/Cancel/{id}` | User (own) | Closes the provider session, cancels and restocks the unpaid order, and puts the items back in the cart. Redirects to `/Carts` |
+| POST | `/payments/webhooks/{provider}` (`stripe` or `hostedgateway`) | Anonymous; no antiforgery check; provider signature required; body ≤ 512 KB | 200 when applied, duplicate or ignored; 400 for an invalid signature; 404 for an unknown or unconfigured provider |
 
 ### `OrdersController` (`Controllers/OrderController.cs`, `[Authorize]`)
 

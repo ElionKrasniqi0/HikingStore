@@ -63,5 +63,15 @@ namespace HikingStore.ViewModels
         public CartSummary Cart { get; set; } = new();
         public List<ShippingMethodOption> ShippingMethods { get; set; } = new();
         public List<Address> SavedAddresses { get; set; } = new();
+
+        public bool CashOnDeliveryAvailable { get; set; }
+
+        /// <summary>Customer-facing name of the active card provider; null when card payment is unavailable.</summary>
+        public string? CardProviderName { get; set; }
+
+        public bool CardTestMode { get; set; }
+        public int CardPaymentTimeoutMinutes { get; set; }
+
+        public bool HasPaymentMethod => CashOnDeliveryAvailable || CardProviderName != null;
     }
 }

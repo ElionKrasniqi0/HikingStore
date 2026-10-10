@@ -66,6 +66,31 @@ namespace HikingStore.Models
         [StringLength(30)]
         public string PaymentStatus { get; set; } = PaymentStatuses.Pending;
 
+        /// <summary>Card payment provider that handles this order (e.g. "Stripe"); null for cash on delivery.</summary>
+        [StringLength(30)]
+        public string? PaymentProvider { get; set; }
+
+        /// <summary>Provider checkout session of the latest payment attempt. Never contains card data.</summary>
+        [StringLength(255)]
+        public string? PaymentSessionId { get; set; }
+
+        /// <summary>Provider reference of the confirmed payment (e.g. Stripe PaymentIntent id).</summary>
+        [StringLength(255)]
+        public string? PaymentTransactionId { get; set; }
+
+        public int PaymentAttempts { get; set; }
+
+        /// <summary>When an unpaid card order is released and its stock returned.</summary>
+        public DateTime? PaymentExpiresAt { get; set; }
+
+        public DateTime? PaidAt { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal? PaidAmount { get; set; }
+
+        [StringLength(300)]
+        public string? PaymentFailureReason { get; set; }
+
         /// <summary>One-time token from the checkout form; prevents duplicate orders on double submit.</summary>
         public Guid? CheckoutToken { get; set; }
 
@@ -93,16 +118,30 @@ namespace HikingStore.Models
         public static string FormatNumber(int orderId) => $"ORD{orderId:D6}";
 
         [NotMapped]
-        public bool CanBeCancelledByCustomer => Status < OrderStatus.Shipped && Status != OrderStatus.Cancelled;
+        public bool IsCardPayment => PaymentMethod == PaymentMethods.Card;
+
+        /// <summary>Card order created at checkout whose payment the provider has not confirmed yet.</summary>
+        [NotMapped]
+        public bool IsAwaitingCardPayment => IsCardPayment && PaymentStatus == PaymentStatuses.Pending && Status != OrderStatus.Cancelled;
+
+        /// <summary>Paid card orders need a refund, so customers cancel those through support instead.</summary>
+        [NotMapped]
+        public bool CanBeCancelledByCustomer => Status < OrderStatus.Shipped && Status != OrderStatus.Cancelled
+            && (!IsCardPayment || PaymentStatus == PaymentStatuses.Pending);
+
+        [NotMapped]
+        public string PaymentStatusLabel => PaymentStatuses.Label(PaymentStatus, PaymentMethod);
     }
 
     public static class PaymentMethods
     {
         public const string CashOnDelivery = "CashOnDelivery";
+        public const string Card = "Card";
 
         public static string DisplayName(string? method) => method switch
         {
             CashOnDelivery => "Cash on delivery",
+            Card => "Card payment",
             _ => method ?? "Unknown"
         };
     }
@@ -113,5 +152,27 @@ namespace HikingStore.Models
         public const string Paid = "Paid";
         public const string Refunded = "Refunded";
         public const string Cancelled = "Cancelled";
+        /// <summary>The provider reported the payment as declined or failed.</summary>
+        public const string Failed = "Failed";
+        /// <summary>The customer did not complete payment before the checkout session expired.</summary>
+        public const string Expired = "Expired";
+        /// <summary>Money was captured for an order that is cancelled; staff must refund it at the provider.</summary>
+        public const string RefundDue = "RefundDue";
+        /// <summary>The confirmed payment did not match the order (amount/currency); staff must check it.</summary>
+        public const string RequiresReview = "RequiresReview";
+
+        public static string Label(string? status, string? method) => status switch
+        {
+            Pending when method == PaymentMethods.Card => "Awaiting card payment",
+            Pending => "Due on delivery",
+            Paid => "Paid",
+            Refunded => "Refunded",
+            Cancelled => "Cancelled",
+            Failed => "Payment failed",
+            Expired => "Payment not completed",
+            RefundDue => "Refund due",
+            RequiresReview => "Under review",
+            _ => status ?? "Unknown"
+        };
     }
 }

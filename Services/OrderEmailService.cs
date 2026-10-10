@@ -34,6 +34,28 @@ namespace HikingStore.Services
                         ? $"You'll pay {settings.FormatPrice(order.TotalAmount)} when you collect it at the store."
                         : $"You'll pay {settings.FormatPrice(order.TotalAmount)} on delivery."))));
 
+        public void QueuePaymentReceived(int orderId, string baseUrl) =>
+            Queue(orderId, baseUrl, (order, settings, url) => (
+                $"Payment received – order #{order.OrderNumber}",
+                BuildBody(order, settings, url,
+                    "Thank you — your payment was successful",
+                    $"We've received your card payment of {settings.FormatPrice(order.PaidAmount ?? order.TotalAmount)} for order #{order.OrderNumber}. " +
+                    "We'll prepare your gear and email you when it ships.")), notifyAdmin: true);
+
+        public void QueuePaymentNotCompleted(int orderId, string baseUrl) =>
+            Queue(orderId, baseUrl, (order, settings, url) => (
+                $"Order #{order.OrderNumber} was not completed",
+                BuildBody(order, settings, url,
+                    "Your payment wasn't completed",
+                    $"We didn't receive a confirmed card payment for order #{order.OrderNumber}, so the order has been cancelled and no money was taken. " +
+                    "You're welcome to place the order again whenever you're ready.")));
+
+        /// <summary>Alerts staff that a captured payment needs manual action (refund or review) in the provider dashboard.</summary>
+        public void QueuePaymentAttention(int orderId, string baseUrl, string reason) =>
+            Queue(orderId, baseUrl, (order, settings, url) => (
+                $"[Admin] Payment needs attention – order #{order.OrderNumber}",
+                BuildBody(order, settings, url, "Payment needs attention", reason)), notifyAdmin: true, customer: false);
+
         public void QueueStatusUpdate(int orderId, string baseUrl, bool notifyAdmin) =>
             Queue(orderId, baseUrl, (order, settings, url) => (
                 $"Your order #{order.OrderNumber} is now {StatusLabel(order.Status)}",
@@ -41,7 +63,7 @@ namespace HikingStore.Services
                     $"Order update: {StatusLabel(order.Status)}",
                     StatusMessage(order))), notifyAdmin);
 
-        private void Queue(int orderId, string baseUrl, Func<Order, StoreSettings, string, (string Subject, string Body)> build, bool notifyAdmin = false)
+        private void Queue(int orderId, string baseUrl, Func<Order, StoreSettings, string, (string Subject, string Body)> build, bool notifyAdmin = false, bool customer = true)
         {
             _ = Task.Run(async () =>
             {
@@ -61,7 +83,7 @@ namespace HikingStore.Services
 
                     var recipient = order.Email ?? order.User?.Email;
                     var (subject, body) = build(order, settings, baseUrl);
-                    if (!string.IsNullOrEmpty(recipient))
+                    if (customer && !string.IsNullOrEmpty(recipient))
                     {
                         await sender.SendEmailAsync(recipient, subject, body);
                     }
@@ -72,7 +94,7 @@ namespace HikingStore.Services
                         if (string.IsNullOrWhiteSpace(adminEmail)) adminEmail = configuration["EmailSettings:SenderEmail"];
                         if (!string.IsNullOrWhiteSpace(adminEmail))
                         {
-                            await sender.SendEmailAsync(adminEmail, $"[Admin] Order #{order.OrderNumber} → {StatusLabel(order.Status)}", body);
+                            await sender.SendEmailAsync(adminEmail, customer ? $"[Admin] Order #{order.OrderNumber} → {StatusLabel(order.Status)}" : subject, body);
                         }
                     }
                 }

@@ -1,0 +1,147 @@
+@model Order
+@inject IOptions<StoreSettings> StoreOptions
+@{
+    var store = StoreOptions.Value;
+    ViewData["Title"] = $"Payment for order {Model.OrderNumber}";
+    ViewData["NoIndex"] = true;
+    var returned = ViewBag.ReturnedFromProvider == true;
+    var cancelledAtProvider = ViewBag.CancelledAtProvider == true;
+    var awaiting = Model.IsAwaitingCardPayment;
+    var needsAttention = Model.PaymentStatus is PaymentStatuses.RefundDue or PaymentStatuses.RequiresReview;
+}
+
+<div class="container-hs" style="max-width:860px">
+    <ol class="checkout-steps" aria-label="Checkout progress">
+        <li class="done"><span class="n"><i class="fa-solid fa-check" aria-hidden="true"></i></span>Cart</li>
+        <li class="done"><span class="n"><i class="fa-solid fa-check" aria-hidden="true"></i></span>Details &amp; delivery</li>
+        <li class="current" aria-current="step"><span class="n">3</span>Payment</li>
+    </ol>
+
+    <section class="card-hs text-center py-5 mb-4" aria-live="polite" data-payment-status
+             data-status-url="@Url.Action("StatusJson", new { id = Model.OrderId })"
+             data-confirmation-url="@Url.Action("OrderConfirmation", "Carts", new { id = Model.OrderId })"
+             data-poll="@(awaiting && returned ? "true" : "false")">
+        @if (awaiting && returned)
+        {
+            <div data-state="confirming">
+                <span class="spinner-border mb-3" style="color:var(--hs-forest);width:3rem;height:3rem" aria-hidden="true"></span>
+                <h1 class="h2">Confirming your payment…</h1>
+                <p class="text-muted mb-0">We're waiting for @ViewBag.ProviderName to confirm your payment for order <strong>#@Model.OrderNumber</strong>. This usually takes a few seconds — please keep this page open.</p>
+            </div>
+            <div data-state="slow" hidden>
+                <i class="fa-regular fa-clock fa-3x mb-3" style="color:var(--hs-forest)" aria-hidden="true"></i>
+                <h1 class="h2">Your payment is still being confirmed</h1>
+                <p class="text-muted mb-0">It's taking longer than usual. You don't need to pay again — we'll email <strong>@Model.Email</strong> as soon as the payment is confirmed, and your order page will update.</p>
+            </div>
+        }
+        else if (awaiting)
+        {
+            <i class="fa-regular fa-credit-card fa-3x mb-3" style="color:var(--hs-forest)" aria-hidden="true"></i>
+            <h1 class="h2">@(cancelledAtProvider ? "Payment not completed" : "Complete your payment")</h1>
+            <p class="text-muted mb-0">
+                Order <strong>#@Model.OrderNumber</strong> is saved and your items are reserved
+                @if (Model.PaymentExpiresAt.HasValue)
+                {
+                    <text>until <strong>@Model.PaymentExpiresAt.Value.ToString("HH:mm") UTC</strong></text>
+                }.
+                No money has been taken yet.
+            </p>
+            @if (!string.IsNullOrEmpty(Model.PaymentFailureReason))
+            {
+                <p class="alert alert-danger d-inline-block mt-3 mb-0" role="alert">Your last attempt didn't go through: @Model.PaymentFailureReason</p>
+            }
+        }
+        else if (Model.Status == OrderStatus.Cancelled && !needsAttention)
+        {
+            <i class="fa-solid fa-circle-xmark fa-3x mb-3" style="color:var(--hs-danger)" aria-hidden="true"></i>
+            <h1 class="h2">This order was cancelled</h1>
+            <p class="text-muted mb-0">
+                @(Model.PaymentStatus switch
+                {
+                    PaymentStatuses.Failed => "The card payment failed, so the order was cancelled. No money was taken.",
+                    PaymentStatuses.Expired => "The payment wasn't completed in time, so the order was cancelled and the items released. No money was taken.",
+                    _ => "The order was cancelled before payment. No money was taken."
+                })
+            </p>
+        }
+        else
+        {
+            <i class="fa-solid fa-circle-info fa-3x mb-3" style="color:var(--hs-forest)" aria-hidden="true"></i>
+            <h1 class="h2">We're checking your payment</h1>
+            <p class="text-muted mb-0">Our team is reviewing the payment for order <strong>#@Model.OrderNumber</strong> and will contact you at <strong>@Model.Email</strong>. You don't need to pay again.</p>
+        }
+
+        @if (TempData["PaymentError"] is string paymentError && !string.IsNullOrEmpty(paymentError))
+        {
+            <p class="alert alert-danger d-inline-block mt-3 mb-0" role="alert"><i class="fa-solid fa-circle-exclamation me-2" aria-hidden="true"></i>@paymentError</p>
+        }
+
+        <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
+            @if (awaiting && !returned)
+            {
+                <form method="post" asp-action="Pay" asp-route-id="@Model.OrderId" data-once>
+                    <button type="submit" class="btn btn-primary btn-lg" data-busy-text="Opening secure payment…">
+                        <i class="fa-solid fa-lock me-2" aria-hidden="true"></i>Pay @store.FormatPrice(Model.TotalAmount) securely
+                    </button>
+                </form>
+                <form method="post" asp-action="Cancel" asp-route-id="@Model.OrderId" data-confirm="Cancel this order? Your items will go back to your cart." data-once>
+                    <button type="submit" class="btn btn-outline-secondary btn-lg" data-busy-text="Cancelling…">Cancel order</button>
+                </form>
+            }
+            else if (!awaiting)
+            {
+                <a class="btn btn-primary" asp-controller="Home" asp-action="Shop">Continue shopping</a>
+            }
+            <a class="btn btn-outline-secondary" asp-controller="Orders" asp-action="Details" asp-route-id="@Model.OrderId">View order</a>
+        </div>
+        @if (awaiting && ViewBag.IsTestMode == true)
+        {
+            <p class="small mt-3 mb-0"><span class="status-badge status-Processing">Test mode</span> No real money is charged.</p>
+        }
+    </section>
+
+    <section class="card-hs" aria-labelledby="items-title">
+        <h2 id="items-title" class="h5">Order summary</h2>
+        <ul class="summary-rows m-0">
+            @foreach (var line in Model.OrderDetails)
+            {
+                <li><span>@line.DisplayName × @line.Quantity</span><span>@store.FormatPrice(line.LineTotal)</span></li>
+            }
+            @if (Model.DiscountAmount > 0)
+            {
+                <li class="discount"><span>Discount (@Model.CouponCode)</span><span>−@store.FormatPrice(Model.DiscountAmount)</span></li>
+            }
+            <li><span>Shipping (@Model.ShippingService)</span><span>@(Model.ShippingCost == 0 ? "Free" : store.FormatPrice(Model.ShippingCost))</span></li>
+            <li class="total"><span>Total</span><span>@store.FormatPrice(Model.TotalAmount)</span></li>
+        </ul>
+    </section>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const box = document.querySelector('[data-payment-status]');
+            if (!box || box.dataset.poll !== 'true') return;
+            let tries = 0;
+            const maxTries = 40;
+            const showSlow = () => {
+                box.querySelector('[data-state="confirming"]').hidden = true;
+                box.querySelector('[data-state="slow"]').hidden = false;
+            };
+            const poll = async () => {
+                tries++;
+                try {
+                    const response = await fetch(box.dataset.statusUrl, { headers: { 'Accept': 'application/json' }, cache: 'no-store' });
+                    if (response.ok) {
+                        const state = await response.json();
+                        if (state.paymentStatus === '@PaymentStatuses.Paid') { window.location.href = box.dataset.confirmationUrl; return; }
+                        if (state.paymentStatus !== '@PaymentStatuses.Pending' || state.cancelled) { window.location.href = window.location.pathname; return; }
+                    }
+                } catch { /* network hiccup: keep polling */ }
+                if (tries >= maxTries) { showSlow(); return; }
+                setTimeout(poll, tries < 10 ? 2000 : 5000);
+            };
+            setTimeout(poll, 1500);
+        })();
+    </script>
+}

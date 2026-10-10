@@ -2,6 +2,7 @@
 using HikingStore.Enum;
 using HikingStore.Hubs;
 using HikingStore.Services;
+using HikingStore.Services.Payments;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +21,7 @@ namespace HikingStore.Controllers
         private readonly OrderService _orderService;
         private readonly IHubContext<RealtimeHub> _hubContext;
         private readonly OrderEmailService _orderEmails;
+        private readonly PaymentService _paymentService;
         private readonly ILogger<OrdersController> _logger;
 
         public OrdersController(
@@ -28,8 +30,10 @@ namespace HikingStore.Controllers
             OrderService orderService,
             IHubContext<RealtimeHub> hubContext,
             OrderEmailService orderEmails,
+            PaymentService paymentService,
             ILogger<OrdersController> logger)
         {
+            _paymentService = paymentService;
             _context = context;
             _userManager = userManager;
             _orderService = orderService;
@@ -108,7 +112,10 @@ namespace HikingStore.Controllers
         public async Task<IActionResult> CancelOrder(int id)
         {
             var userId = _userManager.GetUserId(User)!;
-            var (success, message) = await _orderService.CancelByCustomerAsync(id, userId);
+            var isCardOrder = await _context.Orders.AnyAsync(o => o.OrderId == id && o.UserId == userId && o.PaymentMethod == HikingStore.Models.PaymentMethods.Card);
+            var (success, message) = isCardOrder
+                ? await _paymentService.CancelUnpaidAsync(id, userId, "Order cancelled by customer before payment", HttpContext.RequestAborted)
+                : await _orderService.CancelByCustomerAsync(id, userId);
             if (success)
             {
                 _logger.LogInformation("Order {OrderId} cancelled by customer {UserId}", id, userId);

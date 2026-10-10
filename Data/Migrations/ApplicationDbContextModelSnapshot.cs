@@ -430,6 +430,22 @@ namespace HikingStore.Data.Migrations
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<decimal?>("PaidAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PaymentAttempts")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("PaymentExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentFailureReason")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -437,12 +453,24 @@ namespace HikingStore.Data.Migrations
                         .HasColumnType("nvarchar(30)")
                         .HasDefaultValue("CashOnDelivery");
 
+                    b.Property<string>("PaymentProvider")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("PaymentSessionId")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
                     b.Property<string>("PaymentStatus")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)")
                         .HasDefaultValue("Pending");
+
+                    b.Property<string>("PaymentTransactionId")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
@@ -493,11 +521,62 @@ namespace HikingStore.Data.Migrations
                         .IsUnique()
                         .HasFilter("[CheckoutToken] IS NOT NULL");
 
+                    b.HasIndex("PaymentSessionId")
+                        .HasFilter("[PaymentSessionId] IS NOT NULL");
+
+                    b.HasIndex("PaymentTransactionId")
+                        .HasFilter("[PaymentTransactionId] IS NOT NULL");
+
                     b.HasIndex("Status");
+
+                    b.HasIndex("PaymentStatus", "PaymentExpiresAt");
 
                     b.HasIndex("UserId", "OrderDate");
 
                     b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("HikingStore.Models.PaymentEvent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("EventId")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTime>("ReceivedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Result")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("Provider", "EventId")
+                        .IsUnique();
+
+                    b.ToTable("PaymentEvents");
                 });
 
             modelBuilder.Entity("HikingStore.Models.Product", b =>

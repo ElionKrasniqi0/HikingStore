@@ -5,6 +5,8 @@ using HikingStore.Models;
 
 namespace HikingStore.Controllers
 {
+    // Error pages are re-executed with the failed request's method; a POST that 404s must not turn into a 400.
+    [IgnoreAntiforgeryToken]
     public class ErrorController : Controller
     {
         private readonly ILogger<ErrorController> _logger;

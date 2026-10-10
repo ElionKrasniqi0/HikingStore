@@ -15,7 +15,7 @@ Rendered by `Views/Shared/_Layout.cshtml` on every storefront page.
 - **Mini cart** – clicking the cart icon opens an off-canvas panel that loads `GET /Carts/MiniCart` (partial `_MiniCart.cshtml`). On `/Carts...` pages the icon is a normal link.
 - **Category bar / mega menu** – "Shop all", "New in" (`sort=newest`), the first 6 top-level categories, "Best sellers" (`sort=popular`) and "Sale" (`onSale=true`). A top-level category with subcategories opens a mega menu listing its children plus the category photo; it opens on hover (pointer devices) or click, and closes on Escape, focus loss or an outside click. Mobile uses an off-canvas menu listing every category and subcategory.
 - The category tree comes from `CatalogService.GetNavigationTreeAsync`, cached in memory for 5 minutes. Any POST in the admin `CategoriesController` clears the cache.
-- **Footer** – newsletter form, store address/phone/email, social links (`Store:SocialLinks`, only non-empty ones), Shop/Help/Company links, "We accept: Cash on delivery" and "Prices include VAT."
+- **Footer** – newsletter form, store address/phone/email, social links (`Store:SocialLinks`, only non-empty ones), Shop/Help/Company links, "We accept" (cards when a provider is active, cash on delivery when enabled) and "Prices include VAT."
 - **Toasts** – `TempData["Success"]` / `TempData["Error"]` are rendered as toasts; JavaScript code shows the same toasts through `window.HS.toast`.
 
 ## Homepage
@@ -148,7 +148,11 @@ The form (`Views/Carts/Checkout.cshtml`, view model `CheckoutViewModel`) has fou
 1. **Contact** – email and phone, prefilled from the account.
 2. **Shipping address** – full name, street, city, postal code (optional), country (Kosovo, Albania, North Macedonia, Montenegro) and order notes (max 500 characters). The default saved address, or otherwise the first one, is prefilled, and saved-address chips fill the form. A "Save this address to my account" box is ticked when the user has no saved addresses.
 3. **Delivery method** – radio list built from `Store:ShippingMethods`. Changing it reloads the order summary from `GET /Carts/CheckoutSummary?shippingMethod=` (a server-rendered partial).
-4. **Payment** – only **Cash on delivery** (a hidden `PaymentMethod=CashOnDelivery` field). The page states that online card payments are not available.
+4. **Payment** – option cards for the methods that are currently available:
+   - **Credit or debit card**: shown only when a card provider is active, with a *Test mode* badge for test credentials.
+   - **Cash on delivery**: shown when `Payments:CashOnDeliveryEnabled` is on.
+
+   The submit button reads **Continue to secure payment** for card and **Place order** otherwise. The card number is never entered on HikingStore; see [Card payments](payments.md).
 
 ### Shipping methods
 
@@ -181,23 +185,25 @@ Prices are **VAT-inclusive**. VAT is never added to the total and is not stored 
    - If an order with the same token already exists for the user, its ID is returned instead of creating a new order.
    - A unique filtered index on `Orders.CheckoutToken` catches concurrent duplicates; the controller handles the `DbUpdateException` by redirecting to the existing order.
    - On the client, the form has `data-once`, so `site.js` ignores a second submit and shows a busy button.
-2. It rejects an empty token, a payment method other than `CashOnDelivery`, an unknown shipping method, an empty cart, cart lines with issues, and an invalid coupon.
+2. It rejects an empty token, a payment method that isn't currently available (`Card` without an active provider, or `CashOnDelivery` when disabled), an unknown shipping method, an empty cart, cart lines with issues, and an invalid coupon.
 3. **One database transaction** (inside the EF execution strategy):
    - For each product, the stock is decremented with a conditional `UPDATE ... WHERE IsActive AND StockQuantity >= qty`. If no row is updated, the transaction rolls back with a "just sold out" message.
    - If a discount applies, the coupon's `TimesUsed` is incremented under the same usage-limit condition (rolls back if the limit was just reached).
-   - The `Order` is created: contact and address fields, subtotal, discount, shipping cost, total, coupon code, `PaymentMethod = CashOnDelivery`, `PaymentStatus = Pending`, `Status = Received`, and `Carrier`/`ShippingService` set to the shipping method name. One `OrderDetail` is created per cart line, with product name, variant, quantity and unit price snapshot, plus a first tracking event "Order placed".
+   - The `Order` is created: contact and address fields, subtotal, discount, shipping cost, total, coupon code, the chosen `PaymentMethod`, `PaymentStatus = Pending`, `Status = Received`, and `Carrier`/`ShippingService` set to the shipping method name. Card orders also get `PaymentProvider` and a payment deadline `PaymentExpiresAt`, and their first tracking event is "Order placed — awaiting card payment". One `OrderDetail` is created per cart line, with product name, variant, quantity and unit price snapshot, plus a first tracking event "Order placed".
    - When "Save this address" is ticked and the address (street + city) is not saved yet, an `Address` labelled "Home" is added. It becomes the default when it is the user's first address.
    - The user's cart rows are deleted and the transaction is committed.
-4. The coupon is removed from session, a `CartUpdated` event with count 0 is pushed, the order-confirmation email is queued, and the browser is redirected to `/Carts/OrderConfirmation/{id}`.
+4. The coupon is removed from session and a `CartUpdated` event with count 0 is pushed. What happens next depends on the payment method:
+   - **Cash on delivery:** the order-confirmation email is queued and the browser is redirected to `/Carts/OrderConfirmation/{id}`.
+   - **Card:** `PaymentService.StartPaymentAsync` opens a hosted session and the browser is sent to the provider's page. If the provider can't be reached, the customer lands on `/Payments/Status/{id}` with the error and can retry or cancel. The order is marked paid only when the provider's signed webhook confirms it, and that sends the "payment received" email. Unpaid card orders are released automatically after the payment window. See [Card payments](payments.md).
 
 If anything fails, the form is shown again with the errors and a freshly calculated summary.
 
 ### Order confirmation page
 
-`GET /Carts/OrderConfirmation/{id}` (`[Authorize]`, own orders only; otherwise 404) shows:
+`GET /Carts/OrderConfirmation/{id}` (`[Authorize]`, own orders only; otherwise 404) redirects card orders that aren't paid yet to `/Payments/Status/{id}`. Otherwise it shows:
 
 - the order number (`ORD` + 6-digit ID, e.g. `ORD000123`);
-- items, totals and the amount to pay, labelled "Total to pay on delivery" or "Total to pay at pickup";
+- items, totals and the amount, labelled "Total to pay on delivery", "Total to pay at pickup" or, for card orders, "Total paid";
 - the delivery address, or for pickup the store address and opening hours;
 - payment method and "What happens next" steps.
 
@@ -224,6 +230,8 @@ The **Cancel order** button is shown while `Order.CanBeCancelledByCustomer` is t
 1. Loads the order with an ownership check and re-checks that it can be cancelled.
 2. Sets `Status = Cancelled`, `CancelledDate` and `PaymentStatus = Cancelled`, and adds an "Order cancelled by customer" tracking event.
 3. **Restocks** every product by the ordered quantity and decrements the coupon's `TimesUsed` (`RestockCancelledOrderAsync`).
+
+Card orders are handled differently. While payment is pending, `PaymentService.CancelUnpaidAsync` first closes the provider session, and refuses if the provider says the payment already went through. It then cancels and restocks the order. When the customer cancels from the payment page (`POST /Payments/Cancel/{id}`), the items are also put back in the cart. Once a card order is paid, customers can't cancel it themselves; the details page points them to the contact page, because a refund is needed.
 
 On success the controller pushes `OrderStatusUpdated` to the `Admins` SignalR group and queues a status-update email to the customer with a copy to the admin address. It returns JSON `{ success, message }` for AJAX requests; otherwise it redirects to the details page with a toast.
 
@@ -303,7 +311,7 @@ All served by `HomeController` from `Views/Home/` and sharing the help side menu
 | `/Home/Services` | Store services |
 | `/Home/About` | About us |
 | `/Home/Privacy` | Privacy policy |
-| `/Home/Terms` | Terms & conditions (prices include VAT; cash on delivery only) |
+| `/Home/Terms` | Terms & conditions (prices include VAT; payment methods depend on configuration) |
 
 ## Error pages
 

@@ -186,7 +186,8 @@ namespace HikingStore.Controllers
                 model.InWishlist = await _context.Wishlists.AnyAsync(w => w.UserId == userId && w.ProId == product.ProId);
                 model.HasReviewed = await _context.Reviews.AnyAsync(r => r.UserId == userId && r.ProId == product.ProId);
                 var purchased = await _context.OrderDetails.AnyAsync(d => d.ProId == product.ProId
-                    && d.Order!.UserId == userId && d.Order.Status != OrderStatus.Cancelled);
+                    && d.Order!.UserId == userId && d.Order.Status != OrderStatus.Cancelled
+                    && (d.Order.PaymentMethod != HikingStore.Models.PaymentMethods.Card || d.Order.PaymentStatus == HikingStore.Models.PaymentStatuses.Paid));
                 model.CanReview = purchased && !model.HasReviewed;
                 if (!purchased) model.ReviewBlockedReason = "Only customers who bought this product can review it.";
                 else if (model.HasReviewed) model.ReviewBlockedReason = "Thanks — you have already reviewed this product.";

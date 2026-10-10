@@ -2,6 +2,7 @@ using System.Text;
 using HikingStore.Areas.Admin.ViewModel;
 using HikingStore.Data;
 using HikingStore.Enum;
+using HikingStore.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -29,7 +30,8 @@ namespace HikingStore.Areas.Admin.Controllers
 
             var orders = _context.Orders.AsNoTracking()
                 .Where(o => o.OrderDate >= start && o.OrderDate < endExclusive);
-            var counted = orders.Where(o => o.Status != OrderStatus.Cancelled);
+            var counted = orders.Where(o => o.Status != OrderStatus.Cancelled
+                && (o.PaymentMethod != PaymentMethods.Card || o.PaymentStatus == PaymentStatuses.Paid));
 
             var model = new ReportViewModel
             {
@@ -54,7 +56,8 @@ namespace HikingStore.Areas.Admin.Controllers
                 .ToList();
 
             var lines = _context.OrderDetails.AsNoTracking()
-                .Where(d => d.Order!.Status != OrderStatus.Cancelled && d.Order.OrderDate >= start && d.Order.OrderDate < endExclusive);
+                .Where(d => d.Order!.Status != OrderStatus.Cancelled && d.Order.OrderDate >= start && d.Order.OrderDate < endExclusive
+                    && (d.Order.PaymentMethod != PaymentMethods.Card || d.Order.PaymentStatus == PaymentStatuses.Paid));
 
             model.TopProducts = (await lines
                     .GroupBy(d => new { d.ProId, Name = d.ProductName ?? d.Product!.ProName })

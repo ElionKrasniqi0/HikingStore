@@ -47,7 +47,7 @@ To make another user an admin, open **Customers → Roles** for that user and ad
 ```mermaid
 stateDiagram-v2
     [*] --> Received: customer checks out
-    Received --> Verified
+    Received --> Verified: card orders only once Paid
     Verified --> Processing: tracking number + ETA assigned
     Processing --> Shipped
     Shipped --> Completed: cash-on-delivery payment marked Paid
@@ -63,12 +63,14 @@ The status dropdown on the details page offers every status, so admins can move 
 ### Updating status
 `POST /Admin/Orders/UpdateStatus` with `id`, `status`, and optional `trackingNumber`, `adminNotes`, `carrier` (sent by the details page via `fetch`). Returns JSON `{ success, message }`. Inside a database transaction (wrapped in the EF execution strategy) it:
 
-1. Rejects unknown statuses and any change away from `Cancelled`.
+1. Rejects unknown statuses and any change away from `Cancelled`. For **card orders**, it also:
+   - rejects moving the order past `Received` until the payment is `Paid`;
+   - before cancelling an order that is still awaiting payment, closes the provider's payment session first. If the customer has just paid, it refuses and asks staff to wait for the confirmation.
 2. Sets the status. `adminNotes`, `carrier` and `trackingNumber` overwrite the stored values only when non-empty (truncated to 2000/100/100 characters).
 3. For **Processing** or **Shipped**: generates a tracking number if the order has none (`HS` + 6-digit order ID + `yyMMdd` + 6 random hex characters) and sets `EstimatedDelivery` to 4 business days from now if not already set.
 4. Sets the matching date field once (`VerifiedDate`, `ProcessingDate`, `ShippedDate`, `CompletedDate`, `CancelledDate`).
-5. **Completed**: if the payment method is cash on delivery and the payment status is `Pending`, sets the payment status to `Paid`.
-6. **Cancelled**: sets a `Pending` payment status to `Cancelled`, then calls `OrderService.RestockCancelledOrderAsync`, which **adds every line's quantity back to product stock** and decrements the coupon's `TimesUsed` if the order used one.
+5. **Completed**: if the payment method is cash on delivery and the payment status is `Pending`, sets the payment status to `Paid`. Card orders are never marked paid here; only the provider's webhook does that.
+6. **Cancelled**: sets a `Pending` payment status to `Cancelled`. For a card order that was `Paid` or `RequiresReview`, it sets `RefundDue`; the success message names the transaction to refund in the provider dashboard. It then calls `OrderService.RestockCancelledOrderAsync`, which **adds every line's quantity back to product stock** and decrements the coupon's `TimesUsed` if the order used one.
 7. If the status actually changed, adds a milestone tracking event (location `HikingStore`, e.g. "Order handed to the carrier").
 
 After the commit it:

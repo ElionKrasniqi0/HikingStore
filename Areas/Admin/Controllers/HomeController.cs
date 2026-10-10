@@ -2,6 +2,7 @@
 using HikingStore.Areas.Admin.ViewModel;
 using HikingStore.Data;
 using HikingStore.Enum;
+using HikingStore.Models;
 using HikingStore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -44,7 +45,8 @@ namespace HikingStore.Areas.Admin.Controllers
         {
             var since30 = DateTime.UtcNow.Date.AddDays(-29);
             var since14 = DateTime.UtcNow.Date.AddDays(-13);
-            var revenueOrders = _context.Orders.AsNoTracking().Where(o => o.Status != OrderStatus.Cancelled);
+            var revenueOrders = _context.Orders.AsNoTracking().Where(o => o.Status != OrderStatus.Cancelled
+                && (o.PaymentMethod != PaymentMethods.Card || o.PaymentStatus == PaymentStatuses.Paid));
 
             var model = new DashboardViewModel
             {
@@ -52,7 +54,8 @@ namespace HikingStore.Areas.Admin.Controllers
                 Revenue30Days = await revenueOrders.Where(o => o.OrderDate >= since30).SumAsync(o => (decimal?)o.TotalAmount) ?? 0,
                 OrderCount = await _context.Orders.CountAsync(),
                 Orders30Days = await _context.Orders.CountAsync(o => o.OrderDate >= since30),
-                OpenOrders = await _context.Orders.CountAsync(o => o.Status == OrderStatus.Received || o.Status == OrderStatus.Verified || o.Status == OrderStatus.Processing),
+                OpenOrders = await _context.Orders.CountAsync(o => (o.Status == OrderStatus.Received || o.Status == OrderStatus.Verified || o.Status == OrderStatus.Processing)
+                    && (o.PaymentMethod != PaymentMethods.Card || o.PaymentStatus == PaymentStatuses.Paid)),
                 CustomerCount = await _context.Users.CountAsync(),
                 ActiveProducts = await _context.Products.CountAsync(p => p.IsActive),
                 PendingReviews = await _context.Reviews.CountAsync(r => !r.IsApproved),
@@ -81,7 +84,8 @@ namespace HikingStore.Areas.Admin.Controllers
                 .ToList();
 
             model.TopProducts = (await _context.OrderDetails.AsNoTracking()
-                    .Where(d => d.Order!.Status != OrderStatus.Cancelled)
+                    .Where(d => d.Order!.Status != OrderStatus.Cancelled
+                        && (d.Order.PaymentMethod != PaymentMethods.Card || d.Order.PaymentStatus == PaymentStatuses.Paid))
                     .GroupBy(d => new { d.ProId, Name = d.ProductName ?? d.Product!.ProName })
                     .Select(g => new { g.Key.ProId, g.Key.Name, Units = g.Sum(d => d.Quantity), Revenue = g.Sum(d => d.Price * d.Quantity) })
                     .OrderByDescending(g => g.Units).Take(5).ToListAsync())

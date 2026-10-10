@@ -5,7 +5,7 @@ HikingStore is an online shop for hiking and outdoor gear built with **ASP.NET C
 - browse a database-driven catalog with server-side filters, search and a mega menu;
 - view products with variants, a gallery and moderated reviews;
 - keep a wishlist and a cart, which works for guests and is merged at sign-in;
-- check out with coupons and server-calculated totals, paying by cash on delivery or at store pickup;
+- check out with coupons and server-calculated totals, paying by debit/credit card on a hosted payment page (Stripe Checkout or a bank's page), cash on delivery or at store pickup;
 - track and cancel orders, download invoices, manage addresses;
 - chat live with support.
 
@@ -54,7 +54,14 @@ On startup the app applies pending EF Core migrations and seeds the `Admin` and 
 
 ## Payments
 
-Only **cash on delivery** and **pay at pickup** are supported. No online payment provider is integrated, and the app never collects or stores card data. Orders keep `PaymentStatus = Pending` until an admin marks them completed.
+Card payments are **off until a provider is configured**. Cash on delivery and pay at pickup work out of the box.
+
+- **Stripe Checkout** (`Payments:CardProvider = Stripe`) needs a Stripe account in a [supported country](https://stripe.com/global). Kosovo is not one of them, so live payments need a business entity registered elsewhere. Test mode works for anyone.
+- **A bank or processor hosted payment page** (`Payments:CardProvider = HostedGateway`) needs an e-commerce acquiring agreement with that bank.
+
+Cards are entered only on the provider's page; the app never sees or stores card numbers or CVV codes. Orders are created as *payment pending* and are marked **Paid only by a signature-verified webhook**, never by the customer returning to the site. Keys go in user secrets or environment variables, never in `appsettings.json`.
+
+See **[Card payments](docs/payments.md)** for setup, test cards, webhook events, merchant-account requirements and the production checklist.
 
 ## Tests
 
@@ -62,7 +69,12 @@ Only **cash on delivery** and **pay at pickup** are supported. No online payment
 dotnet test HikingStore.Tests
 ```
 
-The 38 tests cover `CartService` (variant validation, stock limits, guest-cart merge, ownership, database-priced totals, free-shipping threshold, coupons), `CouponService` (discount calculation and validation rules), image signature detection, shipping cost rules and product model helpers.
+The 68 tests cover:
+
+- `CartService`: variant validation, stock limits, guest-cart merge, ownership, database-priced totals, free-shipping threshold and coupons;
+- `CouponService`: discount calculation and validation rules;
+- image signature detection, shipping cost rules and product model helpers;
+- the card-payment flow: Stripe and hosted-gateway signature verification, the order payment states, duplicate events, amount mismatches, cancellation with restock, and expiry release.
 
 > **Windows Smart App Control:** on machines with Smart App Control enabled, Windows may block the freshly built, unsigned `HikingStore.dll`. When that happens, `dotnet run` and `dotnet test` fail because the assembly cannot be loaded. Run on a machine without Smart App Control, in a dev container or in CI.
 
@@ -77,6 +89,7 @@ The 38 tests cover `CartService` (variant validation, stock limits, guest-cart m
 | [Routes and endpoints](docs/routes.md) | Every controller action, its HTTP method, auth requirement and response |
 | [Real-time (SignalR)](docs/realtime.md) | Hubs, groups, client methods and server events |
 | [Configuration and deployment](docs/configuration.md) | `appsettings`, secrets, email, Google login, store settings, database, deployment |
+| [Card payments](docs/payments.md) | Stripe and bank hosted-page setup, merchant requirements, webhooks, payment statuses, test mode, production checklist |
 | [Known issues](docs/known-issues.md) | Open limitations, required actions (secret rotation) and fixed items |
 
 Earlier, more focused write-ups are also in the repository root: `SECURITY_IMPLEMENTATION.md`, `SECURITY_ENHANCEMENTS_SUMMARY.md`, `SECURITY_ORDER_VALIDATION.md` and `PERFORMANCE_OPTIMIZATIONS.md`.

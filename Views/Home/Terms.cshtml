@@ -26,7 +26,15 @@
             <p>When you place an order we send a confirmation email with your order number. All orders depend on stock being available. If we can't fulfil an order, for example because of a stock or pricing error, we'll cancel it and let you know — you won't have paid anything.</p>
 
             <h2>3. Prices and payment</h2>
-            <p>Prices are in euros (@store.Currency) and include VAT. Your total, including any discount and delivery cost, is calculated at checkout and shown before you confirm. Orders are paid <strong>cash on delivery</strong>: you pay when you receive your items. We don't accept online card payments at this time.</p>
+            <p>Prices are in euros (@store.Currency) and include VAT. Your total, including any discount and delivery cost, is calculated at checkout and shown before you confirm. @if (PaymentProviders.ActiveProvider != null)
+            {
+                <text>You can pay by <strong>debit or credit card</strong> on our payment provider's secure page@(PaymentProviders.CashOnDeliveryEnabled ? Html.Raw(", or <strong>cash on delivery</strong>") : Html.Raw("")).
+                A card order is only confirmed once the payment provider confirms the payment; if the payment isn't completed within the time shown at checkout, the order is cancelled automatically and nothing is charged.</text>
+            }
+            else
+            {
+                <text>Orders are paid <strong>cash on delivery</strong>: you pay when you receive your items. We don't accept online card payments at this time.</text>
+            }</p>
 
             <h2>4. Discount codes</h2>
             <p>Each code has its own conditions (such as a minimum order amount, expiry date or limited number of uses), which are checked when you apply it and again at checkout. Codes can't be exchanged for cash.</p>

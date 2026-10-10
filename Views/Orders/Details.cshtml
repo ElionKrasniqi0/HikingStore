@@ -22,7 +22,14 @@
         </div>
         <div class="d-flex flex-wrap gap-2">
             <a class="btn btn-outline-secondary" asp-action="Invoice" asp-route-id="@Model.OrderId" target="_blank" rel="noopener"><i class="fa-solid fa-file-invoice me-2" aria-hidden="true"></i>Invoice</a>
-            @if (Model.CanBeCancelledByCustomer)
+            @if (Model.IsAwaitingCardPayment)
+            {
+                <a class="btn btn-primary" asp-controller="Payments" asp-action="Status" asp-route-id="@Model.OrderId"><i class="fa-solid fa-lock me-2" aria-hidden="true"></i>Complete payment</a>
+                <form method="post" asp-controller="Payments" asp-action="Cancel" asp-route-id="@Model.OrderId" data-confirm="Cancel this order? Your items will go back to your cart." data-once>
+                    <button type="submit" class="btn btn-outline-danger" data-busy-text="Cancelling…">Cancel order</button>
+                </form>
+            }
+            else if (Model.CanBeCancelledByCustomer)
             {
                 <form method="post" asp-action="CancelOrder" asp-route-id="@Model.OrderId" data-confirm="Cancel this order? This can't be undone." data-once>
                     <button type="submit" class="btn btn-outline-danger" data-busy-text="Cancelling…">Cancel order</button>
@@ -107,7 +114,11 @@
                         </address>
                         <h3 class="h6">Payment</h3>
                         <p class="mb-1">@PaymentMethods.DisplayName(Model.PaymentMethod)</p>
-                        <p class="small text-muted">Payment status: @Model.PaymentStatus</p>
+                        <p class="small text-muted">Payment status: @Model.PaymentStatusLabel@(Model.PaidAt.HasValue ? $" · {Model.PaidAt.Value:d MMM yyyy, HH:mm} UTC" : "")</p>
+                        @if (Model.IsCardPayment && Model.PaymentStatus == PaymentStatuses.Paid && Model.Status < OrderStatus.Shipped)
+                        {
+                            <p class="small text-muted">Need to cancel a paid order? <a asp-controller="Home" asp-action="Contact">Contact us</a> and we'll refund your card.</p>
+                        }
                         @if (!string.IsNullOrEmpty(Model.Comment))
                         {
                             <h3 class="h6">Your notes</h3>

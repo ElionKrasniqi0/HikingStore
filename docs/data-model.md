@@ -116,8 +116,14 @@ Unique index `(UserId, ProId)` filtered on `[UserId] IS NOT NULL`.
 | `ShippingCost` | decimal(18,2) | |
 | `TotalAmount` | decimal(18,2) | `Subtotal − DiscountAmount + ShippingCost` |
 | `CouponCode` | nvarchar(40)? | Set only when a discount was applied |
-| `PaymentMethod` | nvarchar(30) | DB default `CashOnDelivery` (`PaymentMethods` constants; the only method) |
-| `PaymentStatus` | nvarchar(30) | DB default `Pending`; values `Pending`, `Paid`, `Refunded`, `Cancelled` (`PaymentStatuses`) |
+| `PaymentMethod` | nvarchar(30) | DB default `CashOnDelivery`; `CashOnDelivery` or `Card` (`PaymentMethods`) |
+| `PaymentStatus` | nvarchar(30) | DB default `Pending`; values `Pending`, `Paid`, `Failed`, `Expired`, `Cancelled`, `RefundDue`, `RequiresReview`, `Refunded` (`PaymentStatuses`, see [Card payments](payments.md#payment-statuses)) |
+| `PaymentProvider` | nvarchar? | `Stripe` or `HostedGateway` for card orders |
+| `PaymentSessionId`, `PaymentTransactionId` | nvarchar? | Provider checkout session and payment (e.g. `cs_…`, `pi_…`); filtered indexes |
+| `PaymentAttempts` | int | Default 0; incremented per hosted session, used as an optimistic-concurrency check |
+| `PaymentExpiresAt` | DateTime? | Deadline for an unpaid card order; indexed with `PaymentStatus` |
+| `PaidAmount`, `PaidAt` | decimal(18,2)?, DateTime? | Amount and time confirmed by the provider webhook |
+| `PaymentFailureReason` | nvarchar? | Last decline/failure message from the provider |
 | `CheckoutToken` | uniqueidentifier? | One-time checkout token; prevents duplicate orders |
 | `Status` | `OrderStatus` (int) | Starts at `Received`; indexed |
 | `VerifiedDate`, `ProcessingDate`, `ShippedDate`, `CompletedDate`, `CancelledDate` | DateTime? | Set on first transition to that status |
@@ -126,7 +132,7 @@ Unique index `(UserId, ProId)` filtered on `[UserId] IS NOT NULL`.
 | `EstimatedDelivery` | DateTime? | 4 business days out when first moved to Processing/Shipped |
 | `AdminNotes` | string? | |
 
-Indexes: unique `CheckoutToken` (filtered `[CheckoutToken] IS NOT NULL`), `(UserId, OrderDate)`, `Status`. `CanBeCancelledByCustomer` (not mapped) is true before `Shipped` and when not already cancelled. Moving an order to `Completed` marks a pending cash-on-delivery payment `Paid`; cancelling marks a pending payment `Cancelled` and restocks items. Cancelled orders cannot be reopened.
+Indexes: unique `CheckoutToken` (filtered `[CheckoutToken] IS NOT NULL`), `(UserId, OrderDate)`, `Status`. `CanBeCancelledByCustomer` (not mapped) is true before `Shipped` and when not already cancelled; for card orders, only while the payment is still `Pending`. `IsCardPayment` and `IsAwaitingCardPayment` are unmapped helpers. Card orders are marked `Paid` only by a verified provider webhook (`PaymentService`). Moving an order to `Completed` marks a pending cash-on-delivery payment `Paid`; cancelling marks a pending payment `Cancelled` and restocks items. Cancelled orders cannot be reopened.
 
 ### `OrderDetails` (`OrderDetail`)
 | Column | Type | Notes |
@@ -241,7 +247,22 @@ The `SenderId` foreign key was created with **No Action** by `AddChatTables`, bu
 - `UserStatus` (`Enum/UserStatus.cs`: `Client`, `User`, `RO_RoleRestricted`) is only used as a property on the admin `Users_In_Role_ViewModel`; it is not persisted.
 - `RequestStatus` (`Enum/RequestStatus.cs`) is declared but not used anywhere.
 
-String constant sets in `Models/Order.cs`: `PaymentMethods` (`CashOnDelivery`) and `PaymentStatuses` (`Pending`, `Paid`, `Refunded`, `Cancelled`).
+String constant sets in `Models/Order.cs`: `PaymentMethods` (`CashOnDelivery`, `Card`) and `PaymentStatuses` (`Pending`, `Paid`, `Failed`, `Expired`, `Cancelled`, `RefundDue`, `RequiresReview`, `Refunded`). `PaymentStatuses.Label(status, method)` gives the customer-facing text, e.g. "Awaiting payment" for a pending card order.
+
+### `PaymentEvents` (`PaymentEvent`)
+Every verified provider notification that was processed. It makes webhook handling idempotent.
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `Id` | int, PK | |
+| `Provider` | nvarchar(30) | `Stripe` or `HostedGateway` |
+| `EventId` | nvarchar(255) | Provider event id (e.g. `evt_…`) |
+| `EventType` | nvarchar(100) | e.g. `checkout.session.completed` |
+| `OrderId` | int? | Matched order, if any (no FK, so events survive order deletion) |
+| `ReceivedAt` | DateTime | UTC |
+| `Result` | nvarchar(300) | What the event did, e.g. "Marked paid." |
+
+Unique index `(Provider, EventId)`.
 
 ## Delete behaviour summary
 
@@ -271,6 +292,7 @@ Located in `Data/Migrations`.
 | `20260111152244_AddShippingOptionToShoppingCart` | `ShoppingCarts.ShippingOption` |
 | `20260212000000_AddAdditionalImagesToProduct` | `Products.AdditionalImages` |
 | `20261009064136_StorefrontRefinement` | See below |
+| `20261010184937_CardPayments` | Additive only: the nullable `Orders` payment columns above, `PaymentAttempts` (default 0), the `PaymentEvents` table and payment indexes. Existing orders are unchanged |
 
 ### `20261009064136_StorefrontRefinement`
 

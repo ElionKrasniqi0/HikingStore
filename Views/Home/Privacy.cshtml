@@ -31,7 +31,14 @@
                 <li><strong>Newsletter</strong> — your email address, if you sign up.</li>
                 <li><strong>Wishlist and cart</strong> — the products you save or add to your cart.</li>
             </ul>
-            <p>We don't collect or store card or bank details: orders are paid cash on delivery.</p>
+            @if (PaymentProviders.ActiveProvider != null)
+            {
+                <p>We never see or store your card number or security code. Card payments are entered on our payment provider's secure, PCI DSS-compliant page; we only keep the provider's payment reference, the amount and the payment status for each order.</p>
+            }
+            else
+            {
+                <p>We don't collect or store card or bank details: orders are paid cash on delivery.</p>
+            }
 
             <h2>Why we use it</h2>
             <ul>

@@ -13,13 +13,51 @@
 <div class="admin-page-head">
     <div>
         <h1>Order @Model.OrderNumber <partial name="_StatusBadge" model="Model.Status" /></h1>
-        <p>Placed @Model.OrderDate.ToString("d MMM yyyy, HH:mm") UTC · @PaymentMethods.DisplayName(Model.PaymentMethod) · payment @Model.PaymentStatus.ToLowerInvariant()</p>
+        <p>Placed @Model.OrderDate.ToString("d MMM yyyy, HH:mm") UTC · @PaymentMethods.DisplayName(Model.PaymentMethod) · payment @Model.PaymentStatusLabel.ToLowerInvariant()</p>
     </div>
     <div class="d-flex gap-2">
         <a class="btn btn-outline-secondary btn-sm" asp-action="Index"><i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i>Orders</a>
         <a class="btn btn-outline-primary btn-sm" asp-action="Invoice" asp-route-id="@Model.OrderId" target="_blank" rel="noopener"><i class="fa-solid fa-print me-1" aria-hidden="true"></i>Invoice</a>
     </div>
 </div>
+
+@if (Model.PaymentStatus is PaymentStatuses.RefundDue or PaymentStatuses.RequiresReview)
+{
+    <div class="alert alert-danger" role="alert">
+        <strong>@(Model.PaymentStatus == PaymentStatuses.RefundDue ? "Refund due." : "Payment needs review.")</strong>
+        @(Model.PaymentStatus == PaymentStatuses.RefundDue
+            ? $"Money was captured for this cancelled order. Refund payment {Model.PaymentTransactionId} in the {Model.PaymentProvider} dashboard; the status updates to Refunded when the provider confirms it."
+            : $"The confirmed payment didn't match this order. Check payment {Model.PaymentTransactionId} in the {Model.PaymentProvider} dashboard before fulfilling it. See the admin notes for details.")
+    </div>
+}
+else if (Model.IsAwaitingCardPayment)
+{
+    <div class="alert alert-warning" role="alert">
+        <strong>Awaiting card payment.</strong> Don't prepare this order yet — it can only move past Received once @Model.PaymentProvider confirms the payment.
+        @if (Model.PaymentExpiresAt.HasValue)
+        {
+            <text>It's released automatically if unpaid after @Model.PaymentExpiresAt.Value.ToString("d MMM, HH:mm") UTC.</text>
+        }
+    </div>
+}
+
+@if (Model.IsCardPayment)
+{
+    <section class="panel mb-3" aria-labelledby="payment-h">
+        <div class="panel-head"><h2 id="payment-h">Card payment</h2></div>
+        <dl class="row small m-0 p-3">
+            <dt class="col-sm-4">Provider</dt><dd class="col-sm-8">@(Model.PaymentProvider ?? "—")</dd>
+            <dt class="col-sm-4">Status</dt><dd class="col-sm-8">@Model.PaymentStatusLabel</dd>
+            <dt class="col-sm-4">Paid</dt><dd class="col-sm-8">@(Model.PaidAt.HasValue ? $"{store.FormatPrice(Model.PaidAmount ?? 0)} on {Model.PaidAt.Value:d MMM yyyy, HH:mm} UTC" : "—")</dd>
+            <dt class="col-sm-4">Payment reference</dt><dd class="col-sm-8 text-break">@(Model.PaymentTransactionId ?? "—")</dd>
+            <dt class="col-sm-4">Checkout session</dt><dd class="col-sm-8 text-break">@(Model.PaymentSessionId ?? "—") (attempts: @Model.PaymentAttempts)</dd>
+            @if (!string.IsNullOrEmpty(Model.PaymentFailureReason))
+            {
+                <dt class="col-sm-4">Last failure</dt><dd class="col-sm-8">@Model.PaymentFailureReason</dd>
+            }
+        </dl>
+    </section>
+}
 
 <div class="row g-3">
     <div class="col-12 col-xl-8">

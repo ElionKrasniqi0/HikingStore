@@ -28,11 +28,13 @@ HikingStore/
 ├── Middleware/                    RateLimitingMiddleware
 ├── Models/                        EF entities (Product, Category, Order, Coupon, Review, Address, ...)
 ├── Services/                      Cart, catalog, coupons, orders, image upload, email, audit, StoreSettings
+│   └── Payments/                  Card payments: provider interface, Stripe and hosted-gateway providers,
+│                                  PaymentService, provider registry, expiry sweeper (see docs/payments.md)
 ├── ViewModels/                    CatalogViewModels.cs (filter, cards, facets, home, product details),
 │                                  CheckoutViewModel.cs (CheckoutInput, CheckoutViewModel)
 ├── Views/                         Storefront Razor views + Shared layout and partials
 ├── wwwroot/                       Static files (see Front-end assets)
-└── HikingStore.Tests/             xUnit tests (CartService, CouponService, models/utilities) on SQLite in-memory
+└── HikingStore.Tests/             xUnit tests (CartService, CouponService, payments, models/utilities) on SQLite in-memory
 ```
 
 ## Request pipeline
@@ -107,7 +109,11 @@ Every POST counts, including successful ones, and each attempt re-sets the cache
 | `OrderService` | Scoped | Checkout and cancellation |
 | `CatalogService` | Scoped | Storefront product queries |
 | `ImageUploadService` | Scoped | Validated image uploads |
-| `OrderEmailService` | **Singleton** | Background order emails |
+| `OrderEmailService` | **Singleton** | Background order emails, including payment received / not completed / needs attention |
+| `PaymentOptions` | Options | `Payments` configuration section |
+| `PaymentProviderRegistry` | Singleton | Builds the Stripe and hosted-gateway providers once, validates their configuration and picks the active card provider |
+| `PaymentService` | Scoped | Starts hosted payment sessions, applies verified webhooks once, cancels unpaid card orders |
+| `PendingPaymentSweeper` | Hosted service | Every 5 minutes, releases card orders whose payment window has passed |
 | `AdminAuditService` | Scoped | Admin audit logging |
 | SignalR | – | Detailed errors in Development, 64 KB max message, 15 s keep-alive and handshake timeout, 30 s client timeout |
 | Response compression | – | Brotli + Gzip, HTTPS enabled |
@@ -134,9 +140,9 @@ Single source of truth for cart contents and pricing; prices, discounts and ship
 `Normalize` trims and upper-cases codes. `ValidateAsync(code, userId, subtotal)` checks existence/`IsActive`, `StartsAt`/`ExpiresAt` (UTC), total `UsageLimit` vs `TimesUsed`, `MinimumOrderAmount`, and `UsageLimitPerUser` (counted from the user's non-cancelled orders with that `CouponCode`). `CalculateDiscount` applies a percentage (capped at 100 %, rounded to 2 decimals) or fixed amount, then `MaxDiscountAmount`, and never exceeds the subtotal.
 
 ### `OrderService`
-- `PlaceOrderAsync(userId, CheckoutInput)` – idempotent per `CheckoutToken` (re-submits return the existing order). Only `CashOnDelivery` is accepted; the shipping method must exist in `StoreSettings`. Rebuilds the cart summary and rejects empty carts, line issues and coupon errors. Inside an execution-strategy transaction it: decrements stock with a conditional `ExecuteUpdate` per product (fails if stock is insufficient), increments the coupon's `TimesUsed` (fails if the limit was just reached), creates the `Order` with `OrderDetails` snapshots (name, size, colour, unit price) and an initial "Order placed" `TrackingEvent`, optionally saves the address to `Addresses` (skips duplicates; first address becomes default), deletes the user's DB cart and commits. Then removes the session coupon.
+- `PlaceOrderAsync(userId, CheckoutInput)` – idempotent per `CheckoutToken` (re-submits return the existing order with `AlreadyPlaced = true`). Accepts `CashOnDelivery` when enabled, and `Card` when a provider is active; card orders also get `PaymentProvider` and `PaymentExpiresAt`. The shipping method must exist in `StoreSettings`. Rebuilds the cart summary and rejects empty carts, line issues and coupon errors. Inside an execution-strategy transaction it: decrements stock with a conditional `ExecuteUpdate` per product (fails if stock is insufficient), increments the coupon's `TimesUsed` (fails if the limit was just reached), creates the `Order` with `OrderDetails` snapshots (name, size, colour, unit price) and an initial "Order placed" `TrackingEvent`, optionally saves the address to `Addresses` (skips duplicates; first address becomes default), deletes the user's DB cart and commits. Then removes the session coupon.
 - `RestockCancelledOrderAsync(orderId)` – returns quantities to stock and decrements the coupon's `TimesUsed`.
-- `CancelByCustomerAsync(orderId, userId)` – allowed only before `Shipped`; sets `Cancelled`, `CancelledDate`, `PaymentStatus = Cancelled`, adds a tracking event and restocks, in one transaction.
+- `CancelByCustomerAsync(orderId, userId)` – for cash orders only (card orders go through `PaymentService.CancelUnpaidAsync`, which closes the provider session first); allowed only before `Shipped`; sets `Cancelled`, `CancelledDate`, `PaymentStatus = Cancelled`, adds a tracking event and restocks, in one transaction.
 
 ### `CatalogService`
 Storefront queries over active products (`IsActive = true`):

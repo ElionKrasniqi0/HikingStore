@@ -9,7 +9,9 @@
     {
         ("Ordering & payment", new[]
         {
-            ("How do I pay?", "All orders are paid cash on delivery. You pay the courier, or our staff if you pick up in store, when you receive your items. We don't ask for card details online."),
+            ("How do I pay?", PaymentProviders.ActiveProvider != null
+                ? "Pay by debit or credit card at checkout — you enter your card on our payment provider's secure page, and we never see or store your card number." + (PaymentProviders.CashOnDeliveryEnabled ? " You can also choose cash on delivery and pay when you receive your items." : "")
+                : "All orders are paid cash on delivery. You pay the courier, or our staff if you pick up in store, when you receive your items. We don't ask for card details online."),
             ("Do I need an account to order?", "You can fill your cart without an account. To check out you sign in or create a free account, so you can follow your order and see your order history. Anything in your cart is kept when you sign in."),
             ("Can I use a discount code?", "Yes. Enter it in your cart and the discount is applied straight away. Each code has its own conditions, such as a minimum order amount or an expiry date."),
             ("Are prices shown with VAT?", "Yes, all prices include VAT. Your invoice shows the VAT amount.")

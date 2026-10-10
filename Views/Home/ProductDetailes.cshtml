@@ -209,7 +209,14 @@
                     }
                 </div></li>
                 <li><i class="fa-solid fa-rotate-left" aria-hidden="true"></i><div><strong>@store.ReturnDays-day returns</strong><br /><span class="text-muted">Unused items in original condition. <a asp-action="Returns">Returns policy</a></span></div></li>
-                <li><i class="fa-solid fa-money-bill-wave" aria-hidden="true"></i><div><strong>Cash on delivery</strong><br /><span class="text-muted">Pay the courier when your order arrives.</span></div></li>
+                @if (PaymentProviders.ActiveProvider != null)
+                {
+                    <li><i class="fa-solid fa-lock" aria-hidden="true"></i><div><strong>Secure card payment</strong><br /><span class="text-muted">Pay by debit or credit card on a secure payment page.</span></div></li>
+                }
+                @if (PaymentProviders.CashOnDeliveryEnabled)
+                {
+                    <li><i class="fa-solid fa-money-bill-wave" aria-hidden="true"></i><div><strong>Cash on delivery</strong><br /><span class="text-muted">Pay the courier when your order arrives.</span></div></li>
+                }
             </ul>
 
             <div class="accordion pdp-accordion mt-4" id="pdp-details">

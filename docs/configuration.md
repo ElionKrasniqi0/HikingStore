@@ -121,7 +121,9 @@ The first entry is the default method. Checkout rejects a code that isn't in the
 
 ## Payment
 
-The only payment method is **cash on delivery** (`PaymentMethods.CashOnDelivery`); for the `pickup` shipping method the customer pays at the store. `OrderService` rejects any other payment method. No online payment provider is integrated and **no card data is collected or stored**. Orders start with payment status `Pending`; it becomes `Paid` when an admin marks the order `Completed`, and `Cancelled` when the order is cancelled.
+**Cash on delivery** (`PaymentMethods.CashOnDelivery`) is on by default (`Payments:CashOnDeliveryEnabled`). With the `pickup` shipping method, the customer pays at the store. Cash orders start with payment status `Pending`. The status becomes `Paid` when an admin marks the order `Completed`, and `Cancelled` when the order is cancelled.
+
+**Card payments** (`PaymentMethods.Card`) use a hosted payment page: Stripe Checkout or a bank's page. They are enabled by `Payments:CardProvider` plus the provider's secrets. No card data is collected or stored. A card order is marked `Paid` only by a signature-verified webhook. All `Payments` settings, the Stripe and bank merchant-account requirements, the webhook setup and the production checklist are in [Card payments](payments.md). Put `Payments:Stripe:SecretKey`, `Payments:Stripe:WebhookSecret` and `Payments:HostedGateway:SigningSecret` in user secrets or environment variables (`Payments__Stripe__SecretKey`, …), never in `appsettings.json`.
 
 ## Secrets
 

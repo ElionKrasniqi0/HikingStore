@@ -1,13 +1,14 @@
 using HikingStore.Data;
 using HikingStore.Enum;
 using HikingStore.Models;
+using HikingStore.Services.Payments;
 using HikingStore.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace HikingStore.Services
 {
-    public record PlaceOrderResult(bool Success, int OrderId, IReadOnlyList<string> Errors)
+    public record PlaceOrderResult(bool Success, int OrderId, IReadOnlyList<string> Errors, bool AlreadyPlaced = false)
     {
         public static PlaceOrderResult Fail(params string[] errors) => new(false, 0, errors);
     }
@@ -18,6 +19,7 @@ namespace HikingStore.Services
         private readonly CartService _cartService;
         private readonly CouponService _couponService;
         private readonly StoreSettings _settings;
+        private readonly PaymentProviderRegistry _payments;
         private readonly ILogger<OrderService> _logger;
 
         public OrderService(
@@ -25,12 +27,14 @@ namespace HikingStore.Services
             CartService cartService,
             CouponService couponService,
             IOptions<StoreSettings> settings,
+            PaymentProviderRegistry payments,
             ILogger<OrderService> logger)
         {
             _context = context;
             _cartService = cartService;
             _couponService = couponService;
             _settings = settings.Value;
+            _payments = payments;
             _logger = logger;
         }
 
@@ -52,10 +56,19 @@ namespace HikingStore.Services
                 .FirstOrDefaultAsync();
             if (existingOrderId.HasValue)
             {
-                return new PlaceOrderResult(true, existingOrderId.Value, Array.Empty<string>());
+                return new PlaceOrderResult(true, existingOrderId.Value, Array.Empty<string>(), AlreadyPlaced: true);
             }
 
-            if (input.PaymentMethod != PaymentMethods.CashOnDelivery)
+            ICardPaymentProvider? cardProvider = null;
+            if (input.PaymentMethod == PaymentMethods.Card)
+            {
+                cardProvider = _payments.ActiveProvider;
+                if (cardProvider == null)
+                {
+                    return PlaceOrderResult.Fail("Card payment isn't available right now. Please choose another payment method.");
+                }
+            }
+            else if (input.PaymentMethod != PaymentMethods.CashOnDelivery || !_payments.CashOnDeliveryEnabled)
             {
                 return PlaceOrderResult.Fail("Please choose an available payment method.");
             }
@@ -129,8 +142,10 @@ namespace HikingStore.Services
                     ShippingCost = summary.ShippingCost,
                     TotalAmount = summary.Total,
                     CouponCode = summary.Discount > 0 ? summary.CouponCode : null,
-                    PaymentMethod = PaymentMethods.CashOnDelivery,
+                    PaymentMethod = cardProvider != null ? PaymentMethods.Card : PaymentMethods.CashOnDelivery,
                     PaymentStatus = PaymentStatuses.Pending,
+                    PaymentProvider = cardProvider?.Name,
+                    PaymentExpiresAt = cardProvider != null ? now.AddMinutes(_payments.Options.EffectiveTimeoutMinutes) : null,
                     CheckoutToken = input.CheckoutToken,
                     Status = OrderStatus.Received,
                     TrackingNumber = null,
@@ -152,7 +167,7 @@ namespace HikingStore.Services
                             EventDate = now,
                             Location = _settings.Name,
                             Status = OrderStatus.Received.ToString(),
-                            Description = "Order placed",
+                            Description = cardProvider != null ? "Order placed — awaiting card payment" : "Order placed",
                             IsMilestone = true
                         }
                     }
@@ -226,6 +241,10 @@ namespace HikingStore.Services
                 if (order == null)
                 {
                     return (false, "Order not found.");
+                }
+                if (order.IsCardPayment)
+                {
+                    return (false, "Card orders are cancelled through the payment page so the payment can be stopped first.");
                 }
                 if (!order.CanBeCancelledByCustomer)
                 {

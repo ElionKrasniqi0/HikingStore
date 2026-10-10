@@ -43,6 +43,7 @@ namespace HikingStore.Data
         public DbSet<Coupon> Coupons { get; set; }
         public DbSet<Address> Addresses { get; set; }
         public DbSet<NewsletterSubscriber> NewsletterSubscribers { get; set; }
+        public DbSet<PaymentEvent> PaymentEvents { get; set; }
 
         /// <summary>
         /// Removes rows whose foreign keys to AspNetUsers don't cascade, so the account itself can be deleted.
@@ -93,6 +94,15 @@ namespace HikingStore.Data
                 entity.HasIndex(o => o.Status);
                 entity.Property(o => o.PaymentMethod).HasDefaultValue(PaymentMethods.CashOnDelivery);
                 entity.Property(o => o.PaymentStatus).HasDefaultValue(PaymentStatuses.Pending);
+                entity.HasIndex(o => o.PaymentSessionId).HasFilter("[PaymentSessionId] IS NOT NULL");
+                entity.HasIndex(o => o.PaymentTransactionId).HasFilter("[PaymentTransactionId] IS NOT NULL");
+                entity.HasIndex(o => new { o.PaymentStatus, o.PaymentExpiresAt });
+            });
+
+            modelBuilder.Entity<PaymentEvent>(entity =>
+            {
+                entity.HasIndex(e => new { e.Provider, e.EventId }).IsUnique();
+                entity.HasIndex(e => e.OrderId);
             });
 
             modelBuilder.Entity<ShoppingCart>()

@@ -18,7 +18,6 @@
 
     <form method="post" asp-action="Checkout" data-once novalidate id="checkout-form">
         <input type="hidden" asp-for="Input.CheckoutToken" />
-        <input type="hidden" asp-for="Input.PaymentMethod" value="@PaymentMethods.CashOnDelivery" />
         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
         <div class="two-col">
@@ -125,14 +124,50 @@
 
                 <section class="card-hs" aria-labelledby="payment-title">
                     <h2 id="payment-title">4. Payment</h2>
-                    <label class="option-card">
-                        <input class="form-check-input" type="radio" checked disabled aria-describedby="cod-help" />
-                        <span class="grow">
-                            <strong class="d-block"><i class="fa-solid fa-money-bill-wave me-2" aria-hidden="true"></i>Cash on delivery</strong>
-                            <span class="small text-muted" id="cod-help">Pay the courier in cash when your order arrives. Nothing is charged now.</span>
-                        </span>
-                    </label>
-                    <p class="small text-muted mt-3 mb-0"><i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Online card payments are not available yet.</p>
+                    <fieldset>
+                        <legend class="visually-hidden">Payment method</legend>
+                        @if (Model.CardProviderName != null)
+                        {
+                            <label class="option-card">
+                                <input class="form-check-input" type="radio" name="Input.PaymentMethod" value="@PaymentMethods.Card" aria-describedby="card-help"
+                                       @(Model.Input.PaymentMethod == PaymentMethods.Card ? "checked" : "") data-payment-method required />
+                                <span class="grow">
+                                    <strong class="d-block">
+                                        <i class="fa-regular fa-credit-card me-2" aria-hidden="true"></i>@Model.CardProviderName
+                                        @if (Model.CardTestMode)
+                                        {
+                                            <span class="status-badge status-Processing ms-1">Test mode</span>
+                                        }
+                                    </strong>
+                                    <span class="small text-muted d-block" id="card-help">
+                                        Visa, Mastercard and other debit or credit cards. You'll enter your card on the payment provider's secure page — HikingStore never sees or stores your card number.
+                                        Your items are reserved for @Model.CardPaymentTimeoutMinutes minutes while you pay.
+                                    </span>
+                                    @if (Model.CardTestMode)
+                                    {
+                                        <span class="small d-block mt-1 fw-semibold">Test mode: no real money is charged. Use a provider test card.</span>
+                                    }
+                                </span>
+                                <span class="cost" aria-hidden="true"><i class="fa-solid fa-lock"></i></span>
+                            </label>
+                        }
+                        @if (Model.CashOnDeliveryAvailable)
+                        {
+                            <label class="option-card">
+                                <input class="form-check-input" type="radio" name="Input.PaymentMethod" value="@PaymentMethods.CashOnDelivery" aria-describedby="cod-help"
+                                       @(Model.Input.PaymentMethod != PaymentMethods.Card || Model.CardProviderName == null ? "checked" : "") data-payment-method required />
+                                <span class="grow">
+                                    <strong class="d-block"><i class="fa-solid fa-money-bill-wave me-2" aria-hidden="true"></i>Cash on delivery</strong>
+                                    <span class="small text-muted" id="cod-help">Pay the courier in cash when your order arrives. Nothing is charged now.</span>
+                                </span>
+                            </label>
+                        }
+                    </fieldset>
+                    <span asp-validation-for="Input.PaymentMethod"></span>
+                    @if (!Model.HasPaymentMethod)
+                    {
+                        <p class="alert alert-warning mt-3 mb-0" role="alert">No payment method is available right now. Please contact us to place your order.</p>
+                    }
                 </section>
             </div>
 
@@ -142,8 +177,13 @@
                     <div data-checkout-summary aria-live="polite">
                         <partial name="_OrderSummary" model="Model.Cart" />
                     </div>
-                    <button type="submit" class="btn btn-primary btn-lg w-100 mt-2" data-busy-text="Placing order…" @(Model.Cart.HasIssues ? "disabled" : "")>
-                        Place order
+                    @{ var payByCard = Model.CardProviderName != null && (Model.Input.PaymentMethod == PaymentMethods.Card || !Model.CashOnDeliveryAvailable); }
+                    <button type="submit" class="btn btn-primary btn-lg w-100 mt-2" data-checkout-submit
+                            data-busy-text="@(payByCard ? "Opening secure payment…" : "Placing order…")"
+                            data-label-card="Continue to secure payment" data-label-cod="Place order"
+                            data-busy-card="Opening secure payment…" data-busy-cod="Placing order…"
+                            @(Model.Cart.HasIssues || !Model.HasPaymentMethod ? "disabled" : "")>
+                        @(payByCard ? "Continue to secure payment" : "Place order")
                     </button>
                     @if (Model.Cart.HasIssues)
                     {
@@ -151,7 +191,9 @@
                     }
                     <p class="small text-muted mt-3 mb-0">
                         By placing your order you agree to our <a asp-controller="Home" asp-action="Terms">terms</a> and
-                        <a asp-controller="Home" asp-action="Privacy">privacy policy</a>. You'll pay <strong>on delivery</strong>.
+                        <a asp-controller="Home" asp-action="Privacy">privacy policy</a>.
+                        <span data-pay-note="card" @(payByCard ? "" : "hidden")>You'll pay by card on a secure payment page; your order is confirmed once the payment provider confirms the payment.</span>
+                        <span data-pay-note="cod" @(payByCard ? "hidden" : "")>You'll pay <strong>on delivery</strong>.</span>
                     </p>
                     <a class="d-inline-block small mt-3" asp-action="Index"><i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i>Back to cart</a>
                 </div>
@@ -174,6 +216,16 @@
                     } catch { /* the server recalculates totals on submit anyway */ }
                 });
             });
+            const submit = form.querySelector('[data-checkout-submit]');
+            const syncPayment = () => {
+                const selected = form.querySelector('[data-payment-method]:checked');
+                const card = selected && selected.value === '@PaymentMethods.Card';
+                submit.textContent = card ? submit.dataset.labelCard : submit.dataset.labelCod;
+                submit.dataset.busyText = card ? submit.dataset.busyCard : submit.dataset.busyCod;
+                form.querySelectorAll('[data-pay-note]').forEach(n => { n.hidden = n.dataset.payNote !== (card ? 'card' : 'cod'); });
+            };
+            form.querySelectorAll('[data-payment-method]').forEach(r => r.addEventListener('change', syncPayment));
+            if (form.querySelector('[data-payment-method]')) syncPayment();
             const fields = {
                 fullName: 'Input_FullName', phone: 'Input_PhoneNumber', address: 'Input_AddressLine',
                 city: 'Input_City', postal: 'Input_PostalCode', country: 'Input_Country'

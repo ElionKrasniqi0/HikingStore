@@ -41,7 +41,14 @@
             <p class="small text-muted">Delivery times are estimates and start once your order is confirmed. Business days are Monday to Friday, excluding public holidays.</p>
 
             <h2>Paying for your order</h2>
-            <p>All orders are currently paid <strong>cash on delivery</strong>: you pay the courier (or our store staff, for pickup) when you receive your items. We don't take card details online. Prices include VAT.</p>
+            @if (PaymentProviders.ActiveProvider != null)
+            {
+                <p>Pay by <strong>debit or credit card</strong> at checkout on our payment provider's secure page@(PaymentProviders.CashOnDeliveryEnabled ? Html.Raw(", or choose <strong>cash on delivery</strong> and pay the courier (or our store staff, for pickup) when you receive your items") : Html.Raw("")). We prepare card orders once the payment is confirmed. Prices include VAT.</p>
+            }
+            else
+            {
+                <p>All orders are currently paid <strong>cash on delivery</strong>: you pay the courier (or our store staff, for pickup) when you receive your items. We don't take card details online. Prices include VAT.</p>
+            }
 
             <h2>Tracking your order</h2>
             <p>We email you when your order is confirmed and each time its status changes. You can follow every step, including the tracking number once it ships, under <a asp-controller="Orders" asp-action="Index">My orders</a>.</p>

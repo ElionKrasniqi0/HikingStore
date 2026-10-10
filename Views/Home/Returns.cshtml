@@ -30,7 +30,9 @@
                 <li><strong>Send us a return request.</strong> Use the <a asp-action="Contact" asp-route-subject="Return request">contact form</a> and include your order number (for example ORD001010) and the items you want to return.</li>
                 <li><strong>Wait for our reply.</strong> We'll confirm the return and tell you how to send the items back or when to bring them to the store.</li>
                 <li><strong>Pack the items</strong> in their original packaging with all tags and accessories.</li>
-                <li><strong>Get your refund.</strong> Once we've received and checked the items, we refund the item price. Because orders are paid cash on delivery, we agree the refund method with you (bank transfer or cash in store).</li>
+                <li><strong>Get your refund.</strong> Once we've received and checked the items, we refund the item price. @(PaymentProviders.ActiveProvider != null
+                    ? "Card payments are refunded to the same card; for cash-on-delivery orders we agree the refund method with you (bank transfer or cash in store)."
+                    : "Because orders are paid cash on delivery, we agree the refund method with you (bank transfer or cash in store).")</li>
             </ol>
 
             <h2>What can't be returned</h2>

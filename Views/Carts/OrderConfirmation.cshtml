@@ -5,6 +5,7 @@
     ViewData["Title"] = $"Order {Model.OrderNumber} confirmed";
     ViewData["NoIndex"] = true;
     var isPickup = store.ShippingMethods.Any(m => m.Code == "pickup" && m.Name == Model.ShippingService);
+    var paidByCard = Model.IsCardPayment && Model.PaymentStatus == PaymentStatuses.Paid;
 }
 
 <div class="container-hs" style="max-width:860px">
@@ -20,7 +21,11 @@
         <p class="m-0">Order number <strong>#@Model.OrderNumber</strong> · @Model.OrderDate.ToString("d MMM yyyy, HH:mm") UTC</p>
         <p class="text-muted mt-2 mb-0">
             We've sent a confirmation to <strong>@Model.Email</strong>.
-            @if (isPickup)
+            @if (paidByCard)
+            {
+                <text>Your card payment of <strong>@store.FormatPrice(Model.PaidAmount ?? Model.TotalAmount)</strong> was confirmed by the payment provider.</text>
+            }
+            else if (isPickup)
             {
                 <text>Please have <strong>@store.FormatPrice(Model.TotalAmount)</strong> ready to pay when you collect your order.</text>
             }
@@ -67,7 +72,7 @@
                         <li class="discount"><span>Discount (@Model.CouponCode)</span><span>−@store.FormatPrice(Model.DiscountAmount)</span></li>
                     }
                     <li><span>Shipping (@Model.ShippingService)</span><span>@(Model.ShippingCost == 0 ? "Free" : store.FormatPrice(Model.ShippingCost))</span></li>
-                    <li class="total"><span>@(isPickup ? "Total to pay at pickup" : "Total to pay on delivery")</span><span>@store.FormatPrice(Model.TotalAmount)</span></li>
+                    <li class="total"><span>@(paidByCard ? "Total paid" : isPickup ? "Total to pay at pickup" : "Total to pay on delivery")</span><span>@store.FormatPrice(Model.TotalAmount)</span></li>
                 </ul>
             </section>
         </div>
@@ -97,20 +102,20 @@
                     </address>
                 }
                 <h3 class="h6">Payment</h3>
-                <p class="mb-3">@PaymentMethods.DisplayName(Model.PaymentMethod)</p>
+                <p class="mb-3">@PaymentMethods.DisplayName(Model.PaymentMethod) · @Model.PaymentStatusLabel</p>
                 <h3 class="h6">What happens next</h3>
                 <ol class="small text-muted ps-3 m-0">
                     @if (isPickup)
                     {
                         <li>We confirm your order and get it ready at the store.</li>
                         <li>We email you each time the order status changes, so you know when to come in.</li>
-                        <li>Bring your order number and pay when you collect it.</li>
+                        <li>@(paidByCard ? "Bring your order number when you collect it — it's already paid." : "Bring your order number and pay when you collect it.")</li>
                     }
                     else
                     {
                         <li>We confirm your order and prepare it for shipping.</li>
                         <li>You get an email when it ships, with a tracking number.</li>
-                        <li>Pay the courier when your parcel arrives.</li>
+                        <li>@(paidByCard ? "Your order is paid — nothing is due on delivery." : "Pay the courier when your parcel arrives.")</li>
                     }
                 </ol>
             </section>
