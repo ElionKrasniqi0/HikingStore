@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HikingStore.Data;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
@@ -15,18 +16,24 @@ namespace HikingStore.Areas.Identity.Pages.Account.Manage
 {
     public partial class EmailModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
+        private readonly ILogger<EmailModel> _logger;
+        private readonly HikingStore.Services.IEmailTemplateService _templates;
 
         public EmailModel(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager,
-            IEmailSender emailSender)
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            IEmailSender emailSender,
+            ILogger<EmailModel> logger,
+            HikingStore.Services.IEmailTemplateService templates)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
+            _logger = logger;
+            _templates = templates;
         }
 
         public string Username { get; set; }
@@ -49,7 +56,7 @@ namespace HikingStore.Areas.Identity.Pages.Account.Manage
             public string NewEmail { get; set; }
         }
 
-        private async Task LoadAsync(IdentityUser user)
+        private async Task LoadAsync(ApplicationUser user)
         {
             var email = await _userManager.GetEmailAsync(user);
             Email = email;
@@ -89,22 +96,37 @@ namespace HikingStore.Areas.Identity.Pages.Account.Manage
             }
 
             var email = await _userManager.GetEmailAsync(user);
-            if (Input.NewEmail != email)
+            Input.NewEmail = Input.NewEmail.Trim();
+            if (!string.Equals(Input.NewEmail, email, StringComparison.OrdinalIgnoreCase))
             {
+                var existing = await _userManager.FindByEmailAsync(Input.NewEmail);
+                if (existing != null && existing.Id != user.Id)
+                {
+                    ModelState.AddModelError("Input.NewEmail", "That email address is already used by another account.");
+                    await LoadAsync(user);
+                    return Page();
+                }
+
                 var userId = await _userManager.GetUserIdAsync(user);
                 var code = await _userManager.GenerateChangeEmailTokenAsync(user, Input.NewEmail);
                 code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                 var callbackUrl = Url.Page(
                     "/Account/ConfirmEmailChange",
                     pageHandler: null,
-                    values: new { userId = userId, email = Input.NewEmail, code = code },
+                    values: new { area = "Identity", userId, email = Input.NewEmail, code },
                     protocol: Request.Scheme);
-                await _emailSender.SendEmailAsync(
-                    Input.NewEmail,
-                    "Confirm your email",
-                    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                if (!await TrySendAsync(Input.NewEmail, "Confirm your new HikingStore email",
+                        _templates.GenerateActionEmail(
+                            "Confirm your new email address",
+                            "Open the link below to make this your HikingStore sign-in address. Your account email changes only after you confirm.",
+                            "Confirm new email",
+                            callbackUrl!,
+                            "If you didn't request this change, ignore this email and consider changing your password.")))
+                {
+                    return RedirectToPage();
+                }
 
-                StatusMessage = "Confirmation link to change email sent. Please check your email.";
+                StatusMessage = $"We've sent a confirmation link to {Input.NewEmail}. Your email changes once you open it.";
                 return RedirectToPage();
             }
 
@@ -135,13 +157,30 @@ namespace HikingStore.Areas.Identity.Pages.Account.Manage
                 pageHandler: null,
                 values: new { area = "Identity", userId = userId, code = code },
                 protocol: Request.Scheme);
-            await _emailSender.SendEmailAsync(
-                email,
-                "Confirm your email",
-                $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+            if (!await TrySendAsync(email, "Confirm your HikingStore email",
+                    _templates.GenerateEmailConfirmationTemplate(
+                        HtmlEncoder.Default.Encode(callbackUrl!), HtmlEncoder.Default.Encode(user.FirstName ?? email))))
+            {
+                return RedirectToPage();
+            }
 
-            StatusMessage = "Verification email sent. Please check your email.";
+            StatusMessage = "Verification email sent. Please check your inbox.";
             return RedirectToPage();
+        }
+
+        private async Task<bool> TrySendAsync(string to, string subject, string body)
+        {
+            try
+            {
+                await _emailSender.SendEmailAsync(to, subject, body);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send account email ({Subject})", subject);
+                StatusMessage = "Error: we couldn't send the email right now. Please try again later.";
+                return false;
+            }
         }
     }
 }

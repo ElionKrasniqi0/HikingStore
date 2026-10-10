@@ -1,794 +1,104 @@
 ﻿@model List<Contact>
-@using Microsoft.AspNetCore.Mvc.TagHelpers
-@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
-    ViewData["Title"] = "Contact Messages";
-    var todayCount = Model.Count(m => m.CreatedDate.Date == DateTime.Today);
+    ViewData["Title"] = "Messages";
 }
 
-<style>
-    /* Hero Section */
-    .hero-section {
-        background: linear-gradient(135deg, #3b5d50 0%, #2d4a3f 100%);
-        color: white;
-        padding: 30px 0;
-        margin-bottom: 40px;
-    }
-
-    .hero-section h1 {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 10px;
-    }
-
-    .hero-section p {
-        font-size: 1.1rem;
-        opacity: 0.9;
-        margin-bottom: 0;
-    }
-
-    /* Statistics Cards */
-    .stat-card {
-        border-radius: 12px;
-        border: none;
-        transition: all 0.3s ease;
-        overflow: hidden;
-    }
-
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    }
-
-    .stat-card .card-body {
-        padding: 20px;
-    }
-
-    .stat-card h4 {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 5px;
-    }
-
-    .stat-card p {
-        font-size: 0.9rem;
-        opacity: 0.9;
-        margin-bottom: 0;
-    }
-
-    /* Filter Card */
-    .filter-card {
-        border-radius: 12px;
-        border: 1px solid #e5e7eb;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        margin-bottom: 30px;
-    }
-
-    .filter-card .card-body {
-        padding: 25px;
-    }
-
-    /* Messages Table */
-    .messages-table-card {
-        border-radius: 12px;
-        border: 1px solid #e5e7eb;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        overflow: hidden;
-    }
-
-    .messages-table-card .card-header {
-        background: #f8fafc;
-        border-bottom: 1px solid #e5e7eb;
-        padding: 20px 25px;
-    }
-
-    .messages-table-card .table {
-        margin-bottom: 0;
-    }
-
-    .messages-table-card .table thead {
-        background: #f8fafc;
-    }
-
-    .messages-table-card .table th {
-        font-weight: 600;
-        font-size: 0.875rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: #6b7280;
-        padding: 15px;
-        border-bottom: 2px solid #e5e7eb;
-    }
-
-    .messages-table-card .table td {
-        padding: 15px;
-        vertical-align: middle;
-        border-bottom: 1px solid #f3f4f6;
-    }
-
-    .messages-table-card .table tbody tr {
-        transition: all 0.2s ease;
-        cursor: pointer;
-    }
-
-    .messages-table-card .table tbody tr:hover {
-        background: #f9fafb;
-    }
-
-    /* Avatar */
-    .avatar-sm {
-        width: 40px;
-        height: 40px;
-        font-size: 1rem;
-        background: #f3f4f6;
-        color: #3b5d50;
-    }
-
-    /* Message Preview */
-    .message-preview {
-        max-width: 300px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    /* Empty State */
-    .empty-state {
-        text-align: center;
-        padding: 60px 20px;
-    }
-
-    .empty-state i {
-        font-size: 4rem;
-        color: #d1d5db;
-        margin-bottom: 20px;
-    }
-
-    .empty-state h3 {
-        color: #6b7280;
-        margin-bottom: 10px;
-    }
-
-    .empty-state p {
-        color: #9ca3af;
-        margin-bottom: 0;
-    }
-
-    /* Responsive */
-    @@media (max-width: 768px) {
-        .hero-section {
-            padding: 20px 0;
-        }
-
-        .hero-section h1 {
-            font-size: 2rem;
-        }
-
-        .stat-card {
-            margin-bottom: 15px;
-        }
-
-        .messages-table-card .table {
-            font-size: 0.875rem;
-        }
-
-        .messages-table-card .table th,
-        .messages-table-card .table td {
-            padding: 10px 8px;
-        }
-
-        .message-preview {
-            max-width: 150px;
-        }
-
-        .btn-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
-        }
-    }
-</style>
-
-<br />
-<br />
-<br />
-
-<!-- Hero Section -->
-<div class="hero-section">
-    <div class="container-fluid px-4">
-        <div class="row align-items-center">
-            <div class="col-lg-8">
-                <h1>Contact Messages</h1>
-                <p>Manage and respond to customer inquiries</p>
-            </div>
-            <div class="col-lg-4 text-end">
-                <button class="btn btn-light btn-lg" onclick="refreshMessages()">
-                    <i class="fas fa-sync-alt me-2"></i>Refresh
-                </button>
-            </div>
-        </div>
+<div class="admin-page-head">
+    <div>
+        <h1>Contact messages</h1>
+        <p>@Model.Count message@(Model.Count == 1 ? "" : "s") from the contact form. Replies are sent by email.</p>
     </div>
 </div>
 
-<div class="container-fluid px-4 pb-5">
-    <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card stat-card bg-primary text-white">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="flex-grow-1">
-                            <h4 class="mb-0">@Model.Count</h4>
-                            <p class="mb-0">Total Messages</p>
-                        </div>
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-inbox fa-2x opacity-50"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<div class="panel" data-messages>
+    @if (Model.Count == 0)
+    {
+        <div class="empty-state">
+            <i class="fa-regular fa-envelope-open" aria-hidden="true"></i>
+            <h2>Inbox is empty</h2>
+            <p>Messages sent through the contact page will appear here.</p>
         </div>
-
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card stat-card bg-success text-white">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="flex-grow-1">
-                            <h4 class="mb-0">@Model.Count(m => !string.IsNullOrEmpty(m.Subject))</h4>
-                            <p class="mb-0">With Subject</p>
-                        </div>
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-tag fa-2x opacity-50"></i>
-                        </div>
-                    </div>
+    }
+    @foreach (var m in Model)
+    {
+        <article class="message-card" data-message="@m.CoId" aria-labelledby="msg-@m.CoId">
+            <div class="d-flex flex-wrap justify-content-between gap-2 mb-2">
+                <div class="min-w-0">
+                    <h2 class="h6 font-body fw-bold m-0" id="msg-@m.CoId">@(string.IsNullOrWhiteSpace(m.Subject) ? "(No subject)" : m.Subject)</h2>
+                    <div class="small text-muted text-break">@m.Name · <a href="mailto:@m.Email">@m.Email</a></div>
                 </div>
+                <div class="small text-muted text-nowrap">@m.CreatedDate.ToString("d MMM yyyy, HH:mm") UTC</div>
             </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card stat-card bg-warning text-white">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="flex-grow-1">
-                            <h4 class="mb-0">@Model.Count(m => string.IsNullOrEmpty(m.Subject))</h4>
-                            <p class="mb-0">No Subject</p>
-                        </div>
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-exclamation-circle fa-2x opacity-50"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card stat-card bg-info text-white">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="flex-grow-1">
-                            <h4 class="mb-0">@todayCount</h4>
-                            <p class="mb-0">Today's Messages</p>
-                        </div>
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-clock fa-2x opacity-50"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Search Filter -->
-    <div class="card filter-card">
-        <div class="card-body">
-            <div class="row g-3">
-                <div class="col-md-10">
-                    <label class="form-label fw-semibold">Search Messages</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="searchInput" 
-                               placeholder="Search by name, email, subject, or message..." 
-                               onkeypress="if(event.key === 'Enter') searchMessages()">
-                        <button class="btn btn-outline-secondary" type="button" onclick="searchMessages()">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button class="btn btn-outline-secondary w-100" onclick="clearSearch()">
-                        <i class="fas fa-times me-2"></i>Clear
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Messages Table -->
-    <div class="card messages-table-card">
-        <div class="card-header">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <h5 class="mb-0 fw-semibold">Customer Messages</h5>
-                </div>
-                <div class="col-md-6 text-end">
-                    <span class="text-muted">Showing <strong id="messageCount">@Model.Count</strong> @(Model.Count == 1 ? "message" : "messages")</span>
-                </div>
-            </div>
-        </div>
-        <div class="card-body p-0">
-            @if (Model.Any())
-            {
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0" id="messagesTable">
-                        <thead>
-                            <tr>
-                                <th>Contact</th>
-                                <th>Subject</th>
-                                <th>Message Preview</th>
-                                <th>Date</th>
-                                <th class="text-end">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in Model)
-                            {
-                                <tr id="message-@item.CoId" onclick="viewMessage(@item.CoId, '@item.Name', '@item.Email', '@(item.Subject ?? "")', '@(item.Message ?? "")')">
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar-sm bg-light rounded-circle d-flex align-items-center justify-content-center me-3">
-                                                <i class="fas fa-user"></i>
-                                            </div>
-                                            <div>
-                                                <div class="fw-semibold">@item.Name</div>
-                                                <small class="text-muted">@item.Email</small>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        @if (!string.IsNullOrEmpty(item.Subject))
-                                        {
-                                            <span class="fw-medium">@item.Subject</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted fst-italic">No subject</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        <div class="message-preview">
-                                            @if (!string.IsNullOrEmpty(item.Message))
-                                            {
-                                                if (item.Message.Length > 80)
-                                                {
-                                                    <span>@item.Message.Substring(0, 80)...</span>
-                                                }
-                                                else
-                                                {
-                                                    <span>@item.Message</span>
-                                                }
-                                            }
-                                            else
-                                            {
-                                                <span class="text-muted fst-italic">No message</span>
-                                            }
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div>@item.CreatedDate.ToString("MMM dd, yyyy")</div>
-                                        <small class="text-muted">@item.CreatedDate.ToString("hh:mm tt")</small>
-                                    </td>
-                                    <td class="text-end" onclick="event.stopPropagation()">
-                                        <div class="btn-group" role="group">
-                                            <button class="btn btn-sm btn-outline-primary view-message"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#messageModal"
-                                                    data-id="@item.CoId"
-                                                    data-name="@item.Name"
-                                                    data-email="@item.Email"
-                                                    data-subject="@(item.Subject ?? "")"
-                                                    data-message="@(item.Message ?? "")">
-                                                <i class="fas fa-eye me-1"></i>View
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-success reply-message"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#replyModal"
-                                                    data-id="@item.CoId"
-                                                    data-email="@item.Email"
-                                                    data-subject="@(item.Subject ?? "")"
-                                                    data-name="@item.Name">
-                                                <i class="fas fa-reply me-1"></i>Reply
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger delete-message"
-                                                    data-id="@item.CoId"
-                                                    data-name="@item.Name">
-                                                <i class="fas fa-trash me-1"></i>Delete
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
-            else
-            {
-                <div class="empty-state">
-                    <i class="fas fa-envelope-open"></i>
-                    <h3>No Messages Found</h3>
-                    <p>All customer messages will appear here.</p>
-                </div>
-            }
-        </div>
-    </div>
-</div>
-
-<!-- Message Detail Modal -->
-<div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="messageModalLabel">
-                    <i class="fas fa-envelope me-2"></i>Message Details
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label text-muted small mb-1">From</label>
-                            <p class="fw-bold mb-0" id="modalUserName"></p>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label text-muted small mb-1">Email</label>
-                            <p class="mb-0" id="modalUserEmail"></p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label text-muted small mb-1">Subject</label>
-                            <p class="mb-0" id="modalSubject"></p>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label text-muted small mb-1">Message ID</label>
-                            <p class="mb-0 text-muted" id="modalMessageId"></p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="border-top pt-3">
-                    <label class="form-label text-muted small mb-2">Message</label>
-                    <div class="bg-light rounded p-4">
-                        <p class="mb-0" id="modalMessage" style="white-space: pre-wrap;"></p>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer border-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-2"></i>Close
+            <p class="body mb-3">@m.Message</p>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#reply-@m.CoId" aria-expanded="false" aria-controls="reply-@m.CoId">
+                    <i class="fa-solid fa-reply me-1" aria-hidden="true"></i>Reply
                 </button>
-                <button type="button" class="btn btn-primary" id="replyFromView">
-                    <i class="fas fa-reply me-2"></i>Reply to Message
-                </button>
+                <button class="btn btn-sm btn-outline-danger" type="button" data-delete-message="@m.CoId">Delete</button>
             </div>
-        </div>
-    </div>
-</div>
-
-<!-- Reply Modal -->
-<div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="replyModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="replyModalLabel">
-                    <i class="fas fa-reply me-2"></i>Reply to Message
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="replyForm">
-                    <input type="hidden" id="replyMessageId">
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">To</label>
-                            <input type="email" class="form-control" id="replyToEmail" readonly>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Customer Name</label>
-                            <input type="text" class="form-control" id="replyCustomerName" readonly>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Subject</label>
-                        <input type="text" class="form-control" id="replySubject" required>
-                        <div class="form-text">The subject will automatically include "Re:" prefix.</div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Your Reply Message</label>
-                        <textarea class="form-control" id="replyMessage" rows="8" placeholder="Type your response here..." required></textarea>
-                        <div class="form-text">Your reply will be sent directly to the customer's email address.</div>
-                    </div>
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        <strong>Tip:</strong> Be professional and courteous in your response. Include any relevant information the customer might need.
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer border-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-2"></i>Cancel
-                </button>
-                <button type="button" class="btn btn-success" id="sendReply">
-                    <i class="fas fa-paper-plane me-2"></i>Send Reply
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete the message from <strong id="deleteCustomerName"></strong>?</p>
-                <p class="text-danger"><strong>This action cannot be undone.</strong></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
-                    <i class="fas fa-trash me-2"></i>Delete Message
-                </button>
-            </div>
-        </div>
-    </div>
+            <form class="collapse mt-3" id="reply-@m.CoId" data-reply-form="@m.CoId">
+                <div class="mb-2">
+                    <label class="form-label small" for="subject-@m.CoId">Subject</label>
+                    <input class="form-control" id="subject-@m.CoId" name="replySubject" value="Re: @m.Subject" maxlength="200" required />
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small" for="body-@m.CoId">Message</label>
+                    <textarea class="form-control" id="body-@m.CoId" name="replyMessage" rows="5" maxlength="5000" required></textarea>
+                </div>
+                <button class="btn btn-primary btn-sm" type="submit" data-busy-text="Sending…">Send reply</button>
+            </form>
+        </article>
+    }
 </div>
 
 @section Scripts {
     <script>
-        let currentMessageId = null;
+        (function () {
+            const replyUrl = '@Url.Action("SendReply", "Home", new { area = "Admin" })';
+            const deleteUrl = '@Url.Action("DeleteMessage", "Home", new { area = "Admin" })';
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // View Message Modal
-            const messageModal = document.getElementById('messageModal');
-            messageModal.addEventListener('show.bs.modal', function(event) {
-                const button = event.relatedTarget;
-                const id = button.getAttribute('data-id');
-                const name = button.getAttribute('data-name');
-                const email = button.getAttribute('data-email');
-                const subject = button.getAttribute('data-subject');
-                const message = button.getAttribute('data-message');
-
-                document.getElementById('modalMessageId').textContent = `#${id}`;
-                document.getElementById('modalUserName').textContent = name;
-                document.getElementById('modalUserEmail').textContent = email;
-                document.getElementById('modalSubject').textContent = subject || 'No subject';
-                document.getElementById('modalMessage').textContent = message || 'No message content';
-
-                // Store data for reply button
-                document.getElementById('replyFromView').setAttribute('data-id', id);
-                document.getElementById('replyFromView').setAttribute('data-email', email);
-                document.getElementById('replyFromView').setAttribute('data-subject', subject);
-                document.getElementById('replyFromView').setAttribute('data-name', name);
-            });
-
-            // Reply from View Message
-            document.getElementById('replyFromView').addEventListener('click', function() {
-                const id = this.getAttribute('data-id');
-                const email = this.getAttribute('data-email');
-                const subject = this.getAttribute('data-subject');
-                const name = this.getAttribute('data-name');
-
-                // Set reply modal values
-                document.getElementById('replyMessageId').value = id;
-                document.getElementById('replyToEmail').value = email;
-                document.getElementById('replyCustomerName').value = name;
-                document.getElementById('replySubject').value = subject ? `Re: ${subject}` : 'Re: Your Message';
-
-                // Close view modal and open reply modal
-                bootstrap.Modal.getInstance(messageModal).hide();
-                const replyModal = new bootstrap.Modal(document.getElementById('replyModal'));
-                replyModal.show();
-            });
-
-            // Reply Modal Handler
-            const replyModal = document.getElementById('replyModal');
-            replyModal.addEventListener('show.bs.modal', function(event) {
-                const button = event.relatedTarget;
-                const id = button.getAttribute('data-id');
-                const email = button.getAttribute('data-email');
-                const subject = button.getAttribute('data-subject');
-                const name = button.getAttribute('data-name');
-
-                document.getElementById('replyMessageId').value = id;
-                document.getElementById('replyToEmail').value = email;
-                document.getElementById('replyCustomerName').value = name;
-                document.getElementById('replySubject').value = subject ? `Re: ${subject}` : 'Re: Your Message';
-                document.getElementById('replyMessage').value = '';
-            });
-
-            // Send Reply
-            document.getElementById('sendReply').addEventListener('click', function() {
-                const messageId = document.getElementById('replyMessageId').value;
-                const replySubject = document.getElementById('replySubject').value;
-                const replyMessage = document.getElementById('replyMessage').value;
-
-                if (!replySubject.trim()) {
-                    showNotification('Please enter a subject for your reply.', 'error');
-                    return;
-                }
-
-                if (!replyMessage.trim()) {
-                    showNotification('Please enter your reply message.', 'error');
-                    return;
-                }
-
-                const sendButton = this;
-                const originalText = sendButton.innerHTML;
-                sendButton.disabled = true;
-                sendButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending...';
-
-                fetch('@Url.Action("SendReply", "Home", new { area = "Admin" })', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `id=${messageId}&replySubject=${encodeURIComponent(replySubject)}&replyMessage=${encodeURIComponent(replyMessage)}`
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showNotification(data.message, 'success');
-                        bootstrap.Modal.getInstance(replyModal).hide();
-                        document.getElementById('replyForm').reset();
-                    } else {
-                        showNotification(data.message, 'error');
-                    }
-                })
-                .catch(error => {
-                    showNotification('Failed to send reply. Please try again.', 'error');
-                })
-                .finally(() => {
-                    sendButton.disabled = false;
-                    sendButton.innerHTML = originalText;
-                });
-            });
-
-            // Delete Message
-            document.querySelectorAll('.delete-message').forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const messageId = this.getAttribute('data-id');
-                    const customerName = this.getAttribute('data-name');
-                    currentMessageId = messageId;
-                    document.getElementById('deleteCustomerName').textContent = customerName;
-                    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-                    deleteModal.show();
-                });
-            });
-
-            // Confirm Delete
-            document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
-                if (currentMessageId) {
-                    deleteMessage(currentMessageId);
-                }
-            });
-        });
-
-        function viewMessage(id, name, email, subject, message) {
-            document.getElementById('modalMessageId').textContent = `#${id}`;
-            document.getElementById('modalUserName').textContent = name;
-            document.getElementById('modalUserEmail').textContent = email;
-            document.getElementById('modalSubject').textContent = subject || 'No subject';
-            document.getElementById('modalMessage').textContent = message || 'No message content';
-
-            document.getElementById('replyFromView').setAttribute('data-id', id);
-            document.getElementById('replyFromView').setAttribute('data-email', email);
-            document.getElementById('replyFromView').setAttribute('data-subject', subject);
-            document.getElementById('replyFromView').setAttribute('data-name', name);
-
-            const modal = new bootstrap.Modal(document.getElementById('messageModal'));
-            modal.show();
-        }
-
-        function deleteMessage(messageId) {
-            const deleteBtn = document.getElementById('confirmDeleteBtn');
-            const originalText = deleteBtn.innerHTML;
-            deleteBtn.disabled = true;
-            deleteBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Deleting...';
-
-            fetch('@Url.Action("DeleteMessage", "Home", new { area = "Admin" })', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `id=${messageId}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showNotification(data.message, 'success');
-                    bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
-                    const row = document.getElementById(`message-${messageId}`);
-                    if (row) {
-                        row.remove();
-                        updateMessageCount();
-                    }
-                    if (document.querySelectorAll('#messagesTable tbody tr').length === 0) {
-                        location.reload();
-                    }
-                } else {
-                    showNotification(data.message, 'error');
-                    deleteBtn.disabled = false;
-                    deleteBtn.innerHTML = originalText;
-                }
-            })
-            .catch(error => {
-                showNotification('Failed to delete message. Please try again.', 'error');
-                deleteBtn.disabled = false;
-                deleteBtn.innerHTML = originalText;
-            });
-        }
-
-        function searchMessages() {
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            const rows = document.querySelectorAll('#messagesTable tbody tr');
-            let visibleCount = 0;
-
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                if (text.includes(search)) {
-                    row.style.display = '';
-                    visibleCount++;
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-
-            updateMessageCount(visibleCount);
-        }
-
-        function clearSearch() {
-            document.getElementById('searchInput').value = '';
-            const rows = document.querySelectorAll('#messagesTable tbody tr');
-            rows.forEach(row => row.style.display = '');
-            updateMessageCount(rows.length);
-        }
-
-        function updateMessageCount(count) {
-            const countElement = document.getElementById('messageCount');
-            if (countElement) {
-                const actualCount = count !== undefined ? count : document.querySelectorAll('#messagesTable tbody tr').length;
-                countElement.textContent = actualCount;
+            async function post(url, data) {
+                const response = await fetch(url, { method: 'POST', body: data, headers: { 'Accept': 'application/json' } });
+                if (!response.ok) throw new Error(response.status);
+                return response.json();
             }
-        }
 
-        function refreshMessages() {
-            location.reload();
-        }
-
-        function showNotification(message, type) {
-            const toast = document.createElement('div');
-            toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0 position-fixed top-0 end-0 m-3`;
-            toast.style.zIndex = '1060';
-            toast.innerHTML = `
-                <div class="d-flex">
-                    <div class="toast-body">${message}</div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                </div>
-            `;
-            document.body.appendChild(toast);
-
-            const bsToast = new bootstrap.Toast(toast);
-            bsToast.show();
-
-            toast.addEventListener('hidden.bs.toast', () => {
-                toast.remove();
+            document.querySelectorAll('[data-reply-form]').forEach(form => {
+                form.addEventListener('submit', async e => {
+                    e.preventDefault();
+                    const button = form.querySelector('button[type=submit]');
+                    const data = new FormData(form);
+                    data.append('id', form.dataset.replyForm);
+                    button.disabled = true;
+                    try {
+                        const result = await post(replyUrl, data);
+                        HS.toast(result.message, result.success ? 'success' : 'error');
+                        if (result.success) {
+                            form.reset();
+                            bootstrap.Collapse.getOrCreateInstance(form).hide();
+                        }
+                    } catch {
+                        HS.toast('The reply could not be sent. Please try again.', 'error');
+                    } finally {
+                        button.disabled = false;
+                    }
+                });
             });
-        }
+
+            document.querySelectorAll('[data-delete-message]').forEach(button => {
+                button.addEventListener('click', async () => {
+                    if (!confirm('Delete this message permanently?')) return;
+                    const data = new FormData();
+                    data.append('id', button.dataset.deleteMessage);
+                    try {
+                        const result = await post(deleteUrl, data);
+                        HS.toast(result.message, result.success ? 'success' : 'error');
+                        if (result.success) button.closest('[data-message]').remove();
+                    } catch {
+                        HS.toast('The message could not be deleted.', 'error');
+                    }
+                });
+            });
+        })();
     </script>
 }

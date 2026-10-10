@@ -1,135 +1,306 @@
 using HikingStore.Data;
 using HikingStore.Models;
+using HikingStore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace HikingStore.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = DbInitializer.AdminRole)]
     public class ProductsController : Controller
     {
+        private const int PageSize = 25;
         private readonly ApplicationDbContext _context;
+        private readonly ImageUploadService _images;
+        private readonly AdminAuditService _audit;
 
-        public ProductsController(ApplicationDbContext context)
+        public ProductsController(ApplicationDbContext context, ImageUploadService images, AdminAuditService audit)
         {
             _context = context;
+            _images = images;
+            _audit = audit;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? search, int? category, string? stock, string? status, int page = 1)
         {
-            var products = await _context.Products
-                .Include(c => c.Category)
-                .AsNoTracking()
-                .ToListAsync();
+            var query = _context.Products.AsNoTracking().Include(p => p.Category).AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = search.Trim();
+                query = query.Where(p => p.ProName!.Contains(term) || (p.Brand != null && p.Brand.Contains(term)) || p.ProId.ToString() == term);
+            }
+            if (category.HasValue)
+            {
+                query = query.Where(p => p.CatId == category.Value);
+            }
+            query = stock switch
+            {
+                "out" => query.Where(p => p.StockQuantity <= 0),
+                "low" => query.Where(p => p.StockQuantity > 0 && p.StockQuantity <= 5),
+                _ => query
+            };
+            query = status switch
+            {
+                "active" => query.Where(p => p.IsActive),
+                "hidden" => query.Where(p => !p.IsActive),
+                "sale" => query.Where(p => p.CompareAtPrice != null && p.CompareAtPrice > p.Price),
+                _ => query
+            };
+
+            var total = await query.CountAsync();
+            var pageCount = Math.Max(1, (int)Math.Ceiling(total / (double)PageSize));
+            page = Math.Clamp(page, 1, pageCount);
+
+            ViewBag.Search = search;
+            ViewBag.Category = category;
+            ViewBag.Stock = stock;
+            ViewBag.Status = status;
+            ViewBag.Page = page;
+            ViewBag.PageCount = pageCount;
+            ViewBag.Total = total;
+            ViewBag.Categories = new SelectList(await _context.Categories.AsNoTracking().OrderBy(c => c.CatName).ToListAsync(), "CatId", "CatName", category);
+
+            var products = await query.OrderByDescending(p => p.ProId).Skip((page - 1) * PageSize).Take(PageSize).ToListAsync();
             return View(products);
         }
 
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "CatId", "CatName");
-            return View();
+            await PopulateCategoriesAsync(null);
+            return View("Form", new Product { IsActive = true });
         }
 
         [HttpPost]
         public async Task<IActionResult> Create(Product model)
         {
-            if (model.File != null && model.File.Length > 0)
+            Validate(model);
+            if (model.File == null)
             {
-                string imageName = Guid.NewGuid().ToString() + ".jpg";
-                string filePathImage = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\Product", imageName);
-                using (var stream = System.IO.File.Create(filePathImage))
-                {
-                    await model.File.CopyToAsync(stream);
-                }
-                model.ProImage = imageName;
+                ModelState.AddModelError(nameof(Product.File), "Please upload a main product image.");
+            }
+            if (!ModelState.IsValid)
+            {
+                await PopulateCategoriesAsync(model.CatId);
+                return View("Form", model);
             }
 
-            // Set default stock if not provided
-            if (model.StockQuantity < 0)
+            var main = await _images.SaveAsync(model.File, ImageUploadService.ProductFolder);
+            if (!main.Success)
             {
-                model.StockQuantity = 0;
+                ModelState.AddModelError(nameof(Product.File), main.Error!);
+                await PopulateCategoriesAsync(model.CatId);
+                return View("Form", model);
             }
 
-            _context.Add(model);
+            var product = new Product();
+            CopyEditableFields(model, product);
+            product.ProImage = main.FileName;
+            product.CreatedAt = DateTime.UtcNow;
+
+            var galleryErrors = await AddGalleryImagesAsync(product, model.GalleryFiles);
+            _context.Products.Add(product);
             await _context.SaveChangesAsync();
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "CatId", "CatName");
+            await _audit.LogAdminModificationAsync("Product", product.ProId.ToString(), "CREATE");
+
+            TempData[galleryErrors.Count > 0 ? "Error" : "Success"] = galleryErrors.Count > 0
+                ? $"Product created, but some gallery images were skipped: {string.Join(" ", galleryErrors)}"
+                : $"“{product.ProName}” was created.";
             return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int id)
         {
-            var product = await _context.Products.FindAsync(id);
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "CatId", "CatName");
-            return View(product);
+            var product = await _context.Products.AsNoTracking().FirstOrDefaultAsync(p => p.ProId == id);
+            if (product == null) return NotFound();
+
+            await PopulateCategoriesAsync(product.CatId);
+            return View("Form", product);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(int id, Product model)
+        public async Task<IActionResult> Edit(int id, Product model, List<string>? removeImages)
         {
-            if (model.File != null && model.File.Length > 0)
+            var product = await _context.Products.FirstOrDefaultAsync(p => p.ProId == id);
+            if (product == null) return NotFound();
+
+            Validate(model);
+            if (!ModelState.IsValid)
             {
-                string imageName = Guid.NewGuid().ToString() + ".jpg";
-                string filePathImage = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\Product", imageName);
-                using (var stream = System.IO.File.Create(filePathImage))
-                {
-                    await model.File.CopyToAsync(stream);
-                }
-                model.ProImage = imageName;
-            }
-            else
-            {
-                // Preserve existing image
-                var existingProduct = await _context.Products.AsNoTracking().FirstOrDefaultAsync(p => p.ProId == id);
-                if (existingProduct != null)
-                {
-                    model.ProImage = existingProduct.ProImage;
-                }
+                model.ProId = id;
+                model.ProImage = product.ProImage;
+                model.AdditionalImages = product.AdditionalImages;
+                await PopulateCategoriesAsync(model.CatId);
+                return View("Form", model);
             }
 
-            // Ensure stock is not negative
-            if (model.StockQuantity < 0)
+            if (model.File != null)
             {
-                model.StockQuantity = 0;
+                var main = await _images.SaveAsync(model.File, ImageUploadService.ProductFolder);
+                if (!main.Success)
+                {
+                    ModelState.AddModelError(nameof(Product.File), main.Error!);
+                    model.ProId = id;
+                    model.ProImage = product.ProImage;
+                    model.AdditionalImages = product.AdditionalImages;
+                    await PopulateCategoriesAsync(model.CatId);
+                    return View("Form", model);
+                }
+                _images.Delete(product.ProImage, ImageUploadService.ProductFolder);
+                product.ProImage = main.FileName;
             }
 
-            _context.Update(model);
+            if (removeImages?.Count > 0)
+            {
+                var kept = product.AdditionalImageList.Where(i => !removeImages.Contains(i)).ToList();
+                foreach (var removed in product.AdditionalImageList.Except(kept))
+                {
+                    _images.Delete(removed, ImageUploadService.ProductFolder);
+                }
+                product.AdditionalImages = kept.Count > 0 ? string.Join(",", kept) : null;
+            }
+
+            var oldPrice = product.Price;
+            CopyEditableFields(model, product);
+            var galleryErrors = await AddGalleryImagesAsync(product, model.GalleryFiles);
             await _context.SaveChangesAsync();
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "CatId", "CatName");
+            await _audit.LogAdminModificationAsync("Product", product.ProId.ToString(), "UPDATE",
+                oldPrice != product.Price ? oldPrice : null, oldPrice != product.Price ? product.Price : null);
+
+            TempData[galleryErrors.Count > 0 ? "Error" : "Success"] = galleryErrors.Count > 0
+                ? $"Product saved, but some gallery images were skipped: {string.Join(" ", galleryErrors)}"
+                : $"“{product.ProName}” was saved.";
             return RedirectToAction(nameof(Index));
         }
 
-        // New action for updating stock
         [HttpPost]
         public async Task<IActionResult> UpdateStock(int id, int stockQuantity)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
+            if (stockQuantity < 0 || stockQuantity > 1_000_000)
+            {
+                return Json(new { success = false, message = "Stock must be between 0 and 1,000,000." });
+            }
+
+            var updated = await _context.Products.Where(p => p.ProId == id)
+                .ExecuteUpdateAsync(s => s.SetProperty(p => p.StockQuantity, stockQuantity));
+            if (updated == 0)
             {
                 return Json(new { success = false, message = "Product not found." });
             }
 
-            product.StockQuantity = stockQuantity;
-            await _context.SaveChangesAsync();
-
-            return Json(new { success = true, message = "Stock updated successfully." });
+            await _audit.LogAdminModificationAsync("Product", id.ToString(), "STOCK", null, stockQuantity);
+            return Json(new { success = true, message = "Stock updated." });
         }
 
-        public IActionResult Delete(int? id)
+        [HttpPost]
+        public async Task<IActionResult> ToggleActive(int id)
         {
-            if (id != null)
+            var product = await _context.Products.FirstOrDefaultAsync(p => p.ProId == id);
+            if (product == null) return NotFound();
+
+            product.IsActive = !product.IsActive;
+            await _context.SaveChangesAsync();
+            TempData["Success"] = product.IsActive ? $"“{product.ProName}” is visible in the store." : $"“{product.ProName}” is hidden from the store.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var product = await _context.Products.FirstOrDefaultAsync(p => p.ProId == id);
+            if (product == null) return NotFound();
+
+            if (await _context.OrderDetails.AnyAsync(d => d.ProId == id))
             {
-                var product = _context.Products.Find(id);
-                _context.Products.Remove(product);
-                _context.SaveChanges();
+                product.IsActive = false;
+                await _context.SaveChangesAsync();
+                await _context.ShoppingCarts.Where(c => c.ProId == id).ExecuteDeleteAsync();
+                TempData["Success"] = $"“{product.ProName}” appears in past orders, so it was hidden from the store instead of deleted.";
                 return RedirectToAction(nameof(Index));
             }
+
+            _context.Products.Remove(product);
+            await _context.SaveChangesAsync();
+            foreach (var image in product.AllImagePaths)
+            {
+                _images.Delete(image, ImageUploadService.ProductFolder);
+            }
+            await _audit.LogAdminDeletionAsync("Product", id.ToString(), product.ProName);
+            TempData["Success"] = $"“{product.ProName}” was deleted.";
             return RedirectToAction(nameof(Index));
+        }
+
+        private void Validate(Product model)
+        {
+            ModelState.Remove(nameof(Product.Category));
+            ModelState.Remove(nameof(Product.Reviews));
+            if (model.CompareAtPrice.HasValue && model.CompareAtPrice.Value > 0 && model.CompareAtPrice.Value <= model.Price)
+            {
+                ModelState.AddModelError(nameof(Product.CompareAtPrice), "The original price must be higher than the selling price, or left empty.");
+            }
+            if (model.CatId > 0 && !_context.Categories.Any(c => c.CatId == model.CatId))
+            {
+                ModelState.AddModelError(nameof(Product.CatId), "Please choose a category.");
+            }
+        }
+
+        private static void CopyEditableFields(Product source, Product target)
+        {
+            target.ProName = source.ProName?.Trim();
+            target.Descreption = source.Descreption?.Trim();
+            target.Price = source.Price;
+            target.CompareAtPrice = source.CompareAtPrice is > 0 ? source.CompareAtPrice : null;
+            target.Brand = Clean(source.Brand);
+            target.Material = Clean(source.Material);
+            target.Specifications = Clean(source.Specifications?.Replace("\r", string.Empty));
+            target.Sizes = NormalizeList(source.Sizes);
+            target.Colors = NormalizeList(source.Colors);
+            target.StockQuantity = Math.Max(0, source.StockQuantity);
+            target.CatId = source.CatId;
+            target.IsActive = source.IsActive;
+            target.IsFeatured = source.IsFeatured;
+        }
+
+        private async Task<List<string>> AddGalleryImagesAsync(Product product, List<IFormFile>? files)
+        {
+            var errors = new List<string>();
+            if (files == null) return errors;
+
+            var images = product.AdditionalImageList.ToList();
+            foreach (var file in files.Where(f => f.Length > 0).Take(8))
+            {
+                var result = await _images.SaveAsync(file, ImageUploadService.ProductFolder);
+                if (result.Success) images.Add(result.FileName!);
+                else errors.Add($"{Path.GetFileName(file.FileName)}: {result.Error}");
+            }
+            product.AdditionalImages = images.Count > 0 ? string.Join(",", images) : null;
+            return errors;
+        }
+
+        private async Task PopulateCategoriesAsync(int? selected)
+        {
+            var categories = await _context.Categories.AsNoTracking().Include(c => c.Parent).ToListAsync();
+            ViewData["CategoryId"] = new SelectList(
+                categories.Select(c => new { c.CatId, Name = c.Parent != null ? $"{c.Parent.CatName} › {c.CatName}" : c.CatName })
+                    .OrderBy(c => c.Name),
+                "CatId", "Name", selected);
+        }
+
+        private static string? Clean(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+        private static string? NormalizeList(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return null;
+            var items = value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Where(v => v.Length <= 50)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            return items.Count > 0 ? string.Join(",", items) : null;
         }
     }
 }

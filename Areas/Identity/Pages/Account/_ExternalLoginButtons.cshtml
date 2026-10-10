@@ -1,0 +1,13 @@
+@model (IList<Microsoft.AspNetCore.Authentication.AuthenticationScheme>? Schemes, string? ReturnUrl)
+@if (Model.Schemes?.Count > 0)
+{
+    <form asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="d-grid gap-2">
+        @foreach (var provider in Model.Schemes)
+        {
+            <button type="submit" class="btn btn-outline-secondary" name="provider" value="@provider.Name">
+                <i class="fa-brands fa-@provider.Name.ToLowerInvariant() me-2" aria-hidden="true"></i>Continue with @provider.DisplayName
+            </button>
+        }
+    </form>
+    <div class="divider-text">or</div>
+}

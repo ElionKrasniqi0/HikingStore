@@ -1,400 +1,163 @@
 @model HikingStore.Models.ChatRoom
 @{
-    ViewData["Title"] = $"Chat - {Model.Subject}";
+    ViewData["Title"] = Model.Subject;
+    ViewData["NoIndex"] = true;
+    var isOpen = Model.Status is ChatRoomStatus.Open or ChatRoomStatus.InProgress;
 }
 
-<div class="container my-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-lg">
-                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-0">
-                            <i class="fas fa-comment-dots me-2"></i>@Model.Subject
-                        </h5>
-                        <small>
-                            @if (Model.Agent != null)
-                            {
-                                <i class="fas fa-user-headset me-1"></i><text>Agent: @Model.Agent.UserName</text>
-                            }
-                            else
-                            {
-                                <i class="fas fa-clock me-1"></i><text>Waiting for agent</text>
-                            }
-                        </small>
-                    </div>
-                    <div>
-                        <span class="badge bg-light text-dark">@Model.Status</span>
-                        @if (Model.Status == ChatRoomStatus.Open || Model.Status == ChatRoomStatus.InProgress)
-                        {
-                            <form asp-action="CloseRoom" method="post" class="d-inline">
-                                <input type="hidden" name="id" value="@Model.Id" />
-                                <button type="submit" class="btn btn-sm btn-light ms-2" onclick="return confirm('Are you sure you want to close this chat?');">
-                                    <i class="fas fa-times me-1"></i>Close
-                                </button>
-                            </form>
-                        }
-                    </div>
-                </div>
-
-                <div class="card-body p-0" style="height: 600px; display: flex; flex-direction: column;">
-                    <!-- Messages Container -->
-                    <div id="messagesContainer" class="flex-grow-1 overflow-auto p-4" style="background: #f8f9fa;">
-                        <div id="messagesList">
-                            @foreach (var message in Model.Messages ?? Enumerable.Empty<ChatMessage>())
-                            {
-                                var isMyMessage = message.SenderId == Model.UserId;
-                                <div class="d-flex mb-3 @(isMyMessage ? "justify-content-end" : "justify-content-start")">
-                                    <div class="message-bubble @(isMyMessage ? "message-sent" : "message-received")">
-                                        <div class="message-header">
-                                            <strong>@(message.IsAgentMessage ? "Agent" : "You")</strong>
-                                            <small class="text-muted ms-2">@message.SentAt.ToString("MMM dd, HH:mm")</small>
-                                        </div>
-                                        <div class="message-content">@message.Message</div>
-                                        @if (isMyMessage && message.IsRead)
-                                        {
-                                            <div class="message-read">
-                                                <i class="fas fa-check-double text-primary"></i>
-                                            </div>
-                                        }
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                        <div id="typingIndicator" class="d-none">
-                            <div class="d-flex justify-content-start mb-3">
-                                <div class="message-bubble message-received">
-                                    <div class="typing-dots">
-                                        <span></span><span></span><span></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Input Area -->
-                    <div class="border-top p-3 bg-white">
-                        @if (Model.Status == ChatRoomStatus.Closed || Model.Status == ChatRoomStatus.Resolved)
-                        {
-                            <div class="alert alert-info alert-dismissible fade show mb-2" role="alert">
-                                <i class="fas fa-info-circle me-2"></i>This chat is @(Model.Status == ChatRoomStatus.Closed ? "closed" : "resolved"). Sending a message will reopen it.
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        }
-                        <form id="messageForm" class="d-flex gap-2">
-                            <input type="hidden" id="chatRoomId" value="@Model.Id" />
-                            <input type="text" id="messageInput" class="form-control" placeholder="Type your message..." autocomplete="off" />
-                            <button type="submit" class="btn btn-primary" id="sendButton">
-                                <i class="fas fa-paper-plane"></i>
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-3">
-                <a href="@Url.Action("Index", "Chat")" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left me-2"></i>Back to Chats
-                </a>
-            </div>
+<div class="container-hs">
+    <nav class="breadcrumb-bar" aria-label="Breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Account" asp-action="Index">My account</a></li>
+            <li class="breadcrumb-item"><a asp-action="Index">Support chat</a></li>
+            <li class="breadcrumb-item active text-truncate" aria-current="page">@Model.Subject</li>
+        </ol>
+    </nav>
+    <div class="page-head d-flex flex-wrap justify-content-between align-items-start gap-3">
+        <div class="min-w-0">
+            <h1 class="text-break">@Model.Subject</h1>
+            <p class="text-muted m-0">@(Model.Agent != null ? "You're chatting with our support team." : "Waiting for a team member to reply.")</p>
         </div>
+        @if (isOpen)
+        {
+            <form asp-action="CloseRoom" method="post" data-confirm="Close this chat? You can reopen it by sending a new message.">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <button type="submit" class="btn btn-outline-secondary btn-sm">Close chat</button>
+            </form>
+        }
     </div>
+
+    <section class="card-hs chat-panel" aria-label="Conversation">
+        <div class="chat-log" id="chatLog" role="log" aria-live="polite">
+            @foreach (var message in Model.Messages.OrderBy(m => m.SentAt))
+            {
+                <div class="chat-msg @(message.IsAgentMessage ? "" : "mine")">
+                    <div class="chat-bubble">
+                        <div class="chat-meta">@(message.IsAgentMessage ? "Support" : "You") · @message.SentAt.ToString("d MMM, HH:mm") UTC</div>
+                        <div class="chat-body">@message.Message</div>
+                    </div>
+                </div>
+            }
+            @if (!Model.Messages.Any())
+            {
+                <p class="small text-muted" id="emptyHint">Write your question below and we'll reply here.</p>
+            }
+            <p class="small text-muted m-0" id="typingIndicator" hidden>Support is typing…</p>
+        </div>
+        <div class="chat-compose">
+            @if (!isOpen)
+            {
+                <p class="small text-muted mb-2">This chat is @Model.Status.ToString().ToLowerInvariant(). Sending a message will reopen it.</p>
+            }
+            <form id="messageForm" class="d-flex gap-2">
+                <label for="messageInput" class="visually-hidden">Message</label>
+                <input type="text" id="messageInput" class="form-control" placeholder="Type your message…" autocomplete="off" maxlength="2000" />
+                <button type="submit" class="btn btn-primary" id="sendButton" aria-label="Send"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i></button>
+            </form>
+            <p class="small text-danger mt-2 mb-0" id="connectionStatus" hidden></p>
+        </div>
+    </section>
 </div>
 
-<style>
-    .message-bubble {
-        max-width: 70%;
-        padding: 12px 16px;
-        border-radius: 18px;
-        word-wrap: break-word;
-    }
-
-    .message-sent {
-        background: linear-gradient(135deg, #3b5d50, #2d473d);
-        color: white;
-        border-bottom-right-radius: 4px;
-    }
-
-    .message-received {
-        background: white;
-        color: #2c3e50;
-        border: 1px solid #e0e0e0;
-        border-bottom-left-radius: 4px;
-    }
-
-    .message-header {
-        font-size: 0.85rem;
-        margin-bottom: 4px;
-        opacity: 0.9;
-    }
-
-    .message-content {
-        font-size: 0.95rem;
-        line-height: 1.5;
-    }
-
-    .message-read {
-        text-align: right;
-        margin-top: 4px;
-        font-size: 0.75rem;
-    }
-
-    .typing-dots {
-        display: flex;
-        gap: 4px;
-        padding: 8px 0;
-    }
-
-    .typing-dots span {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: #999;
-        animation: typing 1.4s infinite;
-    }
-
-    .typing-dots span:nth-child(2) {
-        animation-delay: 0.2s;
-    }
-
-    .typing-dots span:nth-child(3) {
-        animation-delay: 0.4s;
-    }
-
-    @@keyframes typing {
-        0%, 60%, 100% {
-            transform: translateY(0);
-            opacity: 0.7;
-        }
-        30% {
-            transform: translateY(-10px);
-            opacity: 1;
-        }
-    }
-
-    #messagesContainer {
-        scrollbar-width: thin;
-        scrollbar-color: #3b5d50 #f8f9fa;
-    }
-
-    #messagesContainer::-webkit-scrollbar {
-        width: 8px;
-    }
-
-    #messagesContainer::-webkit-scrollbar-track {
-        background: #f8f9fa;
-    }
-
-    #messagesContainer::-webkit-scrollbar-thumb {
-        background: #3b5d50;
-        border-radius: 4px;
-    }
-
-    #messagesContainer::-webkit-scrollbar-thumb:hover {
-        background: #2d473d;
-    }
-</style>
-
 @section Scripts {
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
     <script>
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl("/chatHub", {
-                transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.LongPolling,
-                accessTokenFactory: () => {
-                    // SignalR will automatically use cookies for authentication in ASP.NET Core
-                    return "";
-                }
-            })
-            .withAutomaticReconnect({
-                nextRetryDelayInMilliseconds: retryContext => {
-                    if (retryContext.elapsedMilliseconds < 60000) {
-                        return 2000;
-                    } else {
-                        return null;
-                    }
-                }
-            })
-            .configureLogging(signalR.LogLevel.Information)
-            .build();
+        (function () {
+            const chatRoomId = @Model.Id;
+            const log = document.getElementById('chatLog');
+            const typing = document.getElementById('typingIndicator');
+            const input = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
+            const status = document.getElementById('connectionStatus');
+            let isTyping = false, typingTimeout, hideTypingTimeout;
 
-        const chatRoomId = @Model.Id;
-        let isTyping = false;
-        let typingTimeout;
-        let reconnectAttempts = 0;
-
-        // Connection status handling
-        connection.onreconnecting((error) => {
-            console.log("Connection lost. Reconnecting...", error);
-            reconnectAttempts++;
-        });
-
-        connection.onreconnected((connectionId) => {
-            console.log("Connection reestablished. Connection ID: " + connectionId);
-            reconnectAttempts = 0;
-            // Rejoin room after reconnection
-            connection.invoke("JoinRoom", chatRoomId).catch(function (err) {
-                console.error("Error rejoining room:", err.toString());
-            });
-        });
-
-        connection.onclose((error) => {
-            console.log("Connection closed", error);
-            if (error) {
-                console.error("Connection closed with error:", error);
-            }
-            // Attempt to restart connection
-            setTimeout(() => {
-                startConnection();
-            }, 5000);
-        });
-
-        function startConnection() {
-            connection.start().then(function () {
-                console.log("SignalR Connected");
-                reconnectAttempts = 0;
-                connection.invoke("JoinRoom", chatRoomId).catch(function (err) {
-                    console.error("Error joining room:", err.toString());
-                });
-            }).catch(function (err) {
-                console.error("Error starting connection:", err.toString());
-                if (reconnectAttempts < 10) {
-                    setTimeout(() => {
-                        startConnection();
-                    }, 3000);
-                } else {
-                    alert("Unable to connect to chat server. Please refresh the page.");
-                }
-            });
-        }
-
-        // Start connection
-        startConnection();
-
-        connection.on("ReceiveMessage", function (message) {
-            const messagesList = document.getElementById("messagesList");
-            const messageDiv = document.createElement("div");
-            const isMyMessage = message.senderId === "@Model.UserId";
-            
-            messageDiv.className = `d-flex mb-3 ${isMyMessage ? "justify-content-end" : "justify-content-start"}`;
-            
-            const sentDate = new Date(message.sentAt);
-            const timeString = sentDate.toLocaleDateString("en-US", { month: "short", day: "numeric" }) + 
-                             ", " + sentDate.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
-            
-            messageDiv.innerHTML = `
-                <div class="message-bubble ${isMyMessage ? "message-sent" : "message-received"}">
-                    <div class="message-header">
-                        <strong>${message.isAgentMessage ? "Agent" : "You"}</strong>
-                        <small class="${isMyMessage ? "text-white-50" : "text-muted"} ms-2">${timeString}</small>
-                    </div>
-                    <div class="message-content">${escapeHtml(message.message)}</div>
-                    ${isMyMessage ? '<div class="message-read"><i class="fas fa-check-double text-white-50"></i></div>' : ''}
-                </div>
-            `;
-            
-            messagesList.appendChild(messageDiv);
-            scrollToBottom();
-            hideTypingIndicator();
-        });
-
-        connection.on("UserTyping", function (data) {
-            if (!data.isTyping) {
-                hideTypingIndicator();
+            if (!window.signalR) {
+                status.textContent = 'Live chat could not load. Please refresh the page.';
+                status.hidden = false;
                 return;
             }
-            if (data.userId !== "@Model.UserId") {
-                showTypingIndicator();
-                clearTimeout(typingTimeout);
-                typingTimeout = setTimeout(hideTypingIndicator, 3000);
-            } else {
-                hideTypingIndicator();
+
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl('/chatHub')
+                .withAutomaticReconnect()
+                .build();
+
+            const scrollToBottom = () => { log.scrollTop = log.scrollHeight; };
+            function setStatus(text) { status.textContent = text || ''; status.hidden = !text; }
+
+            function appendMessage(m) {
+                document.getElementById('emptyHint')?.remove();
+                const row = document.createElement('div');
+                row.className = 'chat-msg' + (m.isAgentMessage ? '' : ' mine');
+                const bubble = document.createElement('div');
+                bubble.className = 'chat-bubble';
+                const meta = document.createElement('div');
+                meta.className = 'chat-meta';
+                const sent = new Date(m.sentAt);
+                meta.textContent = (m.isAgentMessage ? 'Support' : 'You') + ' · ' + sent.toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+                const body = document.createElement('div');
+                body.className = 'chat-body';
+                body.textContent = m.message;
+                bubble.append(meta, body);
+                row.appendChild(bubble);
+                log.insertBefore(row, typing);
+                scrollToBottom();
             }
-        });
 
-        connection.on("MessagesRead", function (roomId) {
-            // Update read indicators if needed
-        });
+            connection.on('ReceiveMessage', m => { typing.hidden = true; appendMessage(m); });
+            connection.on('UserTyping', data => {
+                typing.hidden = !data.isTyping;
+                clearTimeout(hideTypingTimeout);
+                if (data.isTyping) { scrollToBottom(); hideTypingTimeout = setTimeout(() => typing.hidden = true, 4000); }
+            });
+            connection.on('ErrorMessage', message => HS.toast(message, 'error'));
+            connection.onreconnecting(() => setStatus('Connection lost. Reconnecting…'));
+            connection.onreconnected(() => { setStatus(''); connection.invoke('JoinRoom', chatRoomId); });
+            connection.onclose(() => setStatus('Disconnected from chat. Refresh the page to reconnect.'));
 
-        connection.on("ErrorMessage", function (message) {
-            alert(message);
-        });
+            async function start() {
+                try {
+                    await connection.start();
+                    await connection.invoke('JoinRoom', chatRoomId);
+                    setStatus('');
+                } catch {
+                    setStatus('Could not connect to chat. Retrying…');
+                    setTimeout(start, 5000);
+                }
+            }
 
-        document.getElementById("messageForm").addEventListener("submit", function (event) {
-            event.preventDefault();
-            const messageInput = document.getElementById("messageInput");
-            const message = messageInput.value.trim();
-            
-            if (message) {
-                const sendButton = document.getElementById("sendButton");
-                const originalHTML = sendButton.innerHTML;
+            document.getElementById('messageForm').addEventListener('submit', async e => {
+                e.preventDefault();
+                const message = input.value.trim();
+                if (!message) return;
                 sendButton.disabled = true;
-                sendButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                
-                connection.invoke("SendMessage", chatRoomId, message)
-                    .then(() => {
-                        messageInput.value = "";
-                        stopTyping();
-                    })
-                    .catch(function (err) {
-                        console.error("Error sending message:", err.toString());
-                        alert("Failed to send message. Please try again.");
-                    })
-                    .finally(() => {
-                        sendButton.disabled = false;
-                        sendButton.innerHTML = originalHTML;
-                    });
-            }
-        });
+                try {
+                    await connection.invoke('SendMessage', chatRoomId, message);
+                    input.value = '';
+                    stopTyping();
+                } catch {
+                    HS.toast('Your message could not be sent. Please try again.', 'error');
+                } finally {
+                    sendButton.disabled = false;
+                    input.focus();
+                }
+            });
 
-        const messageInput = document.getElementById("messageInput");
-        messageInput.addEventListener("input", function () {
-            if (!isTyping) {
-                isTyping = true;
-                connection.invoke("Typing", chatRoomId, true).catch(function (err) {
-                    return console.error(err.toString());
-                });
-            }
-            
-            clearTimeout(typingTimeout);
-            typingTimeout = setTimeout(stopTyping, 1000);
-        });
-
-        function stopTyping() {
-            if (isTyping) {
+            input.addEventListener('input', () => {
+                if (!isTyping && connection.state === signalR.HubConnectionState.Connected) {
+                    isTyping = true;
+                    connection.invoke('Typing', chatRoomId, true).catch(() => { });
+                }
+                clearTimeout(typingTimeout);
+                typingTimeout = setTimeout(stopTyping, 1200);
+            });
+            function stopTyping() {
+                if (!isTyping) return;
                 isTyping = false;
-                connection.invoke("Typing", chatRoomId, false).catch(function (err) {
-                    return console.error(err.toString());
-                });
+                connection.invoke('Typing', chatRoomId, false).catch(() => { });
             }
-        }
 
-        function scrollToBottom() {
-            const container = document.getElementById("messagesContainer");
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function showTypingIndicator() {
-            document.getElementById("typingIndicator").classList.remove("d-none");
             scrollToBottom();
-        }
-
-        function hideTypingIndicator() {
-            document.getElementById("typingIndicator").classList.add("d-none");
-        }
-
-        function escapeHtml(text) {
-            const map = {
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#039;'
-            };
-            return text.replace(/[&<>"']/g, m => map[m]);
-        }
-
-        // Scroll to bottom on load
-        window.addEventListener("load", scrollToBottom);
+            start();
+        })();
     </script>
 }

@@ -1,105 +1,22 @@
 ﻿@{
-    ViewData["Title"] = "Page Not Found";
+    ViewData["Title"] = "Page not found";
+    ViewData["NoIndex"] = true;
 }
 
-<div class="container text-center py-5 my-5">
-    <div class="error-container">
-        <h1 class="display-1 text-primary">404</h1>
-        <div class="error-icon mb-4">
-            <i class="fas fa-search fa-4x text-muted"></i>
-        </div>
-        <h2 class="h3 mb-3">Oops! Page Not Found</h2>
-        <p class="lead text-muted mb-4">
-            The page you're looking for doesn't exist or has been moved.
-        </p>
-
-        <div class="d-flex flex-wrap justify-content-center gap-3 mb-5">
-            <a href="/" class="btn btn-primary" aria-label="Go to home page">
-                <i class="fas fa-home me-2" aria-hidden="true"></i>Go Home
-            </a>
-            <a href="/Home/Product" class="btn btn-outline-primary" aria-label="Browse all products">
-                <i class="fas fa-shopping-bag me-2" aria-hidden="true"></i>Browse Products
-            </a>
-            <button onclick="history.back()" class="btn btn-outline-secondary" aria-label="Go back to previous page">
-                <i class="fas fa-arrow-left me-2" aria-hidden="true"></i>Go Back
-            </button>
-        </div>
-
-        <div class="search-box mt-4">
-            <p class="text-muted small mb-2">Try searching instead:</p>
-            <form class="input-group" style="max-width: 400px; margin: 0 auto;" onsubmit="handleNotFoundSearch(event)" role="search">
-                <input type="text" class="form-control" placeholder="What are you looking for?" 
-                       id="notfound-search" aria-label="Search products">
-                <button class="btn btn-primary" type="submit" aria-label="Submit search">
-                    <i class="fas fa-search" aria-hidden="true"></i>
-                </button>
-            </form>
+<div class="container-hs">
+    <div class="empty-state" style="padding-top:var(--hs-space-8)">
+        <i class="fa-solid fa-route" aria-hidden="true"></i>
+        <h1 class="h2">This trail doesn't go anywhere</h1>
+        <p>The page you're looking for doesn't exist or has moved. Try a search, or head back to the shop.</p>
+        <form method="get" asp-controller="Home" asp-action="Shop" role="search" class="d-flex gap-2 mx-auto mb-4" style="max-width:420px">
+            <label for="nf-search" class="visually-hidden">Search products</label>
+            <input id="nf-search" name="q" type="search" class="form-control" placeholder="Search gear" />
+            <button class="btn btn-primary" type="submit" aria-label="Search"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></button>
+        </form>
+        <div class="d-flex flex-wrap justify-content-center gap-2">
+            <a class="btn btn-outline-primary" asp-controller="Home" asp-action="Index">Home</a>
+            <a class="btn btn-outline-primary" asp-controller="Home" asp-action="Shop">Shop all gear</a>
+            <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Contact">Contact us</a>
         </div>
     </div>
 </div>
-
-<style>
-    .error-container {
-        animation: fadeIn 0.5s ease-out;
-    }
-
-    .display-1 {
-        font-size: 8rem;
-        font-weight: 800;
-        line-height: 1;
-        margin-bottom: 1rem;
-    }
-
-    .error-icon {
-        animation: float 3s ease-in-out infinite;
-    }
-
-    @@keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @@keyframes float {
-        0%, 100% {
-            transform: translateY(0);
-        }
-
-        50% {
-            transform: translateY(-10px);
-        }
-    }
-
-    @@media (max-width: 768px) {
-        .display-1 {
-            font-size: 5rem;
-        }
-
-        .d-flex {
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .btn {
-            width: 100%;
-            max-width: 300px;
-        }
-    }
-</style>
-
-<script>
-    function handleNotFoundSearch(event) {
-        event.preventDefault();
-        const searchInput = document.getElementById('notfound-search');
-        const searchTerm = searchInput ? searchInput.value.trim() : '';
-        if (searchTerm !== '') {
-            window.location.href = '/Home/SearchProduct?search=' + encodeURIComponent(searchTerm);
-        }
-    }
-</script>

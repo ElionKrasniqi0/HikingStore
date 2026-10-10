@@ -6,19 +6,11 @@
 }
 
 <partial name="_StatusMessage" for="StatusMessage" />
-<h4>@ViewData["Title"]</h4>
+<h2>Reset authenticator key</h2>
 <div class="alert alert-warning" role="alert">
-    <p>
-        <span class="glyphicon glyphicon-warning-sign"></span>
-        <strong>If you reset your authenticator key your authenticator app will not work until you reconfigure it.</strong>
-    </p>
-    <p>
-        This process disables 2FA until you verify your authenticator app.
-        If you do not complete your authenticator app configuration you may lose access to your account.
-    </p>
+    Resetting the key turns off two-factor authentication. Your current authenticator app will stop working until you set it up again with the new key.
 </div>
-<div>
-    <form id="reset-authenticator-form" method="post" class="form-group">
-        <button id="reset-authenticator-button" class="btn btn-danger" type="submit">Reset authenticator key</button>
-    </form>
-</div>
+<form id="reset-authenticator-form" method="post" data-once>
+    <button id="reset-authenticator-button" class="btn btn-danger" type="submit" data-busy-text="Resetting…">Reset key</button>
+    <a asp-page="./TwoFactorAuthentication" class="btn btn-outline-secondary ms-2">Cancel</a>
+</form>

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace HikingStore.Services
 {
+    /// <summary>Development-only sender used when SMTP credentials aren't configured: writes emails to the log instead of sending them.</summary>
     public class DevelopmentEmailSender : IEmailSender
     {
         private readonly ILogger<DevelopmentEmailSender> _logger;
@@ -14,15 +15,7 @@ namespace HikingStore.Services
 
         public Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
-            _logger.LogInformation("🎯 EMAIL CONFIRMATION TRIGGERED!");
-            _logger.LogInformation("📧 TO: {Email}", email);
-            _logger.LogInformation("📝 SUBJECT: {Subject}", subject);
-            _logger.LogInformation("📄 MESSAGE CONTENT:");
-            _logger.LogInformation("{Message}", htmlMessage);
-            _logger.LogInformation("✅ Email would be sent in production mode");
-            _logger.LogInformation("🔗 Confirmation link is in the message above");
-
-            // In development, we just log the email instead of sending it
+            _logger.LogWarning("Email not sent (SMTP not configured). To: {Email}; Subject: {Subject}; Body: {Body}", email, subject, htmlMessage);
             return Task.CompletedTask;
         }
     }

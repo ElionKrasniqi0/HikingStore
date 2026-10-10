@@ -1,133 +1,28 @@
 ﻿@page
 @model LoginWithRecoveryCodeModel
 @{
-    ViewData["Title"] = "Recovery code verification";
+    ViewData["Title"] = "Sign in with a recovery code";
+    ViewData["NoIndex"] = true;
 }
 
-<div class="min-vh-100 d-flex align-items-center justify-content-center bg-light py-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-5 col-md-7">
-                <!-- Recovery Code Card -->
-                <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
-                    <!-- Card Header -->
-                    <div class="card-header bg-gradient-warning text-white text-center py-4 border-0">
-                        <div class="icon-wrapper bg-opacity-20 rounded-circle p-3 mx-auto mb-3">
-                            <i class="fas fa-key fa-lg text-white"></i>
-                        </div>
-                        <h2 class="h4 fw-bold mb-2">Recovery Code Verification</h2>
-                        <p class="mb-0 opacity-75">Enter your recovery code to sign in</p>
-                    </div>
-
-                    <!-- Card Body -->
-                    <div class="card-body p-4">
-                        <form method="post" class="needs-validation" novalidate>
-                            <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 rounded-2 mb-4 small"></div>
-
-                            <div class="alert alert-warning border-0 rounded-3 mb-4">
-                                <div class="d-flex align-items-start">
-                                    <i class="fas fa-exclamation-triangle fa-lg me-3 mt-1"></i>
-                                    <div class="text-start">
-                                        <strong class="d-block mb-1">Important Notice</strong>
-                                        <small>This login will not be remembered until you provide an authenticator app code at login or disable 2FA and log in again.</small>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Recovery Code Field -->
-                            <div class="form-group mb-4">
-                                <label asp-for="Input.RecoveryCode" class="form-label fw-semibold text-dark mb-2">
-                                    Recovery Code
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0">
-                                        <i class="fas fa-unlock-alt text-muted"></i>
-                                    </span>
-                                    <input asp-for="Input.RecoveryCode" 
-                                           class="form-control border-start-0 py-3"
-                                           placeholder="Enter your recovery code"
-                                           autocomplete="off" />
-                                </div>
-                                <span asp-validation-for="Input.RecoveryCode" class="text-danger small mt-1 d-block"></span>
-                                <div class="form-text mt-2">
-                                    <small class="text-muted">
-                                        <i class="fas fa-info-circle me-1"></i>
-                                        Enter one of your recovery codes (each code can only be used once)
-                                    </small>
-                                </div>
-                            </div>
-
-                            <!-- Submit Button -->
-                            <button type="submit" class="btn btn-primary btn-lg w-100 py-3 fw-semibold mb-3">
-                                <i class="fas fa-sign-in-alt me-2"></i>Verify & Sign In
-                            </button>
-                        </form>
-
-                        <!-- Help Text -->
-                        <div class="text-center pt-3 border-top">
-                            <p class="text-muted small mb-2">
-                                <i class="fas fa-question-circle me-1"></i>
-                                Lost your recovery codes?
-                            </p>
-                            <a asp-page="./Login" class="text-primary fw-semibold text-decoration-none">
-                                <i class="fas fa-arrow-left me-1"></i>Back to Login
-                            </a>
-                        </div>
-                    </div>
+<div class="container-hs">
+    <div class="auth-wrap">
+        <div class="card-hs">
+            <h1>Sign in with a recovery code</h1>
+            <p class="text-muted">Enter one of the recovery codes you saved when you set up two-factor authentication. Each code works once.</p>
+            <form method="post" asp-route-returnUrl="@Model.ReturnUrl" data-once>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                <div class="mb-4">
+                    <label asp-for="Input.RecoveryCode" class="form-label">Recovery code</label>
+                    <input asp-for="Input.RecoveryCode" class="form-control code-input" autocomplete="off" autofocus />
+                    <span asp-validation-for="Input.RecoveryCode" class="text-danger small"></span>
                 </div>
-            </div>
+                <button type="submit" class="btn btn-primary w-100" data-busy-text="Signing in…">Sign in</button>
+            </form>
+            <p class="mt-4 mb-0 text-center"><a asp-page="./Login"><i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i>Back to sign in</a></p>
         </div>
     </div>
 </div>
-
-<style>
-    .bg-gradient-warning {
-        background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
-    }
-
-    .icon-wrapper {
-        width: 60px;
-        height: 60px;
-        background: rgba(255, 255, 255, 0.2);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .form-control:focus {
-        border-color: #3b5d50;
-        box-shadow: 0 0 0 0.2rem rgba(59, 93, 80, 0.25);
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, #3b5d50 0%, #2d4a3f 100%);
-        border: none;
-        transition: all 0.3s ease;
-    }
-
-    .btn-primary:hover {
-        background: linear-gradient(135deg, #2d4a3f 0%, #1e3329 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(59, 93, 80, 0.3);
-    }
-
-    .input-group-text {
-        border-color: #dee2e6;
-    }
-
-    .card {
-        transition: transform 0.3s ease;
-    }
-
-    .card:hover {
-        transform: translateY(-5px);
-    }
-
-    .alert-warning {
-        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-        border-left: 4px solid #ffc107;
-    }
-</style>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

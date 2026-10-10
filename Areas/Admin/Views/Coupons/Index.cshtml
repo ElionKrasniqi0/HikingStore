@@ -1,0 +1,84 @@
+@model List<Coupon>
+@{
+    ViewData["Title"] = "Coupons";
+    var store = StoreOptions.Value;
+    var now = DateTime.UtcNow;
+}
+
+<div class="admin-page-head">
+    <div>
+        <h1>Coupons</h1>
+        <p>Codes customers can enter in the cart. Discounts are calculated on the server at checkout.</p>
+    </div>
+    <a class="btn btn-primary" asp-action="Create"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>New coupon</a>
+</div>
+
+<div class="panel">
+    @if (Model.Count == 0)
+    {
+        <div class="empty-state">
+            <i class="fa-solid fa-ticket" aria-hidden="true"></i>
+            <h2>No coupons yet</h2>
+            <p>Create a percentage or fixed-amount code for a promotion.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table admin-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Code</th>
+                        <th scope="col">Discount</th>
+                        <th scope="col">Conditions</th>
+                        <th scope="col">Valid</th>
+                        <th scope="col">Used</th>
+                        <th scope="col">Status</th>
+                        <th scope="col" class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in Model)
+                    {
+                        var expired = c.ExpiresAt.HasValue && c.ExpiresAt < now;
+                        var scheduled = c.StartsAt.HasValue && c.StartsAt > now;
+                        var exhausted = c.UsageLimit.HasValue && c.TimesUsed >= c.UsageLimit;
+                        <tr>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@c.CouponId" class="fw-semibold font-monospace">@c.Code</a>
+                                @if (!string.IsNullOrEmpty(c.Description)) { <div class="small text-muted">@c.Description</div> }
+                            </td>
+                            <td class="text-nowrap">@(c.DiscountType == DiscountType.Percentage ? $"{c.Value:0.##}%" : store.FormatPrice(c.Value))</td>
+                            <td class="small">
+                                @if (c.MinimumOrderAmount.HasValue) { <div>Min. @store.FormatPrice(c.MinimumOrderAmount.Value)</div> }
+                                @if (c.MaxDiscountAmount.HasValue) { <div>Max. @store.FormatPrice(c.MaxDiscountAmount.Value) off</div> }
+                                @if (c.UsageLimitPerUser.HasValue) { <div>@c.UsageLimitPerUser per customer</div> }
+                                @if (!c.MinimumOrderAmount.HasValue && !c.MaxDiscountAmount.HasValue && !c.UsageLimitPerUser.HasValue) { <span class="text-muted">None</span> }
+                            </td>
+                            <td class="small text-nowrap">
+                                @(c.StartsAt?.ToString("d MMM yyyy") ?? "Now") – @(c.ExpiresAt?.ToString("d MMM yyyy") ?? "no end")
+                            </td>
+                            <td>@c.TimesUsed@(c.UsageLimit.HasValue ? $" / {c.UsageLimit}" : "")</td>
+                            <td>
+                                @if (!c.IsActive) { <span class="badge text-bg-secondary">Inactive</span> }
+                                else if (expired) { <span class="badge text-bg-secondary">Expired</span> }
+                                else if (exhausted) { <span class="badge text-bg-secondary">Used up</span> }
+                                else if (scheduled) { <span class="badge text-bg-warning">Scheduled</span> }
+                                else { <span class="badge text-bg-success">Live</span> }
+                            </td>
+                            <td class="actions">
+                                <a class="btn btn-sm btn-outline-primary" asp-action="Edit" asp-route-id="@c.CouponId">Edit</a>
+                                <form method="post" asp-action="ToggleActive" asp-route-id="@c.CouponId">
+                                    <button class="btn btn-sm btn-outline-secondary" type="submit">@(c.IsActive ? "Deactivate" : "Activate")</button>
+                                </form>
+                                <form method="post" asp-action="Delete" asp-route-id="@c.CouponId" data-confirm="Delete coupon @c.Code? If it has been used it will be deactivated instead.">
+                                    <button class="btn btn-sm btn-outline-danger" type="submit" aria-label="Delete coupon @c.Code"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

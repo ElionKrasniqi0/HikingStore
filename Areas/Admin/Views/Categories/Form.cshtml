@@ -1,0 +1,62 @@
+@model Category
+@{
+    var isNew = Model.CatId == 0;
+    ViewData["Title"] = isNew ? "Add category" : $"Edit {Model.CatName}";
+}
+
+<div class="admin-page-head">
+    <div><h1>@(isNew ? "Add category" : "Edit category")</h1></div>
+    <a class="btn btn-outline-secondary btn-sm" asp-action="Index"><i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i>Categories</a>
+</div>
+
+<form method="post" asp-action="@(isNew ? "Create" : "Edit")" asp-route-id="@(isNew ? null : Model.CatId)" enctype="multipart/form-data" data-once style="max-width:760px">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+    <section class="panel">
+        <div class="panel-body">
+            <div class="mb-3">
+                <label asp-for="CatName" class="form-label"></label>
+                <input asp-for="CatName" class="form-control" maxlength="100" />
+                <span asp-validation-for="CatName" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="3" maxlength="500"></textarea>
+                <span asp-validation-for="Description" class="text-danger small"></span>
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col-12 col-md-8">
+                    <label asp-for="ParentCatId" class="form-label"></label>
+                    <select asp-for="ParentCatId" class="form-select" asp-items="ViewBag.Parents" aria-describedby="parent-help">
+                        <option value="">None — top-level category</option>
+                    </select>
+                    <span asp-validation-for="ParentCatId" class="text-danger small"></span>
+                    <p class="small text-muted mt-1 mb-0" id="parent-help">Subcategories can only be one level deep.</p>
+                </div>
+                <div class="col-12 col-md-4">
+                    <label asp-for="DisplayOrder" class="form-label"></label>
+                    <input asp-for="DisplayOrder" class="form-control" type="number" step="1" />
+                </div>
+            </div>
+            <div class="row g-3 align-items-start">
+                @if (!string.IsNullOrEmpty(Model.CatPhoto))
+                {
+                    <div class="col-auto"><img src="~/category/@Model.CatPhoto" alt="Current image" class="rounded border" width="120" height="120" style="object-fit:cover" /></div>
+                }
+                <div class="col">
+                    <label asp-for="File" class="form-label">@(string.IsNullOrEmpty(Model.CatPhoto) ? "Image" : "Replace image")</label>
+                    <input asp-for="File" type="file" class="form-control" accept="image/jpeg,image/png,image/webp,image/gif" />
+                    <span asp-validation-for="File" class="text-danger small"></span>
+                    <p class="small text-muted mt-1 mb-0">Optional. Used for the category tile on the homepage. JPG, PNG, WebP or GIF up to 5 MB.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary" data-busy-text="Saving…">@(isNew ? "Create category" : "Save changes")</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

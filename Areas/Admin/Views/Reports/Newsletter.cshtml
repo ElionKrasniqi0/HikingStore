@@ -1,0 +1,48 @@
+@model List<NewsletterSubscriber>
+@{
+    ViewData["Title"] = "Newsletter";
+}
+
+<div class="admin-page-head">
+    <div>
+        <h1>Newsletter subscribers</h1>
+        <p>@Model.Count subscriber@(Model.Count == 1 ? "" : "s") from the footer sign-up form. Sending campaigns is done in your email marketing tool — export the list as CSV.</p>
+    </div>
+    @if (Model.Count > 0)
+    {
+        <a class="btn btn-outline-primary" asp-action="NewsletterCsv"><i class="fa-solid fa-file-csv me-1" aria-hidden="true"></i>Export CSV</a>
+    }
+</div>
+
+<div class="panel">
+    @if (Model.Count == 0)
+    {
+        <div class="empty-state">
+            <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+            <h2>No subscribers yet</h2>
+            <p>People who sign up in the store footer will appear here.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table admin-table">
+                <thead><tr><th scope="col">Email</th><th scope="col">Subscribed (UTC)</th><th scope="col" class="text-end">Actions</th></tr></thead>
+                <tbody>
+                    @foreach (var s in Model)
+                    {
+                        <tr>
+                            <td class="text-break">@s.Email</td>
+                            <td class="text-nowrap">@s.CreatedAt.ToString("d MMM yyyy, HH:mm")</td>
+                            <td class="actions">
+                                <form method="post" asp-action="DeleteSubscriber" asp-route-id="@s.Id" data-confirm="Remove @s.Email from the newsletter list?">
+                                    <button class="btn btn-sm btn-outline-danger" type="submit">Remove</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

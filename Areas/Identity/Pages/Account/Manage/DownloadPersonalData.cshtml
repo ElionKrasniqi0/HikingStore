@@ -1,12 +1,11 @@
 ﻿@page
 @model DownloadPersonalDataModel
 @{
-    ViewData["Title"] = "Download Your Data";
+    ViewData["Title"] = "Download your data";
     ViewData["ActivePage"] = ManageNavPages.PersonalData;
 }
 
-<h3>@ViewData["Title"]</h3>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+<h2>Download your data</h2>
+<form asp-page="DownloadPersonalData" method="post">
+    <button class="btn btn-outline-secondary" type="submit"><i class="fa-solid fa-download me-2" aria-hidden="true"></i>Download my data</button>
+</form>

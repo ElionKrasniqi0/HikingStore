@@ -1,478 +1,60 @@
 @page
 @model RegisterModel
 @{
-    Layout = null;
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Create an account";
+    ViewData["NoIndex"] = true;
 }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - HikingStore</title>
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .login-page-wrapper {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #ffffff;
-            padding: 2rem 1rem;
-        }
-        .login-container {
-            width: 100%;
-            max-width: 450px;
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-            padding: 3rem 2.5rem;
-        }
-        .login-logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            margin-bottom: 2rem;
-        }
-        .login-logo i {
-            font-size: 2rem;
-            color: #3b5d50;
-        }
-        .login-logo .logo-text {
-            font-size: 1.75rem;
-            font-weight: 600;
-            color: #6d7175;
-            letter-spacing: -0.5px;
-        }
-        .login-heading {
-            font-size: 1.5rem;
-            font-weight: 500;
-            color: #6d7175;
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        .social-login-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
-        }
-        .social-login-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            width: 100%;
-            padding: 0.875rem 1.25rem;
-            background: #ffffff;
-            border: 1px solid #e1e3e5;
-            border-radius: 8px;
-            color: #6d7175;
-            font-size: 0.95rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .social-login-btn:hover {
-            background: #f6f6f7;
-            border-color: #d1d5db;
-        }
-        .social-login-btn i {
-            font-size: 1.25rem;
-        }
-        .social-login-btn i.fa-google {
-            background: linear-gradient(45deg, #4285F4, #34A853, #FBBC05, #EA4335);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .social-login-btn i.fa-facebook-f {
-            color: #1877F2;
-        }
-        .social-login-btn i.fa-apple {
-            color: #000000;
-        }
-        .login-separator {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin: 1.5rem 0;
-        }
-        .separator-line {
-            flex: 1;
-            height: 1px;
-            background: #e1e3e5;
-        }
-        .separator-text {
-            color: #8c9196;
-            font-size: 0.875rem;
-        }
-        .login-form {
-            margin-top: 1.5rem;
-        }
-        .form-group {
-            margin-bottom: 1.25rem;
-        }
-        .form-label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: #202223;
-            margin-bottom: 0.5rem;
-        }
-        .form-control {
-            width: 100%;
-            padding: 0.875rem 1rem;
-            border: 1px solid #e1e3e5;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            color: #202223;
-            transition: all 0.2s ease;
-        }
-        .form-control:focus {
-            outline: none;
-            border-color: #29453a;
-            box-shadow: 0 0 0 3px rgba(41, 69, 58, 0.1);
-        }
-        .password-input-wrapper {
-            position: relative;
-        }
-        .password-input-wrapper .form-control {
-            padding-right: 3rem;
-        }
-        .password-toggle {
-            position: absolute;
-            right: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #8c9196;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: color 0.2s ease;
-        }
-        .password-toggle:hover {
-            color: #202223;
-        }
-        .terms-checkbox-group {
-            margin-bottom: 1.5rem;
-        }
-        .terms-checkbox-group .form-check {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.5rem;
-        }
-        .terms-checkbox-group .form-check-input {
-            margin-top: 0.25rem;
-            width: 1.1em;
-            height: 1.1em;
-            border: 1.5px solid #e1e3e5;
-            border-radius: 4px;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-        .terms-checkbox-group .form-check-input:checked {
-            background-color: #3b5d50;
-            border-color: #3b5d50;
-        }
-        .terms-checkbox-group .form-check-label {
-            font-size: 0.875rem;
-            color: #6d7175;
-            line-height: 1.5;
-            cursor: pointer;
-        }
-        .terms-link {
-            color: #3b5d50;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.2s ease;
-        }
-        .terms-link:hover {
-            color: #29453a;
-            text-decoration: underline;
-        }
-        .required-asterisk {
-            color: #c33;
-            margin-left: 2px;
-        }
-        .login-submit-btn {
-            width: 100%;
-            padding: 0.875rem 1.25rem;
-            background: #3b5d50;
-            color: #ffffff;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            margin-bottom: 1.5rem;
-            margin-top: 0.5rem;
-            position: relative;
-            min-height: 48px;
-        }
-        .login-submit-btn:hover:not(:disabled) {
-            background: #29453a;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(59, 93, 80, 0.3);
-        }
-        .login-submit-btn:active:not(:disabled) {
-            transform: translateY(0);
-        }
-        .login-submit-btn:disabled {
-            opacity: 0.8;
-            cursor: not-allowed;
-        }
-        .btn-spinner {
-            display: inline-flex;
-            align-items: center;
-        }
-        .register-link-section {
-            text-align: center;
-            font-size: 0.875rem;
-            color: #6d7175;
-        }
-        .register-link {
-            color: #3b5d50;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.2s ease;
-        }
-        .register-link:hover {
-            color: #29453a;
-            text-decoration: underline;
-        }
-        .alert-danger {
-            background: #fee;
-            border: 1px solid #fcc;
-            color: #c33;
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            font-size: 0.875rem;
-        }
-        .text-danger {
-            color: #c33;
-            font-size: 0.75rem;
-            margin-top: 0.25rem;
-            display: block;
-        }
-        .form-check {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        @@media (max-width: 576px) {
-            .login-container {
-                padding: 2rem 1.5rem;
-            }
-            .login-logo .logo-text {
-                font-size: 1.5rem;
-            }
-            .login-heading {
-                font-size: 1.25rem;
-            }
-            .terms-checkbox-group .form-check-label {
-                font-size: 0.8rem;
-            }
-        }
-    </style>
-</head>
-<body>
-<div class="login-page-wrapper">
-    <div class="login-container">
-        <!-- Logo -->
-        <div class="login-logo">
-            <i class="fas fa-mountain"></i>
-            <span class="logo-text">HikingStore</span>
-        </div>
+<div class="container-hs">
+    <div class="auth-wrap wide">
+        <div class="card-hs">
+            <h1>Create an account</h1>
+            <p class="text-muted">Free, and you can check out faster next time. We'll email you a link to confirm your address.</p>
 
-        <!-- Heading -->
-        <h1 class="login-heading">Create your account</h1>
+            <partial name="_ExternalLoginButtons" model="(Model.ExternalLogins, Model.ReturnUrl)" />
 
-        <!-- Social Login Buttons -->
-        @if (Model.ExternalLogins?.Count > 0)
-        {
-            <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-                <div class="social-login-buttons">
-                    @foreach (var provider in Model.ExternalLogins)
-                    {
-                        <button type="submit" class="social-login-btn" name="provider" value="@provider.Name">
-                            @if (provider.Name == "Google")
-                            {
-                                <i class="fab fa-google"></i>
-                                <span>Register with Google</span>
-                            }
-                            else if (provider.Name == "Facebook")
-                            {
-                                <i class="fab fa-facebook-f"></i>
-                                <span>Register with Facebook</span>
-                            }
-                            else if (provider.Name == "Apple")
-                            {
-                                <i class="fab fa-apple"></i>
-                                <span>Register with Apple</span>
-                            }
-                            else
-                            {
-                                <i class="fas fa-sign-in-alt"></i>
-                                <span>Register with @provider.DisplayName</span>
-                            }
-                        </button>
-                    }
+            <form id="registerForm" method="post" asp-route-returnUrl="@Model.ReturnUrl" data-once>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-sm-6">
+                        <label asp-for="Input.FirstName" class="form-label">First name</label>
+                        <input asp-for="Input.FirstName" class="form-control" autocomplete="given-name" />
+                        <span asp-validation-for="Input.FirstName" class="text-danger small"></span>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label asp-for="Input.LastName" class="form-label">Last name</label>
+                        <input asp-for="Input.LastName" class="form-control" autocomplete="family-name" />
+                        <span asp-validation-for="Input.LastName" class="text-danger small"></span>
+                    </div>
                 </div>
+                <div class="mb-3">
+                    <label asp-for="Input.Email" class="form-label">Email address</label>
+                    <input asp-for="Input.Email" class="form-control" autocomplete="email" inputmode="email" />
+                    <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Input.Password" class="form-label">Password</label>
+                    <div class="input-group">
+                        <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-describedby="pw-help" />
+                        <button class="btn btn-outline-secondary" type="button" data-toggle-password="Input_Password" aria-label="Show password" aria-pressed="false"><i class="fa-regular fa-eye" aria-hidden="true"></i></button>
+                    </div>
+                    <p class="small text-muted mt-1 mb-0" id="pw-help">At least 8 characters, with upper- and lower-case letters, a number and a symbol.</p>
+                    <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                </div>
+                <div class="mb-4">
+                    <label asp-for="Input.ConfirmPassword" class="form-label">Confirm password</label>
+                    <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" />
+                    <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
+                </div>
+                <button type="submit" class="btn btn-primary w-100" data-busy-text="Creating account…">Create account</button>
+                <p class="small text-muted mt-3 mb-0">By creating an account you agree to our <a asp-area="" asp-controller="Home" asp-action="Terms">terms</a> and <a asp-area="" asp-controller="Home" asp-action="Privacy">privacy policy</a>.</p>
             </form>
 
-            <!-- Separator -->
-            <div class="login-separator">
-                <div class="separator-line"></div>
-                <span class="separator-text">Or</span>
-                <div class="separator-line"></div>
-            </div>
-        }
-
-        <!-- Register Form -->
-        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="login-form">
-            <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3"></div>
-
-            <!-- First Name Field -->
-            <div class="form-group">
-                <label asp-for="Input.FirstName" class="form-label">First Name</label>
-                <input asp-for="Input.FirstName" class="form-control" placeholder="Enter your first name" />
-                <span asp-validation-for="Input.FirstName" class="text-danger small"></span>
-            </div>
-
-            <!-- Last Name Field -->
-            <div class="form-group">
-                <label asp-for="Input.LastName" class="form-label">Last Name</label>
-                <input asp-for="Input.LastName" class="form-control" placeholder="Enter your last name" />
-                <span asp-validation-for="Input.LastName" class="text-danger small"></span>
-            </div>
-
-            <!-- Email Field -->
-            <div class="form-group">
-                <label asp-for="Input.Email" class="form-label">Email</label>
-                <input asp-for="Input.Email" class="form-control" placeholder="Enter your email address" autocomplete="email" />
-                <span asp-validation-for="Input.Email" class="text-danger small"></span>
-            </div>
-
-            <!-- Password Field -->
-            <div class="form-group">
-                <label asp-for="Input.Password" class="form-label">Password</label>
-                <div class="password-input-wrapper">
-                    <input asp-for="Input.Password" class="form-control" placeholder="Create a password" autocomplete="new-password" id="password-input" />
-                    <i class="fas fa-eye password-toggle" id="password-toggle"></i>
-                </div>
-                <span asp-validation-for="Input.Password" class="text-danger small"></span>
-            </div>
-
-            <!-- Confirm Password Field (Hidden but still validated) -->
-            <input type="hidden" asp-for="Input.ConfirmPassword" value="" id="confirm-password-hidden" />
-
-            <!-- Terms and Conditions -->
-            <div class="form-group terms-checkbox-group">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="termsCheckbox" required />
-                    <label class="form-check-label" for="termsCheckbox">
-                        By registering an account, you accept the 
-                        <a href="/Home/Services" target="_blank" class="terms-link">Terms and conditions</a> 
-                        and 
-                        <a href="/Home/Privacy" target="_blank" class="terms-link">Privacy Policy</a>
-                        <span class="required-asterisk">*</span>
-                    </label>
-                </div>
-            </div>
-
-            <!-- Register Button -->
-            <button type="submit" class="login-submit-btn" id="registerSubmitBtn">
-                <span class="btn-text">
-                    <i class="fas fa-user-plus me-2"></i>Continue
-                </span>
-                <span class="btn-spinner d-none">
-                    <i class="fas fa-spinner fa-spin me-2"></i>Creating account...
-                </span>
-            </button>
-        </form>
-
-        <!-- Login Link -->
-        <div class="register-link-section">
-            <span>Do you have an account? </span>
-            <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="register-link">Log in</a>
+            <p class="mt-4 mb-0 text-center">Already have an account? <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="fw-semibold">Sign in</a></p>
         </div>
     </div>
 </div>
 
-<!-- Validation Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.12/dist/jquery.validate.unobtrusive.min.js"></script>
-
-<script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Password toggle functionality
-            const passwordToggle = document.getElementById('password-toggle');
-            const passwordInput = document.getElementById('password-input');
-            const confirmPasswordHidden = document.getElementById('confirm-password-hidden');
-
-            if (passwordToggle && passwordInput) {
-                passwordToggle.addEventListener('click', function () {
-                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                    passwordInput.setAttribute('type', type);
-                    
-                    if (type === 'text') {
-                        this.classList.remove('fa-eye');
-                        this.classList.add('fa-eye-slash');
-                    } else {
-                        this.classList.remove('fa-eye-slash');
-                        this.classList.add('fa-eye');
-                    }
-                });
-            }
-
-            // Sync confirm password with password (since we're hiding the confirm field)
-            if (passwordInput && confirmPasswordHidden) {
-                passwordInput.addEventListener('input', function() {
-                    confirmPasswordHidden.value = this.value;
-                });
-            }
-
-            // Form validation - ensure terms checkbox is checked
-            const registerForm = document.getElementById('registerForm');
-            const termsCheckbox = document.getElementById('termsCheckbox');
-            const registerSubmitBtn = document.getElementById('registerSubmitBtn');
-            let isSubmitting = false;
-            
-            if (registerForm && termsCheckbox) {
-                registerForm.addEventListener('submit', function(e) {
-                    if (!termsCheckbox.checked) {
-                        e.preventDefault();
-                        alert('Please accept the Terms and Conditions and Privacy Policy to continue.');
-                        return false;
-                    }
-
-                    // ⚡ PERFORMANCE: Prevent double submission
-                    if (isSubmitting) {
-                        e.preventDefault();
-                        return false;
-                    }
-
-                    // ⚡ PERFORMANCE: Show loading state immediately (optimistic UI)
-                    isSubmitting = true;
-                    if (registerSubmitBtn) {
-                        registerSubmitBtn.disabled = true;
-                        const btnText = registerSubmitBtn.querySelector('.btn-text');
-                        const btnSpinner = registerSubmitBtn.querySelector('.btn-spinner');
-                        if (btnText) btnText.classList.add('d-none');
-                        if (btnSpinner) btnSpinner.classList.remove('d-none');
-                    }
-                });
-            }
-        });
-    </script>
-</body>
-</html>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

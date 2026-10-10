@@ -1,0 +1,53 @@
+@model CartSummary
+@inject IOptions<StoreSettings> StoreOptions
+@{
+    var store = StoreOptions.Value;
+}
+@if (Model.IsEmpty)
+{
+    <div class="empty-state py-5">
+        <i class="fa-solid fa-bag-shopping" aria-hidden="true"></i>
+        <h3 class="h5">Your cart is empty</h3>
+        <a class="btn btn-primary mt-2" asp-controller="Home" asp-action="Shop">Start shopping</a>
+    </div>
+}
+else
+{
+    <div class="lines">
+        @foreach (var line in Model.Lines)
+        {
+            <div class="summary-line">
+                <a class="thumb" asp-controller="Home" asp-action="ProductDetailes" asp-route-id="@line.ProId" tabindex="-1" aria-hidden="true">
+                    @if (!string.IsNullOrEmpty(line.Image))
+                    {
+                        <img src="~/Product/@line.Image" alt="" loading="lazy" />
+                    }
+                </a>
+                <div class="min-w-0">
+                    <a class="d-block text-truncate text-reset text-decoration-none fw-semibold" asp-controller="Home" asp-action="ProductDetailes" asp-route-id="@line.ProId">@line.Name</a>
+                    <span class="text-muted">@string.Join(" · ", new[] { line.Color, line.Size, $"Qty {line.Quantity}" }.Where(v => !string.IsNullOrEmpty(v)))</span>
+                    @if (line.Issue != null)
+                    {
+                        <span class="d-block text-danger">@line.Issue</span>
+                    }
+                </div>
+                <span class="fw-semibold">@store.FormatPrice(line.LineTotal)</span>
+            </div>
+        }
+    </div>
+    <div class="border-top pt-3 mt-2">
+        <div class="d-flex justify-content-between fw-bold mb-1"><span>Subtotal</span><span>@store.FormatPrice(Model.Subtotal)</span></div>
+        @if (Model.AmountUntilFreeShipping > 0)
+        {
+            <p class="small text-muted">Add @store.FormatPrice(Model.AmountUntilFreeShipping) more for free standard shipping.</p>
+        }
+        else
+        {
+            <p class="small text-success">Free standard shipping unlocked.</p>
+        }
+        <div class="d-grid gap-2">
+            <a class="btn btn-primary" asp-controller="Carts" asp-action="Index">View cart &amp; check out</a>
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Continue shopping</button>
+        </div>
+    </div>
+}

@@ -1,0 +1,37 @@
+@model CartSummary
+@inject IOptions<StoreSettings> StoreOptions
+@{
+    var store = StoreOptions.Value;
+}
+<div>
+    @foreach (var line in Model.Lines)
+    {
+        <div class="summary-line">
+            <div class="thumb">
+                @if (!string.IsNullOrEmpty(line.Image))
+                {
+                    <img src="~/Product/@line.Image" alt="" loading="lazy" />
+                }
+                <span class="qty-pill">×@line.Quantity</span>
+            </div>
+            <div class="min-w-0">
+                <span class="d-block text-truncate fw-semibold">@line.Name</span>
+                @if (!string.IsNullOrEmpty(line.Size) || !string.IsNullOrEmpty(line.Color))
+                {
+                    <span class="text-muted">@string.Join(" · ", new[] { line.Color, line.Size }.Where(v => !string.IsNullOrEmpty(v)))</span>
+                }
+                @if (line.Issue != null)
+                {
+                    <span class="d-block text-danger">@line.Issue</span>
+                }
+            </div>
+            <span>@store.FormatPrice(line.LineTotal)</span>
+        </div>
+    }
+</div>
+<hr />
+<partial name="_SummaryRows" model="Model" />
+@if (Model.CouponError != null)
+{
+    <p class="small text-danger">@Model.CouponError</p>
+}

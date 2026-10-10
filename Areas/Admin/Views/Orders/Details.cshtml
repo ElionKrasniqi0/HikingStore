@@ -1,981 +1,230 @@
 ﻿@model Order
-@using HikingStore.Enum
 @{
-    ViewData["Title"] = "Order Details";
-    var vatRate = 0.18m; // 18% VAT
-    var subtotalWithoutVat = Model.TotalAmount / (1 + vatRate);
-    var vatAmount = Model.TotalAmount - subtotalWithoutVat;
+    ViewData["Title"] = $"Order {Model.OrderNumber}";
+    var store = StoreOptions.Value;
+    var isCancelled = Model.Status == OrderStatus.Cancelled;
+    var milestones = new (string Label, DateTime? Date)[]
+    {
+        ("Placed", Model.OrderDate), ("Verified", Model.VerifiedDate), ("Processing", Model.ProcessingDate),
+        ("Shipped", Model.ShippedDate), ("Completed", Model.CompletedDate), ("Cancelled", Model.CancelledDate)
+    };
 }
 
-<style>
-    .order-detail-card {
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        background: white;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        transition: box-shadow 0.3s ease;
-    }
-
-    .order-detail-card:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    .order-detail-header {
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        border-bottom: 1px solid #e5e7eb;
-        border-radius: 12px 12px 0 0;
-        padding: 24px;
-    }
-
-    .order-detail-body {
-        padding: 24px;
-    }
-
-    .order-detail-title {
-        color: #3b5d50;
-        font-weight: 700;
-        font-size: 20px;
-        margin: 0;
-    }
-
-    .order-detail-subtitle {
-        color: #6b7280;
-        font-size: 14px;
-        margin: 4px 0 0 0;
-    }
-
-    .info-card {
-        background: #f8fafc;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 20px;
-        border-left: 4px solid #3b5d50;
-    }
-
-    .info-card-title {
-        color: #374151;
-        font-weight: 600;
-        font-size: 14px;
-        margin-bottom: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .info-item {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px 0;
-        border-bottom: 1px solid #e5e7eb;
-        align-items: flex-start;
-    }
-
-    .info-item:last-child {
-        border-bottom: none;
-    }
-
-    .info-label {
-        color: #6b7280;
-        font-size: 14px;
-        font-weight: 500;
-    }
-
-    .info-value {
-        color: #111827;
-        font-weight: 500;
-        font-size: 14px;
-        text-align: right;
-        word-break: break-word;
-        max-width: 60%;
-    }
-
-    .product-row {
-        display: flex;
-        align-items: center;
-        padding: 16px 0;
-        border-bottom: 1px solid #e5e7eb;
-        transition: background-color 0.2s ease;
-    }
-
-    .product-row:hover {
-        background-color: #f9fafb;
-        border-radius: 8px;
-        padding-left: 8px;
-        padding-right: 8px;
-    }
-
-    .product-row:last-child {
-        border-bottom: none;
-    }
-
-    .product-image {
-        width: 80px;
-        height: 80px;
-        border-radius: 8px;
-        object-fit: cover;
-        margin-right: 16px;
-        border: 1px solid #e5e7eb;
-    }
-
-    .product-name {
-        flex: 1;
-        color: #374151;
-        font-weight: 500;
-        font-size: 15px;
-        line-height: 1.4;
-    }
-
-    .product-qty {
-        color: #6b7280;
-        font-size: 14px;
-        margin-right: 24px;
-        background: #f3f4f6;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-weight: 500;
-    }
-
-    .product-price {
-        color: #3b5d50;
-        font-weight: 600;
-        font-size: 16px;
-        min-width: 100px;
-        text-align: right;
-    }
-
-    .total-section {
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        border-radius: 8px;
-        padding: 20px;
-        margin-top: 24px;
-        border: 1px solid #e5e7eb;
-    }
-
-    .total-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px 0;
-        align-items: center;
-    }
-
-    .total-row.grand-total {
-        border-top: 2px solid #3b5d50;
-        margin-top: 12px;
-        padding-top: 16px;
-        font-weight: 700;
-        color: #3b5d50;
-        font-size: 20px;
-    }
-
-    .status-badge {
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 12px;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .status-received {
-        background: #dbeafe;
-        color: #1e40af;
-    }
-
-    .status-verified {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .status-processing {
-        background: #fef3c7;
-        color: #92400e;
-    }
-
-    .status-shipped {
-        background: #f3e8ff;
-        color: #6b21a8;
-    }
-
-    .status-completed {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .status-cancelled {
-        background: #fee2e2;
-        color: #991b1b;
-    }
-
-    .order-number {
-        background: #3b5d50;
-        color: white;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 12px;
-        display: inline-block;
-    }
-
-    .timeline {
-        position: relative;
-        padding-left: 30px;
-    }
-
-    .timeline-item {
-        position: relative;
-        padding-bottom: 20px;
-    }
-
-    .timeline-item:last-child {
-        padding-bottom: 0;
-    }
-
-    .timeline-marker {
-        position: absolute;
-        left: -30px;
-        top: 0;
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        border: 3px solid white;
-        z-index: 2;
-    }
-
-    .timeline-item.completed .timeline-marker {
-        background-color: #28a745 !important;
-    }
-
-    .timeline-item:not(.completed) .timeline-marker {
-        background-color: #e9ecef !important;
-    }
-
-    .timeline-item:not(:last-child):after {
-        content: '';
-        position: absolute;
-        left: -23px;
-        top: 16px;
-        bottom: -20px;
-        width: 2px;
-        background-color: #e9ecef;
-        z-index: 1;
-    }
-
-    .timeline-item.completed:not(:last-child):after {
-        background-color: #28a745;
-    }
-
-    .timeline-content h6 {
-        font-size: 0.9rem;
-        margin-bottom: 2px;
-        font-weight: 600;
-    }
-
-    .timeline-content small {
-        font-size: 0.8rem;
-        color: #6b7280;
-    }
-
-    .action-buttons {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        margin-top: 24px;
-    }
-
-    .action-buttons .btn {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .table-responsive {
-        border-radius: 8px;
-        overflow: hidden;
-    }
-
-    .table thead {
-        background: #f8fafc;
-    }
-
-    .table tbody tr:hover {
-        background-color: #f9fafb;
-    }
-
-    @@media (max-width: 768px) {
-        .order-detail-header {
-            padding: 16px !important;
-        }
-
-        .order-detail-body {
-            padding: 16px !important;
-        }
-
-        .product-row {
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .product-image {
-            width: 60px;
-            height: 60px;
-        }
-
-        .product-name {
-            flex: 1 1 100%;
-            margin-top: 8px;
-        }
-
-        .info-item {
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .info-value {
-            text-align: left;
-            max-width: 100%;
-        }
-    }
-</style>
-<br />
-<br />
-<br />
-
-<div class="container-fluid px-4 py-4">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <a asp-action="Index" class="text-decoration-none text-muted mb-2 d-inline-block">
-                <i class="fas fa-arrow-left me-2"></i>Back to Orders
-            </a>
-            <h1 class="h3 fw-bold text-dark mb-1">Order Details</h1>
-            <div class="d-flex align-items-center gap-2">
-                <span class="order-number">#ORD@(Model.OrderId.ToString("D6"))</span>
-                <span class="text-muted">• @Model.OrderDate.ToString("MMM dd, yyyy • hh:mm tt")</span>
-            </div>
-        </div>
-        <div class="d-flex gap-2">
-            <a asp-action="Invoice" asp-route-id="@Model.OrderId" target="_blank" class="btn btn-primary">
-                <i class="fas fa-file-invoice me-2"></i>Download Invoice
-            </a>
-            <button class="btn btn-outline-primary" onclick="updateStatus(@Model.OrderId, '@Model.Status')">
-                <i class="fas fa-edit me-2"></i>Update Status
-            </button>
-            <button class="btn btn-outline-secondary" onclick="printOrder()">
-                <i class="fas fa-print me-2"></i>Print
-            </button>
-            @if (Model.Status == OrderStatus.Cancelled || Model.Status == OrderStatus.Received)
-            {
-                <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                    <i class="fas fa-trash me-2"></i>Delete
-                </button>
-            }
-        </div>
+<div class="admin-page-head">
+    <div>
+        <h1>Order @Model.OrderNumber <partial name="_StatusBadge" model="Model.Status" /></h1>
+        <p>Placed @Model.OrderDate.ToString("d MMM yyyy, HH:mm") UTC · @PaymentMethods.DisplayName(Model.PaymentMethod) · payment @Model.PaymentStatus.ToLowerInvariant()</p>
     </div>
-
-    <div class="row g-4">
-        <!-- Left Column: Order Items & Summary -->
-        <div class="col-lg-8">
-            <!-- Order Summary Card -->
-            <div class="order-detail-card mb-4">
-                <div class="order-detail-header">
-                    <h2 class="order-detail-title">Order Summary</h2>
-                    <p class="order-detail-subtitle">Complete order information</p>
-                </div>
-                <div class="order-detail-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="info-card">
-                                <div class="info-card-title">Order Information</div>
-                                <div class="info-item">
-                                    <span class="info-label">Order ID</span>
-                                    <span class="info-value">#ORD@(Model.OrderId.ToString("D6"))</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Order Date</span>
-                                    <span class="info-value">@Model.OrderDate.ToString("MMMM dd, yyyy 'at' h:mm tt")</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Status</span>
-                                    <span class="info-value">
-                                        <span class="status-badge @("status-" + Model.Status.ToString().ToLower())">
-                                            <i class="fas fa-circle" style="font-size: 8px;"></i>
-                                            @Model.Status
-                                        </span>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="info-card">
-                                <div class="info-card-title">Customer Information</div>
-                                <div class="info-item">
-                                    <span class="info-label">Customer</span>
-                                    <span class="info-value">@Model.User?.UserName</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Email</span>
-                                    <span class="info-value">@Model.User?.Email</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Phone</span>
-                                    <span class="info-value">@Model.PhoneNumber</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    @if (!string.IsNullOrEmpty(Model.TrackingNumber) && Model.TrackingNumber != "N/A")
-                    {
-                        <div class="alert alert-info mt-3">
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-truck me-2"></i>
-                                <div>
-                                    <strong>Tracking Number:</strong> <span class="font-monospace">@Model.TrackingNumber</span>
-                                    @if (!string.IsNullOrEmpty(Model.Carrier))
-                                    {
-                                        <div class="small">Carrier: @Model.Carrier</div>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    }
-                </div>
-            </div>
-
-            <!-- Order Items Card -->
-            <div class="order-detail-card">
-                <div class="order-detail-header">
-                    <h2 class="order-detail-title">Order Items</h2>
-                    <p class="order-detail-subtitle">@Model.OrderDetails.Sum(od => od.Quantity) items in this order</p>
-                </div>
-                <div class="order-detail-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th class="border-0">Product</th>
-                                    <th class="border-0">Price</th>
-                                    <th class="border-0 text-center">Quantity</th>
-                                    <th class="border-0 text-end">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var item in Model.OrderDetails)
-                                {
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <img src="~/Product/@item.Product.ProImage"
-                                                     alt="@item.Product.ProName"
-                                                     class="product-image me-3">
-                                                <div>
-                                                    <h6 class="mb-0">@item.Product.ProName</h6>
-                                                    <small class="text-muted">@item.Product.Category?.CatName</small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="align-middle">€@item.Price.ToString("N2")</td>
-                                        <td class="text-center align-middle">
-                                            <span class="product-qty">@item.Quantity</span>
-                                        </td>
-                                        <td class="text-end align-middle fw-bold">€@((item.Price * item.Quantity).ToString("N2"))</td>
-                                    </tr>
-                                }
-                            </tbody>
-                            <tfoot class="table-light">
-                                <tr>
-                                    <td colspan="3" class="text-end fw-bold">Subtotal:</td>
-                                    <td class="text-end fw-bold">€@subtotalWithoutVat.ToString("N2")</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="3" class="text-end fw-bold">Shipping:</td>
-                                    <td class="text-end text-success">Free</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="3" class="text-end fw-bold">VAT (18%):</td>
-                                    <td class="text-end fw-bold">€@vatAmount.ToString("N2")</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="3" class="text-end fw-bold h5 mb-0">Total:</td>
-                                    <td class="text-end fw-bold h5 mb-0 text-success">€@Model.TotalAmount.ToString("N2")</td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right Column: Shipping & Timeline -->
-        <div class="col-lg-4">
-            <!-- Shipping Information Card -->
-            <div class="order-detail-card mb-4">
-                <div class="order-detail-header">
-                    <h2 class="order-detail-title">Shipping Information</h2>
-                </div>
-                <div class="order-detail-body">
-                    <div class="info-card">
-                        <div class="info-card-title">Delivery Address</div>
-                        <div class="info-item">
-                            <span class="info-label">Address</span>
-                            <span class="info-value">@Model.ShippingAddress</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">City</span>
-                            <span class="info-value">@Model.City</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Phone</span>
-                            <span class="info-value">@Model.PhoneNumber</span>
-                        </div>
-                    </div>
-
-                    @if (!string.IsNullOrEmpty(Model.Comment))
-                    {
-                        <div class="alert alert-light mt-3">
-                            <div class="info-card-title mb-2">Customer Comment</div>
-                            <p class="mb-0 text-muted">@Model.Comment</p>
-                        </div>
-                    }
-
-                    @if (!string.IsNullOrEmpty(Model.AdminNotes))
-                    {
-                        <div class="alert alert-warning mt-3">
-                            <div class="info-card-title mb-2">Admin Notes</div>
-                            <p class="mb-0">@Model.AdminNotes</p>
-                        </div>
-                    }
-                </div>
-            </div>
-
-            <!-- Order Timeline Card -->
-            <div class="order-detail-card mb-4">
-                <div class="order-detail-header">
-                    <h2 class="order-detail-title">Order Timeline</h2>
-                    <p class="order-detail-subtitle">Track order progress</p>
-                </div>
-                <div class="order-detail-body">
-                    <div class="timeline">
-                        <div class="timeline-item completed">
-                            <div class="timeline-marker bg-primary"></div>
-                            <div class="timeline-content">
-                                <h6 class="mb-1">Order Placed</h6>
-                                <small class="text-muted">@Model.OrderDate.ToString("MMM dd, yyyy hh:mm tt")</small>
-                            </div>
-                        </div>
-                        @if (Model.VerifiedDate != null)
-                        {
-                            <div class="timeline-item completed">
-                                <div class="timeline-marker bg-success"></div>
-                                <div class="timeline-content">
-                                    <h6 class="mb-1">Order Verified</h6>
-                                    <small class="text-muted">@Model.VerifiedDate.Value.ToString("MMM dd, yyyy hh:mm tt")</small>
-                                </div>
-                            </div>
-                        }
-                        @if (Model.ProcessingDate != null)
-                        {
-                            <div class="timeline-item completed">
-                                <div class="timeline-marker bg-warning"></div>
-                                <div class="timeline-content">
-                                    <h6 class="mb-1">Processing</h6>
-                                    <small class="text-muted">@Model.ProcessingDate.Value.ToString("MMM dd, yyyy hh:mm tt")</small>
-                                </div>
-                            </div>
-                        }
-                        @if (Model.ShippedDate != null)
-                        {
-                            <div class="timeline-item completed">
-                                <div class="timeline-marker bg-info"></div>
-                                <div class="timeline-content">
-                                    <h6 class="mb-1">Order Shipped</h6>
-                                    <small class="text-muted">@Model.ShippedDate.Value.ToString("MMM dd, yyyy hh:mm tt")</small>
-                                </div>
-                            </div>
-                        }
-                        @if (Model.CompletedDate != null)
-                        {
-                            <div class="timeline-item completed">
-                                <div class="timeline-marker bg-success"></div>
-                                <div class="timeline-content">
-                                    <h6 class="mb-1">Order Completed</h6>
-                                    <small class="text-muted">@Model.CompletedDate.Value.ToString("MMM dd, yyyy hh:mm tt")</small>
-                                </div>
-                            </div>
-                        }
-                        @if (Model.CancelledDate != null)
-                        {
-                            <div class="timeline-item completed">
-                                <div class="timeline-marker bg-danger"></div>
-                                <div class="timeline-content">
-                                    <h6 class="mb-1">Order Cancelled</h6>
-                                    <small class="text-muted">@Model.CancelledDate.Value.ToString("MMM dd, yyyy hh:mm tt")</small>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-secondary btn-sm" asp-action="Index"><i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i>Orders</a>
+        <a class="btn btn-outline-primary btn-sm" asp-action="Invoice" asp-route-id="@Model.OrderId" target="_blank" rel="noopener"><i class="fa-solid fa-print me-1" aria-hidden="true"></i>Invoice</a>
     </div>
 </div>
 
-<!-- Status Update Modal -->
-<div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="statusModalLabel">Update Order Status</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="orderIdForStatus" value="@Model.OrderId">
-                <input type="hidden" id="orderTotalAmount" value="@Model.TotalAmount">
-                <div class="mb-3">
-                    <label class="form-label">New Status</label>
-                    <select class="form-select" id="newStatus" onchange="handleStatusChange()">
-                        @foreach (OrderStatus status in System.Enum.GetValues(typeof(OrderStatus)))
+<div class="row g-3">
+    <div class="col-12 col-xl-8">
+        <section class="panel" aria-labelledby="items-h">
+            <div class="panel-head"><h2 id="items-h">Items</h2></div>
+            <div class="table-responsive">
+                <table class="table admin-table">
+                    <thead><tr><th scope="col">Product</th><th scope="col" class="text-end">Price</th><th scope="col" class="text-end">Qty</th><th scope="col" class="text-end">Total</th></tr></thead>
+                    <tbody>
+                        @foreach (var line in Model.OrderDetails)
                         {
-                            if (status == Model.Status)
-                            {
-                                <option value="@status" selected>@status</option>
-                            }
-                            else
-                            {
-                                <option value="@status">@status</option>
-                            }
+                            <tr>
+                                <td>
+                                    <div class="d-flex gap-2 align-items-center">
+                                        @if (!string.IsNullOrEmpty(line.Product?.ProImage))
+                                        {
+                                            <img class="thumb" src="~/Product/@line.Product.ProImage" alt="" loading="lazy" width="48" height="48" />
+                                        }
+                                        <div class="min-w-0">
+                                            <a asp-controller="Products" asp-action="Edit" asp-route-id="@line.ProId" class="fw-semibold">@line.DisplayName</a>
+                                            @if (!string.IsNullOrEmpty(line.SelectedSize) || !string.IsNullOrEmpty(line.SelectedColor))
+                                            {
+                                                <div class="small text-muted">@string.Join(" · ", new[] { line.SelectedColor, line.SelectedSize }.Where(v => !string.IsNullOrEmpty(v)))</div>
+                                            }
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-end text-nowrap">@store.FormatPrice(line.Price)</td>
+                                <td class="text-end">@line.Quantity</td>
+                                <td class="text-end text-nowrap">@store.FormatPrice(line.LineTotal)</td>
+                            </tr>
                         }
-                    </select>
-                </div>
-                <div class="mb-3" id="trackingNumberSection" style="display: none;">
-                    <label class="form-label">Tracking Number</label>
-                    <input type="text" class="form-control font-monospace" id="trackingNumber" 
-                           readonly
-                           placeholder="Will be auto-generated when status is Processing/Shipped">
-                    <small class="form-text text-muted">Automatically generated by the system when order enters Processing status</small>
-                </div>
-                <div class="mb-3" id="carrierSection" style="display: none;">
-                    <label class="form-label">Carrier</label>
-                    @if (!string.IsNullOrEmpty(Model.Carrier) && Model.Status == OrderStatus.Received)
+                    </tbody>
+                </table>
+            </div>
+            <div class="panel-body border-top">
+                <dl class="row m-0 ms-auto small" style="max-width:340px">
+                    <dt class="col-7 fw-normal">Subtotal</dt><dd class="col-5 text-end m-0">@store.FormatPrice(Model.Subtotal)</dd>
+                    @if (Model.DiscountAmount > 0)
                     {
-                        <input type="text" class="form-control" id="carrier" value="@Model.Carrier" readonly>
-                        <small class="form-text text-muted">Selected by customer - cannot be changed</small>
+                        <dt class="col-7 fw-normal">Discount (@Model.CouponCode)</dt><dd class="col-5 text-end m-0">−@store.FormatPrice(Model.DiscountAmount)</dd>
                     }
-                    else
-                    {
-                        <select class="form-select" id="carrier">
-                            <option value="Standard Shipping" selected="@(Model.Carrier == "Standard Shipping")">Standard Shipping</option>
-                            <option value="Express Shipping" selected="@(Model.Carrier == "Express Shipping")">Express Shipping</option>
-                            <option value="DHL" selected="@(Model.Carrier == "DHL")">DHL</option>
-                            <option value="UPS" selected="@(Model.Carrier == "UPS")">UPS</option>
-                            <option value="FedEx" selected="@(Model.Carrier == "FedEx")">FedEx</option>
-                            <option value="Custom" selected="@(Model.Carrier == "Custom")">Custom Carrier</option>
+                    <dt class="col-7 fw-normal">Shipping (@Model.ShippingService)</dt><dd class="col-5 text-end m-0">@store.FormatPrice(Model.ShippingCost)</dd>
+                    <dt class="col-7 fs-6 pt-2 border-top mt-2">Total</dt><dd class="col-5 text-end fs-6 fw-bold pt-2 border-top mt-2 mb-0">@store.FormatPrice(Model.TotalAmount)</dd>
+                </dl>
+            </div>
+        </section>
+
+        <section class="panel" aria-labelledby="tracking-h">
+            <div class="panel-head"><h2 id="tracking-h">Tracking history</h2></div>
+            <div class="panel-body" data-tracking-history>
+                <partial name="~/Views/Orders/_TrackingHistory.cshtml" model="Model.TrackingEvents" />
+            </div>
+            <div class="panel-body border-top">
+                <h3 class="h6 font-body fw-bold">Add a tracking update</h3>
+                <form class="row g-2" data-tracking-form>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label small" for="t-status">Status</label>
+                        <input class="form-control" id="t-status" name="status" maxlength="100" placeholder="In transit" required />
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label small" for="t-location">Location</label>
+                        <input class="form-control" id="t-location" name="location" maxlength="100" placeholder="Prishtina hub" required />
+                    </div>
+                    <div class="col-12 col-md-4 d-flex align-items-end">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="t-milestone" name="isMilestone" value="true" />
+                            <label class="form-check-label small" for="t-milestone">Highlight as milestone</label>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small" for="t-desc">Description (visible to the customer)</label>
+                        <input class="form-control" id="t-desc" name="description" maxlength="500" required />
+                    </div>
+                    <div class="col-12"><button class="btn btn-outline-primary btn-sm" type="submit">Add update</button></div>
+                </form>
+            </div>
+        </section>
+    </div>
+
+    <div class="col-12 col-xl-4">
+        <section class="panel" aria-labelledby="status-h">
+            <div class="panel-head"><h2 id="status-h">Update order</h2></div>
+            <div class="panel-body">
+                @if (isCancelled)
+                {
+                    <p class="small text-muted">This order was cancelled and its stock has been returned. Cancelled orders can't be reopened.</p>
+                }
+                <form data-status-form>
+                    <div class="mb-3">
+                        <label class="form-label small" for="o-status">Status</label>
+                        <select class="form-select" id="o-status" name="status" disabled="@isCancelled">
+                            @foreach (var s in System.Enum.GetValues<OrderStatus>())
+                            {
+                                <option value="@s" selected="@(s == Model.Status)">@s</option>
+                            }
                         </select>
-                        <small class="form-text text-muted">@(string.IsNullOrEmpty(Model.Carrier) ? "Select carrier for this order" : "Current carrier (can be changed)")</small>
-                    }
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Admin Notes</label>
-                    <textarea class="form-control" id="adminNotes" rows="3" 
-                              placeholder="Add internal notes...">@Model.AdminNotes</textarea>
-                </div>
+                        <p class="small text-muted mt-1 mb-0">Cancelling returns the items to stock. The customer is emailed when the status changes.</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small" for="o-carrier">Carrier</label>
+                        <input class="form-control" id="o-carrier" name="carrier" value="@Model.Carrier" maxlength="100" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small" for="o-tracking">Tracking number</label>
+                        <input class="form-control" id="o-tracking" name="trackingNumber" value="@Model.TrackingNumber" maxlength="100" aria-describedby="o-tracking-help" />
+                        <p class="small text-muted mt-1 mb-0" id="o-tracking-help">Generated automatically when the order moves to Processing or Shipped, if left empty.</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small" for="o-notes">Internal notes</label>
+                        <textarea class="form-control" id="o-notes" name="adminNotes" rows="3" maxlength="2000">@Model.AdminNotes</textarea>
+                    </div>
+                    <button class="btn btn-primary w-100" type="submit" data-busy-text="Saving…">Save changes</button>
+                </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="updateStatusBtn">
-                    <i class="fas fa-save me-2"></i>Update Status
-                </button>
+        </section>
+
+        <section class="panel" aria-labelledby="cust-h">
+            <div class="panel-head"><h2 id="cust-h">Customer</h2></div>
+            <div class="panel-body small">
+                <p class="mb-2"><strong>@(Model.FullName ?? Model.User?.DisplayName)</strong><br />
+                    <a href="mailto:@(Model.Email ?? Model.User?.Email)">@(Model.Email ?? Model.User?.Email)</a><br />
+                    <a href="tel:@Model.PhoneNumber">@Model.PhoneNumber</a></p>
+                <h3 class="small-caps text-muted mt-3 mb-1">Ship to</h3>
+                <p class="mb-0">@Model.ShippingAddress<br />@Model.PostalCode @Model.City<br />@Model.Country</p>
+                @if (!string.IsNullOrWhiteSpace(Model.Comment))
+                {
+                    <h3 class="small-caps text-muted mt-3 mb-1">Customer note</h3>
+                    <p class="mb-0" style="white-space:pre-wrap">@Model.Comment</p>
+                }
+                @if (Model.EstimatedDelivery.HasValue && !isCancelled && Model.Status != OrderStatus.Completed)
+                {
+                    <h3 class="small-caps text-muted mt-3 mb-1">Estimated delivery</h3>
+                    <p class="mb-0">@Model.EstimatedDelivery.Value.ToString("ddd d MMM yyyy")</p>
+                }
             </div>
-        </div>
+        </section>
+
+        <section class="panel" aria-labelledby="dates-h">
+            <div class="panel-head"><h2 id="dates-h">Timeline (UTC)</h2></div>
+            <ul class="list-group list-group-flush small">
+                @foreach (var m in milestones.Where(m => m.Date.HasValue))
+                {
+                    <li class="list-group-item d-flex justify-content-between"><span>@m.Label</span><span class="text-muted">@m.Date!.Value.ToString("d MMM yyyy, HH:mm")</span></li>
+                }
+            </ul>
+        </section>
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="deleteModalLabel">
-                    <i class="fas fa-exclamation-triangle me-2"></i>Delete Order #ORD@(Model.OrderId.ToString("D6"))
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-danger border-0">
-                    <div class="d-flex align-items-start">
-                        <i class="fas fa-exclamation-triangle fa-2x me-3 mt-1"></i>
-                        <div>
-                            <h6 class="alert-heading mb-2">Warning: This action cannot be undone!</h6>
-                            <p class="mb-2">Are you sure you want to permanently delete this order?</p>
-                            <hr class="my-2">
-                            <ul class="mb-0 ps-3">
-                                <li>All order details will be permanently removed</li>
-                                <li>All tracking information will be deleted</li>
-                                <li>All order items will be removed</li>
-                                <li>This action cannot be reversed</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card bg-light border-0 mb-3">
-                    <div class="card-body">
-                        <div class="row g-2 small">
-                            <div class="col-6">
-                                <strong>Order ID:</strong><br>
-                                <span class="text-muted">#ORD@(Model.OrderId.ToString("D6"))</span>
-                            </div>
-                            <div class="col-6">
-                                <strong>Customer:</strong><br>
-                                <span class="text-muted">@Model.User?.UserName</span>
-                            </div>
-                            <div class="col-6">
-                                <strong>Total Amount:</strong><br>
-                                <span class="text-muted">€@Model.TotalAmount.ToString("N2")</span>
-                            </div>
-                            <div class="col-6">
-                                <strong>Status:</strong><br>
-                                <span class="text-muted">@Model.Status</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+@section Scripts {
+    <script>
+        (function () {
+            const orderId = @Model.OrderId;
+            const originalStatus = '@Model.Status';
 
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="confirmDeleteCheck" required>
-                    <label class="form-check-label fw-semibold" for="confirmDeleteCheck">
-                        I understand this action is permanent and cannot be undone
-                    </label>
-                </div>
-            </div>
-            <div class="modal-footer border-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-2"></i>Cancel
-                </button>
-                <button type="button" class="btn btn-danger" id="confirmDeleteBtn" disabled>
-                    <i class="fas fa-trash me-2"></i>Delete Order Permanently
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+            async function post(url, data) {
+                const response = await fetch(url, { method: 'POST', body: data, headers: { 'Accept': 'application/json' } });
+                if (!response.ok) throw new Error(response.status);
+                return response.json();
+            }
 
-@Html.AntiForgeryToken()
-
-<script>
-    // Enable delete button when checkbox is checked
-    document.addEventListener('DOMContentLoaded', function() {
-        const confirmCheck = document.getElementById('confirmDeleteCheck');
-        const deleteBtn = document.getElementById('confirmDeleteBtn');
-        
-        if (confirmCheck && deleteBtn) {
-            confirmCheck.addEventListener('change', function() {
-                deleteBtn.disabled = !this.checked;
-            });
-
-            // Handle delete confirmation
-            deleteBtn.addEventListener('click', function() {
-                if (confirmCheck.checked) {
-                    deleteOrder(@Model.OrderId);
+            const statusForm = document.querySelector('[data-status-form]');
+            statusForm.addEventListener('submit', async e => {
+                e.preventDefault();
+                const data = new FormData(statusForm);
+                const newStatus = statusForm.elements.status.value;
+                if (newStatus === 'Cancelled' && originalStatus !== 'Cancelled'
+                    && !confirm('Cancel this order? Items will be returned to stock and the customer will be notified.')) return;
+                if (!data.has('status')) data.append('status', originalStatus);
+                data.append('id', orderId);
+                const button = statusForm.querySelector('button[type=submit]');
+                button.disabled = true;
+                try {
+                    const result = await post('@Url.Action("UpdateStatus")', data);
+                    HS.toast(result.message, result.success ? 'success' : 'error');
+                    if (result.success) setTimeout(() => window.location.reload(), 900);
+                    else button.disabled = false;
+                } catch {
+                    HS.toast('The order could not be updated.', 'error');
+                    button.disabled = false;
                 }
             });
-        }
-    });
 
-    function deleteOrder(orderId) {
-        const deleteButton = document.getElementById('confirmDeleteBtn');
-        const originalText = deleteButton.innerHTML;
-
-        deleteButton.disabled = true;
-        deleteButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Deleting...';
-
-        // Get anti-forgery token
-        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
-
-        if (!token) {
-            showNotification('Security token not found. Please refresh the page.', 'error');
-            deleteButton.disabled = false;
-            deleteButton.innerHTML = originalText;
-            return;
-        }
-
-        fetch('@Url.Action("DeleteOrder", "Orders", new { area = "Admin" })', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'RequestVerificationToken': token
-            },
-            body: `id=${orderId}&__RequestVerificationToken=${encodeURIComponent(token)}`
-        })
-        .then(response => {
-            if (response.redirected) {
-                // Success - redirect to orders list
-                showNotification('Order deleted successfully!', 'success');
-                setTimeout(() => {
-                    window.location.href = '@Url.Action("Index", "Orders", new { area = "Admin" })';
-                }, 1000);
-            } else if (response.ok) {
-                return response.json().then(data => {
-                    if (data && data.success) {
-                        showNotification(data.message || 'Order deleted successfully!', 'success');
-                        setTimeout(() => {
-                            window.location.href = '@Url.Action("Index", "Orders", new { area = "Admin" })';
-                        }, 1000);
-                    } else {
-                        showNotification(data.message || 'Error deleting order', 'error');
-                        deleteButton.disabled = false;
-                        deleteButton.innerHTML = originalText;
+            const trackingForm = document.querySelector('[data-tracking-form]');
+            trackingForm.addEventListener('submit', async e => {
+                e.preventDefault();
+                const data = new FormData(trackingForm);
+                data.append('orderId', orderId);
+                const button = trackingForm.querySelector('button[type=submit]');
+                button.disabled = true;
+                try {
+                    const result = await post('@Url.Action("AddTrackingEvent")', data);
+                    HS.toast(result.message, result.success ? 'success' : 'error');
+                    if (result.success) {
+                        trackingForm.reset();
+                        const html = await (await fetch('@Url.Action("GetTrackingHistory")?orderId=' + orderId)).text();
+                        document.querySelector('[data-tracking-history]').innerHTML = html;
                     }
-                });
-            } else {
-                return response.text().then(text => {
-                    showNotification('Error deleting order. Please try again.', 'error');
-                    deleteButton.disabled = false;
-                    deleteButton.innerHTML = originalText;
-                });
-            }
-        })
-        .catch(error => {
-            console.error('Delete error:', error);
-            showNotification('Error deleting order: ' + error.message, 'error');
-            deleteButton.disabled = false;
-            deleteButton.innerHTML = originalText;
-        });
-    }
-
-    function updateStatus(orderId, currentStatus) {
-        document.getElementById('orderIdForStatus').value = orderId;
-        document.getElementById('newStatus').value = currentStatus;
-        
-        // Initialize modal with current status
-        handleStatusChange();
-
-        const modal = new bootstrap.Modal(document.getElementById('statusModal'));
-        modal.show();
-    }
-
-    function handleStatusChange() {
-        const status = document.getElementById('newStatus').value;
-        const trackingNumberSection = document.getElementById('trackingNumberSection');
-        const carrierSection = document.getElementById('carrierSection');
-        const trackingNumberField = document.getElementById('trackingNumber');
-        const carrierField = document.getElementById('carrier');
-        
-        // Show tracking and carrier fields when order is Processing or Shipped
-        // Processing = order is being prepared (tracking assigned during preparation)
-        // Shipped = order is being shipped (tracking should already exist, but show for editing)
-        if (status === 'Processing' || status === 'Shipped') {
-            // Show tracking and carrier fields
-            trackingNumberSection.style.display = 'block';
-            carrierSection.style.display = 'block';
-            
-            // Generate tracking number if not already set
-            if (!trackingNumberField.value || trackingNumberField.value.trim() === '' || trackingNumberField.value === 'N/A') {
-                trackingNumberField.value = generateTrackingNumber();
-            }
-            
-            // Carrier is already set from user selection - no auto-selection
-            // If it's a select element, make sure it shows the current value
-            if (carrierField && carrierField.tagName === 'SELECT') {
-                // Value should already be set in the HTML from the model
-            }
-        } else {
-            // Hide tracking and carrier fields for other statuses
-            trackingNumberSection.style.display = 'none';
-            carrierSection.style.display = 'none';
-        }
-    }
-
-    function generateTrackingNumber() {
-        const orderId = document.getElementById('orderIdForStatus').value;
-        const now = new Date();
-        const datePart = now.getFullYear() + 
-                        String(now.getMonth() + 1).padStart(2, '0') + 
-                        String(now.getDate()).padStart(2, '0');
-        const randomPart = Math.random().toString(36).substring(2, 10).toUpperCase();
-        const paddedOrderId = String(orderId).padStart(6, '0');
-        return `HS${paddedOrderId}${datePart}${randomPart}`;
-    }
-
-    // Handle status update
-    document.getElementById('updateStatusBtn')?.addEventListener('click', function() {
-        const orderId = document.getElementById('orderIdForStatus').value;
-        const status = document.getElementById('newStatus').value;
-        const adminNotes = document.getElementById('adminNotes').value;
-        
-        // For Processing or Shipped status, let server auto-generate tracking number (send empty)
-        // Send selected carrier to server - server will use it or auto-determine if "Standard Shipping"
-        let trackingNumber = '';
-        let carrier = '';
-        
-        if (status === 'Processing' || status === 'Shipped') {
-            // Let server auto-generate tracking number - send empty string to trigger auto-generation
-            trackingNumber = '';
-            // Get selected carrier from dropdown
-            carrier = document.getElementById('carrier').value || 'Standard Shipping';
-        } else {
-            // For other statuses, send empty values
-            trackingNumber = '';
-            carrier = 'Standard Shipping';
-        }
-
-        const updateButton = this;
-        const originalText = updateButton.innerHTML;
-
-        updateButton.disabled = true;
-        updateButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Updating...';
-
-        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
-
-        fetch('@Url.Action("UpdateStatus", "Orders", new { area = "Admin" })', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'RequestVerificationToken': token
-            },
-            body: `id=${orderId}&status=${status}&trackingNumber=${encodeURIComponent(trackingNumber)}&adminNotes=${encodeURIComponent(adminNotes)}&carrier=${encodeURIComponent(carrier)}&__RequestVerificationToken=${token}`
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showNotification('Order status updated successfully! Tracking number and carrier set automatically.', 'success');
-                setTimeout(() => {
-                    bootstrap.Modal.getInstance(document.getElementById('statusModal')).hide();
-                    location.reload();
-                }, 1500);
-            } else {
-                showNotification(data.message || 'Error updating status', 'error');
-                updateButton.disabled = false;
-                updateButton.innerHTML = originalText;
-            }
-        })
-        .catch(error => {
-            showNotification('Error updating status: ' + error.message, 'error');
-            updateButton.disabled = false;
-            updateButton.innerHTML = originalText;
-        });
-    });
-
-    function printOrder() {
-        window.print();
-    }
-
-    function showNotification(message, type) {
-        const toast = document.createElement('div');
-        toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0 position-fixed top-0 end-0 m-3`;
-        toast.style.zIndex = '1060';
-        toast.innerHTML = `
-            <div class="d-flex">
-                <div class="toast-body">${message}</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        `;
-        document.body.appendChild(toast);
-
-        const bsToast = new bootstrap.Toast(toast);
-        bsToast.show();
-
-        toast.addEventListener('hidden.bs.toast', () => {
-            toast.remove();
-        });
-    }
-</script>
+                } catch {
+                    HS.toast('The tracking update could not be added.', 'error');
+                } finally {
+                    button.disabled = false;
+                }
+            });
+        })();
+    </script>
+}

@@ -1,0 +1,38 @@
+@model PaginationModel
+@if (Model.PageCount > 1)
+{
+    var start = Math.Max(1, Model.Page - 2);
+    var end = Math.Min(Model.PageCount, Model.Page + 2);
+    <nav aria-label="Pagination" class="mt-5 d-flex justify-content-center">
+        <ul class="pagination">
+            <li class="page-item @(Model.Page <= 1 ? "disabled" : "")">
+                <a class="page-link" href="@Model.UrlFor(Model.Page - 1)" aria-label="Previous page" @(Model.Page <= 1 ? "aria-disabled=true tabindex=-1" : "")><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></a>
+            </li>
+            @if (start > 1)
+            {
+                <li class="page-item"><a class="page-link" href="@Model.UrlFor(1)">1</a></li>
+                if (start > 2)
+                {
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                }
+            }
+            @for (var i = start; i <= end; i++)
+            {
+                <li class="page-item @(i == Model.Page ? "active" : "")">
+                    <a class="page-link" href="@Model.UrlFor(i)" @(i == Model.Page ? "aria-current=page" : "")>@i</a>
+                </li>
+            }
+            @if (end < Model.PageCount)
+            {
+                if (end < Model.PageCount - 1)
+                {
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                }
+                <li class="page-item"><a class="page-link" href="@Model.UrlFor(Model.PageCount)">@Model.PageCount</a></li>
+            }
+            <li class="page-item @(Model.Page >= Model.PageCount ? "disabled" : "")">
+                <a class="page-link" href="@Model.UrlFor(Model.Page + 1)" aria-label="Next page" @(Model.Page >= Model.PageCount ? "aria-disabled=true tabindex=-1" : "")><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></a>
+            </li>
+        </ul>
+    </nav>
+}

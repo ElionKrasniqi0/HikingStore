@@ -1,106 +1,66 @@
-﻿@using HikingStore.Areas.Admin.ViewModel
-@model EditRoleViewModel
-
+﻿@model EditRoleViewModel
 @{
-    var roles = ViewBag.roles;
+    ViewData["Title"] = "Customer roles";
+    var roles = ViewBag.roles as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> ?? new();
+    var available = roles.Where(r => !Model.UserRoles.Contains(r.Text)).ToList();
 }
 
-<div class="container-fluid px-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 mb-1 text-gray-800">Manage User Roles</h1>
-            <p class="text-muted">Add or remove roles for this user</p>
-        </div>
-        <a asp-action="Index" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Back to Users
-        </a>
+<div class="admin-page-head">
+    <div>
+        <h1>Roles for @ViewBag.UserEmail</h1>
+        <p>Role changes sign the user out of other sessions.</p>
     </div>
-
-    <div class="row">
-        <div class="col-lg-6">
-            <!-- Add Role Card -->
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0">Add Role to User</h5>
-                </div>
-                <div class="card-body">
-                    <form method="post" class="needs-validation" novalidate>
-                        <div class="mb-3">
-                            <label for="roleSelect" class="form-label">Select Role</label>
-                            <select class="form-select" asp-for="RoleId" asp-items="@roles" required>
-                                <option value="">Choose a role...</option>
-                            </select>
-                            <div class="invalid-feedback">
-                                Please select a role.
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-plus me-2"></i>Add Role
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-6">
-            <!-- Current Roles Card -->
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0">Current User Roles</h5>
-                </div>
-                <div class="card-body">
-                    @if (Model.UserRoles.Any())
-                    {
-                        <div class="list-group list-group-flush">
-                            @foreach (var role in Model.UserRoles)
-                            {
-                                <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
-                                    <div>
-                                        <span class="badge bg-primary me-2">@role</span>
-                                        <small class="text-muted">Assigned role</small>
-                                    </div>
-                                    <form method="POST" asp-controller="RoleManager" asp-action="RemoveUserRole"
-                                          asp-route-UserId="@Model.UserId" asp-route-roleName="@role">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger"
-                                                onclick="return confirm('Are you sure you want to remove this role?')">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            }
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="text-center py-4">
-                            <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
-                            <p class="text-muted mb-0">No roles assigned to this user</p>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
+    <a class="btn btn-outline-secondary btn-sm" asp-action="Users"><i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i>Customers</a>
 </div>
 
-@section Scripts {
-    <script>
-        // Form validation
-        (function() {
-            'use strict';
-            window.addEventListener('load', function() {
-                var forms = document.getElementsByClassName('needs-validation');
-                Array.prototype.filter.call(forms, function(form) {
-                    form.addEventListener('submit', function(event) {
-                        if (form.checkValidity() === false) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                        }
-                        form.classList.add('was-validated');
-                    }, false);
-                });
-            }, false);
-        })();
-    </script>
-}
-
+<div class="row g-3">
+    <div class="col-12 col-lg-6">
+        <section class="panel" aria-labelledby="current-h">
+            <div class="panel-head"><h2 id="current-h">Current roles</h2></div>
+            @if (Model.UserRoles.Count == 0)
+            {
+                <p class="panel-body text-muted m-0">This account has no roles.</p>
+            }
+            else
+            {
+                <ul class="list-group list-group-flush">
+                    @foreach (var role in Model.UserRoles)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold">@role</span>
+                            <form method="post" asp-action="RemoveRole" data-confirm="Remove the @role role from this account?">
+                                <input type="hidden" name="roleName" value="@role" />
+                                <input type="hidden" name="userId" value="@Model.UserId" />
+                                <button class="btn btn-sm btn-outline-danger" type="submit">Remove</button>
+                            </form>
+                        </li>
+                    }
+                </ul>
+            }
+        </section>
+    </div>
+    <div class="col-12 col-lg-6">
+        <section class="panel" aria-labelledby="add-h">
+            <div class="panel-head"><h2 id="add-h">Add a role</h2></div>
+            <div class="panel-body">
+                @if (available.Count == 0)
+                {
+                    <p class="text-muted m-0">This account already has every role.</p>
+                }
+                else
+                {
+                    <form method="post" asp-action="EditRole" class="d-flex flex-wrap gap-2 align-items-end">
+                        <input type="hidden" asp-for="UserId" />
+                        <div class="flex-grow-1">
+                            <label class="form-label small" asp-for="RoleId">Role</label>
+                            <select class="form-select" asp-for="RoleId" asp-items="available" required>
+                                <option value="">Choose a role…</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" type="submit">Add role</button>
+                    </form>
+                }
+            </div>
+        </section>
+    </div>
+</div>

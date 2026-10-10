@@ -1,358 +1,304 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using HikingStore.Data;
+﻿using System.Net;
 using HikingStore.Areas.Admin.ViewModel;
+using HikingStore.Data;
+using HikingStore.Enum;
 using HikingStore.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using HikingStore.Models;
-using HikingStore.Enum;
 
 namespace HikingStore.Areas.Admin.Controllers
 {
-
     [Area("Admin")]
-    [Authorize(Roles = "Admin")] // SECURITY: Strict role-based authorization
+    [Authorize(Roles = DbInitializer.AdminRole)]
     public class HomeController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly AdminAuditService _auditService;
+        private readonly IEmailSender _emailSender;
         private readonly ILogger<HomeController> _logger;
 
         public HomeController(
-            ApplicationDbContext context, 
-            SignInManager<IdentityUser> signInManager, 
-            UserManager<IdentityUser> userManager, 
+            ApplicationDbContext context,
+            UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
             AdminAuditService auditService,
+            IEmailSender emailSender,
             ILogger<HomeController> logger)
         {
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
-            _signInManager = signInManager;
             _auditService = auditService;
+            _emailSender = emailSender;
             _logger = logger;
         }
+
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            // SECURITY: Log admin access to dashboard
-            await _auditService.LogAdminAccessAsync("Admin Dashboard", "VIEW");
-            
-            // SECURITY: Verify admin role again (defense in depth)
-            if (!User.IsInRole("Admin"))
-            {
-                _logger.LogWarning("SECURITY: Unauthorized access attempt to admin dashboard. User: {User}, IP: {IP}", 
-                    User.Identity?.Name, HttpContext.Connection.RemoteIpAddress?.ToString());
-                return Forbid();
-            }
+            var since30 = DateTime.UtcNow.Date.AddDays(-29);
+            var since14 = DateTime.UtcNow.Date.AddDays(-13);
+            var revenueOrders = _context.Orders.AsNoTracking().Where(o => o.Status != OrderStatus.Cancelled);
 
-            // Optimize: Get all users with their roles in a single query instead of N+1 queries
-            var allusers = await _context.Users
-                .AsNoTracking()
+            var model = new DashboardViewModel
+            {
+                TotalRevenue = await revenueOrders.SumAsync(o => (decimal?)o.TotalAmount) ?? 0,
+                Revenue30Days = await revenueOrders.Where(o => o.OrderDate >= since30).SumAsync(o => (decimal?)o.TotalAmount) ?? 0,
+                OrderCount = await _context.Orders.CountAsync(),
+                Orders30Days = await _context.Orders.CountAsync(o => o.OrderDate >= since30),
+                OpenOrders = await _context.Orders.CountAsync(o => o.Status == OrderStatus.Received || o.Status == OrderStatus.Verified || o.Status == OrderStatus.Processing),
+                CustomerCount = await _context.Users.CountAsync(),
+                ActiveProducts = await _context.Products.CountAsync(p => p.IsActive),
+                PendingReviews = await _context.Reviews.CountAsync(r => !r.IsApproved),
+                MessageCount = await _context.Contacts.CountAsync(),
+                NewsletterSubscribers = await _context.NewsletterSubscribers.CountAsync(),
+                LowStock = await _context.Products.AsNoTracking()
+                    .Where(p => p.IsActive && p.StockQuantity <= 5)
+                    .OrderBy(p => p.StockQuantity).Take(8).ToListAsync(),
+                RecentOrders = await _context.Orders.AsNoTracking()
+                    .Include(o => o.User)
+                    .OrderByDescending(o => o.OrderDate).Take(8).ToListAsync(),
+                OrdersByStatus = await _context.Orders.GroupBy(o => o.Status)
+                    .Select(g => new { g.Key, Count = g.Count() })
+                    .ToDictionaryAsync(g => g.Key, g => g.Count)
+            };
+
+            var daily = await revenueOrders.Where(o => o.OrderDate >= since14)
+                .GroupBy(o => o.OrderDate.Date)
+                .Select(g => new { Date = g.Key, Orders = g.Count(), Revenue = g.Sum(o => o.TotalAmount) })
                 .ToListAsync();
+            model.SalesByDay = Enumerable.Range(0, 14)
+                .Select(i => since14.AddDays(i))
+                .Select(d => daily.FirstOrDefault(x => x.Date == d) is { } x
+                    ? new DailySales(d, x.Orders, x.Revenue)
+                    : new DailySales(d, 0, 0))
+                .ToList();
 
-            // Get all user-role mappings in a single query
-            var userRolesMap = await (from user in _context.Users
-                                     join userRoles in _context.UserRoles on user.Id equals userRoles.UserId
-                                     join role in _context.Roles on userRoles.RoleId equals role.Id
-                                     select new { UserId = user.Id, RoleName = role.Name })
-                                .AsNoTracking()
-                                .ToListAsync();
+            model.TopProducts = (await _context.OrderDetails.AsNoTracking()
+                    .Where(d => d.Order!.Status != OrderStatus.Cancelled)
+                    .GroupBy(d => new { d.ProId, Name = d.ProductName ?? d.Product!.ProName })
+                    .Select(g => new { g.Key.ProId, g.Key.Name, Units = g.Sum(d => d.Quantity), Revenue = g.Sum(d => d.Price * d.Quantity) })
+                    .OrderByDescending(g => g.Units).Take(5).ToListAsync())
+                .Select(g => new TopProduct(g.ProId, g.Name ?? "Product", g.Units, g.Revenue))
+                .ToList();
 
-            // Group roles by user ID for efficient lookup
-            var rolesByUserId = userRolesMap
-                .GroupBy(x => x.UserId)
-                .ToDictionary(g => g.Key, g => g.Select(x => x.RoleName).ToList());
-
-            List<Users_In_Role_ViewModel> model = new();
-
-            foreach (var item in allusers)
-            {
-                // Get roles from dictionary (O(1) lookup instead of database query)
-                var rolesList = rolesByUserId.TryGetValue(item.Id, out var roles) ? roles : new List<string>();
-
-                Users_In_Role_ViewModel tempUsers = new()
-                {
-                    UserId = item.Id,
-                    Email = item.Email,
-                    UserName = item.UserName,
-                    IsLocked = item.LockoutEnabled,
-                    Roles = rolesList,
-                };
-                model.Add(tempUsers);
-            }
             return View(model);
         }
 
         [HttpGet]
-        public async Task<IActionResult> EditRole(Guid UserId)
+        public async Task<IActionResult> Users(string? search)
         {
-            if (await UserExists(UserId))
+            var query = _context.Users.AsNoTracking();
+            if (!string.IsNullOrWhiteSpace(search))
             {
-                List<SelectListItem> roles = _context.Roles.Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Name }).AsNoTracking().ToList();
-
-                var user = await _userManager.FindByIdAsync(UserId.ToString());
-                var userRoles = (List<string>)await _userManager.GetRolesAsync(user);
-
-                ViewBag.roles = roles;
-
-                EditRoleViewModel model = new()
-                {
-                    UserId = UserId.ToString(),
-                    UserRoles = userRoles
-                };
-
-                return View(model);
-            }
-            else
-            {
-                return NotFound("User not Found");
-            }
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditRoleAsync(EditRoleViewModel model)
-        {
-            IdentityUser user = await _userManager
-                .FindByIdAsync(model.UserId.ToString());
-
-            var role = await _roleManager
-                .FindByIdAsync(model.RoleId);
-
-            var userAlreadyInRole = await _context.UserRoles
-                .Where(x => x.RoleId == role.Id && x.UserId == user.Id)
-                .AsNoTracking()
-                .FirstOrDefaultAsync();
-
-            if (userAlreadyInRole == null)
-            {
-                var roleResult = await _userManager.AddToRoleAsync(user, role.Name);
-
-                if (roleResult.Succeeded)
-                {
-                    await _userManager.UpdateSecurityStampAsync(user);
-
-                    return RedirectToAction("EditRole", new { UserId = model.UserId });
-                }
-
-                foreach (var error in roleResult.Errors)
-                {
-                    ModelState.AddModelError("", error.Description);
-                }
-
-                return RedirectToAction("EditRole", new { model.UserId });
+                var term = search.Trim();
+                query = query.Where(u => u.Email!.Contains(term) || u.UserName!.Contains(term)
+                    || (u.FirstName != null && u.FirstName.Contains(term)) || (u.LastName != null && u.LastName.Contains(term)));
             }
 
-            return RedirectToAction("EditRole", new { model.UserId });
-        }
+            var users = await query.OrderBy(u => u.Email).ToListAsync();
+            var userRoles = await (from ur in _context.UserRoles
+                                   join r in _context.Roles on ur.RoleId equals r.Id
+                                   select new { ur.UserId, r.Name }).ToListAsync();
+            var rolesByUser = userRoles.GroupBy(x => x.UserId).ToDictionary(g => g.Key, g => g.Select(x => x.Name!).ToList());
+            var orderCounts = await _context.Orders.GroupBy(o => o.UserId).Select(g => new { g.Key, Count = g.Count() })
+                .ToDictionaryAsync(g => g.Key, g => g.Count);
 
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RemoveRole(string RoleName, string UserId)
-        {
-            if (!String.IsNullOrEmpty(RoleName) && !String.IsNullOrEmpty(UserId))
+            var now = DateTimeOffset.UtcNow;
+            var model = users.Select(u => new Users_In_Role_ViewModel
             {
-                IdentityUser user = await _userManager.FindByIdAsync(UserId);
-                if (user != null)
-                {
-                    // Removes the role from the said user and the said role.
-                    await _userManager.RemoveFromRoleAsync(user, RoleName);
+                UserId = u.Id,
+                Email = u.Email ?? string.Empty,
+                UserName = u.DisplayName,
+                IsLocked = u.LockoutEnd.HasValue && u.LockoutEnd.Value > now,
+                EmailConfirmed = u.EmailConfirmed,
+                OrderCount = orderCounts.GetValueOrDefault(u.Id),
+                Roles = rolesByUser.GetValueOrDefault(u.Id) ?? new List<string>()
+            }).ToList();
 
-                    Guid guidUserId = Guid.Parse(UserId);
-
-                    await _userManager.UpdateSecurityStampAsync(user);
-                    return RedirectToAction("EditRole", new { UserId = guidUserId });
-                }
-                return RedirectToAction("Index");
-            }
-            else
-            {
-                return RedirectToAction("Index");
-            }
-        }
-
-        [ActionName("DeleteUser")]
-        [HttpPost]
-        public async Task<IActionResult> DeleteUser(Guid UserId)
-        {
-            if (await UserExists(UserId))
-            {
-                var userIdString = UserId.ToString();
-                var user = await _userManager.FindByIdAsync(userIdString);
-
-                try
-                {
-                    // Delete all shopping cart items for this user first
-                    var shoppingCarts = await _context.ShoppingCarts
-                        .Where(c => c.UserId == userIdString)
-                        .ToListAsync();
-
-                    if (shoppingCarts.Any())
-                    {
-                        _context.ShoppingCarts.RemoveRange(shoppingCarts);
-                        await _context.SaveChangesAsync();
-                    }
-
-                    // Now delete the user
-                    var result = await _userManager.DeleteAsync(user);
-
-                    if (result.Succeeded)
-                    {
-                        //TempData["Message"] = $"User: {user.UserName} deleted successfully.";
-                        //_notyf.Success($"User: {user.UserName} was deleted successfully!");
-
-                        return RedirectToAction("Index");
-                    }
-
-                    foreach (var error in result.Errors)
-                    {
-                        ModelState.AddModelError("", error.Description);
-                    }
-                    return View("Index");
-                }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", $"Error deleting user: {ex.Message}");
-                    return View("Index");
-                }
-            }
-
-            ViewBag.ErrorMessage = $"User with the Id = {UserId}, cannot be found!";
-            return View("NotFound");
-        }
-
-        public async Task<bool> UserExists(Guid UserId)
-        {
-            if (UserId != Guid.Empty)
-            {
-                var user = await _context.Users
-                    .AsNoTracking()
-                    .Where(x => x.Id.Equals(UserId.ToString()))
-                    .FirstOrDefaultAsync();
-                return user != null;
-            }
-            return false;
+            ViewBag.Search = search;
+            return View(model);
         }
 
         [HttpGet]
-        [AllowAnonymous]
-        public IActionResult AccessDenied()
+        public async Task<IActionResult> EditRole(string userId)
         {
-            return View();
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.roles = await _context.Roles.AsNoTracking()
+                .Select(r => new SelectListItem { Value = r.Id, Text = r.Name }).ToListAsync();
+            ViewBag.UserEmail = user.Email;
+            return View(new EditRoleViewModel
+            {
+                UserId = user.Id,
+                UserRoles = (await _userManager.GetRolesAsync(user)).ToList()
+            });
         }
 
-        [ValidateAntiForgeryToken]
         [HttpPost]
-        public async Task<IActionResult> LockUser(Guid UserId)
+        public async Task<IActionResult> EditRole(EditRoleViewModel model)
         {
-            try
+            var user = await _userManager.FindByIdAsync(model.UserId);
+            var role = string.IsNullOrEmpty(model.RoleId) ? null : await _roleManager.FindByIdAsync(model.RoleId);
+            if (user == null || role?.Name == null)
             {
-                var user = await _userManager.FindByIdAsync(UserId.ToString());
-                if (user.LockoutEnabled != true)
+                TempData["Error"] = "Please choose a valid role.";
+                return RedirectToAction(nameof(EditRole), new { userId = model.UserId });
+            }
+
+            if (!await _userManager.IsInRoleAsync(user, role.Name))
+            {
+                var result = await _userManager.AddToRoleAsync(user, role.Name);
+                if (result.Succeeded)
                 {
-                    DateTime resctritedDate = DateTime.Now.AddYears(1);
-
-                    var lockUserTask = await _userManager.SetLockoutEnabledAsync(user, true);
-                    var lockDateTask = await _userManager.SetLockoutEndDateAsync(user, resctritedDate);
-
-                    // Force Logouts the User
                     await _userManager.UpdateSecurityStampAsync(user);
-
-                    return RedirectToAction("Index", "Home", new { area = "Admin" });
+                    await _auditService.LogAdminModificationAsync("User", user.Id, "ADD_ROLE", null, role.Name);
+                    TempData["Success"] = $"Added role {role.Name}.";
                 }
-                return RedirectToAction("Index", "Home", new { area = "Admin" });
+                else
+                {
+                    TempData["Error"] = string.Join(" ", result.Errors.Select(e => e.Description));
+                }
             }
-            catch (Exception)
-            {
-                return RedirectToAction("Index", "Home", new { area = "Admin" });
-            }
+            return RedirectToAction(nameof(EditRole), new { userId = model.UserId });
         }
 
-        public async Task<IActionResult> UnlockUser(Guid UserId)
+        [HttpPost]
+        public async Task<IActionResult> RemoveRole(string roleName, string userId)
         {
-            try
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null || string.IsNullOrEmpty(roleName))
             {
-                DateTime resctritedDate = DateTime.Now - TimeSpan.FromMinutes(1);
-
-                var user = await _userManager.FindByIdAsync(UserId.ToString());
-
-                var setLockoutEndDateTask = await _userManager.SetLockoutEndDateAsync(user, resctritedDate);
-                var lockDisabledTask = await _userManager.SetLockoutEnabledAsync(user, false);
-
-                // Force Logout the User
-                await _userManager.UpdateSecurityStampAsync(user);
-
-                return RedirectToAction("Index", "Home", new { area = "Admin" });
+                return RedirectToAction(nameof(Users));
             }
-            catch (Exception)
+
+            if (roleName == DbInitializer.AdminRole && user.Id == _userManager.GetUserId(User))
             {
-                return RedirectToAction("Index", "Home", new { area = "Admin" });
+                TempData["Error"] = "You cannot remove your own admin role.";
+                return RedirectToAction(nameof(EditRole), new { userId });
             }
+
+            await _userManager.RemoveFromRoleAsync(user, roleName);
+            await _userManager.UpdateSecurityStampAsync(user);
+            await _auditService.LogAdminModificationAsync("User", user.Id, "REMOVE_ROLE", roleName, null);
+            TempData["Success"] = $"Removed role {roleName}.";
+            return RedirectToAction(nameof(EditRole), new { userId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteUser(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            if (user.Id == _userManager.GetUserId(User))
+            {
+                TempData["Error"] = "You cannot delete your own account here.";
+                return RedirectToAction(nameof(Users));
+            }
+            if (await _context.Orders.AnyAsync(o => o.UserId == user.Id))
+            {
+                TempData["Error"] = "This customer has orders, so the account can't be deleted without losing order history. Lock the account instead.";
+                return RedirectToAction(nameof(Users));
+            }
+
+            await _context.RemoveNonCascadingUserDataAsync(user.Id);
+            var result = await _userManager.DeleteAsync(user);
+            if (result.Succeeded)
+            {
+                await _auditService.LogAdminDeletionAsync("User", user.Id, user.Email);
+                TempData["Success"] = $"Deleted {user.Email}.";
+            }
+            else
+            {
+                TempData["Error"] = string.Join(" ", result.Errors.Select(e => e.Description));
+            }
+            return RedirectToAction(nameof(Users));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> LockUser(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return NotFound();
+            if (user.Id == _userManager.GetUserId(User))
+            {
+                TempData["Error"] = "You cannot lock your own account.";
+                return RedirectToAction(nameof(Users));
+            }
+
+            await _userManager.SetLockoutEnabledAsync(user, true);
+            await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.UtcNow.AddYears(100));
+            await _userManager.UpdateSecurityStampAsync(user);
+            await _auditService.LogAdminModificationAsync("User", user.Id, "LOCK");
+            TempData["Success"] = $"{user.Email} is locked and signed out.";
+            return RedirectToAction(nameof(Users));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UnlockUser(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return NotFound();
+
+            await _userManager.SetLockoutEndDateAsync(user, null);
+            await _userManager.ResetAccessFailedCountAsync(user);
+            await _auditService.LogAdminModificationAsync("User", user.Id, "UNLOCK");
+            TempData["Success"] = $"{user.Email} is unlocked.";
+            return RedirectToAction(nameof(Users));
         }
 
         public async Task<IActionResult> ShowMessage()
         {
-            var message = await _context.Contacts
-                .AsNoTracking()
-                .OrderByDescending(c => c.CreatedDate)
-                .ToListAsync();
-            return View(message);
+            var messages = await _context.Contacts.AsNoTracking().OrderByDescending(c => c.CreatedDate).ToListAsync();
+            return View(messages);
         }
 
         [HttpPost]
         public async Task<IActionResult> DeleteMessage(int id)
         {
-            try
-            {
-                var contact = await _context.Contacts.FindAsync(id);
-                if (contact == null)
-                {
-                    return Json(new { success = false, message = "Message not found." });
-                }
-
-                _context.Contacts.Remove(contact);
-                await _context.SaveChangesAsync();
-
-                return Json(new { success = true, message = "Message deleted successfully." });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = $"Error deleting message: {ex.Message}" });
-            }
+            var deleted = await _context.Contacts.Where(c => c.CoId == id).ExecuteDeleteAsync();
+            return Json(new { success = deleted > 0, message = deleted > 0 ? "Message deleted." : "Message not found." });
         }
 
         [HttpPost]
         public async Task<IActionResult> SendReply(int id, string replySubject, string replyMessage)
         {
+            var contact = await _context.Contacts.AsNoTracking().FirstOrDefaultAsync(c => c.CoId == id);
+            if (contact?.Email == null)
+            {
+                return Json(new { success = false, message = "Message not found." });
+            }
+            if (string.IsNullOrWhiteSpace(replySubject) || string.IsNullOrWhiteSpace(replyMessage))
+            {
+                return Json(new { success = false, message = "Subject and message are required." });
+            }
+
+            var body = $"<p>Hi {WebUtility.HtmlEncode(contact.Name)},</p>" +
+                       $"<p>{WebUtility.HtmlEncode(replyMessage).Replace("\n", "<br>")}</p>" +
+                       "<p>— The HikingStore team</p>";
             try
             {
-                var contact = await _context.Contacts.FindAsync(id);
-                if (contact == null)
-                {
-                    return Json(new { success = false, message = "Message not found." });
-                }
-
-                // Here you would typically send an email using an email service
-                // For now, we'll just return success
-                // TODO: Implement email sending functionality
-                
-                return Json(new { success = true, message = "Reply sent successfully to " + contact.Email });
+                await _emailSender.SendEmailAsync(contact.Email, replySubject.Trim(), body);
+                await _auditService.LogAdminActionAsync("CONTACT_REPLY", $"Replied to contact message {id}", $"Contact:{id}");
+                return Json(new { success = true, message = $"Reply sent to {contact.Email}." });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = $"Error sending reply: {ex.Message}" });
+                _logger.LogError(ex, "Failed to send reply to contact message {Id}", id);
+                return Json(new { success = false, message = "The email could not be sent. Check the email settings." });
             }
         }
     }

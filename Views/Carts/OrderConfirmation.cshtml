@@ -1,217 +1,119 @@
 ﻿@model Order
-<br />
-<br />
-<div class="hero">
-    <div class="container">
-        <div class="row justify-content-between">
-            <div class="col-lg-5">
-                <div class="intro-excerpt">
-                    <h1>Order Confirmation</h1>
-                </div>
-            </div>
-            <div class="col-lg-7">
-                <!-- Steps indicator -->
-                <div class="checkout-steps d-flex justify-content-end">
-                    <div class="step completed">
-                        <div class="step-number">
-                            <i class="fas fa-check"></i>
-                        </div>
-                        <div class="step-label">Cart</div>
-                    </div>
-                    <div class="step completed">
-                        <div class="step-number">
-                            <i class="fas fa-check"></i>
-                        </div>
-                        <div class="step-label">Details</div>
-                    </div>
-                    <div class="step completed">
-                        <div class="step-number">
-                            <i class="fas fa-check"></i>
-                        </div>
-                        <div class="step-label">Payment</div>
-                    </div>
-                    <div class="step active">
-                        <div class="step-number">4</div>
-                        <div class="step-label">Complete</div>
-                    </div>
-                </div>
-            </div>
+@inject IOptions<StoreSettings> StoreOptions
+@{
+    var store = StoreOptions.Value;
+    ViewData["Title"] = $"Order {Model.OrderNumber} confirmed";
+    ViewData["NoIndex"] = true;
+    var isPickup = store.ShippingMethods.Any(m => m.Code == "pickup" && m.Name == Model.ShippingService);
+}
+
+<div class="container-hs" style="max-width:860px">
+    <ol class="checkout-steps mt-4" aria-label="Checkout progress">
+        <li class="done"><span class="n"><i class="fa-solid fa-check" aria-hidden="true"></i></span>Cart</li>
+        <li class="done"><span class="n"><i class="fa-solid fa-check" aria-hidden="true"></i></span>Details &amp; delivery</li>
+        <li class="current" aria-current="step"><span class="n">3</span>Confirmation</li>
+    </ol>
+
+    <div class="card-hs text-center py-5 mb-4">
+        <i class="fa-solid fa-circle-check fa-3x mb-3" style="color:var(--hs-forest)" aria-hidden="true"></i>
+        <h1 class="h2">Thank you, your order is placed</h1>
+        <p class="m-0">Order number <strong>#@Model.OrderNumber</strong> · @Model.OrderDate.ToString("d MMM yyyy, HH:mm") UTC</p>
+        <p class="text-muted mt-2 mb-0">
+            We've sent a confirmation to <strong>@Model.Email</strong>.
+            @if (isPickup)
+            {
+                <text>Please have <strong>@store.FormatPrice(Model.TotalAmount)</strong> ready to pay when you collect your order.</text>
+            }
+            else
+            {
+                <text>Please have <strong>@store.FormatPrice(Model.TotalAmount)</strong> ready to pay the courier on delivery.</text>
+            }
+        </p>
+        <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
+            <a class="btn btn-primary" asp-controller="Orders" asp-action="Details" asp-route-id="@Model.OrderId">Track this order</a>
+            <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Shop">Continue shopping</a>
         </div>
     </div>
-</div>
 
-<div class="untree_co-section">
-    <div class="container">
-        <!-- Email Sent Notification -->
-        @if (TempData["EmailSent"] != null)
-        {
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="fas fa-check-circle me-2"></i>
-                @TempData["EmailSent"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        }
-
-        <div class="row">
-            <div class="col-md-12 text-center pt-5">
-                <span class="display-3 thankyou-icon text-primary">
-                    <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-cart-check mb-5" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" d="M11.354 5.646a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L8 8.293l2.646-2.647a.5.5 0 0 1 .708 0z" />
-                        <path fill-rule="evenodd" d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm7 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
-                    </svg>
-                </span>
-                <h2 class="display-3 text-black">Thank you!</h2>
-                <p class="lead mb-5">You order was successfully completed.</p>
-
-                <!-- Order Details -->
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-body">
-                        <h4 class="text-primary">Order #@Model.OrderId</h4>
-                        <p><strong>Order Date:</strong> @Model.OrderDate.ToString("MMMM dd, yyyy")</p>
-                        <p><strong>Total Amount:</strong> €@Model.TotalAmount.ToString("N2")</p>
-                        <p><strong>Shipping Method:</strong> @(Model.Carrier ?? "Standard Shipping")</p>
-                        <p><strong>Shipping To:</strong> @Model.ShippingAddress, @Model.City</p>
-
-                        @if (!string.IsNullOrEmpty(Model.Comment))
+    <div class="row g-4">
+        <div class="col-md-7">
+            <section class="card-hs h-100" aria-labelledby="items-title">
+                <h2 id="items-title" class="h5">Items</h2>
+                @foreach (var line in Model.OrderDetails)
+                {
+                    <div class="summary-line">
+                        <div class="thumb">
+                            @if (!string.IsNullOrEmpty(line.Product?.ProImage))
+                            {
+                                <img src="~/Product/@line.Product.ProImage" alt="" loading="lazy" />
+                            }
+                            <span class="qty-pill">×@line.Quantity</span>
+                        </div>
+                        <div class="min-w-0">
+                            <span class="d-block fw-semibold">@line.DisplayName</span>
+                            @if (!string.IsNullOrEmpty(line.SelectedSize) || !string.IsNullOrEmpty(line.SelectedColor))
+                            {
+                                <span class="text-muted">@string.Join(" · ", new[] { line.SelectedColor, line.SelectedSize }.Where(v => !string.IsNullOrEmpty(v)))</span>
+                            }
+                        </div>
+                        <span>@store.FormatPrice(line.LineTotal)</span>
+                    </div>
+                }
+                <hr />
+                <ul class="summary-rows m-0">
+                    <li><span>Subtotal</span><span>@store.FormatPrice(Model.Subtotal)</span></li>
+                    @if (Model.DiscountAmount > 0)
+                    {
+                        <li class="discount"><span>Discount (@Model.CouponCode)</span><span>−@store.FormatPrice(Model.DiscountAmount)</span></li>
+                    }
+                    <li><span>Shipping (@Model.ShippingService)</span><span>@(Model.ShippingCost == 0 ? "Free" : store.FormatPrice(Model.ShippingCost))</span></li>
+                    <li class="total"><span>@(isPickup ? "Total to pay at pickup" : "Total to pay on delivery")</span><span>@store.FormatPrice(Model.TotalAmount)</span></li>
+                </ul>
+            </section>
+        </div>
+        <div class="col-md-5">
+            <section class="card-hs h-100" aria-labelledby="ship-title">
+                <h2 id="ship-title" class="h5">@(isPickup ? "Pickup" : "Delivery")</h2>
+                @if (isPickup)
+                {
+                    <address class="mb-3">
+                        <strong>@store.Name</strong><br />
+                        @store.Address
+                        @foreach (var hours in store.OpeningHours)
                         {
-                            <p><strong>Order Notes:</strong> @Model.Comment</p>
+                            <br />@hours
                         }
-                    </div>
-                </div>
-
-                <p class="text-muted mb-4">
-                    <i class="fas fa-envelope text-primary me-2"></i>
-                    A confirmation email has been sent to your email address with all order details.
-                </p>
-
-                <div class="d-flex justify-content-center gap-3">
-                    <a href="/Home/Product" class="btn btn-primary btn-outline-black">Continue Shopping</a>
-                    <a href="/Orders" class="btn btn-outline-primary">View My Orders</a>
-                </div>
-            </div>
+                    </address>
+                    <p class="small text-muted">Contact: @Model.FullName · @Model.PhoneNumber</p>
+                }
+                else
+                {
+                    <address class="mb-3">
+                        <strong>@Model.FullName</strong><br />
+                        @Model.ShippingAddress<br />
+                        @Model.PostalCode @Model.City<br />
+                        @Model.Country<br />
+                        @Model.PhoneNumber
+                    </address>
+                }
+                <h3 class="h6">Payment</h3>
+                <p class="mb-3">@PaymentMethods.DisplayName(Model.PaymentMethod)</p>
+                <h3 class="h6">What happens next</h3>
+                <ol class="small text-muted ps-3 m-0">
+                    @if (isPickup)
+                    {
+                        <li>We confirm your order and get it ready at the store.</li>
+                        <li>We email you each time the order status changes, so you know when to come in.</li>
+                        <li>Bring your order number and pay when you collect it.</li>
+                    }
+                    else
+                    {
+                        <li>We confirm your order and prepare it for shipping.</li>
+                        <li>You get an email when it ships, with a tracking number.</li>
+                        <li>Pay the courier when your parcel arrives.</li>
+                    }
+                </ol>
+            </section>
         </div>
     </div>
 </div>
-
-
-<style>
-    /* Checkout Steps */
-    .checkout-steps {
-        gap: 2rem;
-    }
-
-    .step {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        position: relative;
-        cursor: default;
-    }
-
-        .step:not(:last-child):after {
-            content: '';
-            position: absolute;
-            top: 20px;
-            left: 60px;
-            width: 60px;
-            height: 2px;
-            background: #dee2e6;
-            transition: background 0.3s ease;
-        }
-
-        .step.active:not(:last-child):after,
-        .step.completed:not(:last-child):after {
-            background: #3b5d50;
-        }
-
-    .step-number {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: #dee2e6;
-        color: #6c757d;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        transition: all 0.3s ease;
-        font-size: 0.9rem;
-    }
-
-    .step.active .step-number {
-        background: #3b5d50;
-        color: white;
-        box-shadow: 0 4px 12px rgba(59, 93, 80, 0.3);
-        transform: scale(1.1);
-    }
-
-    .step.completed .step-number {
-        background: #28a745;
-        color: white;
-        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-    }
-
-    .step.completed .step-number i {
-        font-size: 0.875rem;
-    }
-
-    .step-label {
-        font-size: 0.875rem;
-        color: #6c757d;
-        font-weight: 500;
-        transition: all 0.3s ease;
-    }
-
-    .step.active .step-label {
-        color: #3b5d50;
-        font-weight: 600;
-    }
-
-    .step.completed .step-label {
-        color: #28a745;
-        font-weight: 600;
-    }
-
-    /* Responsive Design */
-    @@media (max-width: 768px) {
-        .checkout-steps {
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .step:not(:last-child):after {
-            width: 30px;
-            left: 45px;
-        }
-
-        .step-number {
-            width: 35px;
-            height: 35px;
-            font-size: 0.875rem;
-        }
-    }
-
-    @@media (max-width: 576px) {
-        .step:not(:last-child):after {
-            display: none;
-        }
-
-        .checkout-steps {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.5rem;
-        }
-
-        .step {
-            flex-direction: row;
-            width: 100%;
-        }
-
-        .step-number {
-            margin-right: 1rem;
-            margin-bottom: 0;
-        }
-    }
-</style>
-

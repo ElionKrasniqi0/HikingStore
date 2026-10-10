@@ -1,0 +1,72 @@
+@model Address
+@{
+    var editing = Model.AddressId > 0;
+    ViewData["Title"] = editing ? "Edit address" : "Add address";
+    ViewData["NoIndex"] = true;
+    ViewData["AccountSection"] = "addresses";
+}
+
+<div class="container-hs">
+    <div class="page-head"><h1>@ViewData["Title"]</h1></div>
+    <div class="account-layout">
+        <partial name="_AccountNav" />
+        <section class="card-hs" style="max-width:720px">
+            <form method="post" asp-action="AddressForm" asp-route-id="@(editing ? Model.AddressId : null)" data-once>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <label asp-for="Label" class="form-label"></label>
+                        <input asp-for="Label" class="form-control" maxlength="50" />
+                    </div>
+                    <div class="col-sm-6">
+                        <label asp-for="FullName" class="form-label"></label>
+                        <input asp-for="FullName" class="form-control" autocomplete="name" />
+                        <span asp-validation-for="FullName"></span>
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="AddressLine" class="form-label"></label>
+                        <input asp-for="AddressLine" class="form-control" autocomplete="street-address" />
+                        <span asp-validation-for="AddressLine"></span>
+                    </div>
+                    <div class="col-sm-5">
+                        <label asp-for="City" class="form-label"></label>
+                        <input asp-for="City" class="form-control" autocomplete="address-level2" />
+                        <span asp-validation-for="City"></span>
+                    </div>
+                    <div class="col-sm-3">
+                        <label asp-for="PostalCode" class="form-label"></label>
+                        <input asp-for="PostalCode" class="form-control" autocomplete="postal-code" />
+                    </div>
+                    <div class="col-sm-4">
+                        <label asp-for="Country" class="form-label"></label>
+                        <select asp-for="Country" class="form-select">
+                            @foreach (var country in new[] { "Kosovo", "Albania", "North Macedonia", "Montenegro" })
+                            {
+                                <option value="@country">@country</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="PhoneNumber" class="form-label"></label>
+                        <input asp-for="PhoneNumber" class="form-control" autocomplete="tel" inputmode="tel" />
+                        <span asp-validation-for="PhoneNumber"></span>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input asp-for="IsDefault" class="form-check-input" />
+                            <label asp-for="IsDefault" class="form-check-label"></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary" data-busy-text="Saving…">Save address</button>
+                    <a class="btn btn-outline-secondary" asp-action="Addresses">Cancel</a>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

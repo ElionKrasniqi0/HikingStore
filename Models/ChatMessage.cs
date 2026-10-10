@@ -1,3 +1,4 @@
+using HikingStore.Data;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -18,7 +19,7 @@ namespace HikingStore.Models
         public string SenderId { get; set; } = string.Empty;
 
         [ForeignKey("SenderId")]
-        public virtual Microsoft.AspNetCore.Identity.IdentityUser? Sender { get; set; }
+        public virtual HikingStore.Data.ApplicationUser? Sender { get; set; }
 
         [Required]
         public string Message { get; set; } = string.Empty;

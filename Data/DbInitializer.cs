@@ -1,90 +1,78 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using HikingStore.Data;
-using HikingStore.Enum;
 
 namespace HikingStore.Data
 {
     public static class DbInitializer
     {
+        public const string AdminRole = "Admin";
+        public const string UserRole = "User";
+
         public static async Task InitializeAsync(IServiceProvider serviceProvider)
         {
             using var scope = serviceProvider.CreateScope();
             var services = scope.ServiceProvider;
 
             var context = services.GetRequiredService<ApplicationDbContext>();
-            var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+            var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
             var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
             var configuration = services.GetRequiredService<IConfiguration>();
+            var logger = services.GetRequiredService<ILoggerFactory>().CreateLogger(nameof(DbInitializer));
 
-            // Ensure database is created
             await context.Database.MigrateAsync();
 
-            // Seed Admin Role
-            string adminRoleName = "Admin";
-            if (!await roleManager.RoleExistsAsync(adminRoleName))
+            foreach (var roleName in new[] { AdminRole, UserRole })
             {
-                await roleManager.CreateAsync(new IdentityRole(adminRoleName));
+                if (!await roleManager.RoleExistsAsync(roleName))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(roleName));
+                }
             }
 
-            // Seed User Role
-            string userRoleName = "User";
-            if (!await roleManager.RoleExistsAsync(userRoleName))
+            var adminEmail = configuration["SeedData:AdminEmail"];
+            var adminPassword = configuration["SeedData:AdminPassword"];
+            if (string.IsNullOrWhiteSpace(adminEmail))
             {
-                await roleManager.CreateAsync(new IdentityRole(userRoleName));
+                return;
             }
-
-            // Seed Admin User
-            string adminEmail = configuration["SeedData:AdminEmail"] ?? "admin@hikingstore.com";
-            string adminPassword = configuration["SeedData:AdminPassword"] ?? "Admin@123";
-            string adminFirstName = configuration["SeedData:AdminFirstName"] ?? "Admin";
-            string adminLastName = configuration["SeedData:AdminLastName"] ?? "User";
 
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
             if (adminUser == null)
             {
+                if (string.IsNullOrWhiteSpace(adminPassword))
+                {
+                    logger.LogWarning("No admin account exists and SeedData:AdminPassword is not configured; skipping admin seeding.");
+                    return;
+                }
+
                 adminUser = new ApplicationUser
                 {
                     UserName = adminEmail,
                     Email = adminEmail,
-                    EmailConfirmed = true, // Auto-confirm admin email so they can log in immediately
-                    FirstName = adminFirstName,
-                    LastName = adminLastName,
-                    UserStatus = UserStatus.Client
+                    EmailConfirmed = true,
+                    FirstName = configuration["SeedData:AdminFirstName"] ?? "Admin",
+                    LastName = configuration["SeedData:AdminLastName"] ?? "User"
                 };
 
                 var result = await userManager.CreateAsync(adminUser, adminPassword);
-                if (result.Succeeded)
+                if (!result.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(adminUser, adminRoleName);
+                    logger.LogError("Could not create the seed admin account: {Errors}",
+                        string.Join("; ", result.Errors.Select(e => e.Description)));
+                    return;
                 }
             }
-            else
+
+            // Only guarantee the role and confirmed email; an existing admin password is never overwritten.
+            if (!await userManager.IsInRoleAsync(adminUser, AdminRole))
             {
-                // Ensure admin user is in Admin role even if they already exist
-                if (!await userManager.IsInRoleAsync(adminUser, adminRoleName))
-                {
-                    await userManager.AddToRoleAsync(adminUser, adminRoleName);
-                }
-                
-                // Reset password to ensure it matches the configuration
-                // Check if current password is correct, if not, reset it
-                var passwordCheck = await userManager.CheckPasswordAsync(adminUser, adminPassword);
-                if (!passwordCheck)
-                {
-                    var token = await userManager.GeneratePasswordResetTokenAsync(adminUser);
-                    var passwordResult = await userManager.ResetPasswordAsync(adminUser, token, adminPassword);
-                    // Note: If password reset fails, the existing password will remain
-                }
-                
-                // Ensure email is confirmed
-                if (!adminUser.EmailConfirmed)
-                {
-                    adminUser.EmailConfirmed = true;
-                    await userManager.UpdateAsync(adminUser);
-                }
+                await userManager.AddToRoleAsync(adminUser, AdminRole);
+            }
+
+            if (!adminUser.EmailConfirmed)
+            {
+                adminUser.EmailConfirmed = true;
+                await userManager.UpdateAsync(adminUser);
             }
         }
     }

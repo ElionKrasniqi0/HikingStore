@@ -1,54 +1,36 @@
 @{
-    ViewData["Title"] = "Test Email";
+    ViewData["Title"] = "Email test";
+    ViewData["NoIndex"] = true;
 }
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0"><i class="fas fa-envelope me-2"></i>Test Email Configuration</h4>
+<div class="container-hs">
+    <div class="auth-wrap wide">
+        <div class="card-hs">
+            <h1>Email test</h1>
+            <p class="text-muted">Send a test message to check that the store's SMTP settings work. Account confirmation, password reset and order emails all use these settings.</p>
+
+            @if (ViewBag.Success != null)
+            {
+                <div class="alert alert-success" role="status">@ViewBag.Success</div>
+            }
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger" role="alert">@ViewBag.Error</div>
+            }
+
+            <form method="post" asp-action="SendTestEmail" data-once>
+                <div class="mb-3">
+                    <label for="testEmail" class="form-label">Send to</label>
+                    <input type="email" class="form-control" id="testEmail" name="testEmail" required autocomplete="email" />
                 </div>
-                <div class="card-body">
-                    @if (ViewBag.Success != null)
-                    {
-                        <div class="alert alert-success">
-                            <i class="fas fa-check-circle me-2"></i>@ViewBag.Success
-                        </div>
-                    }
-                    @if (ViewBag.Error != null)
-                    {
-                        <div class="alert alert-danger">
-                            <i class="fas fa-exclamation-circle me-2"></i>@ViewBag.Error
-                        </div>
-                    }
-                    
-                    <form method="post" asp-action="SendTestEmail">
-                        <div class="mb-3">
-                            <label for="testEmail" class="form-label">Email Address</label>
-                            <input type="email" class="form-control" id="testEmail" name="testEmail" required placeholder="Enter email address to test">
-                            <small class="form-text text-muted">Enter an email address to send a test email</small>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-paper-plane me-2"></i>Send Test Email
-                        </button>
-                    </form>
-                    
-                    <hr class="my-4">
-                    
-                    <div class="alert alert-info">
-                        <h6><i class="fas fa-info-circle me-2"></i>Gmail Setup Instructions:</h6>
-                        <ol class="mb-0">
-                            <li>Enable <strong>2-Step Verification</strong> on your Gmail account</li>
-                            <li>Generate an <strong>App Password</strong> at: <a href="https://myaccount.google.com/apppasswords" target="_blank">myaccount.google.com/apppasswords</a></li>
-                            <li>Use the 16-character App Password (without spaces) in appsettings.json</li>
-                            <li>Do NOT use your regular Gmail password</li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
+                <button type="submit" class="btn btn-primary w-100" data-busy-text="Sending…">Send test email</button>
+            </form>
+
+            <h2 class="h6 mt-4">Configuring email</h2>
+            <p class="small text-muted mb-2">Keep credentials out of <code>appsettings.json</code>. In development, use user secrets:</p>
+            <pre class="small bg-light border rounded p-2 mb-2"><code>dotnet user-secrets set "EmailSettings:SenderEmail" "you@example.com"
+dotnet user-secrets set "EmailSettings:SenderPassword" "app-password"</code></pre>
+            <p class="small text-muted mb-0">In production, set the environment variables <code>EmailSettings__SenderEmail</code> and <code>EmailSettings__SenderPassword</code>. For Gmail, turn on 2-Step Verification and create an <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener">app password</a>; your normal password won't work.</p>
         </div>
     </div>
 </div>
-
-

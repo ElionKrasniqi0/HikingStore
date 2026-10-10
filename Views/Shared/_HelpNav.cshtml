@@ -1,0 +1,27 @@
+@{
+    var current = ViewData["HelpSection"] as string;
+    var links = new (string Action, string Label, string Icon)[]
+    {
+        ("Shipping", "Shipping & delivery", "fa-truck-fast"),
+        ("Returns", "Returns & refunds", "fa-rotate-left"),
+        ("Faq", "FAQ", "fa-circle-question"),
+        ("Contact", "Contact us", "fa-envelope"),
+        ("Services", "Services", "fa-screwdriver-wrench"),
+        ("About", "About us", "fa-mountain-sun"),
+        ("Privacy", "Privacy policy", "fa-user-shield"),
+        ("Terms", "Terms & conditions", "fa-file-contract")
+    };
+}
+<nav class="help-nav" aria-label="Help and information">
+    <ul>
+        @foreach (var (action, label, icon) in links)
+        {
+            var active = string.Equals(current, action, StringComparison.OrdinalIgnoreCase);
+            <li>
+                <a asp-area="" asp-controller="Home" asp-action="@action" class="@(active ? "active" : "")" aria-current="@(active ? "page" : null)">
+                    <i class="fa-solid @icon" aria-hidden="true"></i>@label
+                </a>
+            </li>
+        }
+    </ul>
+</nav>

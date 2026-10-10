@@ -1,89 +1,20 @@
-﻿@using HikingStore.Models
-@model List<TrackingEvent>
-
+﻿@model IEnumerable<TrackingEvent>
 @if (Model.Any())
 {
-    <div class="timeline">
+    <ol class="timeline">
         @foreach (var tracking in Model.OrderByDescending(t => t.EventDate))
         {
-            <div class="timeline-item @(tracking.IsMilestone ? "milestone" : "")">
-                <div class="timeline-marker">
-                    @if (tracking.IsMilestone)
-                    {
-                        <i class="fas fa-flag text-primary"></i>
-                    }
-                    else
-                    {
-                        <i class="fas fa-circle text-muted"></i>
-                    }
+            <li class="@(tracking.IsMilestone ? "milestone" : "")">
+                <div class="d-flex justify-content-between flex-wrap gap-2">
+                    <strong>@tracking.Description</strong>
+                    <time class="small text-muted" datetime="@tracking.EventDate.ToString("o")">@tracking.EventDate.ToString("d MMM yyyy, HH:mm") UTC</time>
                 </div>
-                <div class="timeline-content">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <h6 class="mb-1">@tracking.Status</h6>
-                        <small class="text-muted">@tracking.EventDate.ToString("dd.MM.yyyy HH:mm")</small>
-                    </div>
-                    <p class="mb-1 small">@tracking.Description</p>
-                    <small class="text-muted">
-                        <i class="fas fa-map-marker-alt me-1"></i>@tracking.Location
-                    </small>
-                </div>
-            </div>
+                <div class="small text-muted">@tracking.Location</div>
+            </li>
         }
-    </div>
+    </ol>
 }
 else
 {
-    <div class="text-center py-4">
-        <i class="fas fa-history fa-3x text-muted mb-3"></i>
-        <p class="text-muted">No tracking history available yet.</p>
-    </div>
+    <p class="text-muted m-0">No tracking updates yet.</p>
 }
-
-<style>
-    .timeline {
-        position: relative;
-        padding-left: 30px;
-    }
-
-    .timeline-item {
-        position: relative;
-        padding-bottom: 20px;
-        border-left: 2px solid #e9ecef;
-    }
-
-        .timeline-item.milestone {
-            border-left-color: #007bff;
-        }
-
-    .timeline-marker {
-        position: absolute;
-        left: -36px;
-        top: 0;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        background: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 2px solid #e9ecef;
-    }
-
-    .timeline-item.milestone .timeline-marker {
-        border-color: #007bff;
-        background: #007bff;
-        color: white;
-    }
-
-    .timeline-content {
-        background: white;
-        padding: 15px;
-        border-radius: 8px;
-        margin-left: 10px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-
-    .timeline-item:last-child {
-        border-left: 2px solid transparent;
-    }
-</style>

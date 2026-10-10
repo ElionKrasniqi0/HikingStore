@@ -1,0 +1,18 @@
+@model CartSummary
+@inject IOptions<StoreSettings> StoreOptions
+@{
+    var store = StoreOptions.Value;
+}
+<ul class="summary-rows">
+    <li><span>Subtotal</span><span>@store.FormatPrice(Model.Subtotal)</span></li>
+    @if (Model.Discount > 0)
+    {
+        <li class="discount"><span>Discount (@Model.CouponCode)</span><span>−@store.FormatPrice(Model.Discount)</span></li>
+    }
+    <li>
+        <span>Shipping <span class="text-muted">(@Model.ShippingMethod.Name)</span></span>
+        <span>@(Model.ShippingCost == 0 ? "Free" : store.FormatPrice(Model.ShippingCost))</span>
+    </li>
+    <li class="total"><span>Total</span><span>@store.FormatPrice(Model.Total)</span></li>
+    <li class="pt-0"><span class="text-muted">Includes VAT</span><span></span></li>
+</ul>

@@ -1,147 +1,74 @@
 @model IEnumerable<HikingStore.Models.ChatRoom>
 @{
-    ViewData["Title"] = "My Chats";
+    ViewData["Title"] = "Support chat";
+    ViewData["NoIndex"] = true;
+    static string StatusLabel(ChatRoomStatus s) => s switch
+    {
+        ChatRoomStatus.Open => "Waiting for reply",
+        ChatRoomStatus.InProgress => "In progress",
+        ChatRoomStatus.Resolved => "Resolved",
+        _ => "Closed"
+    };
 }
 
-<div class="container my-5">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="mb-0">
-                    <i class="fas fa-comments text-primary me-2"></i>My Chats
-                </h2>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newChatModal">
-                    <i class="fas fa-plus me-2"></i>New Chat
-                </button>
-            </div>
+<div class="container-hs">
+    <div class="page-head"><h1>Support chat</h1></div>
+    <div class="account-layout">
+        <partial name="_AccountNav" />
+        <div class="d-flex flex-column gap-4 min-w-0">
+            <section class="card-hs">
+                <h2 class="h5">Start a conversation</h2>
+                <p class="text-muted small">Ask about gear, sizing or an order. Our team replies during opening hours; you'll see replies here.</p>
+                <form asp-action="CreateRoom" method="post" class="d-flex flex-column flex-sm-row gap-2" data-once>
+                    <label for="subject" class="visually-hidden">Subject</label>
+                    <input type="text" class="form-control" id="subject" name="subject" placeholder="What can we help with?" maxlength="150" required />
+                    <button type="submit" class="btn btn-primary flex-shrink-0" data-busy-text="Starting…">Start chat</button>
+                </form>
+            </section>
 
-            @if (Model != null && Model.Any())
-            {
-                <div class="row g-3">
-                    @foreach (var room in Model)
-                    {
-                        var lastMessage = room.Messages?.OrderByDescending(m => m.SentAt).FirstOrDefault();
-                        var unreadCount = room.Messages?.Count(m => !m.IsRead && !m.IsAgentMessage) ?? 0;
-                        var statusBadge = room.Status switch
+            <section aria-label="Your conversations">
+                @if (Model.Any())
+                {
+                    <ul class="chat-list">
+                        @foreach (var room in Model)
                         {
-                            ChatRoomStatus.Open => "bg-info",
-                            ChatRoomStatus.InProgress => "bg-warning",
-                            ChatRoomStatus.Resolved => "bg-success",
-                            ChatRoomStatus.Closed => "bg-secondary",
-                            _ => "bg-secondary"
-                        };
-
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card h-100 shadow-sm hover-lift">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start mb-3">
-                                        <h5 class="card-title mb-0">
-                                            @room.Subject
-                                        </h5>
-                                        <span class="badge @statusBadge">@room.Status</span>
-                                    </div>
-
-                                    @if (lastMessage != null)
-                                    {
-                                        <p class="card-text text-muted small mb-2">
-                                            @(lastMessage.Message.Length > 100 ? lastMessage.Message.Substring(0, 100) + Html.Raw("...") : lastMessage.Message)
-                                        </p>
-                                        <p class="card-text text-muted small mb-3">
-                                            <i class="far fa-clock me-1"></i>@lastMessage.SentAt.ToString("MMM dd, yyyy HH:mm")
-                                        </p>
-                                    }
-                                    else
-                                    {
-                                        <p class="card-text text-muted small mb-3">No messages yet</p>
-                                    }
-
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="small text-muted">
-                                            @if (room.Agent != null)
-                                            {
-                                                <i class="fas fa-user-headset me-1"></i><text>@room.Agent.UserName</text>
-                                            }
-                                            else
-                                            {
-                                                <i class="fas fa-clock me-1"></i><text>Unassigned</text>
-                                            }
-                                        </span>
-                                        @if (unreadCount > 0)
+                            var lastMessage = room.Messages.OrderByDescending(m => m.SentAt).FirstOrDefault();
+                            var unread = room.Messages.Count(m => m.IsAgentMessage && !m.IsRead);
+                            <li>
+                                <a asp-action="Room" asp-route-id="@room.Id">
+                                    <strong class="text-truncate">@room.Subject</strong>
+                                    <span class="d-flex align-items-center gap-2">
+                                        @if (unread > 0)
                                         {
-                                            <span class="badge bg-danger rounded-pill">@unreadCount</span>
+                                            <span class="badge rounded-pill text-bg-danger">@unread new</span>
                                         }
-                                    </div>
-                                </div>
-                                <div class="card-footer bg-transparent border-top-0">
-                                    <a href="@Url.Action("Room", "Chat", new { id = room.Id })" class="btn btn-outline-primary btn-sm w-100">
-                                        <i class="fas fa-comment-dots me-2"></i>Open Chat
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                </div>
-            }
-            else
-            {
-                <div class="text-center py-5">
-                    <i class="fas fa-comments fa-4x text-muted mb-3"></i>
-                    <h4 class="text-muted">No chats yet</h4>
-                    <p class="text-muted">Start a new conversation with our support team</p>
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newChatModal">
-                        <i class="fas fa-plus me-2"></i>Start New Chat
-                    </button>
-                </div>
-            }
-        </div>
-    </div>
-</div>
-
-<!-- New Chat Modal -->
-<div class="modal fade" id="newChatModal" tabindex="-1" aria-labelledby="newChatModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="newChatModalLabel">
-                    <i class="fas fa-plus-circle me-2"></i>Start New Chat
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form asp-action="CreateRoom" method="post">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="subject" class="form-label">Subject</label>
-                        <input type="text" class="form-control" id="subject" name="subject" placeholder="What can we help you with?" required>
-                        <div class="form-text">Brief description of your inquiry</div>
+                                        <span class="badge text-bg-light border">@StatusLabel(room.Status)</span>
+                                    </span>
+                                    <span class="preview">
+                                        @if (lastMessage != null)
+                                        {
+                                            @(lastMessage.IsAgentMessage ? "Support: " : "You: ")@lastMessage.Message
+                                        }
+                                        else
+                                        {
+                                            <text>No messages yet</text>
+                                        }
+                                    </span>
+                                    <span class="small text-muted">@room.LastMessageAt.ToString("d MMM yyyy, HH:mm") UTC</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i class="fa-regular fa-comments" aria-hidden="true"></i>
+                        <h2>No conversations yet</h2>
+                        <p>Start a chat above, or <a asp-controller="Home" asp-action="Contact">send us a message</a>.</p>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-paper-plane me-2"></i>Start Chat
-                    </button>
-                </div>
-            </form>
+                }
+            </section>
         </div>
     </div>
 </div>
-
-<style>
-    .hover-lift {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .hover-lift:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
-    }
-</style>
-
-@section Scripts {
-    <script>
-        // Auto-focus on subject input when modal opens
-        document.getElementById('newChatModal')?.addEventListener('shown.bs.modal', function () {
-            document.getElementById('subject')?.focus();
-        });
-    </script>
-}

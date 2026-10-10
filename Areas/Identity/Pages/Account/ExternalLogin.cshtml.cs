@@ -13,24 +13,33 @@ namespace HikingStore.Areas.Identity.Pages.Account
 {
     public class ExternalLoginModel : PageModel
     {
-        private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly IUserStore<IdentityUser> _userStore;
+        private readonly IUserStore<ApplicationUser> _userStore;
         private readonly IEmailSender _emailSender;
+        private readonly HikingStore.Services.CartService _cartService;
+        private readonly ILogger<ExternalLoginModel> _logger;
+        private readonly HikingStore.Services.IEmailTemplateService _templates;
 
         public ExternalLoginModel(
-            SignInManager<IdentityUser> signInManager,
-            UserManager<IdentityUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
-            IUserStore<IdentityUser> userStore,
-            IEmailSender emailSender)
+            IUserStore<ApplicationUser> userStore,
+            IEmailSender emailSender,
+            HikingStore.Services.CartService cartService,
+            ILogger<ExternalLoginModel> logger,
+            HikingStore.Services.IEmailTemplateService templates)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _roleManager = roleManager;
             _userStore = userStore;
             _emailSender = emailSender;
+            _cartService = cartService;
+            _logger = logger;
+            _templates = templates;
         }
 
         [BindProperty]
@@ -79,6 +88,11 @@ namespace HikingStore.Areas.Identity.Pages.Account
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
             if (result.Succeeded)
             {
+                var signedInUser = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+                if (signedInUser != null)
+                {
+                    await _cartService.MergeGuestCartAsync(signedInUser.Id);
+                }
                 return LocalRedirect(returnUrl);
             }
             if (result.IsLockedOut)
@@ -119,7 +133,17 @@ namespace HikingStore.Areas.Identity.Pages.Account
                 
                 if (existingUser != null)
                 {
-                    // User already exists, link the external login to the existing user
+                    // Only link when the provider itself vouches for this email; the form field alone proves nothing.
+                    var providerEmail = info.Principal.FindFirstValue(ClaimTypes.Email);
+                    if (!string.Equals(providerEmail, Input.Email, StringComparison.OrdinalIgnoreCase))
+                    {
+                        ModelState.AddModelError(string.Empty,
+                            $"An account with this email already exists. Sign in with your password, then connect {info.ProviderDisplayName} under Account settings › External logins.");
+                        ProviderDisplayName = info.ProviderDisplayName;
+                        ReturnUrl = returnUrl;
+                        return Page();
+                    }
+
                     var result = await _userManager.AddLoginAsync(existingUser, info);
                     if (result.Succeeded)
                     {
@@ -134,8 +158,8 @@ namespace HikingStore.Areas.Identity.Pages.Account
                             }
                         }
 
-                        // Sign in the existing user with the external login
                         await _signInManager.SignInAsync(existingUser, isPersistent: false, info.LoginProvider);
+                        await _cartService.MergeGuestCartAsync(existingUser.Id);
                         return LocalRedirect(returnUrl);
                     }
                     else
@@ -198,15 +222,13 @@ namespace HikingStore.Areas.Identity.Pages.Account
 
                             try
                             {
-                                await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                                    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                                await _emailSender.SendEmailAsync(Input.Email, "Confirm your HikingStore account",
+                                    _templates.GenerateEmailConfirmationTemplate(
+                                        HtmlEncoder.Default.Encode(callbackUrl), HtmlEncoder.Default.Encode(user.FirstName ?? Input.Email)));
                             }
                             catch (Exception ex)
                             {
-                                // Log the email sending error but continue with user creation
-                                Console.WriteLine($"Failed to send confirmation email: {ex.Message}");
-                                // You might want to add a model error here to inform the user
-                                ModelState.AddModelError(string.Empty, "Account created but confirmation email could not be sent. Please contact support.");
+                                _logger.LogError(ex, "Failed to send confirmation email for external-login user {UserId}", userId);
                             }
 
                             // If account confirmation is required, we need to show the link if we don't have a real email sender
@@ -231,7 +253,7 @@ namespace HikingStore.Areas.Identity.Pages.Account
             return Page();
         }
 
-        private IdentityUser CreateUser()
+        private ApplicationUser CreateUser()
         {
             try
             {
@@ -245,13 +267,13 @@ namespace HikingStore.Areas.Identity.Pages.Account
             }
         }
 
-        private IUserEmailStore<IdentityUser> GetEmailStore()
+        private IUserEmailStore<ApplicationUser> GetEmailStore()
         {
             if (!_userManager.SupportsUserEmail)
             {
                 throw new NotSupportedException("The default UI requires a user store with email support.");
             }
-            return (IUserEmailStore<IdentityUser>)_userStore;
+            return (IUserEmailStore<ApplicationUser>)_userStore;
         }
     }
 }

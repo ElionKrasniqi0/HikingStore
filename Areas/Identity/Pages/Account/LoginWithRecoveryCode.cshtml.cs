@@ -1,4 +1,5 @@
-﻿using System;
+using HikingStore.Data;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -14,13 +15,16 @@ namespace HikingStore.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class LoginWithRecoveryCodeModel : PageModel
     {
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<LoginWithRecoveryCodeModel> _logger;
+        private readonly HikingStore.Services.CartService _cartService;
 
-        public LoginWithRecoveryCodeModel(SignInManager<IdentityUser> signInManager, ILogger<LoginWithRecoveryCodeModel> logger)
+        public LoginWithRecoveryCodeModel(SignInManager<ApplicationUser> signInManager, ILogger<LoginWithRecoveryCodeModel> logger,
+            HikingStore.Services.CartService cartService)
         {
             _signInManager = signInManager;
             _logger = logger;
+            _cartService = cartService;
         }
 
         [BindProperty]
@@ -43,7 +47,7 @@ namespace HikingStore.Areas.Identity.Pages.Account
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
-                throw new InvalidOperationException($"Unable to load two-factor authentication user.");
+                return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
 
             ReturnUrl = returnUrl;
@@ -61,7 +65,7 @@ namespace HikingStore.Areas.Identity.Pages.Account
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
-                throw new InvalidOperationException($"Unable to load two-factor authentication user.");
+                return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
 
             var recoveryCode = Input.RecoveryCode.Replace(" ", string.Empty);
@@ -71,6 +75,7 @@ namespace HikingStore.Areas.Identity.Pages.Account
             if (result.Succeeded)
             {
                 _logger.LogInformation("User with ID '{UserId}' logged in with a recovery code.", user.Id);
+                await _cartService.MergeGuestCartAsync(user.Id);
                 return LocalRedirect(returnUrl ?? Url.Content("~/"));
             }
             if (result.IsLockedOut)

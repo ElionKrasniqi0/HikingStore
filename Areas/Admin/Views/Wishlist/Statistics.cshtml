@@ -1,155 +1,55 @@
-@using HikingStore.Models
-@using Microsoft.AspNetCore.Mvc.TagHelpers
-@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
-
+@using HikingStore.Areas.Admin.Controllers
 @{
-    var totalWishlists = ViewBag.TotalWishlists ?? 0;
-    var uniqueUsers = ViewBag.UniqueUsers ?? 0;
-    var mostWishedProducts = ViewBag.MostWishedProducts as List<dynamic> ?? new List<dynamic>();
+    ViewData["Title"] = "Wishlist insights";
+    var store = StoreOptions.Value;
+    int totalWishlists = ViewBag.TotalWishlists ?? 0;
+    int uniqueUsers = ViewBag.UniqueUsers ?? 0;
+    var mostWished = ViewBag.MostWishedProducts as List<MostWishedProduct> ?? new();
 }
 
-<style>
-    .hero-section {
-        background: linear-gradient(135deg, #3b5d50 0%, #2d4a3f 100%);
-        color: white;
-        padding: 30px 0;
-        margin-bottom: 40px;
-    }
-
-    .stat-card {
-        border-radius: 12px;
-        border: none;
-        transition: all 0.3s ease;
-        overflow: hidden;
-    }
-
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    }
-</style>
-<br />
-<br />
-<br />
-
-<!-- Hero Section -->
-<div class="hero-section">
-    <div class="row align-items-center">
-        <div class="col-lg-8">
-            <h1>Wishlist Statistics</h1>
-            <p>Analytics and insights about customer wishlists</p>
-        </div>
-        <div class="col-lg-4 text-end">
-            <a href="@Url.Action("Index", "Wishlist", new { area = "Admin" })" class="btn btn-light btn-lg">
-                <i class="fas fa-arrow-left me-2"></i>Back to Wishlists
-            </a>
-        </div>
+<div class="admin-page-head">
+    <div>
+        <h1>Wishlist insights</h1>
+        <p>What customers are saving for later — useful for restocking and promotions.</p>
     </div>
+    <a class="btn btn-outline-secondary btn-sm" asp-action="Index"><i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i>All saved items</a>
 </div>
 
-<div class="pb-5">
-    <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-xl-6 col-md-6 mb-3">
-            <div class="card stat-card bg-primary text-white">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="flex-grow-1">
-                            <h4 class="mb-0">@totalWishlists</h4>
-                            <p class="mb-0">Total Wishlist Items</p>
-                        </div>
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-heart fa-2x opacity-50"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-6 col-md-6 mb-3">
-            <div class="card stat-card bg-info text-white">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="flex-grow-1">
-                            <h4 class="mb-0">@uniqueUsers</h4>
-                            <p class="mb-0">Unique Users with Wishlists</p>
-                        </div>
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-users fa-2x opacity-50"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Most Wished Products -->
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0 fw-semibold">Most Wished Products</h5>
-        </div>
-        <div class="card-body">
-            @if (mostWishedProducts.Any())
-            {
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Rank</th>
-                                <th>Product</th>
-                                <th>Category</th>
-                                <th>Price</th>
-                                <th>Wishlist Count</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @{
-                                int rank = 1;
-                            }
-                            @foreach (var item in mostWishedProducts)
-                            {
-                                <tr>
-                                    <td>
-                                        <span class="badge bg-primary">#@rank</span>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="~/Product/@(item.Product?.ProImage ?? "")" 
-                                                 alt="@(item.Product?.ProName ?? "")" 
-                                                 class="rounded me-3" 
-                                                 style="width: 50px; height: 50px; object-fit: cover;">
-                                            <div>
-                                                <h6 class="mb-0">@(item.Product?.ProName ?? "N/A")</h6>
-                                                <small class="text-muted">@(item.Product?.Category?.CatName ?? "")</small>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>@(item.Product?.Category?.CatName ?? "N/A")</td>
-                                    <td><strong>€@((item.Product?.Price ?? 0).ToString("N2"))</strong></td>
-                                    <td>
-                                        <span class="badge bg-danger">@item.Count</span>
-                                    </td>
-                                    <td>
-                                        <a href="/Home/ProductDetailes/@(item.Product?.ProId ?? 0)" 
-                                           class="btn btn-sm btn-outline-primary" 
-                                           target="_blank">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                                rank++;
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
-            else
-            {
-                <div class="text-center py-5">
-                    <i class="far fa-heart fa-4x text-muted mb-3"></i>
-                    <p class="text-muted">No wishlist data available</p>
-                </div>
-            }
-        </div>
-    </div>
+<div class="kpis">
+    <div class="kpi"><div class="l">Saved items</div><div class="v">@totalWishlists</div></div>
+    <div class="kpi"><div class="l">Customers with a wishlist</div><div class="v">@uniqueUsers</div></div>
+    <div class="kpi"><div class="l">Average per customer</div><div class="v">@(uniqueUsers == 0 ? "0" : (totalWishlists / (double)uniqueUsers).ToString("0.#"))</div></div>
 </div>
+
+<section class="panel" aria-labelledby="top-h">
+    <div class="panel-head"><h2 id="top-h">Most wished-for products</h2></div>
+    @if (mostWished.Count == 0)
+    {
+        <p class="panel-body text-muted m-0">No products have been saved yet.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table admin-table">
+                <thead><tr><th scope="col">Product</th><th scope="col">Category</th><th scope="col" class="text-end">Price</th><th scope="col">Stock</th><th scope="col" class="text-end">Saved by</th></tr></thead>
+                <tbody>
+                    @foreach (var item in mostWished)
+                    {
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    @if (!string.IsNullOrEmpty(item.Product.ProImage)) { <img class="thumb" src="~/Product/@item.Product.ProImage" alt="" loading="lazy" width="48" height="48" /> }
+                                    <a asp-controller="Products" asp-action="Edit" asp-route-id="@item.ProductId">@item.Product.ProName</a>
+                                </div>
+                            </td>
+                            <td>@item.Product.Category?.CatName</td>
+                            <td class="text-end text-nowrap">@store.FormatPrice(item.Product.Price)</td>
+                            <td>@if (item.Product.StockQuantity == 0) { <span class="badge text-bg-danger">Sold out</span> } else { @item.Product.StockQuantity }</td>
+                            <td class="text-end fw-semibold">@item.Count</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

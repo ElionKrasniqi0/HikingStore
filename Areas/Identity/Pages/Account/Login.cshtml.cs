@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HikingStore.Data;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -17,17 +18,20 @@ namespace HikingStore.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class LoginModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<LoginModel> _logger;
+        private readonly HikingStore.Services.CartService _cartService;
 
-        public LoginModel(SignInManager<IdentityUser> signInManager, 
+        public LoginModel(SignInManager<ApplicationUser> signInManager,
             ILogger<LoginModel> logger,
-            UserManager<IdentityUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            HikingStore.Services.CartService cartService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+            _cartService = cartService;
         }
 
         [BindProperty]
@@ -74,10 +78,9 @@ namespace HikingStore.Areas.Identity.Pages.Account
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
+            ReturnUrl = returnUrl;
+            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
-            // ⚡ OPTIMIZATION: Skip ExternalLogins fetch on POST - not needed for login
-            // ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-        
             if (ModelState.IsValid)
             {
                 // ⚡ OPTIMIZATION: Use FindByNameAsync directly since email is used as username
@@ -86,33 +89,30 @@ namespace HikingStore.Areas.Identity.Pages.Account
                 
                 if (user == null)
                 {
-                    // ⚡ OPTIMIZATION: Add small delay to prevent timing attacks, but don't block
-                    await Task.Delay(100).ConfigureAwait(false);
+                    await Task.Delay(1000);
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                     return Page();
                 }
 
-                // Check if email is confirmed before attempting sign in
-                if (!await _userManager.IsEmailConfirmedAsync(user).ConfigureAwait(false))
-                {
-                    ModelState.AddModelError(string.Empty, "You must confirm your email address before logging in. Please check your email for a confirmation link.");
-                    return Page();
-                }
-
-                // SECURITY: Enable lockout on failure to prevent brute force attacks
                 var result = await _signInManager.PasswordSignInAsync(
-                    user.UserName, 
-                    Input.Password, 
-                    Input.RememberMe, 
-                    lockoutOnFailure: true).ConfigureAwait(false); // SECURITY: Enable lockout
-                
+                    user.UserName,
+                    Input.Password,
+                    Input.RememberMe,
+                    lockoutOnFailure: true);
+
                 if (result.Succeeded)
                 {
-                    // SECURITY: Log successful login with IP address for audit trail
-                    var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-                    _logger.LogInformation("SECURITY: User {Email} logged in successfully from IP {IPAddress}", 
-                        Input.Email, ipAddress);
+                    _logger.LogInformation("SECURITY: User {UserId} logged in from IP {IPAddress}",
+                        user.Id, HttpContext.Connection.RemoteIpAddress?.ToString());
+                    await _cartService.MergeGuestCartAsync(user.Id);
                     return LocalRedirect(returnUrl);
+                }
+
+                if (result.IsNotAllowed)
+                {
+                    // Only reached after a correct password, so this does not reveal whether an account exists.
+                    ModelState.AddModelError(string.Empty, "Please confirm your email address before signing in. Check your inbox for the confirmation link, or request a new one below.");
+                    return Page();
                 }
                 
                 if (result.RequiresTwoFactor)

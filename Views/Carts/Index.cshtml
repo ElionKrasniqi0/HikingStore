@@ -1,145 +1,168 @@
-﻿@model ShoppingCartDetails
-@using Microsoft.AspNetCore.Antiforgery
-@inject IAntiforgery antiforgery
+﻿@model CartSummary
+@inject IOptions<StoreSettings> StoreOptions
 @{
-    var tokenSet = antiforgery.GetAndStoreTokens(Context);
+    var store = StoreOptions.Value;
+    ViewData["Title"] = "Your cart";
+    ViewData["NoIndex"] = true;
+    var signedIn = User.Identity?.IsAuthenticated == true;
 }
-<div class="container py-5">
-    <div class="row">
-        <div class="col-12">
-            <h1 class="h2 fw-bold mb-4">Shopping Cart</h1>
-        </div>
+
+<div class="container-hs">
+    <div class="page-head">
+        <h1>Your cart @if (!Model.IsEmpty) { <span class="text-muted fs-5 fw-normal">(@Model.ItemCount @(Model.ItemCount == 1 ? "item" : "items"))</span> }</h1>
     </div>
 
     @if (Model.IsEmpty)
     {
-        <div class="text-center py-5">
-            <div class="empty-cart-icon mb-4">
-                <i class="fas fa-shopping-cart fa-4x text-muted"></i>
-            </div>
-            <h3 class="text-muted mb-3">Your cart is empty</h3>
-            <p class="text-muted mb-4">Start shopping to add items to your cart</p>
-            <a href="/Home/Product" class="btn btn-primary btn-lg">
-                <i class="fas fa-shopping-bag me-2"></i>Start Shopping
-            </a>
+        <div class="empty-state">
+            <i class="fa-solid fa-bag-shopping" aria-hidden="true"></i>
+            <h2>Your cart is empty</h2>
+            <p>Find something for your next trip — new arrivals land every week.</p>
+            <a class="btn btn-primary" asp-controller="Home" asp-action="Shop">Start shopping</a>
         </div>
     }
     else
     {
-        <div class="row">
-            <div class="col-lg-8">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white py-3">
-                        <h5 class="mb-0">Cart Items (@Model.Carts.Sum(c => c.Qty) items)</h5>
+        <div class="two-col">
+            <section aria-label="Cart items">
+                @if (Model.HasIssues)
+                {
+                    <div class="alert alert-warning" role="alert">
+                        <i class="fa-solid fa-triangle-exclamation me-2" aria-hidden="true"></i>Some items need your attention before you can check out.
                     </div>
-                    <div class="card-body p-0">
-                        @foreach (var item in Model.Carts)
-                        {
-                            <div class="cart-item p-4 border-bottom">
-                                <div class="row align-items-center">
-                                    <div class="col-md-2">
-                                        <img src="~/Product/@item.Product.ProImage" alt="@item.Product.ProName"
-                                             class="img-fluid rounded" style="height: 80px; object-fit: cover;">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <h6 class="mb-1">@item.Product.ProName</h6>
-                                        <small class="text-muted">@item.Product.Category?.CatName</small>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <span class="fw-bold text-primary">€@item.Product.Price.ToString("N2")</span>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <div class="input-group input-group-sm">
-                                            <input type="number" class="form-control" value="@item.Qty" min="1"
-                                                   onchange="updateCartItem(@item.CartId, this.value)">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <span class="fw-bold">€@((item.Product.Price * item.Qty).ToString("N2"))</span>
-                                        <button class="btn btn-sm btn-outline-danger ms-2"
-                                                onclick="removeCartItem(@item.CartId)">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
+                }
+                <div class="card-hs">
+                    @foreach (var line in Model.Lines)
+                    {
+                        <div class="cart-line @(line.Issue != null ? "has-issue" : "")">
+                            <a class="thumb" asp-controller="Home" asp-action="ProductDetailes" asp-route-id="@line.ProId" tabindex="-1" aria-hidden="true">
+                                @if (!string.IsNullOrEmpty(line.Image))
+                                {
+                                    <img src="~/Product/@line.Image" alt="" loading="lazy" width="96" height="96" />
+                                }
+                            </a>
+                            <div class="min-w-0">
+                                @if (!string.IsNullOrEmpty(line.Brand))
+                                {
+                                    <div class="p-brand">@line.Brand</div>
+                                }
+                                <a class="name" asp-controller="Home" asp-action="ProductDetailes" asp-route-id="@line.ProId">@line.Name</a>
+                                @if (!string.IsNullOrEmpty(line.Size) || !string.IsNullOrEmpty(line.Color))
+                                {
+                                    <div class="variant">@string.Join(" · ", new[] { line.Color, line.Size is null ? null : $"Size {line.Size}" }.Where(v => !string.IsNullOrEmpty(v)))</div>
+                                }
+                                <div class="price small mt-1">
+                                    <span class="now @(line.CompareAtPrice > line.UnitPrice ? "on-sale" : "")">@store.FormatPrice(line.UnitPrice)</span>
+                                    @if (line.CompareAtPrice > line.UnitPrice)
+                                    {
+                                        <span class="was">@store.FormatPrice(line.CompareAtPrice.Value)</span>
+                                    }
+                                </div>
+                                @if (line.Issue != null)
+                                {
+                                    <p class="small text-danger mt-1 mb-0"><i class="fa-solid fa-circle-exclamation me-1" aria-hidden="true"></i>@line.Issue</p>
+                                }
+                                <div class="d-flex flex-wrap align-items-center gap-3 mt-2">
+                                    @if (line.IsAvailable || line.AvailableStock > 0)
+                                    {
+                                        <form method="post" asp-action="UpdateCartItem" class="d-flex align-items-center gap-2">
+                                            <input type="hidden" name="lineKey" value="@line.LineKey" />
+                                            <div class="qty-stepper sm">
+                                                <button type="button" data-step="-1" aria-label="Decrease quantity of @line.Name"><i class="fa-solid fa-minus" aria-hidden="true"></i></button>
+                                                <label class="visually-hidden" for="qty-@line.LineKey">Quantity of @line.Name</label>
+                                                <input id="qty-@line.LineKey" type="number" name="quantity" value="@line.Quantity" min="1"
+                                                       max="@Math.Max(1, Math.Min(line.AvailableStock, CartService.MaxQuantityPerLine))" inputmode="numeric" data-auto-submit />
+                                                <button type="button" data-step="1" aria-label="Increase quantity of @line.Name"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+                                            </div>
+                                            <noscript><button type="submit" class="btn btn-sm btn-outline-secondary">Update</button></noscript>
+                                        </form>
+                                    }
+                                    <form method="post" asp-action="RemoveFromCart">
+                                        <input type="hidden" name="lineKey" value="@line.LineKey" />
+                                        <button type="submit" class="link-btn">Remove</button>
+                                    </form>
                                 </div>
                             </div>
+                            <div class="line-total">@store.FormatPrice(line.LineTotal)</div>
+                        </div>
+                    }
+                    <div class="d-flex justify-content-between flex-wrap gap-2 mt-3">
+                        <a asp-controller="Home" asp-action="Shop"><i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i>Continue shopping</a>
+                        <form method="post" asp-action="RemoveAll" data-confirm="Remove all items from your cart?">
+                            <button type="submit" class="link-btn">Empty cart</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="sticky-summary" aria-label="Order summary">
+                <div class="card-hs beige">
+                    <h2>Order summary</h2>
+                    @if (store.FreeShippingThreshold > 0)
+                    {
+                        var progress = (int)Math.Min(100, Math.Round(100 * (Model.Subtotal - Model.Discount) / store.FreeShippingThreshold));
+                        <div class="free-ship-meter">
+                            @if (Model.AmountUntilFreeShipping > 0)
+                            {
+                                <span>Add <strong>@store.FormatPrice(Model.AmountUntilFreeShipping)</strong> more for free standard shipping.</span>
+                            }
+                            else
+                            {
+                                <span><i class="fa-solid fa-circle-check text-success me-1" aria-hidden="true"></i>You've unlocked free standard shipping.</span>
+                            }
+                            <div class="bar" role="progressbar" aria-valuenow="@progress" aria-valuemin="0" aria-valuemax="100" aria-label="Progress to free shipping"><span style="width:@progress%"></span></div>
+                        </div>
+                    }
+
+                    <partial name="_SummaryRows" model="Model" />
+
+                    <div class="mb-3">
+                        @if (!string.IsNullOrEmpty(Model.CouponCode) && Model.CouponError == null)
+                        {
+                            <form method="post" asp-action="RemoveCoupon" class="d-flex justify-content-between align-items-center small">
+                                <span><i class="fa-solid fa-tag me-1" aria-hidden="true"></i><strong>@Model.CouponCode</strong> @Model.CouponDescription</span>
+                                <button type="submit" class="link-btn">Remove</button>
+                            </form>
+                        }
+                        else if (signedIn)
+                        {
+                            <form method="post" asp-action="ApplyCoupon" class="d-flex gap-2">
+                                <label for="coupon" class="visually-hidden">Coupon code</label>
+                                <input id="coupon" name="code" class="form-control" placeholder="Coupon code" maxlength="40" autocomplete="off" required />
+                                <button type="submit" class="btn btn-outline-primary">Apply</button>
+                            </form>
+                            @if (Model.CouponError != null)
+                            {
+                                <p class="small text-danger mt-1 mb-0">@Model.CouponError</p>
+                            }
+                        }
+                        else
+                        {
+                            <p class="small text-muted m-0">Have a coupon? <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="/Carts">Sign in</a> to apply it.</p>
                         }
                     </div>
+
+                    @if (Model.HasIssues)
+                    {
+                        <button class="btn btn-primary btn-lg w-100" disabled>Checkout</button>
+                        <p class="small text-muted mt-2 mb-0">Resolve the highlighted items to continue.</p>
+                    }
+                    else if (signedIn)
+                    {
+                        <a class="btn btn-primary btn-lg w-100" asp-action="Checkout">Checkout</a>
+                    }
+                    else
+                    {
+                        <a class="btn btn-primary btn-lg w-100" asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="/Carts/Checkout">Sign in to check out</a>
+                        <p class="small text-muted mt-2 mb-0">Your cart is kept when you sign in or <a asp-area="Identity" asp-page="/Account/Register" asp-route-returnUrl="/Carts/Checkout">create an account</a>.</p>
+                    }
+
+                    <ul class="trust-list">
+                        <li><i class="fa-solid fa-money-bill-wave" aria-hidden="true"></i>Pay with cash on delivery</li>
+                        <li><i class="fa-solid fa-rotate-left" aria-hidden="true"></i>@store.ReturnDays-day returns</li>
+                    </ul>
                 </div>
-
-                <div class="mt-4">
-                    <a href="/Home/Product" class="btn btn-outline-primary">
-                        <i class="fas fa-arrow-left me-2"></i>Continue Shopping
-                    </a>
-                </div>
-            </div>
-
-            <div class="col-lg-4">
-                <div class="card border-0 shadow-sm sticky-top" style="top: 20px;">
-                    <div class="card-header bg-white py-3">
-                        <h5 class="mb-0">Order Summary</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Subtotal:</span>
-                            <span>€@Model.TotalAmount.ToString("N2")</span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Shipping:</span>
-                            <span class="text-success">FREE</span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Tax:</span>
-                            <span>€0.00</span>
-                        </div>
-                        <hr>
-                        <div class="d-flex justify-content-between mb-4">
-                            <strong>Total:</strong>
-                            <strong class="text-primary h5">€@Model.TotalAmount.ToString("N2")</strong>
-                        </div>
-
-                        <a href="/Carts/Checkout" class="btn btn-primary btn-lg w-100 mb-3">
-                            <i class="fas fa-lock me-2"></i>Proceed to Checkout
-                        </a>
-
-                        <div class="text-center">
-                            <small class="text-muted">
-                                <i class="fas fa-lock me-1"></i>
-                                Secure checkout
-                            </small>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </aside>
         </div>
     }
 </div>
-
-<script>
-    function updateCartItem(cartId, quantity) {
-        if (quantity < 1) {
-            removeCartItem(cartId);
-            return;
-        }
-
-        $.post('/Carts/UpdateCartItem', { cartId: cartId, quantity: quantity })
-            .done(function() {
-                location.reload();
-            })
-            .fail(function() {
-                alert('Error updating cart item');
-            });
-    }
-
-    function removeCartItem(cartId) {
-        if (confirm('Are you sure you want to remove this item from your cart?')) {
-            $.post('/Carts/RemoveFromCart', { cartId: cartId })
-                .done(function() {
-                    location.reload();
-                })
-                .fail(function() {
-                    alert('Error removing item from cart');
-                });
-        }
-    }
-</script>

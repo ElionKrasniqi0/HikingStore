@@ -1,0 +1,160 @@
+@model ReportViewModel
+@{
+    ViewData["Title"] = "Reports";
+    var store = StoreOptions.Value;
+    var maxRevenue = Model.Daily.Count == 0 ? 0 : Model.Daily.Max(d => d.Revenue);
+    var chartDays = Model.Daily.Count;
+    var today = DateTime.UtcNow.Date;
+    var presets = new[] { ("Last 7 days", today.AddDays(-6)), ("Last 30 days", today.AddDays(-29)), ("Last 90 days", today.AddDays(-89)), ("This year", new DateTime(today.Year, 1, 1)) };
+}
+
+<div class="admin-page-head">
+    <div>
+        <h1>Sales report</h1>
+        <p>@Model.From.ToString("d MMM yyyy") – @Model.To.ToString("d MMM yyyy") (UTC). Cancelled orders are excluded from revenue. Totals include VAT and shipping.</p>
+    </div>
+    <button type="button" class="btn btn-outline-primary btn-sm no-print" onclick="window.print()"><i class="fa-solid fa-print me-1" aria-hidden="true"></i>Print</button>
+</div>
+
+<div class="panel no-print">
+    <div class="panel-body">
+        <form method="get" class="filter-bar">
+            <div>
+                <label class="form-label small" for="from">From</label>
+                <input type="date" id="from" name="from" class="form-control" value="@Model.From.ToString("yyyy-MM-dd")" />
+            </div>
+            <div>
+                <label class="form-label small" for="to">To</label>
+                <input type="date" id="to" name="to" class="form-control" value="@Model.To.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="btns"><button class="btn btn-primary" type="submit">Apply</button></div>
+        </form>
+        <div class="d-flex flex-wrap gap-2 mt-3">
+            @foreach (var (label, from) in presets)
+            {
+                <a class="btn btn-sm btn-outline-secondary" asp-action="Index" asp-route-from="@from.ToString("yyyy-MM-dd")" asp-route-to="@today.ToString("yyyy-MM-dd")">@label</a>
+            }
+        </div>
+        <p class="small text-muted mt-2 mb-0">Ranges longer than 366 days are shortened.</p>
+    </div>
+</div>
+
+<div class="kpis">
+    <div class="kpi"><div class="l">Revenue</div><div class="v">@store.FormatPrice(Model.Revenue)</div></div>
+    <div class="kpi"><div class="l">Orders</div><div class="v">@Model.OrderCount</div><div class="s">@Model.CancelledCount cancelled</div></div>
+    <div class="kpi"><div class="l">Average order</div><div class="v">@store.FormatPrice(Model.AverageOrderValue)</div></div>
+    <div class="kpi"><div class="l">First-time customers</div><div class="v">@Model.NewCustomers</div><div class="s">Placed their first order</div></div>
+    <div class="kpi"><div class="l">Discounts given</div><div class="v">@store.FormatPrice(Model.Discounts)</div></div>
+    <div class="kpi"><div class="l">Shipping charged</div><div class="v">@store.FormatPrice(Model.ShippingCollected)</div></div>
+</div>
+
+<section class="panel" aria-labelledby="daily-h">
+    <div class="panel-head"><h2 id="daily-h">Daily revenue</h2></div>
+    <div class="panel-body">
+        @if (Model.Revenue == 0)
+        {
+            <p class="text-muted m-0">No sales in this period.</p>
+        }
+        else
+        {
+            <div class="bar-chart" style="grid-template-columns:repeat(@chartDays, minmax(0, 1fr)); gap:@(chartDays > 60 ? 1 : 4)px" role="img" aria-label="Daily revenue chart. Exact figures are in the table below.">
+                @foreach (var day in Model.Daily)
+                {
+                    var pct = maxRevenue == 0 ? 0 : (int)Math.Round(day.Revenue / maxRevenue * 100);
+                    <div class="bar" title="@day.Date.ToString("ddd d MMM"): @store.FormatPrice(day.Revenue) · @day.Orders orders">
+                        <span style="height:@(pct)%"></span>
+                        @if (chartDays <= 31) { <small>@day.Date.ToString("d/M")</small> }
+                    </div>
+                }
+            </div>
+            <details class="mt-3">
+                <summary class="small">Show daily figures</summary>
+                <div class="table-responsive mt-2" style="max-height:360px">
+                    <table class="table admin-table">
+                        <thead><tr><th scope="col">Date</th><th scope="col" class="text-end">Orders</th><th scope="col" class="text-end">Revenue</th></tr></thead>
+                        <tbody>
+                            @foreach (var day in Model.Daily.Where(d => d.Orders > 0))
+                            {
+                                <tr><td>@day.Date.ToString("ddd d MMM yyyy")</td><td class="text-end">@day.Orders</td><td class="text-end">@store.FormatPrice(day.Revenue)</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+        }
+    </div>
+</section>
+
+<div class="row g-3">
+    <div class="col-12 col-xl-6">
+        <section class="panel h-100" aria-labelledby="prod-h">
+            <div class="panel-head"><h2 id="prod-h">Top products by revenue</h2></div>
+            @if (Model.TopProducts.Count == 0)
+            {
+                <p class="panel-body text-muted m-0">No products sold in this period.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table admin-table">
+                        <thead><tr><th scope="col">Product</th><th scope="col" class="text-end">Units</th><th scope="col" class="text-end">Revenue</th></tr></thead>
+                        <tbody>
+                            @foreach (var p in Model.TopProducts)
+                            {
+                                <tr>
+                                    <td><a asp-controller="Products" asp-action="Edit" asp-route-id="@p.ProId">@p.Name</a></td>
+                                    <td class="text-end">@p.Units</td>
+                                    <td class="text-end text-nowrap">@store.FormatPrice(p.Revenue)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </section>
+    </div>
+    <div class="col-12 col-xl-6">
+        <section class="panel" aria-labelledby="cat-h">
+            <div class="panel-head"><h2 id="cat-h">Sales by category</h2></div>
+            @if (Model.ByCategory.Count == 0)
+            {
+                <p class="panel-body text-muted m-0">No sales in this period.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table admin-table">
+                        <thead><tr><th scope="col">Category</th><th scope="col" class="text-end">Units</th><th scope="col" class="text-end">Revenue</th></tr></thead>
+                        <tbody>
+                            @foreach (var c in Model.ByCategory)
+                            {
+                                <tr><td>@c.Name</td><td class="text-end">@c.Units</td><td class="text-end text-nowrap">@store.FormatPrice(c.Revenue)</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </section>
+        <section class="panel" aria-labelledby="coupon-h">
+            <div class="panel-head"><h2 id="coupon-h">Coupon usage</h2></div>
+            @if (Model.Coupons.Count == 0)
+            {
+                <p class="panel-body text-muted m-0">No coupons used in this period.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table admin-table">
+                        <thead><tr><th scope="col">Code</th><th scope="col" class="text-end">Orders</th><th scope="col" class="text-end">Discount</th></tr></thead>
+                        <tbody>
+                            @foreach (var c in Model.Coupons)
+                            {
+                                <tr><td class="font-monospace">@c.Code</td><td class="text-end">@c.Uses</td><td class="text-end text-nowrap">@store.FormatPrice(c.Discount)</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </section>
+    </div>
+</div>

@@ -1,381 +1,226 @@
-﻿@model HikingStore.ViewModels.IndexVM
-
+﻿@model HomeViewModel
+@inject IOptions<StoreSettings> StoreOptions
 @{
-    // Helper function for truncation
-    string Truncate(string input, int length)
+    var store = StoreOptions.Value;
+    ViewData["Title"] = null;
+    var heroImage = string.IsNullOrWhiteSpace(store.HeroImageUrl) ? null : Url.Content(store.HeroImageUrl.StartsWith("/") ? "~" + store.HeroImageUrl : store.HeroImageUrl);
+    var hasSale = Model.OnSale.Count > 0;
+    var categoriesWithPhotos = Model.Categories.Take(6).ToList();
+}
+@section Head {
+    @if (heroImage != null)
     {
-        if (string.IsNullOrEmpty(input)) return input;
-        return input.Length <= length ? input : input.Substring(0, length) + "...";
+        <link rel="preload" as="image" href="@heroImage" fetchpriority="high" />
     }
 }
 
-<!-- Hero Section -->
-<section class="hero-section">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6">
-                <h1 class="display-5 fw-bold mb-3">Explore the Great Outdoors</h1>
-                <p class="lead mb-3" style="font-size: 1.1rem;">Premium hiking gear and outdoor equipment for your next adventure</p>
-                <a href="/Home/Shop" class="btn btn-light btn-sm me-2">Shop Now</a>
-                <a href="/Home/Product" class="btn btn-outline-light btn-sm">View Products</a>
-            </div>
-            <div class="col-lg-6">
-                <img src="~/img/banner-1.jpg" alt="Hiking Adventure" class="img-fluid rounded-3" style="max-height: 300px; object-fit: cover;">
+<section class="hero" style="@(heroImage != null ? $"background-image:url('{heroImage}')" : "")" aria-labelledby="hero-title">
+    <div class="container-hs">
+        <div class="hero-content">
+            <span class="eyebrow">Outdoor &amp; hiking gear</span>
+            <h1 id="hero-title">Made for the long way up</h1>
+            <p>Boots, packs and layers chosen for real trail conditions — with free standard shipping over @store.FormatPrice(store.FreeShippingThreshold) and @store.ReturnDays-day returns.</p>
+            <div class="d-flex flex-wrap gap-2">
+                <a class="btn btn-light btn-lg" asp-action="Shop" asp-route-sort="newest">Shop new arrivals</a>
+                @if (hasSale)
+                {
+                    <a class="btn btn-sale btn-lg" asp-action="Shop" asp-route-onSale="true">Shop the sale</a>
+                }
+                else
+                {
+                    <a class="btn btn-outline-light btn-lg" asp-action="Shop">Browse all gear</a>
+                }
             </div>
         </div>
     </div>
 </section>
 
-<!-- Search Bar -->
-<section class="py-3 bg-light">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="input-group input-group-sm">
-                    <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Search for hiking gear, camping equipment...">
-                    <button class="btn btn-primary btn-sm" type="button" onclick="searchProducts()">
-                        <i class="fas fa-search"></i> Search
-                    </button>
+<section class="benefits" aria-label="Store benefits">
+    <div class="container-hs">
+        <ul>
+            <li><i class="fa-solid fa-truck-fast" aria-hidden="true"></i><div><strong>Free standard shipping</strong><span>On orders over @store.FormatPrice(store.FreeShippingThreshold)</span></div></li>
+            <li><i class="fa-solid fa-rotate-left" aria-hidden="true"></i><div><strong>@store.ReturnDays-day returns</strong><span><a asp-action="Returns">How returns work</a></span></div></li>
+            <li><i class="fa-solid fa-money-bill-wave" aria-hidden="true"></i><div><strong>Cash on delivery</strong><span>Pay when your order arrives</span></div></li>
+            <li><i class="fa-solid fa-headset" aria-hidden="true"></i><div><strong>Real people, real advice</strong><span>@(string.IsNullOrEmpty(store.SupportPhone) ? "Contact our team" : store.SupportPhone)</span></div></li>
+        </ul>
+    </div>
+</section>
+
+@if (categoriesWithPhotos.Count > 0)
+{
+    <section class="section" aria-labelledby="cat-title">
+        <div class="container-hs">
+            <div class="section-head">
+                <div>
+                    <h2 id="cat-title">Shop by category</h2>
+                </div>
+                <a class="link-more" asp-action="Shop">View all <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+            <div class="cat-tiles">
+                @foreach (var category in categoriesWithPhotos)
+                {
+                    <a class="cat-tile" asp-action="Shop" asp-route-category="@category.CatId">
+                        <div class="img">
+                            @if (!string.IsNullOrEmpty(category.CatPhoto))
+                            {
+                                <img src="~/category/@category.CatPhoto" alt="" loading="lazy" width="200" height="200" />
+                            }
+                            else
+                            {
+                                <i class="fa-solid fa-mountain" aria-hidden="true"></i>
+                            }
+                        </div>
+                        <strong>@category.CatName</strong>
+                    </a>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+@if (Model.NewArrivals.Count > 0)
+{
+    <section class="section section-beige" aria-labelledby="new-title">
+        <div class="container-hs">
+            <div class="section-head">
+                <div>
+                    <span class="eyebrow">Just landed</span>
+                    <h2 id="new-title">New arrivals</h2>
+                </div>
+                <a class="link-more" asp-action="Shop" asp-route-sort="newest">Shop new in <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+            <div class="product-rail" tabindex="0" aria-label="New arrivals, scroll horizontally">
+                @foreach (var card in Model.NewArrivals)
+                {
+                    <partial name="_ProductCard" model="card" />
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<section class="section" aria-label="Collections">
+    <div class="container-hs promo-split">
+        <a class="promo-card" style="background-image:url('@Url.Content("~/img/banner-1.jpg")')" asp-action="Shop" asp-route-sort="popular">
+            <div>
+                <span class="eyebrow" style="color:var(--hs-sand)">Customer favourites</span>
+                <h3>Trail-tested best sellers</h3>
+                <span class="btn btn-light mt-2">Shop best sellers</span>
+            </div>
+        </a>
+        @if (hasSale)
+        {
+            <a class="promo-card" style="background-image:url('@Url.Content("~/img/banner-3.jpg")')" asp-action="Shop" asp-route-onSale="true">
+                <div>
+                    <span class="eyebrow" style="color:var(--hs-sand)">Limited stock</span>
+                    <h3>Gear on sale</h3>
+                    <span class="btn btn-light mt-2">Shop the sale</span>
+                </div>
+            </a>
+        }
+        else
+        {
+            <a class="promo-card" style="background-image:url('@Url.Content("~/img/banner-3.jpg")')" asp-action="Shop" asp-route-inStock="true">
+                <div>
+                    <span class="eyebrow" style="color:var(--hs-sand)">Ready to ship</span>
+                    <h3>In stock now</h3>
+                    <span class="btn btn-light mt-2">Shop in-stock gear</span>
+                </div>
+            </a>
+        }
+    </div>
+</section>
+
+@if (Model.BestSellers.Count > 0)
+{
+    <section class="section pt-0" aria-labelledby="best-title">
+        <div class="container-hs">
+            <div class="section-head">
+                <div>
+                    <span class="eyebrow">Most ordered</span>
+                    <h2 id="best-title">Best sellers</h2>
+                </div>
+                <a class="link-more" asp-action="Shop" asp-route-sort="popular">See all <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+            <div class="product-grid">
+                @foreach (var card in Model.BestSellers.Take(8))
+                {
+                    <partial name="_ProductCard" model="card" />
+                }
+            </div>
+        </div>
+    </section>
+}
+
+@if (Model.Featured.Count > 0)
+{
+    <section class="section section-beige" aria-labelledby="essentials-title">
+        <div class="container-hs">
+            <div class="section-head">
+                <div>
+                    <span class="eyebrow">Picked by our team</span>
+                    <h2 id="essentials-title">Trail essentials</h2>
                 </div>
             </div>
-        </div>
-    </div>
-</section>
-
-<!-- Categories Section -->
-<section class="py-5">
-    <div class="container">
-        <div class="row mb-4">
-            <div class="col-12 text-center">
-                <h3 class="h4 fw-bold mb-2">Shop by Category</h3>
-                <p class="text-muted small mb-0">Find the perfect gear for your adventure</p>
+            <div class="product-grid">
+                @foreach (var card in Model.Featured)
+                {
+                    <partial name="_ProductCard" model="card" />
+                }
             </div>
         </div>
+    </section>
+}
 
-        <div class="row g-4 justify-content-center">
-            @foreach (var cat in Model.Categories)
-            {
-                <div class="col-lg-3 col-md-4 col-sm-6">
-                    <div class="card category-card h-100 text-center">
+@if (hasSale)
+{
+    <section class="section" aria-labelledby="sale-title">
+        <div class="container-hs">
+            <div class="section-head">
+                <div>
+                    <span class="eyebrow" style="color:var(--hs-sale)">Reduced</span>
+                    <h2 id="sale-title">On sale now</h2>
+                </div>
+                <a class="link-more" asp-action="Shop" asp-route-onSale="true">Shop all sale <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+            <div class="product-rail" tabindex="0" aria-label="Sale products, scroll horizontally">
+                @foreach (var card in Model.OnSale)
+                {
+                    <partial name="_ProductCard" model="card" />
+                }
+            </div>
+        </div>
+    </section>
+}
 
-                        <!-- Category Image -->
-                        <div class="category-image-wrapper">
-                            <img src="~/category/@cat.CatPhoto"
-                                 alt="@cat.CatName"
-                                 class="category-image">
-                        </div>
-
-                        <!-- Card Body -->
-                        <div class="card-body d-flex flex-column">
-                            <h6 class="card-title mb-3">@cat.CatName</h6>
-
-                            <div class="mt-auto">
-                                <a href="/Home/ProductCategory/@cat.CatId"
-                                   class="btn btn-outline-primary btn-sm px-3">
-                                    Explore
-                                </a>
-                            </div>
-                        </div>
-
+@if (Model.LatestReviews.Count > 0)
+{
+    <section class="section section-beige" aria-labelledby="reviews-title">
+        <div class="container-hs">
+            <div class="section-head">
+                <div>
+                    <span class="eyebrow">From verified customers</span>
+                    <h2 id="reviews-title">What hikers are saying</h2>
+                </div>
+            </div>
+            <div class="row g-4">
+                @foreach (var review in Model.LatestReviews)
+                {
+                    <div class="col-md-4">
+                        <figure class="card-hs h-100 m-0">
+                            <partial name="_Stars" model="(double)review.Rating" />
+                            <blockquote class="mt-2 mb-3">
+                                <p class="fw-semibold mb-1">@review.Title</p>
+                                <p class="m-0 text-muted">@(review.Comment.Length > 220 ? review.Comment[..220] + "…" : review.Comment)</p>
+                            </blockquote>
+                            <figcaption class="small">
+                                — @(review.User?.FirstName ?? "Customer")@(review.IsVerifiedPurchase ? ", verified buyer" : "") ·
+                                <a asp-action="ProductDetailes" asp-route-id="@review.ProId">@review.Product?.ProName</a>
+                            </figcaption>
+                        </figure>
                     </div>
-                </div>
-            }
-        </div>
-    </div>
-</section>
-
-<!-- Featured Products -->
-<section class="py-4 bg-light">
-    <div class="container">
-        <div class="row mb-4">
-            <div class="col-12 text-center">
-                <h3 class="h4 fw-bold mb-2">Featured Products</h3>
-                <p class="text-muted small mb-0">Top-rated gear for outdoor enthusiasts</p>
+                }
             </div>
         </div>
-        <div class="row g-3">
-            @foreach (var product in Model.Products)
-            {
-                <div class="col-lg-3 col-md-4 col-sm-6">
-                    <div class="card card-hover border-0 shadow-sm h-100 d-flex flex-column">
-                        <div class="position-relative flex-grow-0 p-2">
-                            <img src="~/Product/@product.ProImage"
-                                 class="card-img-top mx-auto"
-                                 alt="@product.ProName"
-                                 style="height: 100px; width: 100%; object-fit: contain;">
-
-                            <div class="position-absolute top-0 end-0 m-1">
-                                <span class="badge bg-primary" style="font-size: 0.7rem; padding: 0.2rem 0.5rem;">Featured</span>
-                            </div>
-                            <!-- Stock Status Badge -->
-                            <div class="position-absolute top-0 start-0 m-1">
-                                @if (product.IsInStock)
-                                {
-                                    <span class="badge bg-success" style="font-size: 0.7rem; padding: 0.2rem 0.5rem;">In Stock</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-danger" style="font-size: 0.7rem; padding: 0.2rem 0.5rem;">Out of Stock</span>
-                                }
-                            </div>
-                        </div>
-                        <div class="card-body d-flex flex-column p-2">
-                            <h6 class="card-title mb-1" style="font-size: 1rem; line-height: 1.2; min-height: 38px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">@product.ProName</h6>
-                            <p class="card-text text-muted mb-2 flex-grow-1" style="font-size: 0.75rem; line-height: 1.3; min-height: 40px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">@Truncate(product.Descreption, 50)</p>
-                            <div class="mt-auto">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="h6 text-primary mb-0" style="font-size: 0.95rem;">€@product.Price.ToString("N2")</span>
-                                    <a href="/Home/ProductDetailes/@product.ProId" class="btn btn-primary btn-sm" style="font-size: 0.8rem; padding: 0.25rem 0.75rem;">View Details</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-        <div class="row mt-4">
-            <div class="col-12 text-center">
-                <a href="/Home/Product" class="btn btn-outline-primary btn-sm">View All Products</a>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Features Section -->
-<section class="py-4">
-    <div class="container">
-        <div class="row g-3">
-            <div class="col-md-4 text-center">
-                <div class="feature-icon mb-2">
-                    <i class="fas fa-shipping-fast fa-2x text-primary"></i>
-                </div>
-                <h6 class="mb-1" style="font-size: 0.9rem;">Free Shipping</h6>
-                <p class="text-muted small mb-0">Free shipping on orders over €50</p>
-            </div>
-            <div class="col-md-4 text-center">
-                <div class="feature-icon mb-2">
-                    <i class="fas fa-undo-alt fa-2x text-primary"></i>
-                </div>
-                <h6 class="mb-1" style="font-size: 0.9rem;">Easy Returns</h6>
-                <p class="text-muted small mb-0">30-day return policy</p>
-            </div>
-            <div class="col-md-4 text-center">
-                <div class="feature-icon mb-2">
-                    <i class="fas fa-headset fa-2x text-primary"></i>
-                </div>
-                <h6 class="mb-1" style="font-size: 0.9rem;">24/7 Support</h6>
-                <p class="text-muted small mb-0">Expert customer support</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<style>
-    .hero-section {
-        background: linear-gradient(135deg, #3b5d50 0%, #2d473d 100%);
-        color: white;
-        padding: 60px 0;
-    }
-
-    .card-hover {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        border: 1px solid rgba(0,0,0,0.05);
-        border-radius: 8px;
-    }
-
-        .card-hover:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            border-color: rgba(59, 93, 80, 0.2);
-        }
-
-            .card-hover:hover .category-icon img {
-                transform: scale(1.05);
-            }
-
-    .feature-icon {
-        color: #3b5d50;
-        transition: transform 0.3s ease;
-    }
-
-        .feature-icon:hover {
-            transform: translateY(-3px);
-        }
-
-    .btn-primary {
-        background-color: #3b5d50;
-        border-color: #3b5d50;
-        transition: all 0.3s ease;
-    }
-
-        .btn-primary:hover {
-            background-color: #2d473d;
-            border-color: #2d473d;
-            transform: translateY(-1px);
-        }
-
-    /* Ensures all cards have consistent height */
-    .card {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-    }
-
-    .card-img-top {
-        object-fit: cover;
-        width: 100%;
-        border-radius: 6px 6px 0 0;
-    }
-
-    .card-body {
-        flex: 1 0 auto;
-    }
-
-    /* Make sure images maintain aspect ratio */
-    .category-icon img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: 6px;
-        transition: transform 0.3s ease;
-    }
-
-    /* Responsive adjustments */
-    @@media (max-width: 768px) {
-        .hero-section {
-            padding: 40px 0;
-            text-align: center;
-        }
-
-        .display-5 {
-            font-size: 2rem;
-        }
-
-        .col-sm-6 {
-            margin-bottom: 1rem;
-        }
-    }
-
-
-    /* Smaller & centered product images */
-    .product-image {
-        height: 110px;
-        width: auto;
-        max-width: 100%;
-        object-fit: contain;
-        margin: 12px auto 8px auto;
-    }
-
-    /* More air inside cards */
-    .card-hover {
-        padding: 10px;
-        border-radius: 14px;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
-    }
-
-    /* Remove heavy image corners */
-    .card-img-top {
-        border-radius: 10px;
-    }
-
-    /* Slight hover – premium feel */
-    .card-hover:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 10px 28px rgba(0,0,0,0.08);
-    }
-
-    /* Better spacing between text */
-    .card-body {
-        padding: 10px;
-    }
-
-        /* Price & button alignment */
-        .card-body .h6 {
-            font-weight: 600;
-        }
-
-    /* Mobile optimization */
-    @@media (max-width: 768px) {
-        .product-image {
-            height: 95px;
-        }
-    }
-    /* ===============================
-           CATEGORY CARD STYLING
-        ================================ */
-
-    .category-card {
-        border: none;
-        border-radius: 16px;
-        padding: 12px;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.05);
-    }
-
-        .category-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 28px rgba(0,0,0,0.08);
-        }
-
-    /* Image wrapper keeps size consistent */
-    .category-image-wrapper {
-        height: 110px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 12px;
-    }
-
-    .category-image {
-        max-height: 100px;
-        max-width: 100%;
-        object-fit: contain;
-    }
-
-    /* Title styling */
-    .category-card .card-title {
-        font-size: 0.95rem;
-        font-weight: 600;
-        min-height: 40px;
-    }
-
-    /* Mobile optimization */
-    @@media (max-width: 768px) {
-        .category-image-wrapper {
-            height: 90px;
-        }
-
-        .category-image {
-            max-height: 80px;
-        }
-    }
-
-</style>
-
-<script>
-    function searchProducts() {
-        const searchTerm = document.getElementById('searchInput').value;
-        if (searchTerm.trim() !== '') {
-            window.location.href = '/Home/Search?query=' + encodeURIComponent(searchTerm);
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        // Add hover effects to cards
-        const cards = document.querySelectorAll('.card-hover');
-
-        cards.forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-3px)';
-                this.style.boxShadow = '0 8px 20px rgba(0,0,0,0.1)';
-                this.style.borderColor = 'rgba(59, 93, 80, 0.2)';
-            });
-
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
-                this.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
-                this.style.borderColor = 'rgba(0,0,0,0.05)';
-            });
-        });
-    });
-</script>
+    </section>
+}

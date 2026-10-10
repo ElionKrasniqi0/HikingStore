@@ -1,0 +1,65 @@
+@model List<Address>
+@{
+    ViewData["Title"] = "Addresses";
+    ViewData["NoIndex"] = true;
+    ViewData["AccountSection"] = "addresses";
+}
+
+<div class="container-hs">
+    <div class="page-head d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <h1>Addresses</h1>
+        <a class="btn btn-primary" asp-action="AddressForm"><i class="fa-solid fa-plus me-2" aria-hidden="true"></i>Add address</a>
+    </div>
+    <div class="account-layout">
+        <partial name="_AccountNav" />
+        <section aria-label="Saved addresses">
+            @if (Model.Count == 0)
+            {
+                <div class="empty-state card-hs">
+                    <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                    <h2>No saved addresses</h2>
+                    <p>Save an address to check out faster next time.</p>
+                    <a class="btn btn-primary" asp-action="AddressForm">Add address</a>
+                </div>
+            }
+            else
+            {
+                <div class="row g-3">
+                    @foreach (var address in Model)
+                    {
+                        <div class="col-md-6">
+                            <div class="card-hs h-100 d-flex flex-column">
+                                <div class="d-flex justify-content-between gap-2 mb-2">
+                                    <strong>@(address.Label ?? "Address")</strong>
+                                    @if (address.IsDefault)
+                                    {
+                                        <span class="status-badge status-Shipped">Default</span>
+                                    }
+                                </div>
+                                <address class="small mb-3 flex-grow-1">
+                                    @address.FullName<br />
+                                    @address.AddressLine<br />
+                                    @address.PostalCode @address.City<br />
+                                    @address.Country<br />
+                                    @address.PhoneNumber
+                                </address>
+                                <div class="d-flex flex-wrap gap-3 align-items-center">
+                                    <a class="small" asp-action="AddressForm" asp-route-id="@address.AddressId">Edit</a>
+                                    @if (!address.IsDefault)
+                                    {
+                                        <form method="post" asp-action="SetDefaultAddress" asp-route-id="@address.AddressId">
+                                            <button type="submit" class="link-btn">Make default</button>
+                                        </form>
+                                    }
+                                    <form method="post" asp-action="DeleteAddress" asp-route-id="@address.AddressId" data-confirm="Delete this address?">
+                                        <button type="submit" class="link-btn">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </section>
+    </div>
+</div>

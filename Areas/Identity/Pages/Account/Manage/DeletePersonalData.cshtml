@@ -1,32 +1,28 @@
 ﻿@page
 @model DeletePersonalDataModel
 @{
-    ViewData["Title"] = "Delete Personal Data";
+    ViewData["Title"] = "Close account";
     ViewData["ActivePage"] = ManageNavPages.PersonalData;
 }
 
-<h3>@ViewData["Title"]</h3>
-
+<h2>Close account</h2>
 <div class="alert alert-warning" role="alert">
-    <p>
-        <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
-    </p>
+    <strong>This can't be undone.</strong> Your account, saved cart, wishlist, addresses and reviews will be deleted. Accounts with orders can't be closed online because we have to keep order records; contact us instead.
 </div>
 
-<div>
-    <form id="delete-user" method="post" class="form-group">
-        <div asp-validation-summary="All" class="text-danger"></div>
-        @if (Model.RequirePassword)
-        {
-            <div class="form-group">
-                <label asp-for="Input.Password"></label>
-                <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" />
-                <span asp-validation-for="Input.Password" class="text-danger"></span>
-            </div>
-        }
-        <button class="btn btn-danger" type="submit">Delete data and close my account</button>
-    </form>
-</div>
+<form id="delete-user" method="post" data-once data-confirm="Permanently close your HikingStore account?">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+    @if (Model.RequirePassword)
+    {
+        <div class="mb-3" style="max-width:360px">
+            <label asp-for="Input.Password" class="form-label">Confirm with your password</label>
+            <input asp-for="Input.Password" class="form-control" autocomplete="current-password" />
+            <span asp-validation-for="Input.Password" class="text-danger small"></span>
+        </div>
+    }
+    <button class="btn btn-danger" type="submit" data-busy-text="Closing account…">Close my account</button>
+    <a asp-page="./PersonalData" class="btn btn-outline-secondary ms-2">Cancel</a>
+</form>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

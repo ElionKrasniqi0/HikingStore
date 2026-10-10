@@ -1,5 +1,6 @@
 using HikingStore.Data;
 using HikingStore.Models;
+using HikingStore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,116 +12,91 @@ namespace HikingStore.Controllers
     public class WishlistController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly CatalogService _catalog;
 
-        public WishlistController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public WishlistController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, CatalogService catalog)
         {
             _context = context;
             _userManager = userManager;
+            _catalog = catalog;
         }
+
+        private string UserId => _userManager.GetUserId(User)!;
 
         public async Task<IActionResult> Index()
         {
-            var userId = _userManager.GetUserId(User);
-            var wishlistItems = await _context.Wishlists
-                .Include(w => w.Product)
-                    .ThenInclude(p => p.Category)
-                .Where(w => w.UserId == userId)
+            var products = await _context.Wishlists.AsNoTracking()
+                .Where(w => w.UserId == UserId && w.Product!.IsActive)
                 .OrderByDescending(w => w.AddedDate)
+                .Select(w => w.Product!)
                 .ToListAsync();
+            return View(await _catalog.BuildCardsAsync(products, UserId));
+        }
 
-            return View(wishlistItems);
+        [HttpPost]
+        public async Task<IActionResult> Toggle(int productId)
+        {
+            var existing = await _context.Wishlists.FirstOrDefaultAsync(w => w.UserId == UserId && w.ProId == productId);
+            bool inWishlist;
+            string message;
+            if (existing != null)
+            {
+                _context.Wishlists.Remove(existing);
+                inWishlist = false;
+                message = "Removed from your wishlist.";
+            }
+            else
+            {
+                if (!await _context.Products.AnyAsync(p => p.ProId == productId && p.IsActive))
+                {
+                    return Json(new { success = false, message = "Product not found." });
+                }
+                _context.Wishlists.Add(new Wishlist { UserId = UserId, ProId = productId, AddedDate = DateTime.UtcNow });
+                inWishlist = true;
+                message = "Saved to your wishlist.";
+            }
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                _context.ChangeTracker.Clear();
+                inWishlist = await _context.Wishlists.AnyAsync(w => w.UserId == UserId && w.ProId == productId);
+                message = inWishlist ? "Saved to your wishlist." : "Removed from your wishlist.";
+            }
+
+            return Json(new { success = true, inWishlist, message, count = await CountAsync() });
         }
 
         [HttpPost]
         public async Task<IActionResult> AddToWishlist(int productId)
         {
-            var userId = _userManager.GetUserId(User);
-            if (string.IsNullOrEmpty(userId))
+            if (await _context.Wishlists.AnyAsync(w => w.UserId == UserId && w.ProId == productId))
             {
-                return Json(new { success = false, message = "Please login to add items to wishlist." });
+                return Json(new { success = true, message = "Already in your wishlist.", count = await CountAsync() });
             }
-
-            var product = await _context.Products.FindAsync(productId);
-            if (product == null)
-            {
-                return Json(new { success = false, message = "Product not found." });
-            }
-
-            // Check if already in wishlist
-            var existingWishlist = await _context.Wishlists
-                .FirstOrDefaultAsync(w => w.UserId == userId && w.ProId == productId);
-
-            if (existingWishlist != null)
-            {
-                return Json(new { success = false, message = "Product already in wishlist." });
-            }
-
-            var wishlist = new Wishlist
-            {
-                UserId = userId,
-                ProId = productId,
-                AddedDate = DateTime.Now
-            };
-
-            _context.Wishlists.Add(wishlist);
-            await _context.SaveChangesAsync();
-
-            return Json(new { success = true, message = "Added to wishlist successfully." });
+            return await Toggle(productId);
         }
 
         [HttpPost]
         public async Task<IActionResult> RemoveFromWishlist(int productId)
         {
-            var userId = _userManager.GetUserId(User);
-            if (string.IsNullOrEmpty(userId))
+            await _context.Wishlists.Where(w => w.UserId == UserId && w.ProId == productId).ExecuteDeleteAsync();
+
+            if (Request.Headers.XRequestedWith == "XMLHttpRequest")
             {
-                return Json(new { success = false, message = "Please login to remove items from wishlist." });
+                return Json(new { success = true, message = "Removed from your wishlist.", count = await CountAsync() });
             }
-
-            var wishlistItem = await _context.Wishlists
-                .FirstOrDefaultAsync(w => w.UserId == userId && w.ProId == productId);
-
-            if (wishlistItem == null)
-            {
-                return Json(new { success = false, message = "Item not found in wishlist." });
-            }
-
-            _context.Wishlists.Remove(wishlistItem);
-            await _context.SaveChangesAsync();
-
-            return Json(new { success = true, message = "Removed from wishlist successfully." });
+            TempData["Success"] = "Removed from your wishlist.";
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]
-        public async Task<IActionResult> IsInWishlist(int productId)
-        {
-            var userId = _userManager.GetUserId(User);
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Json(new { inWishlist = false });
-            }
+        public async Task<IActionResult> GetWishlistCount() => Json(new { count = await CountAsync() });
 
-            var isInWishlist = await _context.Wishlists
-                .AnyAsync(w => w.UserId == userId && w.ProId == productId);
-
-            return Json(new { inWishlist = isInWishlist });
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetWishlistCount()
-        {
-            var userId = _userManager.GetUserId(User);
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Json(new { count = 0 });
-            }
-
-            var count = await _context.Wishlists
-                .Where(w => w.UserId == userId)
-                .CountAsync();
-
-            return Json(new { count = count });
-        }
+        private Task<int> CountAsync() => _context.Wishlists.CountAsync(w => w.UserId == UserId && w.Product!.IsActive);
     }
 }

@@ -1,0 +1,17 @@
+@{
+    var active = ViewData["AccountSection"] as string;
+    string Css(string section) => section == active ? "active" : "";
+    string? Current(string section) => section == active ? "page" : null;
+}
+<nav aria-label="My account">
+    <ul class="account-nav">
+        <li><a class="@Css("overview")" asp-area="" asp-controller="Account" asp-action="Index" aria-current="@Current("overview")"><i class="fa-solid fa-house" aria-hidden="true"></i>Overview</a></li>
+        <li><a class="@Css("orders")" asp-area="" asp-controller="Orders" asp-action="Index" aria-current="@Current("orders")"><i class="fa-solid fa-box" aria-hidden="true"></i>Orders</a></li>
+        <li><a class="@Css("wishlist")" asp-area="" asp-controller="Wishlist" asp-action="Index" aria-current="@Current("wishlist")"><i class="fa-regular fa-heart" aria-hidden="true"></i>Wishlist</a></li>
+        <li><a class="@Css("addresses")" asp-area="" asp-controller="Account" asp-action="Addresses" aria-current="@Current("addresses")"><i class="fa-solid fa-location-dot" aria-hidden="true"></i>Addresses</a></li>
+        <li><a class="@Css("reviews")" asp-area="" asp-controller="Account" asp-action="Reviews" aria-current="@Current("reviews")"><i class="fa-regular fa-star" aria-hidden="true"></i>Reviews</a></li>
+        <li><a class="@Css("chat")" asp-area="" asp-controller="Chat" asp-action="Index" aria-current="@Current("chat")"><i class="fa-regular fa-comments" aria-hidden="true"></i>Support chat</a></li>
+        <li><a class="@Css("profile")" asp-area="" asp-controller="Account" asp-action="Profile" aria-current="@Current("profile")"><i class="fa-regular fa-user" aria-hidden="true"></i>Profile</a></li>
+        <li><a class="@Css("security")" asp-area="Identity" asp-page="/Account/Manage/ChangePassword" aria-current="@Current("security")"><i class="fa-solid fa-lock" aria-hidden="true"></i>Sign-in &amp; security</a></li>
+    </ul>
+</nav>

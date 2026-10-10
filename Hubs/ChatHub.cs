@@ -11,11 +11,13 @@ namespace HikingStore.Hubs
     [Authorize]
     public class ChatHub : Hub
     {
+        public const int MaxMessageLength = 2000;
+
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<ChatHub> _logger;
 
-        public ChatHub(ApplicationDbContext context, UserManager<IdentityUser> userManager, ILogger<ChatHub> logger)
+        public ChatHub(ApplicationDbContext context, UserManager<ApplicationUser> userManager, ILogger<ChatHub> logger)
         {
             _context = context;
             _userManager = userManager;
@@ -91,6 +93,14 @@ namespace HikingStore.Hubs
                 if (userId == null)
                 {
                     await Clients.Caller.SendAsync("ErrorMessage", "You must be logged in to send messages.");
+                    return;
+                }
+
+                message = message?.Trim() ?? string.Empty;
+                if (message.Length == 0) return;
+                if (message.Length > MaxMessageLength)
+                {
+                    await Clients.Caller.SendAsync("ErrorMessage", $"Messages can be at most {MaxMessageLength} characters.");
                     return;
                 }
 
@@ -173,17 +183,8 @@ namespace HikingStore.Hubs
                     isRead = chatMessage.IsRead
                 };
 
-                // Send to all participants in the room via room group
+                // Participants viewing the room are in the room group; sending to one group avoids duplicate delivery.
                 await Clients.Group($"Room_{chatRoomId}").SendAsync("ReceiveMessage", messageData);
-                
-                // Also send to individual user groups for reliability
-                await Clients.Group(chatRoom.UserId).SendAsync("ReceiveMessage", messageData);
-
-                // Send to agent if assigned
-                if (chatRoom.AgentId != null && chatRoom.AgentId != userId)
-                {
-                    await Clients.Group(chatRoom.AgentId).SendAsync("ReceiveMessage", messageData);
-                }
 
                 // If message is from agent, notify all agents about new activity (except sender)
                 if (isAgent)
@@ -282,6 +283,10 @@ namespace HikingStore.Hubs
 
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) return;
+
+            var chatRoom = await _context.ChatRooms.AsNoTracking().FirstOrDefaultAsync(cr => cr.Id == chatRoomId);
+            if (chatRoom == null) return;
+            if (chatRoom.UserId != userId && chatRoom.AgentId != userId && !await _userManager.IsInRoleAsync(user, "Admin")) return;
 
             // Send typing indicator to others in the room (not to self)
             await Clients.OthersInGroup($"Room_{chatRoomId}").SendAsync("UserTyping", new

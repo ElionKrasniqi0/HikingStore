@@ -1,4 +1,5 @@
-﻿using System;
+using HikingStore.Data;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -14,13 +15,16 @@ namespace HikingStore.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class LoginWith2faModel : PageModel
     {
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<LoginWith2faModel> _logger;
+        private readonly HikingStore.Services.CartService _cartService;
 
-        public LoginWith2faModel(SignInManager<IdentityUser> signInManager, ILogger<LoginWith2faModel> logger)
+        public LoginWith2faModel(SignInManager<ApplicationUser> signInManager, ILogger<LoginWith2faModel> logger,
+            HikingStore.Services.CartService cartService)
         {
             _signInManager = signInManager;
             _logger = logger;
+            _cartService = cartService;
         }
 
         [BindProperty]
@@ -49,7 +53,7 @@ namespace HikingStore.Areas.Identity.Pages.Account
 
             if (user == null)
             {
-                throw new InvalidOperationException($"Unable to load two-factor authentication user.");
+                return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
 
             ReturnUrl = returnUrl;
@@ -70,7 +74,7 @@ namespace HikingStore.Areas.Identity.Pages.Account
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
-                throw new InvalidOperationException($"Unable to load two-factor authentication user.");
+                return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
 
             var authenticatorCode = Input.TwoFactorCode.Replace(" ", string.Empty).Replace("-", string.Empty);
@@ -80,6 +84,7 @@ namespace HikingStore.Areas.Identity.Pages.Account
             if (result.Succeeded)
             {
                 _logger.LogInformation("User with ID '{UserId}' logged in with 2fa.", user.Id);
+                await _cartService.MergeGuestCartAsync(user.Id);
                 return LocalRedirect(returnUrl);
             }
             else if (result.IsLockedOut)

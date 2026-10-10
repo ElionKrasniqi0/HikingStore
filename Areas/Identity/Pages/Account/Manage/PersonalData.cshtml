@@ -1,27 +1,24 @@
 ﻿@page
 @model PersonalDataModel
 @{
-    ViewData["Title"] = "Personal Data";
+    ViewData["Title"] = "Your data";
     ViewData["ActivePage"] = ManageNavPages.PersonalData;
 }
 
-<h3>@ViewData["Title"]</h3>
+<h2>Your data</h2>
+<p class="text-muted">Download a copy of the personal information stored with your account, or close your account. See our <a asp-area="" asp-controller="Home" asp-action="Privacy">privacy policy</a> for details.</p>
 
-<div class="row">
-    <div class="col-md-6">
-        <p>Your account contains personal data that you have given us. This page allows you to download or delete that data.</p>
-        <p>
-            <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
-        </p>
-        <form id="download-data" asp-page="DownloadPersonalData" method="post" class="form-group">
-            <button class="btn btn-primary" type="submit">Download</button>
+<div class="d-flex flex-column gap-4">
+    <div>
+        <h3 class="h6">Download</h3>
+        <p class="small text-muted">A JSON file with your profile details and sign-in information.</p>
+        <form id="download-data" asp-page="DownloadPersonalData" method="post">
+            <button class="btn btn-outline-secondary" type="submit"><i class="fa-solid fa-download me-2" aria-hidden="true"></i>Download my data</button>
         </form>
-        <p>
-            <a id="delete" role="button" asp-page="DeletePersonalData" class="btn btn-secondary">Delete</a>
-        </p>
+    </div>
+    <div>
+        <h3 class="h6">Close account</h3>
+        <p class="small text-muted">Permanently deletes your account, saved cart, wishlist and addresses.</p>
+        <a id="delete" asp-page="DeletePersonalData" class="btn btn-outline-danger">Close my account</a>
     </div>
 </div>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}

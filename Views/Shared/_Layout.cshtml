@@ -1,1051 +1,372 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@inject IOptions<StoreSettings> StoreOptions
+@inject CatalogService Catalog
+@inject CartService Cart
+@inject ApplicationDbContext Db
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@{
+    var store = StoreOptions.Value;
+    var signedIn = SignInManager.IsSignedIn(User);
+    var userId = signedIn ? UserManager.GetUserId(User) : null;
+    var navCategories = await Catalog.GetNavigationTreeAsync();
+    var cartCount = await Cart.GetItemCountAsync(userId);
+    var wishlistCount = userId == null ? 0 : await Db.Wishlists.CountAsync(w => w.UserId == userId && w.Product!.IsActive);
+    var title = ViewData["Title"] as string;
+    var pageTitle = string.IsNullOrEmpty(title) ? $"{store.Name} – Outdoor & hiking gear" : $"{title} | {store.Name}";
+    var description = ViewData["Description"] as string ?? "Hiking boots, backpacks, jackets and camping gear chosen for the trail. Free standard shipping over " + store.FormatPrice(store.FreeShippingThreshold) + ".";
+    var canonical = ViewData["Canonical"] as string ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}";
+    var ogImage = ViewData["OgImage"] as string;
+    var requestToken = Antiforgery.GetAndStoreTokens(Context).RequestToken;
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    var currentCategory = Context.Request.Query["category"].ToString();
+    var searchQuery = Context.Request.Query["q"].ToString();
+    var socialLinks = store.SocialLinks.Where(s => !string.IsNullOrWhiteSpace(s.Value)).ToList();
+    string SocialIcon(string name) => name.ToLowerInvariant() switch
+    {
+        "facebook" => "fa-facebook-f",
+        "instagram" => "fa-instagram",
+        "youtube" => "fa-youtube",
+        "tiktok" => "fa-tiktok",
+        "x" or "twitter" => "fa-x-twitter",
+        _ => "fa-link"
+    };
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="description" content="Premium hiking gear and outdoor equipment for your next adventure. Shop quality hiking boots, backpacks, camping gear, and outdoor clothing.">
-    <meta name="keywords" content="hiking gear, outdoor equipment, camping supplies, hiking boots, backpacks, outdoor clothing">
-    <meta name="author" content="HikingStore">
-    <meta name="robots" content="index, follow">
-    <meta name="theme-color" content="#2d473d">
-
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="@(Context.Request.Scheme)://@(Context.Request.Host)">
-    <meta property="og:title" content="@(ViewData["Title"] ?? "HikingStore") - Premium Hiking Gear">
-    <meta property="og:description" content="Premium hiking gear and outdoor equipment for your next adventure">
-    <meta property="og:image" content="@(Context.Request.Scheme)://@(Context.Request.Host)/img/banner-1.jpg">
-    
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="@(Context.Request.Scheme)://@(Context.Request.Host)">
-    <meta property="twitter:title" content="@(ViewData["Title"] ?? "HikingStore") - Premium Hiking Gear">
-    <meta property="twitter:description" content="Premium hiking gear and outdoor equipment for your next adventure">
-    <meta property="twitter:image" content="@(Context.Request.Scheme)://@(Context.Request.Host)/img/banner-1.jpg">
-    
-    <title>@(ViewData["Title"] != null ? $"{ViewData["Title"]} - " : "")HikingStore - Premium Hiking Gear & Outdoor Equipment</title>
-    
-    <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
-    <link rel="canonical" href="@(Context.Request.Scheme)://@(Context.Request.Host)@(Context.Request.Path)" />
-
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- Responsive Styles -->
-    <link rel="stylesheet" href="~/css/responsive.css">
-    <link rel="stylesheet" href="~/css/site.css">
-    <link rel="stylesheet" href="~/css/print.css" media="print">
-
-    <style>
-        :root {
-            --primary-color: #2d473d;
-            --primary-light: #3b5d50;
-            --secondary-color: #f9bf29;
-            --accent-color: #e74c3c;
-            --light-bg: #f8f9fa;
-            --dark-text: #2c3e50;
-            --gray-light: #6c757d;
-            --white: #ffffff;
-            --border-radius: 8px;
-            --shadow: 0 4px 12px rgba(0,0,0,0.08);
-            --transition: all 0.3s ease;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            color: var(--dark-text);
-            line-height: 1.6;
-            background-color: var(--white);
-        }
-
-        /* Typography */
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'Playfair Display', serif;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .display-1, .display-2, .display-3, .display-4, .display-5, .display-6 {
-            font-family: 'Playfair Display', serif;
-        }
-
-        /* Navigation */
-        .navbar {
-            background: var(--white) !important;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
-            transition: var(--transition);
-            padding: 1rem 0;
-            z-index: 1030;
-        }
-
-        .navbar-scrolled {
-            padding: 0.75rem 0;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.12);
-        }
-
-        .navbar-brand {
-            font-family: 'Playfair Display', serif;
-            font-weight: 700;
-            font-size: 1.75rem;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-            .navbar-brand:hover {
-                opacity: 0.9;
-            }
-
-            .navbar-brand i {
-                background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
-            }
-
-        .nav-link {
-            font-weight: 500;
-            color: var(--dark-text) !important;
-            padding: 0.625rem 1rem !important;
-            margin: 0 0.125rem;
-            border-radius: var(--border-radius);
-            transition: var(--transition);
-            position: relative;
-            font-size: 0.95rem;
-        }
-
-            .nav-link:hover,
-            .nav-link.active {
-                color: var(--primary-light) !important;
-                background-color: rgba(59, 93, 80, 0.08);
-            }
-
-            .nav-link::after {
-                content: '';
-                position: absolute;
-                bottom: 0.25rem;
-                left: 50%;
-                width: 0;
-                height: 2px;
-                background: var(--primary-light);
-                transition: var(--transition);
-                transform: translateX(-50%);
-                border-radius: 2px;
-            }
-
-            .nav-link:hover::after,
-            .nav-link.active::after {
-                width: 70%;
-            }
-
-        /* Buttons */
-        .btn {
-            border-radius: var(--border-radius);
-            font-weight: 500;
-            padding: 0.75rem 1.5rem;
-            transition: var(--transition);
-            border: none;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
-            color: var(--white);
-            box-shadow: 0 4px 15px rgba(59, 93, 80, 0.3);
-        }
-
-            .btn-primary:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 6px 20px rgba(59, 93, 80, 0.4);
-            }
-
-        .btn-outline-primary {
-            border: 2px solid var(--primary-light);
-            color: var(--primary-light);
-            background: transparent;
-        }
-
-            .btn-outline-primary:hover {
-                background: var(--primary-light);
-                color: var(--white);
-                transform: translateY(-2px);
-            }
-
-        /* Cart Icon */
-        .cart-icon {
-            position: relative;
-            padding: 0.5rem;
-            border-radius: 50%;
-            transition: var(--transition);
-        }
-
-            .cart-icon:hover {
-                background: rgba(59, 93, 80, 0.1);
-            }
-
-        .cart-count {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: var(--accent-color);
-            color: var(--white);
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 0.75rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-        }
-
-        /* Dropdown */
-        .dropdown-menu {
-            border: none;
-            box-shadow: var(--shadow);
-            border-radius: var(--border-radius);
-            padding: 0.5rem;
-            min-width: 200px;
-        }
-
-        .dropdown-item {
-            padding: 0.75rem 1rem;
-            border-radius: 6px;
-            transition: var(--transition);
-            color: var(--dark-text);
-        }
-
-            .dropdown-item:hover {
-                background: rgba(59, 93, 80, 0.08);
-                color: var(--primary-light);
-            }
-
-        /* Main Content */
-        main {
-            min-height: calc(100vh - 200px);
-        }
-
-        /* Footer */
-        .footer {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-            color: var(--white);
-            padding: 3rem 0 1rem;
-            margin-top: 4rem;
-        }
-
-            .footer h5 {
-                color: var(--white);
-                margin-bottom: 1rem;
-                font-weight: 600;
-            }
-
-            .footer a {
-                color: rgba(255,255,255,0.8);
-                text-decoration: none;
-                transition: var(--transition);
-            }
-
-                .footer a:hover {
-                    color: var(--white);
-                    text-decoration: underline;
-                }
-
-            .footer .social-links a {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                width: 40px;
-                height: 40px;
-                background: rgba(255,255,255,0.1);
-                border-radius: 50%;
-                margin-right: 0.5rem;
-                transition: var(--transition);
-            }
-
-                .footer .social-links a:hover {
-                    background: rgba(255,255,255,0.2);
-                    transform: translateY(-2px);
-                }
-
-        /* Utility Classes */
-        .text-primary {
-            color: var(--primary-light) !important;
-        }
-
-        .bg-primary {
-            background-color: var(--primary-light) !important;
-        }
-
-        .border-primary {
-            border-color: var(--primary-light) !important;
-        }
-
-        .section-padding {
-            padding: 4rem 0;
-        }
-
-        .card {
-            border: none;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-        }
-
-            .card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-            }
-
-        /* Loading Animation */
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid #f3f3f3;
-            border-top: 2px solid var(--primary-light);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-
-
-        /* Search Bar Styling */
-        .navbar-search-form {
-            position: relative;
-            max-width: 400px;
-            width: 100%;
-        }
-
-        .navbar-search-form .form-control {
-            border: 2px solid rgba(59, 93, 80, 0.15);
-            border-radius: 25px;
-            padding: 0.625rem 3rem 0.625rem 1.25rem;
-            font-size: 0.9rem;
-            transition: var(--transition);
-            background: rgba(248, 249, 250, 0.8);
-        }
-
-            .navbar-search-form .form-control:focus {
-                border-color: var(--primary-light);
-                box-shadow: 0 0 0 0.2rem rgba(59, 93, 80, 0.15);
-                background: var(--white);
-            }
-
-        .navbar-search-form .btn {
-            position: absolute;
-            right: 0.25rem;
-            top: 50%;
-            transform: translateY(-50%);
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--primary-light);
-            border: none;
-            transition: var(--transition);
-        }
-
-            .navbar-search-form .btn:hover {
-                background: var(--primary-color);
-                transform: translateY(-50%) scale(1.05);
-            }
-
-        /* Navbar Container Improvements */
-        .navbar .container {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .navbar-collapse {
-            flex-grow: 1;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .navbar-nav.me-auto {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-
-        /* Navbar Right Section */
-        .navbar-right-section {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .btn {
-            padding: 0.625rem 1.25rem;
-        }
-
-        .section-padding {
-            padding: 2rem 0;
-        }
-
-        /* Desktop Navigation Styles */
-        @@media (min-width: 992px) {
-            .mobile-nav-content {
-                display: none !important;
-        }
-        }
-
-        /* Accessibility */
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border: 0;
-        }
-
-        .sr-only-focusable:focus {
-            position: static;
-            width: auto;
-            height: auto;
-            padding: 0.5rem 1rem;
-            margin: 0;
-            overflow: visible;
-            clip: auto;
-            white-space: normal;
-            background: var(--primary-color);
-            color: var(--white);
-            z-index: 9999;
-            border-radius: var(--border-radius);
-        }
-
-        .skip-link {
-            position: absolute;
-            top: -40px;
-            left: 0;
-            background: var(--primary-color);
-            color: var(--white);
-            padding: 8px;
-            text-decoration: none;
-            z-index: 10000;
-        }
-
-        .skip-link:focus {
-            top: 0;
-        }
-
-        /* Chat Widget */
-        .chat-widget {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1050;
-        }
-
-        .chat-widget-button {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
-            color: var(--white);
-            border: none;
-            box-shadow: 0 4px 20px rgba(59, 93, 80, 0.4);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            transition: var(--transition);
-            position: relative;
-        }
-
-        .chat-widget-button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 25px rgba(59, 93, 80, 0.5);
-        }
-
-        .chat-widget-button:active {
-            transform: scale(0.95);
-        }
-
-        .chat-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: var(--accent-color);
-            color: var(--white);
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            font-size: 0.75rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            border: 2px solid var(--white);
-        }
-
-        .chat-widget-panel {
-            position: absolute;
-            bottom: 80px;
-            right: 0;
-            width: 350px;
-            max-width: calc(100vw - 40px);
-            background: var(--white);
-            border-radius: var(--border-radius);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-            overflow: hidden;
-            animation: slideUp 0.3s ease;
-        }
-
-        @@keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .chat-widget-header {
-            background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
-            color: var(--white);
-            padding: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .chat-widget-body {
-            padding: 1.5rem;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        @@media (max-width: 768px) {
-            .chat-widget {
-                bottom: 15px;
-                right: 15px;
-            }
-
-            .chat-widget-panel {
-                width: 300px;
-                max-width: calc(100vw - 30px);
-            }
-        }
-
-        /* Focus states for accessibility */
-        button:focus,
-        a:focus,
-        .btn:focus {
-            outline: 2px solid var(--primary-light);
-            outline-offset: 2px;
-        }
-
-        @@media print {
-            /* Hide navigation, footer, and buttons when printing */
-            .navbar,
-            .sb-topnav,
-            .footer,
-            .breadcrumb,
-            button,
-            .btn,
-            .dropdown,
-            .nav-link,
-            .cart-summary-wrapper,
-            .user-dropdown-toggle,
-            .auth-buttons-container,
-            .no-print {
-                display: none !important;
-            }
-            /* Simple print layout */
-            body {
-                background: white !important;
-                color: black !important;
-                font-size: 12pt !important;
-                margin: 0 !important;
-                padding: 10mm !important;
-            }
-            /* Remove backgrounds and shadows */
-            * {
-                background: transparent !important;
-                box-shadow: none !important;
-                text-shadow: none !important;
-            }
-            /* Show URLs for links */
-            a[href]:after {
-                content: " (" attr(href) ")";
-                font-size: 90%;
-            }
-            /* Don't show links for images or internal links */
-            a[href^="#"]:after,
-            a[href^="javascript:"]:after {
-                content: "";
-            }
-        }
-    </style>
-
-    @RenderSection("Styles", required: false)
-    
-    <!-- Structured Data for SEO -->
-    <script type="application/ld+json">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@pageTitle</title>
+    <meta name="description" content="@description" />
+    <meta name="csrf-token" content="@requestToken" />
+    <meta name="theme-color" content="#163526" />
+    @if (ViewData["NoIndex"] is true)
     {
-        "@@context": "https://schema.org",
-        "@@type": "Store",
-        "name": "HikingStore",
-        "description": "Premium hiking gear and outdoor equipment for your next adventure",
-        "url": "@(Context.Request.Scheme)://@(Context.Request.Host)",
-        "logo": "@(Context.Request.Scheme)://@(Context.Request.Host)/img/banner-1.jpg",
-        "sameAs": [
-            "https://www.facebook.com/",
-            "https://www.x.com/",
-            "https://www.instagram.com/",
-            "https://www.linkedin.com/"
-        ]
+        <meta name="robots" content="noindex" />
     }
+    <link rel="canonical" href="@canonical" />
+    <meta property="og:site_name" content="@store.Name" />
+    <meta property="og:title" content="@pageTitle" />
+    <meta property="og:description" content="@description" />
+    <meta property="og:url" content="@canonical" />
+    <meta property="og:type" content="@(ViewData["OgType"] as string ?? "website")" />
+    @if (!string.IsNullOrEmpty(ogImage))
+    {
+        <meta property="og:image" content="@ogImage" />
+    }
+    <link rel="icon" href="~/favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+          integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="~/css/hikingstore.css" asp-append-version="true" />
+    @await RenderSectionAsync("Head", required: false)
+    <script type="application/ld+json">
+        {
+          "@@context": "https://schema.org",
+          "@@type": "OnlineStore",
+          "name": "@store.Name",
+          "url": "@($"{Context.Request.Scheme}://{Context.Request.Host}")",
+          "email": "@store.SupportEmail",
+          "telephone": "@store.SupportPhone"
+        }
     </script>
 </head>
-<body>
-    @* Hidden form so __RequestVerificationToken is available for cart flyout +/- and other AJAX POSTs *@
-    <form method="post" id="antiforgery-form" style="display: none;" aria-hidden="true"></form>
-    <!-- Skip to main content for accessibility -->
-    <a href="#main-content" class="sr-only sr-only-focusable skip-link">Skip to main content</a>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light sticky-top" role="navigation" aria-label="Main navigation">
-        <div class="container">
-            <a class="navbar-brand" asp-controller="Home" asp-action="Index" aria-label="HikingStore Home">
-                <i class="fas fa-mountain" aria-hidden="true"></i>
-                <span>HikingStore</span>
-            </a>
+<body class="@(ViewData["BodyClass"] as string)" data-signed-in="@(signedIn ? "true" : "false")"
+      data-login-url="@Url.Page("/Account/Login", new { area = "Identity" })">
+    <a class="skip-link" href="#main">Skip to content</a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"
-                    style="border: 2px solid rgba(59, 93, 80, 0.2); border-radius: 8px; padding: 0.5rem;">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+    @if (!string.IsNullOrWhiteSpace(store.AnnouncementText))
+    {
+        <div class="announcement-bar">@store.AnnouncementText</div>
+    }
 
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <!-- Desktop: Navigation Links -->
-                <ul class="navbar-nav me-auto d-none d-lg-flex">
-                    <li class="nav-item">
-                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" && ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "active" : "")"
-                           asp-controller="Home" asp-action="Index">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Shop" ? "active" : "")"
-                           asp-controller="Home" asp-action="Shop">Shop</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Product" ? "active" : "")"
-                           asp-controller="Home" asp-action="Product">Products</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Contact" ? "active" : "")"
-                           asp-controller="Home" asp-action="Contact">Contact</a>
-                    </li>
-                </ul>
+    <header class="site-header">
+        <div class="container-hs header-main">
+            <div class="d-flex align-items-center gap-1">
+                <button class="action-btn menu-toggle" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileNav" aria-controls="mobileNav" aria-label="Open menu">
+                    <i class="fa-solid fa-bars" aria-hidden="true"></i>
+                </button>
+                <a class="brand" asp-area="" asp-controller="Home" asp-action="Index" aria-label="@store.Name home">
+                    <span class="brand-mark" aria-hidden="true"><i class="fa-solid fa-mountain-sun"></i></span>
+                    <span class="brand-text">@store.Name</span>
+                </a>
+            </div>
 
-                <!-- Desktop: Right section with search, auth, and cart -->
-                <div class="navbar-right-section d-none d-lg-flex align-items-center">
-                    <!-- Search Bar (Desktop) -->
-                    <form class="navbar-search-form" role="search" onsubmit="handleSearch(event)">
-                        <input type="text" class="form-control" placeholder="Search products..."
-                               aria-label="Search products" aria-describedby="search-button" 
-                               id="navbar-search-input" name="search">
-                        <button class="btn btn-primary" type="submit" id="search-button" aria-label="Submit search">
-                            <i class="fas fa-search" aria-hidden="true"></i>
+            <form class="header-search" role="search" method="get" asp-area="" asp-controller="Home" asp-action="Shop" data-quick-search>
+                <label for="site-search" class="visually-hidden">Search products</label>
+                <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
+                <input id="site-search" class="form-control" type="search" name="q" value="@searchQuery" maxlength="100"
+                       placeholder="Search boots, jackets, tents…" autocomplete="off"
+                       role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="search-suggest" />
+                <div id="search-suggest" class="search-suggest" role="listbox" hidden></div>
+            </form>
+
+            <nav class="header-actions" aria-label="Account and cart">
+                @if (signedIn)
+                {
+                    <div class="dropdown">
+                        <button class="action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-regular fa-user" aria-hidden="true"></i><span class="label">Account</span>
                         </button>
-                    </form>
-
-                    <!-- User Authentication (Desktop) -->
-                    <partial name="_LoginPartial" />
-
-                    <!-- Cart Summary (Desktop) -->
-                    @await Component.InvokeAsync("CartSummary")
-                </div>
-
-                <!-- Mobile: Stacked layout -->
-                <div class="mobile-nav-content d-lg-none w-100">
-                    <!-- Mobile Search - Top -->
-                    <form class="mobile-search-form mb-3" role="search" onsubmit="handleSearch(event)">
-                        <div class="input-group">
-                            <input type="text" class="form-control" placeholder="Search products..."
-                                   aria-label="Search products" id="mobile-search-input" name="search"
-                                   style="font-size: 16px;">
-                            <button class="btn btn-primary" type="submit" aria-label="Submit search">
-                                <i class="fas fa-search"></i>
-                            </button>
-                        </div>
-                    </form>
-
-                    <!-- Navigation Links - Middle -->
-                    <ul class="navbar-nav mobile-nav-links mb-3">
-                    <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" && ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "active" : "")"
-                               asp-controller="Home" asp-action="Index">
-                                <i class="fas fa-home me-2"></i>Home
-                            </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Shop" ? "active" : "")"
-                               asp-controller="Home" asp-action="Shop">
-                                <i class="fas fa-store me-2"></i>Shop
-                            </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Product" ? "active" : "")"
-                               asp-controller="Home" asp-action="Product">
-                                <i class="fas fa-box me-2"></i>Products
-                            </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Contact" ? "active" : "")"
-                               asp-controller="Home" asp-action="Contact">
-                                <i class="fas fa-envelope me-2"></i>Contact
-                            </a>
-                    </li>
-                </ul>
-
-                    <!-- Mobile Bottom Section: Cart and Auth -->
-                    <div class="mobile-nav-bottom d-flex align-items-center justify-content-between">
-                        <!-- Cart (Mobile) -->
-                        <div class="mobile-cart-wrapper">
-                            @await Component.InvokeAsync("CartSummary")
-                        </div>
-
-                        <!-- User Authentication (Mobile) -->
-                        <div class="mobile-auth-wrapper">
-                    <partial name="_LoginPartial" />
-                </div>
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                            <li><h2 class="dropdown-header text-truncate" style="max-width:240px">@User.Identity?.Name</h2></li>
+                            <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Index"><i class="fa-regular fa-user me-2" aria-hidden="true"></i>My account</a></li>
+                            <li><a class="dropdown-item" asp-area="" asp-controller="Orders" asp-action="Index"><i class="fa-solid fa-box me-2" aria-hidden="true"></i>Orders &amp; tracking</a></li>
+                            <li><a class="dropdown-item" asp-area="" asp-controller="Wishlist" asp-action="Index"><i class="fa-regular fa-heart me-2" aria-hidden="true"></i>Wishlist</a></li>
+                            <li><a class="dropdown-item" asp-area="" asp-controller="Chat" asp-action="Index"><i class="fa-regular fa-comments me-2" aria-hidden="true"></i>Support chat</a></li>
+                            @if (User.IsInRole(DbInitializer.AdminRole))
+                            {
+                                <li><hr class="dropdown-divider" /></li>
+                                <li><a class="dropdown-item" asp-area="Admin" asp-controller="Home" asp-action="Index"><i class="fa-solid fa-gauge me-2" aria-hidden="true"></i>Admin dashboard</a></li>
+                            }
+                            <li><hr class="dropdown-divider" /></li>
+                            <li>
+                                <form method="post" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                                    <button type="submit" class="dropdown-item"><i class="fa-solid fa-arrow-right-from-bracket me-2" aria-hidden="true"></i>Sign out</button>
+                                </form>
+                            </li>
+                        </ul>
                     </div>
-                </div>
+                    <a class="action-btn hide-xs" asp-area="" asp-controller="Wishlist" asp-action="Index" aria-label="Wishlist, @wishlistCount items">
+                        <i class="fa-regular fa-heart" aria-hidden="true"></i><span class="label">Wishlist</span>
+                        <span class="count-badge" data-wishlist-count data-count="@wishlistCount">@wishlistCount</span>
+                    </a>
+                }
+                else
+                {
+                    <a class="action-btn" asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@($"{Context.Request.Path}{Context.Request.QueryString}")">
+                        <i class="fa-regular fa-user" aria-hidden="true"></i><span class="label">Sign in</span>
+                    </a>
+                }
+                <a class="action-btn" asp-area="" asp-controller="Carts" asp-action="Index" data-mini-cart-toggle aria-label="Cart, @cartCount items">
+                    <i class="fa-solid fa-bag-shopping" aria-hidden="true"></i><span class="label">Cart</span>
+                    <span class="count-badge" data-cart-count data-count="@cartCount">@cartCount</span>
+                </a>
+            </nav>
+        </div>
+
+        <nav class="cat-nav" aria-label="Product categories">
+            <div class="container-hs">
+                <ul>
+                    <li><a class="nav-top @(controller == "Home" && action == "Shop" && string.IsNullOrEmpty(currentCategory) && Context.Request.Query.Count == 0 ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Shop">Shop all</a></li>
+                    <li><a class="nav-top" asp-area="" asp-controller="Home" asp-action="Shop" asp-route-sort="newest">New in</a></li>
+                    @foreach (var category in navCategories.Take(6))
+                    {
+                        var isActive = currentCategory == category.CatId.ToString() || category.Children.Any(c => c.CatId.ToString() == currentCategory);
+                        if (category.Children.Count > 0)
+                        {
+                            <li class="has-mega">
+                                <button class="nav-top @(isActive ? "active" : "")" type="button" aria-expanded="false" aria-controls="mega-@category.CatId" data-mega-toggle>
+                                    @category.CatName <i class="fa-solid fa-chevron-down small" aria-hidden="true"></i>
+                                </button>
+                                <div class="mega" id="mega-@category.CatId" hidden>
+                                    <div>
+                                        <a class="fw-bold d-inline-block mb-2" asp-area="" asp-controller="Home" asp-action="Shop" asp-route-category="@category.CatId">All @category.CatName</a>
+                                        <ul>
+                                            @foreach (var child in category.Children)
+                                            {
+                                                <li><a asp-area="" asp-controller="Home" asp-action="Shop" asp-route-category="@child.CatId">@child.CatName</a></li>
+                                            }
+                                        </ul>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(category.CatPhoto))
+                                    {
+                                        <a class="mega-feature" asp-area="" asp-controller="Home" asp-action="Shop" asp-route-category="@category.CatId">
+                                            <img src="~/category/@category.CatPhoto" alt="" loading="lazy" />
+                                            <span>Shop @category.CatName</span>
+                                        </a>
+                                    }
+                                </div>
+                            </li>
+                        }
+                        else
+                        {
+                            <li><a class="nav-top @(isActive ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Shop" asp-route-category="@category.CatId">@category.CatName</a></li>
+                        }
+                    }
+                    <li><a class="nav-top" asp-area="" asp-controller="Home" asp-action="Shop" asp-route-sort="popular">Best sellers</a></li>
+                    <li><a class="nav-top sale" asp-area="" asp-controller="Home" asp-action="Shop" asp-route-onSale="true">Sale</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <div class="offcanvas offcanvas-start mobile-nav" tabindex="-1" id="mobileNav" aria-labelledby="mobileNavLabel">
+        <div class="offcanvas-header">
+            <h2 class="offcanvas-title h5 m-0" id="mobileNavLabel">Menu</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close menu"></button>
+        </div>
+        <div class="offcanvas-body p-0">
+            <div class="list-group list-group-flush">
+                <a class="list-group-item list-group-item-action" asp-area="" asp-controller="Home" asp-action="Shop">Shop all</a>
+                <a class="list-group-item list-group-item-action" asp-area="" asp-controller="Home" asp-action="Shop" asp-route-sort="newest">New in</a>
+                <a class="list-group-item list-group-item-action" asp-area="" asp-controller="Home" asp-action="Shop" asp-route-sort="popular">Best sellers</a>
+                <a class="list-group-item list-group-item-action sale-link" asp-area="" asp-controller="Home" asp-action="Shop" asp-route-onSale="true">Sale</a>
+                @foreach (var category in navCategories)
+                {
+                    <a class="list-group-item list-group-item-action fw-semibold" asp-area="" asp-controller="Home" asp-action="Shop" asp-route-category="@category.CatId">@category.CatName</a>
+                    @foreach (var child in category.Children)
+                    {
+                        <a class="list-group-item list-group-item-action sub" asp-area="" asp-controller="Home" asp-action="Shop" asp-route-category="@child.CatId">@child.CatName</a>
+                    }
+                }
+            </div>
+            <div class="list-group list-group-flush border-top mt-2">
+                @if (signedIn)
+                {
+                    <a class="list-group-item list-group-item-action" asp-area="" asp-controller="Account" asp-action="Index"><i class="fa-regular fa-user me-2" aria-hidden="true"></i>My account</a>
+                    <a class="list-group-item list-group-item-action" asp-area="" asp-controller="Orders" asp-action="Index"><i class="fa-solid fa-box me-2" aria-hidden="true"></i>Orders</a>
+                    <a class="list-group-item list-group-item-action" asp-area="" asp-controller="Wishlist" asp-action="Index"><i class="fa-regular fa-heart me-2" aria-hidden="true"></i>Wishlist</a>
+                }
+                else
+                {
+                    <a class="list-group-item list-group-item-action" asp-area="Identity" asp-page="/Account/Login"><i class="fa-regular fa-user me-2" aria-hidden="true"></i>Sign in</a>
+                    <a class="list-group-item list-group-item-action" asp-area="Identity" asp-page="/Account/Register"><i class="fa-solid fa-user-plus me-2" aria-hidden="true"></i>Create account</a>
+                }
+                <a class="list-group-item list-group-item-action" asp-area="" asp-controller="Home" asp-action="Contact"><i class="fa-regular fa-envelope me-2" aria-hidden="true"></i>Contact us</a>
             </div>
         </div>
-    </nav>
+    </div>
 
-    <!-- Main Content -->
-    <main id="main-content" role="main" tabindex="-1">
+    <div class="offcanvas offcanvas-end mini-cart" tabindex="-1" id="miniCart" aria-labelledby="miniCartLabel">
+        <div class="offcanvas-header border-bottom">
+            <h2 class="offcanvas-title h5 m-0" id="miniCartLabel">Your cart</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close cart"></button>
+        </div>
+        <div class="offcanvas-body" data-mini-cart-body aria-live="polite">
+            <div class="text-center text-muted py-5"><span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Loading…</div>
+        </div>
+    </div>
+
+    <main id="main" tabindex="-1">
         @RenderBody()
     </main>
 
-    <!-- Chat Widget -->
-    @if (User.Identity?.IsAuthenticated == true && !User.IsInRole("Admin"))
-    {
-        <div id="chatWidget" class="chat-widget">
-            <button id="chatWidgetToggle" class="chat-widget-button" aria-label="Open chat">
-                <i class="fas fa-comments"></i>
-                <span class="chat-badge d-none" id="chatBadge">0</span>
-            </button>
-            <div id="chatWidgetPanel" class="chat-widget-panel d-none">
-                <div class="chat-widget-header">
-                    <h6 class="mb-0">
-                        <i class="fas fa-headset me-2"></i>Live Support
-                    </h6>
-                    <button type="button" class="btn-close btn-close-white" id="chatWidgetClose" aria-label="Close chat"></button>
+    <footer class="site-footer">
+        <section class="footer-newsletter" aria-labelledby="newsletter-title">
+            <div class="container-hs">
+                <div class="row g-3 align-items-center">
+                    <div class="col-lg-6">
+                        <h2 id="newsletter-title">Trail notes in your inbox</h2>
+                        <p class="m-0" style="color:#DCE3D6">New arrivals and seasonal offers. No spam — unsubscribe any time by contacting us.</p>
+                    </div>
+                    <div class="col-lg-6">
+                        <form method="post" asp-area="" asp-controller="Home" asp-action="Subscribe" class="d-flex gap-2">
+                            <input type="hidden" name="returnUrl" value="@($"{Context.Request.Path}{Context.Request.QueryString}")" />
+                            <label for="newsletter-email" class="visually-hidden">Email address</label>
+                            <input id="newsletter-email" type="email" name="email" class="form-control min-w-0" placeholder="Your email address" required maxlength="256" autocomplete="email" />
+                            <button type="submit" class="btn btn-light flex-shrink-0">Subscribe</button>
+                        </form>
+                    </div>
                 </div>
-                <div class="chat-widget-body">
-                    <div class="text-center py-4">
-                        <i class="fas fa-comments fa-3x text-primary mb-3"></i>
-                        <h6>Need Help?</h6>
-                        <p class="text-muted small mb-3">Start a conversation with our support team</p>
-                        <a href="@Url.Action("Index", "Chat")" class="btn btn-primary btn-sm">
-                            <i class="fas fa-plus me-2"></i>Start New Chat
-                        </a>
-                    </div>
-                    <hr class="my-3">
-                    <div>
-                        <a href="@Url.Action("Index", "Chat")" class="btn btn-outline-primary btn-sm w-100">
-                            <i class="fas fa-inbox me-2"></i>View All Chats
-                        </a>
-                    </div>
+            </div>
+        </section>
+        <div class="container-hs py-5">
+            <div class="row g-4">
+                <div class="col-12 col-lg-4">
+                    <a class="brand text-white mb-3" asp-area="" asp-controller="Home" asp-action="Index">
+                        <span class="brand-mark" aria-hidden="true"><i class="fa-solid fa-mountain-sun"></i></span>@store.Name
+                    </a>
+                    <p class="mt-3">Gear for day hikes, long trails and nights under the stars.</p>
+                    <ul>
+                        @if (!string.IsNullOrEmpty(store.Address))
+                        {
+                            <li><i class="fa-solid fa-location-dot me-2" aria-hidden="true"></i>@store.Address</li>
+                        }
+                        @if (!string.IsNullOrEmpty(store.SupportPhone))
+                        {
+                            <li><i class="fa-solid fa-phone me-2" aria-hidden="true"></i><a href="tel:@store.SupportPhone.Replace(" ", "")">@store.SupportPhone</a></li>
+                        }
+                        @if (!string.IsNullOrEmpty(store.SupportEmail))
+                        {
+                            <li><i class="fa-regular fa-envelope me-2" aria-hidden="true"></i><a href="mailto:@store.SupportEmail">@store.SupportEmail</a></li>
+                        }
+                    </ul>
+                    @if (socialLinks.Count > 0)
+                    {
+                        <div class="social-links mt-3">
+                            @foreach (var link in socialLinks)
+                            {
+                                <a href="@link.Value" target="_blank" rel="noopener" aria-label="@store.Name on @link.Key"><i class="fa-brands @SocialIcon(link.Key)" aria-hidden="true"></i></a>
+                            }
+                        </div>
+                    }
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <h2>Shop</h2>
+                    <ul>
+                        @foreach (var category in navCategories.Take(5))
+                        {
+                            <li><a asp-area="" asp-controller="Home" asp-action="Shop" asp-route-category="@category.CatId">@category.CatName</a></li>
+                        }
+                        <li><a asp-area="" asp-controller="Home" asp-action="Shop" asp-route-sort="newest">New in</a></li>
+                        <li><a asp-area="" asp-controller="Home" asp-action="Shop" asp-route-onSale="true">Sale</a></li>
+                    </ul>
+                </div>
+                <div class="col-6 col-md-4 col-lg-3">
+                    <h2>Help</h2>
+                    <ul>
+                        <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact us</a></li>
+                        <li><a asp-area="" asp-controller="Home" asp-action="Shipping">Shipping &amp; delivery</a></li>
+                        <li><a asp-area="" asp-controller="Home" asp-action="Returns">Returns &amp; exchanges</a></li>
+                        <li><a asp-area="" asp-controller="Home" asp-action="Faq">FAQ</a></li>
+                        <li><a asp-area="" asp-controller="Orders" asp-action="Index">Track an order</a></li>
+                    </ul>
+                </div>
+                <div class="col-12 col-md-4 col-lg-3">
+                    <h2>Company</h2>
+                    <ul>
+                        <li><a asp-area="" asp-controller="Home" asp-action="About">About us</a></li>
+                        <li><a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy policy</a></li>
+                        <li><a asp-area="" asp-controller="Home" asp-action="Terms">Terms &amp; conditions</a></li>
+                    </ul>
+                    <p class="mt-3 small mb-1">We accept</p>
+                    <p class="small m-0"><i class="fa-solid fa-money-bill-wave me-2" aria-hidden="true"></i>Cash on delivery</p>
                 </div>
             </div>
         </div>
-    }
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="row g-4">
-                <div class="col-lg-4 col-md-6">
-                    <h5>
-                        <i class="fas fa-mountain me-2"></i>HikingStore
-                    </h5>
-                    <p class="mb-4">Your trusted partner for premium hiking gear and outdoor equipment. Explore nature with confidence and style.</p>
-                    <div class="social-links" role="list">
-                        <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" aria-label="Visit our Facebook page"><i class="fa fa-brands fa-facebook-f" aria-hidden="true"></i></a>
-                        <a href="https://www.x.com/" target="_blank" rel="noopener noreferrer" aria-label="Visit our Twitter page"><i class="fa fa-brands fa-twitter" aria-hidden="true"></i></a>
-                        <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Visit our Instagram page"><i class="fa fa-brands fa-instagram" aria-hidden="true"></i></a>
-                        <a href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer" aria-label="Visit our LinkedIn page"><i class="fa fa-brands fa-linkedin" aria-hidden="true"></i></a>
-                    </div>
-                </div>
-
-                <div class="col-lg-2 col-md-6">
-                    <h6>Shop</h6>
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><a href="#">Hiking Gear</a></li>
-                        <li class="mb-2"><a href="#">Camping Equipment</a></li>
-                        <li class="mb-2"><a href="#">Outdoor Clothing</a></li>
-                        <li class="mb-2"><a href="#">Accessories</a></li>
-                    </ul>
-                </div>
-
-                <div class="col-lg-2 col-md-6">
-                    <h6>Support</h6>
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><a href="/Home/About/">About Us</a></li>
-                        <li class="mb-2"><a href="/Home/Services/">Services</a></li>
-                        <li class="mb-2"><a href="/Home/Contact/">Contact</a></li>
-                        <li class="mb-2"><a href="#">FAQ</a></li>
-                    </ul>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <h6>Newsletter</h6>
-                    <p class="mb-3">Subscribe to get special offers, free giveaways, and outdoor tips.</p>
-                    <div class="input-group mb-3">
-                        <input type="email" class="form-control" placeholder="Your email address"
-                               aria-label="Email address" aria-describedby="subscribe-button">
-                        <button class="btn btn-outline-light" type="button" id="subscribe-button">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </div>
-                    <small class="text-muted">We respect your privacy. Unsubscribe at any time.</small>
-                </div>
-            </div>
-
-            <hr class="my-4" style="border-color: rgba(255,255,255,0.1);">
-
-            <div class="row align-items-center">
-                <div class="col-md-6 text-center text-md-start">
-                    <p class="mb-0">&copy; <span id="year"></span> HikingStore. All rights reserved.</p>
-                </div>
-                <div class="col-md-6 text-center text-md-end">
-                    <a href="/Home/Privacy/" class="text-white-50 text-decoration-none me-3">Privacy Policy</a>
-                    <a href="/Home/Services" class="text-white-50 text-decoration-none">Terms of Service</a>
-                </div>
+        <div class="footer-bottom">
+            <div class="container-hs d-flex flex-wrap justify-content-between gap-2">
+                <span>&copy; @DateTime.UtcNow.Year @store.Name. All rights reserved.</span>
+                <span>Prices include VAT.</span>
             </div>
         </div>
     </footer>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <script>
-        // Navbar scroll effect
-        window.addEventListener('scroll', function() {
-            const navbar = document.querySelector('.navbar');
-            if (window.scrollY > 50) {
-                navbar.classList.add('navbar-scrolled');
-            } else {
-                navbar.classList.remove('navbar-scrolled');
-            }
-        });
-
-        // Search functionality
-        function handleSearch(event) {
-            event.preventDefault();
-            const searchInput = document.getElementById('navbar-search-input') || document.getElementById('mobile-search-input');
-            const searchTerm = searchInput ? searchInput.value.trim() : '';
-            if (searchTerm !== '') {
-                window.location.href = '/Home/SearchProduct?search=' + encodeURIComponent(searchTerm);
+    <div class="toast-stack" aria-live="polite" aria-atomic="false" data-toast-stack>
+        @foreach (var key in new[] { "Success", "SuccessMessage" })
+        {
+            if (TempData[key] is string ok && !string.IsNullOrEmpty(ok))
+            {
+                <div class="toast-hs success" role="status"><i class="fa-solid fa-circle-check mt-1" aria-hidden="true"></i><span>@ok</span><button type="button" class="close" aria-label="Dismiss">&times;</button></div>
             }
         }
-
-        // Allow Enter key to submit search for both inputs
-        const searchInputs = [document.getElementById('navbar-search-input'), document.getElementById('mobile-search-input')];
-        searchInputs.forEach(searchInput => {
-            if (searchInput) {
-                searchInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        handleSearch(e);
-                    }
-                });
+        @foreach (var key in new[] { "Error", "ErrorMessage" })
+        {
+            if (TempData[key] is string err && !string.IsNullOrEmpty(err))
+            {
+                <div class="toast-hs error" role="alert"><i class="fa-solid fa-circle-exclamation mt-1" aria-hidden="true"></i><span>@err</span><button type="button" class="close" aria-label="Dismiss">&times;</button></div>
             }
-        });
-
-        // Close mobile search when clicking outside
-        document.addEventListener('click', function(e) {
-            const mobileSearch = document.getElementById('mobileSearch');
-            const mobileSearchBtn = document.querySelector('[data-bs-target="#mobileSearch"]');
-            if (mobileSearch && mobileSearchBtn && 
-                !mobileSearch.contains(e.target) && 
-                !mobileSearchBtn.contains(e.target) &&
-                mobileSearch.classList.contains('show')) {
-                const bsCollapse = bootstrap.Collapse.getInstance(mobileSearch);
-                if (bsCollapse) {
-                    bsCollapse.hide();
-                }
-            }
-        });
-
-        // Global cart count update function (available on all pages)
-        window.updateCartCount = function(count) {
-            // Find the cart badge (the one inside #topcartlink, not the quantity input)
-            const cartLink = document.getElementById('topcartlink');
-            let cartBadge = null;
-            
-            if (cartLink) {
-                // Find badge as direct child or by class within cart link
-                cartBadge = cartLink.querySelector('span.cart-qty:not(.qty-input)');
-                
-                // If badge doesn't exist, create it
-                if (!cartBadge && count > 0) {
-                    cartBadge = document.createElement('span');
-                    cartBadge.className = 'cart-qty animate-flip bg-primary rounded-full absolute top-0 right-0 text-gray-300 flex';
-                    cartBadge.style.cssText = 'position: absolute; top: 0; right: 0; transform: translate(25%, -25%); background-color: #ff6600; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; z-index: 10;';
-                    cartLink.appendChild(cartBadge);
-                }
-            }
-            
-            if (cartBadge) {
-                if (count > 0) {
-                    cartBadge.textContent = count;
-                    cartBadge.style.display = 'flex';
-                } else {
-                    cartBadge.style.display = 'none';
-                }
-            }
-            
-            // Update flyout cart content via AJAX without page reload
-            if (typeof window.updateCartFlyout === 'function') {
-                window.updateCartFlyout();
-            }
-        };
-
-        // Function to update cart flyout content via AJAX (cache-busted so dropdown shows current cart)
-        window.updateCartFlyout = function() {
-            const flyoutCart = document.getElementById('flyout-cart');
-            if (!flyoutCart) return;
-
-            fetch('/Carts/GetCartFlyoutContent?_=' + Date.now(), {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                credentials: 'same-origin',
-                cache: 'no-store'
-            })
-            .then(response => {
-                if (response.status === 401) {
-                    return null;
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data && data.success) {
-                    flyoutCart.innerHTML = data.html;
-                    // Update badge only (do not call updateCartCount here to avoid double fetch)
-                    const cartLink = document.getElementById('topcartlink');
-                    const cartBadge = cartLink ? cartLink.querySelector('span.cart-qty:not(.qty-input)') : null;
-                    if (cartBadge) {
-                        const count = data.itemCount || 0;
-                        if (count > 0) {
-                            cartBadge.textContent = count;
-                            cartBadge.style.display = 'flex';
-                        } else {
-                            cartBadge.style.display = 'none';
-                        }
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error updating cart flyout:', error);
-            });
-        };
-
-        // Cart functionality
-        function updateCartItem(cartId, quantity) {
-            $.post('/Carts/UpdateCartItem', { cartId: cartId, quantity: quantity })
-                .done(function(data) {
-                    if (data.success) {
-                        if (typeof window.updateCartCount === 'function') {
-                            window.updateCartCount(data.cartItemCount);
-                        }
-                        if (typeof window.updateCartFlyout === 'function') {
-                            window.updateCartFlyout();
-                        }
-                    }
-                })
-                .fail(function() {
-                    alert('Error updating cart item');
-                });
         }
+    </div>
 
-
-        // Smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-            document.querySelector("#year").textContent = new Date().getFullYear();
-
-        // Chat Widget
-        const chatWidgetToggle = document.getElementById('chatWidgetToggle');
-        const chatWidgetPanel = document.getElementById('chatWidgetPanel');
-        const chatWidgetClose = document.getElementById('chatWidgetClose');
-
-        if (chatWidgetToggle && chatWidgetPanel) {
-            chatWidgetToggle.addEventListener('click', function() {
-                chatWidgetPanel.classList.toggle('d-none');
-            });
-        }
-
-        if (chatWidgetClose && chatWidgetPanel) {
-            chatWidgetClose.addEventListener('click', function() {
-                chatWidgetPanel.classList.add('d-none');
-            });
-        }
-
-        // Close chat panel when clicking outside
-        document.addEventListener('click', function(event) {
-            const chatWidget = document.getElementById('chatWidget');
-            if (chatWidget && chatWidgetPanel && !chatWidget.contains(event.target)) {
-                chatWidgetPanel.classList.add('d-none');
-            }
-        });
-
-    </script>
-
-    <!-- SignalR for real-time updates -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
-    <script src="~/js/realtime-updates.js"></script>
-    
-    @RenderSection("Scripts", required: false)
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @if (signedIn)
+    {
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js" integrity="sha384-mU1xC5yC2LldSW74Rj1Ax8wPiLw/28V5eh51uKJMlBbRVsOtUYd4xyzNsgIAJARB" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="~/js/realtime-updates.js" asp-append-version="true"></script>
+    }
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

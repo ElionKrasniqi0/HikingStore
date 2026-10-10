@@ -12,5 +12,5 @@ public class Contact
     public string? Subject { get; set; }
     public string? Message { get; set; }
 
-    public DateTime CreatedDate { get; set; } = DateTime.Now;
+    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 }

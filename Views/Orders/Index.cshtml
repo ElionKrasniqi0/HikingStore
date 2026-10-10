@@ -1,407 +1,84 @@
 ﻿@model List<Order>
-@using HikingStore.Enum
-@using Microsoft.AspNetCore.Mvc.TagHelpers
-@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@inject IOptions<StoreSettings> StoreOptions
+@{
+    var store = StoreOptions.Value;
+    ViewData["Title"] = "My orders";
+    ViewData["NoIndex"] = true;
+    ViewData["AccountSection"] = "orders";
+    var counts = ViewBag.StatusCounts as Dictionary<OrderStatus, int> ?? new();
+    var current = ViewBag.CurrentStatus as OrderStatus?;
+    var total = (int)(ViewBag.TotalCount ?? 0);
+    var page = (int)(ViewBag.Page ?? 1);
+    var pageCount = (int)(ViewBag.PageCount ?? 1);
+}
 
-<style>
-    /* Custom styling based on the screenshot */
-    .order-card {
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        transition: all 0.3s ease;
-        background: white;
-    }
-
-        .order-card:hover {
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            transform: translateY(-2px);
-        }
-
-    .order-header {
-        background: #f8fafc;
-        border-bottom: 1px solid #e5e7eb;
-        border-radius: 12px 12px 0 0;
-    }
-
-    .order-status-badge {
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 12px;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .status-received {
-        background: #dbeafe;
-        color: #1e40af;
-    }
-
-    .status-verified {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .status-processing {
-        background: #fef3c7;
-        color: #92400e;
-    }
-
-    .status-shipped {
-        background: #f3e8ff;
-        color: #6b21a8;
-    }
-
-    .status-completed {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .status-cancelled {
-        background: #fee2e2;
-        color: #991b1b;
-    }
-
-    .order-id {
-        color: #3b5d50;
-        font-weight: 700;
-        font-size: 18px;
-    }
-
-    .order-date {
-        color: #6b7280;
-        font-size: 14px;
-    }
-
-    .order-total {
-        color: #3b5d50;
-        font-weight: 700;
-        font-size: 18px;
-    }
-
-    .product-count {
-        background: #f3f4f6;
-        color: #4b5563;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 500;
-    }
-
-    .order-details-btn {
-        background: #3b5d50;
-        color: white;
-        padding: 8px 20px;
-        border-radius: 8px;
-        font-weight: 500;
-        font-size: 14px;
-        text-decoration: none;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-    }
-
-        .order-details-btn:hover {
-            background: #2d473d;
-            color: white;
-            text-decoration: none;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(59, 93, 80, 0.3);
-        }
-
-    .empty-state {
-        padding: 80px 20px;
-        text-align: center;
-        background: #f8f9fa;
-        border-radius: 12px;
-        margin-top: 2rem;
-    }
-
-    .empty-state-icon {
-        font-size: 64px;
-        color: #d1d5db;
-        margin-bottom: 20px;
-    }
-
-    .empty-state h3 {
-        color: #374151;
-        font-weight: 600;
-        margin-bottom: 12px;
-    }
-
-    .empty-state p {
-        color: #6b7280;
-        margin-bottom: 24px;
-    }
-
-    .status-filter {
-        display: flex;
-        gap: 8px;
-        overflow-x: auto;
-        padding-bottom: 16px;
-        margin-bottom: 24px;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .status-filter::-webkit-scrollbar {
-        height: 6px;
-    }
-
-    .status-filter::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 10px;
-    }
-
-    .status-filter::-webkit-scrollbar-thumb {
-        background: #3b5d50;
-        border-radius: 10px;
-    }
-
-    .status-filter::-webkit-scrollbar-thumb:hover {
-        background: #2d473d;
-    }
-
-    .status-filter-btn {
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-size: 14px;
-        font-weight: 500;
-        white-space: nowrap;
-        border: 1px solid #e5e7eb;
-        background: white;
-        color: #6b7280;
-        transition: all 0.3s ease;
-    }
-
-        .status-filter-btn:hover {
-            background: #f9fafb;
-            color: #374151;
-        }
-
-        .status-filter-btn.active {
-            background: #3b5d50;
-            color: white;
-            border-color: #3b5d50;
-        }
-
-    .order-meta {
-        display: flex;
-        gap: 16px;
-        align-items: center;
-        flex-wrap: wrap;
-    }
-
-    .order-meta-item {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        color: #6b7280;
-        font-size: 14px;
-    }
-
-    .order-meta-item i {
-        color: #3b5d50;
-        font-size: 16px;
-    }
-
-    .order-actions {
-        display: flex;
-        gap: 8px;
-        justify-content: flex-end;
-    }
-    /* PRINT STYLES */
-    @@media print {
-        /* Hide all elements except order content */
-        body * {
-            visibility: hidden;
-        }
-
-        .container,
-        .container * {
-            visibility: visible;
-        }
-        /* Specifically hide these elements */
-        .navbar,
-        .sb-topnav,
-        .footer,
-        .breadcrumb,
-        button,
-        .btn,
-        .status-filter,
-        .action-buttons,
-        .order-actions,
-        .fa-print,
-        .fa-arrow-left,
-        .fa-shopping-bag {
-            display: none !important;
-        }
-        /* Position the printable area */
-        .container {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-        }
-        /* Simplify colors for printing */
-        * {
-            color: black !important;
-            background: white !important;
-        }
-        /* Add borders for clarity */
-        .order-card,
-        .order-detail-card {
-            border: 1px solid black !important;
-            box-shadow: none !important;
-        }
-    }
-
-    /* Hero section styling */
-    .hero {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        padding: 3rem 0;
-        border-bottom: 1px solid #e5e7eb;
-    }
-
-    .intro-excerpt h1 {
-        color: #2d473d;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
-</style>
-
-<div class="hero">
-    <div class="container">
-        <div class="row justify-content-between align-items-center">
-            <div class="col-lg-8">
-                <div class="intro-excerpt">
-                    <h1>My Orders</h1>
-                    <p class="text-muted">Track and manage all your purchases</p>
-                </div>
-            </div>
-            <div class="col-lg-4 text-lg-end">
-                <a href="/Home/Product" class="btn btn-outline-primary">
-                    <i class="fas fa-shopping-bag me-2"></i>Continue Shopping
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="container py-5">
-
-    <!-- Status Filters -->
-    <div class="status-filter">
-        <a href="@Url.Action("Index", "Orders", new { status = "" })"
-           class="status-filter-btn @(string.IsNullOrEmpty(ViewBag.CurrentStatus?.ToString()) ? "active" : "")">
-            All Orders (@(ViewBag.TotalCount ?? 0))
-        </a>
-        @foreach (var status in System.Enum.GetValues(typeof(OrderStatus)).Cast<OrderStatus>())
-        {
-            var statusCounts = ViewBag.StatusCounts as Dictionary<OrderStatus, int>;
-            var count = statusCounts != null && statusCounts.ContainsKey(status) ? statusCounts[status] : 0;
-            <a href="@Url.Action("Index", "Orders", new { status = status })"
-               class="status-filter-btn @(ViewBag.CurrentStatus?.ToString() == status.ToString() ? "active" : "")">
-                @status (@count)
-            </a>
-        }
-    </div>
-
-    <!-- Orders List -->
-    @if (Model != null && Model.Any())
-    {
-        <div class="row g-4">
-            @foreach (var order in Model)
+<div class="container-hs">
+    <div class="page-head"><h1>My orders</h1></div>
+    <div class="account-layout">
+        <partial name="_AccountNav" />
+        <section aria-label="Orders">
+            @if (total > 0)
             {
-                <div class="col-12">
-                    <div class="order-card">
-                        <!-- Order Header -->
-                        <div class="order-header p-4">
-                            <div class="row align-items-center">
-                                <div class="col-md-6">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="order-id">#@order.OrderId</div>
-                                        <div class="order-date">
-                                            @order.OrderDate.ToString("MMM dd, yyyy • hh:mm tt")
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="d-flex justify-content-md-end">
-                                        <span class="order-status-badge @("status-" + order.Status.ToString().ToLower())">
-                                            <i class="fas fa-circle" style="font-size: 8px;"></i>
-                                            @order.Status
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Order Body -->
-                        <div class="p-4">
-                            <div class="row align-items-center">
-                                <div class="col-md-8">
-                                    <div class="order-meta mb-3">
-                                        <div class="order-meta-item">
-                                            <i class="fas fa-box"></i>
-                                            <span class="product-count">@order.OrderDetails.Sum(od => od.Quantity) items</span>
-                                        </div>
-                                        <div class="order-meta-item">
-                                            <i class="fas fa-map-marker-alt"></i>
-                                            <span>@order.City</span>
-                                        </div>
-                                        @if (!string.IsNullOrEmpty(order.TrackingNumber) && order.TrackingNumber != "N/A")
-                                        {
-                                            <div class="order-meta-item">
-                                                <i class="fas fa-truck"></i>
-                                                <span>@order.TrackingNumber</span>
-                                            </div>
-                                        }
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div class="order-total">€@order.TotalAmount.ToString("N2")</div>
-                                        <div class="order-actions">
-                                            <a asp-action="Details" asp-route-id="@order.OrderId"
-                                               class="order-details-btn">
-                                                <i class="fas fa-eye me-2"></i>View Details
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="chip-row mb-4" role="navigation" aria-label="Filter by status">
+                    <a class="chip @(current == null ? "active" : "")" asp-action="Index">All (@total)</a>
+                    @foreach (var status in System.Enum.GetValues<OrderStatus>())
+                    {
+                        if (counts.TryGetValue(status, out var n) && n > 0)
+                        {
+                            <a class="chip @(current == status ? "active" : "")" asp-action="Index" asp-route-status="@status">@OrderEmailService.StatusLabel(status) (@n)</a>
+                        }
+                    }
                 </div>
             }
-        </div>
-    }
-    else
-    {
-        <div class="empty-state">
-            <div class="empty-state-icon">
-                <i class="fas fa-shopping-bag"></i>
-            </div>
-            <h3 class="text-muted mb-3">No Orders Found</h3>
-            <p class="text-muted mb-4">You haven't placed any orders yet. Start shopping to see orders here.</p>
-            <a href="/Home/Product" class="btn btn-primary">
-                <i class="fas fa-shopping-bag me-2"></i>Start Shopping
-            </a>
-        </div>
-    }
-</div>
 
-<script>
-    // Add active class to current status filter
-    document.addEventListener('DOMContentLoaded', function() {
-        const currentPath = window.location.pathname + window.location.search;
-        const filterButtons = document.querySelectorAll('.status-filter-btn');
-
-        filterButtons.forEach(button => {
-            if (button.href.includes(currentPath)) {
-                button.classList.add('active');
+            @if (Model.Count == 0)
+            {
+                <div class="empty-state card-hs">
+                    <i class="fa-solid fa-box-open" aria-hidden="true"></i>
+                    <h2>@(total == 0 ? "No orders yet" : "No orders with this status")</h2>
+                    <p>@(total == 0 ? "When you place an order, you can track it here." : "Try another status filter.")</p>
+                    <a class="btn btn-primary" asp-controller="Home" asp-action="Shop">Start shopping</a>
+                </div>
             }
-        });
-    });
-</script>
+            else
+            {
+                @foreach (var order in Model)
+                {
+                    <article class="order-row">
+                        <div class="min-w-0">
+                            <div class="d-flex flex-wrap align-items-center gap-2">
+                                <h2 class="h6 m-0 font-body"><a asp-action="Details" asp-route-id="@order.OrderId">Order #@order.OrderNumber</a></h2>
+                                <span class="status-badge status-@order.Status">@OrderEmailService.StatusLabel(order.Status)</span>
+                            </div>
+                            <p class="small text-muted mb-0 mt-1">
+                                Placed @order.OrderDate.ToString("d MMM yyyy") · @order.OrderDetails.Sum(d => d.Quantity) items · @PaymentMethods.DisplayName(order.PaymentMethod)
+                                @if (!string.IsNullOrEmpty(order.TrackingNumber))
+                                {
+                                    <text> · Tracking @order.TrackingNumber</text>
+                                }
+                            </p>
+                            <div class="order-thumbs">
+                                @foreach (var line in order.OrderDetails.Take(5))
+                                {
+                                    @if (!string.IsNullOrEmpty(line.Product?.ProImage))
+                                    {
+                                        <img src="~/Product/@line.Product.ProImage" alt="@line.DisplayName" loading="lazy" width="52" height="52" />
+                                    }
+                                }
+                                @if (order.OrderDetails.Count > 5)
+                                {
+                                    <span class="small text-muted align-self-center">+@(order.OrderDetails.Count - 5) more</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="d-flex flex-column align-items-md-end justify-content-between gap-2">
+                            <strong>@store.FormatPrice(order.TotalAmount)</strong>
+                            <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@order.OrderId">View &amp; track</a>
+                        </div>
+                    </article>
+                }
+                <partial name="_Pagination" model='new PaginationModel(page, pageCount, p => Url.Action("Index", new { status = current?.ToString(), page = p })!)' />
+            }
+        </section>
+    </div>
+</div>

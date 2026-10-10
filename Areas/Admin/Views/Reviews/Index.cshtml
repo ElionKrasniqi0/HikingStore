@@ -1,0 +1,71 @@
+@model List<Review>
+@{
+    ViewData["Title"] = "Reviews";
+    string status = ViewBag.Status ?? "pending";
+    int pending = ViewBag.PendingCount;
+    var pagination = new PaginationModel((int)ViewBag.Page, (int)ViewBag.PageCount, p => Url.Action("Index", new { status, page = p })!);
+    var tabs = new[] { ("pending", $"Awaiting approval ({pending})"), ("approved", "Published"), ("all", "All") };
+}
+
+<div class="admin-page-head">
+    <div>
+        <h1>Reviews</h1>
+        <p>Only customers who ordered the product (and didn't cancel) can review it; “verified purchase” means the order was delivered. Reviews appear in the store after approval.</p>
+    </div>
+</div>
+
+<nav class="status-tabs" aria-label="Filter reviews">
+    @foreach (var (key, label) in tabs)
+    {
+        <a class="@(status == key ? "active" : "")" asp-action="Index" asp-route-status="@key" aria-current="@(status == key ? "page" : null)">@label</a>
+    }
+</nav>
+
+<div class="panel">
+    @if (Model.Count == 0)
+    {
+        <div class="empty-state">
+            <i class="fa-regular fa-star" aria-hidden="true"></i>
+            <h2>@(status == "pending" ? "Nothing to moderate" : "No reviews")</h2>
+            <p>@(status == "pending" ? "New customer reviews will wait here for approval." : "Reviews will appear here once customers write them.")</p>
+        </div>
+    }
+    @foreach (var r in Model)
+    {
+        <article class="message-card" aria-labelledby="rev-@r.ReviewId">
+            <div class="d-flex flex-wrap justify-content-between gap-2 mb-1">
+                <div class="min-w-0">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <partial name="~/Views/Shared/_Stars.cshtml" model="(double)r.Rating" />
+                        <h2 class="h6 font-body fw-bold m-0" id="rev-@r.ReviewId">@r.Title</h2>
+                        @if (r.IsApproved) { <span class="badge text-bg-success">Published</span> } else { <span class="badge text-bg-warning">Pending</span> }
+                        @if (r.IsVerifiedPurchase) { <span class="badge text-bg-light border">Verified purchase</span> }
+                    </div>
+                    <div class="small text-muted mt-1">
+                        on <a asp-area="" asp-controller="Home" asp-action="ProductDetailes" asp-route-id="@r.ProId" target="_blank" rel="noopener">@(r.Product?.ProName ?? $"product #{r.ProId}")</a>
+                        by @(r.User?.DisplayName ?? "deleted account") · @r.CreatedAt.ToString("d MMM yyyy")
+                    </div>
+                </div>
+                <div class="d-flex gap-2 align-items-start">
+                    @if (r.IsApproved)
+                    {
+                        <form method="post" asp-action="Unpublish" asp-route-id="@r.ReviewId" asp-route-status="@status">
+                            <button class="btn btn-sm btn-outline-secondary" type="submit">Unpublish</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form method="post" asp-action="Approve" asp-route-id="@r.ReviewId" asp-route-status="@status">
+                            <button class="btn btn-sm btn-primary" type="submit">Approve</button>
+                        </form>
+                    }
+                    <form method="post" asp-action="Delete" asp-route-id="@r.ReviewId" asp-route-status="@status" data-confirm="Delete this review permanently?">
+                        <button class="btn btn-sm btn-outline-danger" type="submit" aria-label="Delete review"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+                    </form>
+                </div>
+            </div>
+            <p class="body mb-0 mt-2">@r.Comment</p>
+        </article>
+    }
+    <partial name="_AdminPagination" model="pagination" />
+</div>

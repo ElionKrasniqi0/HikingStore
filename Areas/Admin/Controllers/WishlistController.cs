@@ -12,9 +12,9 @@ namespace HikingStore.Areas.Admin.Controllers
     public class WishlistController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public WishlistController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public WishlistController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _userManager = userManager;
@@ -25,7 +25,7 @@ namespace HikingStore.Areas.Admin.Controllers
             var query = _context.Wishlists
                 .Include(w => w.Product)
                     .ThenInclude(p => p.Category)
-                .Include(w => w.IdentityUser)
+                .Include(w => w.ApplicationUser)
                 .AsQueryable();
 
             // Filter by user if specified
@@ -37,10 +37,10 @@ namespace HikingStore.Areas.Admin.Controllers
             // Search functionality
             if (!string.IsNullOrEmpty(search))
             {
-                query = query.Where(w => 
-                    w.Product.ProName.Contains(search) ||
-                    w.IdentityUser.UserName.Contains(search) ||
-                    w.IdentityUser.Email.Contains(search));
+                query = query.Where(w =>
+                    w.Product!.ProName!.Contains(search) ||
+                    w.ApplicationUser!.UserName!.Contains(search) ||
+                    w.ApplicationUser!.Email!.Contains(search));
             }
 
             var wishlists = await query
@@ -79,19 +79,19 @@ namespace HikingStore.Areas.Admin.Controllers
         {
             var totalWishlists = await _context.Wishlists.CountAsync();
             var uniqueUsers = await _context.Wishlists.Select(w => w.UserId).Distinct().CountAsync();
-            var mostWishedProducts = await _context.Wishlists
-                .Include(w => w.Product)
-                    .ThenInclude(p => p.Category)
+            var counts = await _context.Wishlists
                 .GroupBy(w => w.ProId)
-                .Select(g => new
-                {
-                    ProductId = g.Key,
-                    Count = g.Count(),
-                    Product = g.First().Product
-                })
+                .Select(g => new { ProductId = g.Key, Count = g.Count() })
                 .OrderByDescending(x => x.Count)
                 .Take(10)
                 .ToListAsync();
+            var ids = counts.Select(c => c.ProductId).ToList();
+            var products = await _context.Products.AsNoTracking().Include(p => p.Category)
+                .Where(p => ids.Contains(p.ProId)).ToDictionaryAsync(p => p.ProId);
+            var mostWishedProducts = counts
+                .Where(c => products.ContainsKey(c.ProductId))
+                .Select(c => new MostWishedProduct(c.ProductId, c.Count, products[c.ProductId]))
+                .ToList();
 
             ViewBag.TotalWishlists = totalWishlists;
             ViewBag.UniqueUsers = uniqueUsers;
@@ -100,4 +100,6 @@ namespace HikingStore.Areas.Admin.Controllers
             return View();
         }
     }
+
+    public record MostWishedProduct(int ProductId, int Count, Product Product);
 }

@@ -1,0 +1,63 @@
+@inject IOptions<StoreSettings> StoreOptions
+@{
+    var store = StoreOptions.Value;
+    ViewData["Title"] = "Shipping & delivery";
+    ViewData["Description"] = $"Delivery options, costs and times for {store.Name} orders. Free standard shipping over {store.FormatPrice(store.FreeShippingThreshold)}.";
+    ViewData["HelpSection"] = "Shipping";
+}
+
+<div class="container-hs">
+    <nav class="breadcrumb-bar" aria-label="Breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Shipping &amp; delivery</li>
+        </ol>
+    </nav>
+    <div class="page-head"><h1>Shipping &amp; delivery</h1></div>
+    <div class="help-layout">
+        <partial name="_HelpNav" />
+        <article class="prose">
+            <p class="lead-muted">We ship from Prishtina to Kosovo, Albania, North Macedonia and Montenegro. Standard shipping is free on orders over @store.FormatPrice(store.FreeShippingThreshold) after discounts.</p>
+
+            <h2>Delivery options</h2>
+            <div class="table-responsive">
+                <table class="table table-hs">
+                    <thead><tr><th scope="col">Method</th><th scope="col">Delivery time</th><th scope="col" class="text-end">Cost</th></tr></thead>
+                    <tbody>
+                        @foreach (var m in store.ShippingMethods)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@m.Name</td>
+                                <td>@m.EstimatedDays</td>
+                                <td class="text-end">
+                                    @(m.Cost == 0 ? "Free" : store.FormatPrice(m.Cost))
+                                    @if (m.FreeOverThreshold && m.Cost > 0) { <div class="small text-muted">Free over @store.FormatPrice(store.FreeShippingThreshold)</div> }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <p class="small text-muted">Delivery times are estimates and start once your order is confirmed. Business days are Monday to Friday, excluding public holidays.</p>
+
+            <h2>Paying for your order</h2>
+            <p>All orders are currently paid <strong>cash on delivery</strong>: you pay the courier (or our store staff, for pickup) when you receive your items. We don't take card details online. Prices include VAT.</p>
+
+            <h2>Tracking your order</h2>
+            <p>We email you when your order is confirmed and each time its status changes. You can follow every step, including the tracking number once it ships, under <a asp-controller="Orders" asp-action="Index">My orders</a>.</p>
+            <ol class="steps-list">
+                <li><strong>Received</strong> — we have your order and are checking stock.</li>
+                <li><strong>Verified</strong> — the order is confirmed.</li>
+                <li><strong>Processing</strong> — your items are being packed.</li>
+                <li><strong>Shipped</strong> — handed to the carrier, with a tracking number.</li>
+                <li><strong>Completed</strong> — delivered and paid.</li>
+            </ol>
+
+            <h2>Changing or cancelling an order</h2>
+            <p>You can cancel an order yourself from <a asp-controller="Orders" asp-action="Index">My orders</a> until it ships. After that, refuse the delivery or follow our <a asp-action="Returns">returns process</a>.</p>
+
+            <h2>Questions?</h2>
+            <p><a asp-action="Contact" asp-route-subject="Shipping question">Send us a message</a>@(string.IsNullOrEmpty(store.SupportPhone) ? "" : " or call ")@if (!string.IsNullOrEmpty(store.SupportPhone)) { <a href="tel:@store.SupportPhone.Replace(" ", "")">@store.SupportPhone</a> }.</p>
+        </article>
+    </div>
+</div>

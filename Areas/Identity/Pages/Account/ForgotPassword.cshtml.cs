@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HikingStore.Data;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Encodings.Web;
@@ -16,13 +17,18 @@ namespace HikingStore.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class ForgotPasswordModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailSender _emailSender;
+        private readonly HikingStore.Services.IEmailTemplateService _templates;
+        private readonly ILogger<ForgotPasswordModel> _logger;
 
-        public ForgotPasswordModel(UserManager<IdentityUser> userManager, IEmailSender emailSender)
+        public ForgotPasswordModel(UserManager<ApplicationUser> userManager, IEmailSender emailSender,
+            HikingStore.Services.IEmailTemplateService templates, ILogger<ForgotPasswordModel> logger)
         {
             _userManager = userManager;
             _emailSender = emailSender;
+            _templates = templates;
+            _logger = logger;
         }
 
         [BindProperty]
@@ -56,10 +62,22 @@ namespace HikingStore.Areas.Identity.Pages.Account
                     values: new { area = "Identity", code },
                     protocol: Request.Scheme);
 
-                await _emailSender.SendEmailAsync(
-                    Input.Email,
-                    "Reset Password",
-                    $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                try
+                {
+                    await _emailSender.SendEmailAsync(
+                        Input.Email,
+                        "Reset your HikingStore password",
+                        _templates.GenerateActionEmail(
+                            "Reset your password",
+                            "We received a request to reset the password for your account. Choose a new password using the button below.",
+                            "Choose a new password",
+                            callbackUrl!,
+                            "If you didn't ask for this, you can ignore this email — your password stays the same."));
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to send password reset email for user {UserId}", user.Id);
+                }
 
                 return RedirectToPage("./ForgotPasswordConfirmation");
             }

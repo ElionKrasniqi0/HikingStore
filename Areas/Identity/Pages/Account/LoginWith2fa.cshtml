@@ -2,168 +2,32 @@
 @model LoginWith2faModel
 @{
     ViewData["Title"] = "Two-factor authentication";
+    ViewData["NoIndex"] = true;
 }
 
-<div class="min-vh-100 d-flex align-items-center justify-content-center bg-light py-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-5 col-md-7">
-                <!-- 2FA Card -->
-                <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
-                    <!-- Card Header -->
-                    <div class="card-header bg-gradient-primary text-white text-center py-4 border-0">
-                        <div class="icon-wrapper bg-opacity-20 rounded-circle p-3 mx-auto mb-3">
-                            <i class="fas fa-shield-alt fa-lg text-white"></i>
-                        </div>
-                        <h2 class="h4 fw-bold mb-2">Two-Factor Authentication</h2>
-                        <p class="mb-0 opacity-75">Enter your authenticator code to continue</p>
-                    </div>
-
-                    <!-- Card Body -->
-                    <div class="card-body p-4">
-                        <form method="post" asp-route-returnUrl="@Model.ReturnUrl" class="needs-validation" novalidate>
-                            <input asp-for="RememberMe" type="hidden" />
-                            <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 rounded-2 mb-4 small"></div>
-
-                            <div class="alert alert-info border-0 rounded-3 mb-4">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-mobile-alt fa-lg me-3"></i>
-                                    <div class="text-start">
-                                        <strong class="d-block mb-1">Your login is protected</strong>
-                                        <small>Open your authenticator app and enter the 6-digit code</small>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Authenticator Code Field -->
-                            <div class="form-group mb-4">
-                                <label asp-for="Input.TwoFactorCode" class="form-label fw-semibold text-dark mb-2">
-                                    Authenticator Code
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0">
-                                        <i class="fas fa-key text-muted"></i>
-                                    </span>
-                                    <input asp-for="Input.TwoFactorCode" 
-                                           class="form-control border-start-0 py-3 text-center"
-                                           placeholder="000000"
-                                           autocomplete="off"
-                                           maxlength="6"
-                                           style="font-size: 1.5rem; letter-spacing: 0.5rem; font-weight: 600;" />
-                                </div>
-                                <span asp-validation-for="Input.TwoFactorCode" class="text-danger small mt-1 d-block"></span>
-                                <div class="form-text mt-2">
-                                    <small class="text-muted">
-                                        <i class="fas fa-info-circle me-1"></i>
-                                        Enter the 6-digit code from your authenticator app
-                                    </small>
-                                </div>
-                            </div>
-
-                            <!-- Remember This Device -->
-                            <div class="form-check mb-4">
-                                <input asp-for="Input.RememberMachine" class="form-check-input" type="checkbox" />
-                                <label asp-for="Input.RememberMachine" class="form-check-label text-dark small">
-                                    <i class="fas fa-check-circle me-1"></i>
-                                    @Html.DisplayNameFor(m => m.Input.RememberMachine)
-                                </label>
-                                <div class="form-text">
-                                    <small class="text-muted">Don't ask for codes on this device for 30 days</small>
-                                </div>
-                            </div>
-
-                            <!-- Submit Button -->
-                            <button type="submit" class="btn btn-primary btn-lg w-100 py-3 fw-semibold mb-3">
-                                <i class="fas fa-sign-in-alt me-2"></i>Verify & Sign In
-                            </button>
-                        </form>
-
-                        <!-- Recovery Code Link -->
-                        <div class="text-center pt-3 border-top">
-                            <p class="text-muted small mb-2">
-                                <i class="fas fa-question-circle me-1"></i>
-                                Don't have access to your authenticator device?
-                            </p>
-                            <a id="recovery-code-login" 
-                               asp-page="./LoginWithRecoveryCode" 
-                               asp-route-returnUrl="@Model.ReturnUrl"
-                               class="text-primary fw-semibold text-decoration-none">
-                                <i class="fas fa-key me-1"></i>Log in with a recovery code
-                            </a>
-                        </div>
-                    </div>
+<div class="container-hs">
+    <div class="auth-wrap">
+        <div class="card-hs">
+            <h1>Two-factor authentication</h1>
+            <p class="text-muted">Enter the 6-digit code from your authenticator app.</p>
+            <form method="post" asp-route-returnUrl="@Model.ReturnUrl" data-once>
+                <input asp-for="RememberMe" type="hidden" />
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                <div class="mb-3">
+                    <label asp-for="Input.TwoFactorCode" class="form-label">Authentication code</label>
+                    <input asp-for="Input.TwoFactorCode" class="form-control code-input" autocomplete="one-time-code" inputmode="numeric" maxlength="7" autofocus />
+                    <span asp-validation-for="Input.TwoFactorCode" class="text-danger small"></span>
                 </div>
-            </div>
+                <div class="form-check mb-4">
+                    <input asp-for="Input.RememberMachine" class="form-check-input" />
+                    <label asp-for="Input.RememberMachine" class="form-check-label">Remember this device</label>
+                </div>
+                <button type="submit" class="btn btn-primary w-100" data-busy-text="Verifying…">Verify and sign in</button>
+            </form>
+            <p class="small text-muted mt-4 mb-0">No access to your authenticator? <a asp-page="./LoginWithRecoveryCode" asp-route-returnUrl="@Model.ReturnUrl">Sign in with a recovery code</a>.</p>
         </div>
     </div>
 </div>
-
-<style>
-    .bg-gradient-primary {
-        background: linear-gradient(135deg, #3b5d50 0%, #2d4a3f 100%);
-    }
-
-    .icon-wrapper {
-        width: 60px;
-        height: 60px;
-        background: rgba(255, 255, 255, 0.2);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .form-control:focus {
-        border-color: #3b5d50;
-        box-shadow: 0 0 0 0.2rem rgba(59, 93, 80, 0.25);
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, #3b5d50 0%, #2d4a3f 100%);
-        border: none;
-        transition: all 0.3s ease;
-    }
-
-    .btn-primary:hover {
-        background: linear-gradient(135deg, #2d4a3f 0%, #1e3329 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(59, 93, 80, 0.3);
-    }
-
-    .input-group-text {
-        border-color: #dee2e6;
-    }
-
-    .card {
-        transition: transform 0.3s ease;
-    }
-
-    .card:hover {
-        transform: translateY(-5px);
-    }
-
-    .alert-info {
-        background: linear-gradient(135deg, #e7f5ff 0%, #d0ebff 100%);
-        border-left: 4px solid #17a2b8;
-    }
-
-    input[type="text"][maxlength="6"] {
-        text-align: center;
-    }
-</style>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const codeInput = document.querySelector('input[asp-for="Input.TwoFactorCode"]');
-        if (codeInput) {
-            // Auto-format and focus
-            codeInput.focus();
-            codeInput.addEventListener('input', function(e) {
-                // Only allow numbers
-                this.value = this.value.replace(/[^0-9]/g, '');
-            });
-        }
-    });
-</script>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

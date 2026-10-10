@@ -1,0 +1,100 @@
+@model List<Users_In_Role_ViewModel>
+@{
+    ViewData["Title"] = "Customers";
+    var search = ViewBag.Search as string;
+    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+}
+
+<div class="admin-page-head">
+    <div>
+        <h1>Customers</h1>
+        <p>@Model.Count account@(Model.Count == 1 ? "" : "s")@(string.IsNullOrEmpty(search) ? "" : $" matching “{search}”")</p>
+    </div>
+</div>
+
+<div class="panel">
+    <div class="panel-body">
+        <form method="get" class="filter-bar" role="search">
+            <div class="grow">
+                <label class="form-label small" for="search">Search</label>
+                <input id="search" name="search" value="@search" class="form-control" placeholder="Name or email" />
+            </div>
+            <div class="btns">
+                <button class="btn btn-primary" type="submit">Search</button>
+                @if (!string.IsNullOrEmpty(search)) { <a class="btn btn-outline-secondary" asp-action="Users">Clear</a> }
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="panel">
+    @if (Model.Count == 0)
+    {
+        <p class="panel-body text-muted m-0">No accounts found.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table admin-table">
+                <thead>
+                    <tr><th scope="col">Customer</th><th scope="col">Roles</th><th scope="col">Orders</th><th scope="col">Status</th><th scope="col" class="text-end">Actions</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var u in Model)
+                    {
+                        var isSelf = u.UserId == currentUserId;
+                        <tr>
+                            <td class="min-w-0">
+                                <div class="fw-semibold">@u.UserName</div>
+                                <div class="small text-muted text-break">@u.Email</div>
+                            </td>
+                            <td>
+                                @foreach (var r in u.Roles) { <span class="badge text-bg-light border me-1">@r</span> }
+                            </td>
+                            <td>
+                                @if (u.OrderCount > 0)
+                                {
+                                    <a asp-controller="Orders" asp-action="Index" asp-route-search="@u.Email">@u.OrderCount</a>
+                                }
+                                else { <span class="text-muted">0</span> }
+                            </td>
+                            <td>
+                                @if (u.IsLocked) { <span class="badge text-bg-danger">Locked</span> }
+                                else { <span class="badge text-bg-success">Active</span> }
+                                @if (!u.EmailConfirmed) { <span class="badge text-bg-warning ms-1" title="Email address not confirmed">Unconfirmed</span> }
+                            </td>
+                            <td class="actions">
+                                <a class="btn btn-sm btn-outline-primary" asp-action="EditRole" asp-route-userId="@u.UserId">Roles</a>
+                                @if (!isSelf)
+                                {
+                                    if (u.IsLocked)
+                                    {
+                                        <form method="post" asp-action="UnlockUser" asp-route-userId="@u.UserId">
+                                            <button class="btn btn-sm btn-outline-secondary" type="submit">Unlock</button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form method="post" asp-action="LockUser" asp-route-userId="@u.UserId" data-confirm="Lock @u.Email? They will be signed out and unable to sign in.">
+                                            <button class="btn btn-sm btn-outline-secondary" type="submit">Lock</button>
+                                        </form>
+                                    }
+                                    if (u.OrderCount == 0)
+                                    {
+                                        <form method="post" asp-action="DeleteUser" asp-route-userId="@u.UserId" data-confirm="Permanently delete @u.Email? This cannot be undone.">
+                                            <button class="btn btn-sm btn-outline-danger" type="submit" aria-label="Delete @u.Email"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+                                        </form>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="small text-muted ms-1">You</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

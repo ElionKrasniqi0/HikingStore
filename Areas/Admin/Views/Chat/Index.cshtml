@@ -1,207 +1,89 @@
-@model IEnumerable<HikingStore.Models.ChatRoom>
-@using HikingStore.Models
+@model IEnumerable<ChatRoom>
 @{
-    ViewData["Title"] = "Chat Support";
-    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Live chat";
+    string StatusClass(ChatRoomStatus s) => s switch
+    {
+        ChatRoomStatus.Open => "text-bg-warning",
+        ChatRoomStatus.InProgress => "text-bg-primary",
+        ChatRoomStatus.Resolved => "text-bg-success",
+        _ => "text-bg-secondary"
+    };
 }
-<br />
-<br />
-<br />
-<div class="container-fluid px-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="mt-4">
-            <i class="fas fa-headset text-primary me-2"></i>Chat Support
-        </h1>
-        <div id="unreadBadge" class="badge bg-danger fs-6" style="display: none;">
-            <span id="unreadCount">0</span> Unread
-        </div>
+
+<div class="admin-page-head">
+    <div>
+        <h1>Live chat</h1>
+        <p>Conversations started by signed-in customers. Opening an unassigned chat assigns it to you.</p>
     </div>
-
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
-
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-list me-2"></i>Active Chat Rooms
-                    </h5>
-                </div>
-                <div class="card-body">
-                    @if (Model != null && Model.Any())
-                    {
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Subject</th>
-                                        <th>User</th>
-                                        <th>Agent</th>
-                                        <th>Status</th>
-                                        <th>Last Message</th>
-                                        <th>Unread</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var room in Model)
-                                    {
-                                        var lastMessage = room.Messages?.OrderByDescending(m => m.SentAt).FirstOrDefault();
-                                        var unreadCount = room.Messages?.Count(m => !m.IsRead && !m.IsAgentMessage) ?? 0;
-                                        var statusBadge = room.Status switch
-                                        {
-                                            ChatRoomStatus.Open => "badge bg-info",
-                                            ChatRoomStatus.InProgress => "badge bg-warning",
-                                            ChatRoomStatus.Resolved => "badge bg-success",
-                                            ChatRoomStatus.Closed => "badge bg-secondary",
-                                            _ => "badge bg-secondary"
-                                        };
-
-                                        <tr class="@(unreadCount > 0 ? "table-warning" : "")">
-                                            <td>
-                                                <strong>@room.Subject</strong>
-                                            </td>
-                                            <td>
-                                                <i class="fas fa-user me-1"></i>
-                                                @(room.User?.UserName ?? room.User?.Email ?? "Unknown")
-                                            </td>
-                                            <td>
-                                                @if (room.Agent != null)
-                                                {
-                                                    <i class="fas fa-user-headset me-1 text-primary"></i>
-                                                    @room.Agent.UserName
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-muted">
-                                                        <i class="fas fa-clock me-1"></i>Unassigned
-                                                    </span>
-                                                }
-                                            </td>
-                                            <td>
-                                                <span class="@statusBadge">@room.Status</span>
-                                            </td>
-                                            <td>
-                                                @if (lastMessage != null)
-                                                {
-                                                    <small class="text-muted">
-                                                        @lastMessage.SentAt.ToString("MMM dd, yyyy HH:mm")
-                                                    </small>
-                                                }
-                                                else
-                                                {
-                                                    <small class="text-muted">No messages</small>
-                                                }
-                                            </td>
-                                            <td>
-                                                @if (unreadCount > 0)
-                                                {
-                                                    <span class="badge bg-danger">@unreadCount</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-muted">-</span>
-                                                }
-                                            </td>
-                                            <td>
-                                                <div class="d-flex gap-1">
-                                                    <a href="@Url.Action("Room", "Chat", new { area = "Admin", id = room.Id })" 
-                                                       class="btn btn-sm btn-primary">
-                                                        <i class="fas fa-comment-dots me-1"></i>Open
-                                                    </a>
-                                                    @if (room.Status == ChatRoomStatus.Resolved || room.Status == ChatRoomStatus.Closed)
-                                                    {
-                                                        <form asp-action="DeleteRoom" method="post" class="d-inline" asp-antiforgery="true">
-                                                            <input type="hidden" name="id" value="@room.Id" />
-                                                            <button type="submit" class="btn btn-sm btn-danger" 
-                                                                    onclick="return confirm('Are you sure you want to permanently delete this chat room? This action cannot be undone!');"
-                                                                    title="Delete Chat Room">
-                                                                <i class="fas fa-trash"></i>
-                                                            </button>
-                                                        </form>
-                                                    }
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="text-center py-5">
-                            <i class="fas fa-comments fa-4x text-muted mb-3"></i>
-                            <h5 class="text-muted">No chat rooms yet</h5>
-                            <p class="text-muted">Chat rooms will appear here when users start conversations</p>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
+    <span class="badge text-bg-danger fs-6" data-unread hidden><span data-unread-count>0</span> with unread messages</span>
 </div>
-<style>
-    .bg-primary{
-        background-color: #3d5d50 !important;
-    }
 
-    .text-primary {
-        --bs-text-opacity: 1;
-        color: #3d5d50 !important;
+<div class="panel">
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <i class="fa-regular fa-comments" aria-hidden="true"></i>
+            <h2>No conversations yet</h2>
+            <p>Chats appear here when customers start one from the store.</p>
+        </div>
     }
-</style>
+    else
+    {
+        <div class="table-responsive">
+            <table class="table admin-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Subject</th>
+                        <th scope="col">Customer</th>
+                        <th scope="col">Agent</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Last message (UTC)</th>
+                        <th scope="col">Unread</th>
+                        <th scope="col" class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var room in Model)
+                    {
+                        var unread = room.Messages.Count(m => !m.IsRead && !m.IsAgentMessage);
+                        <tr class="@(unread > 0 ? "fw-semibold" : "")">
+                            <td><a asp-action="Room" asp-route-id="@room.Id">@room.Subject</a></td>
+                            <td class="text-break">@(room.User?.Email ?? "Unknown")</td>
+                            <td>@(room.Agent?.DisplayName ?? "Unassigned")</td>
+                            <td><span class="badge @StatusClass(room.Status)">@room.Status</span></td>
+                            <td class="text-nowrap small">@room.LastMessageAt.ToString("d MMM yyyy, HH:mm")</td>
+                            <td>@if (unread > 0) { <span class="badge text-bg-danger">@unread</span> } else { <span class="text-muted">–</span> }</td>
+                            <td class="actions">
+                                <a class="btn btn-sm btn-primary" asp-action="Room" asp-route-id="@room.Id">Open</a>
+                                @if (room.Status is ChatRoomStatus.Resolved or ChatRoomStatus.Closed)
+                                {
+                                    <form method="post" asp-action="DeleteRoom" asp-route-id="@room.Id" data-confirm="Permanently delete this conversation?">
+                                        <button class="btn btn-sm btn-outline-danger" type="submit" aria-label="Delete conversation"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
 @section Scripts {
     <script>
-        // Wait for DOM to be fully loaded before running scripts
-        document.addEventListener('DOMContentLoaded', function() {
-            // Auto-refresh unread count every 10 seconds
-            function updateUnreadCount() {
+        (function () {
+            const badge = document.querySelector('[data-unread]');
+            const count = document.querySelector('[data-unread-count]');
+            async function refresh() {
                 try {
-                    fetch('/Admin/Chat/GetUnreadCount')
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Network response was not ok');
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            const badge = document.getElementById('unreadBadge');
-                            const countSpan = document.getElementById('unreadCount');
-                            if (badge && countSpan) {
-                                if (data.count > 0) {
-                                    countSpan.textContent = data.count;
-                                    badge.style.display = 'block';
-                                } else {
-                                    badge.style.display = 'none';
-                                }
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error updating unread count:', error);
-                            // Silently fail - don't break the page
-                        });
-                } catch (error) {
-                    console.error('Error in updateUnreadCount:', error);
-                }
+                    const data = await (await fetch('@Url.Action("GetUnreadCount")')).json();
+                    count.textContent = data.count;
+                    badge.hidden = data.count === 0;
+                } catch { }
             }
-
-            // Update on load and every 10 seconds
-            updateUnreadCount();
-            setInterval(updateUnreadCount, 10000);
-        });
+            refresh();
+            setInterval(refresh, 15000);
+        })();
     </script>
 }

@@ -1,927 +1,158 @@
-@using HikingStore.ViewModels
-@model ShopViewModel
+@model CatalogViewModel
+@inject IOptions<StoreSettings> StoreOptions
+@{
+    var store = StoreOptions.Value;
+    var f = Model.Filter;
+    ViewData["Title"] = Model.Title + (f.Page > 1 ? $" – page {f.Page}" : "");
+    ViewData["Description"] = Model.Description ?? $"Shop {Model.Title.ToLowerInvariant()} at {store.Name}. {Model.TotalCount} products, free standard shipping over {store.FormatPrice(store.FreeShippingThreshold)}.";
+    if (!string.IsNullOrEmpty(f.Q) || f.Brand.Count > 0 || !string.IsNullOrEmpty(f.Size) || !string.IsNullOrEmpty(f.Color) || f.MinPrice.HasValue || f.MaxPrice.HasValue || f.Rating.HasValue)
+    {
+        ViewData["NoIndex"] = true;
+    }
 
-<!-- Hero Section -->
-<section class="shop-hero-section py-4">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6">
-                <h1 class="display-6 fw-bold text-dark mb-3">Outdoor Gear Shop</h1>
-                <p class="lead text-muted mb-4">Premium hiking equipment and camping gear for every adventure</p>
-            </div>
-            <div class="col-lg-6 text-lg-end">
-                <div class="shop-stats d-flex gap-3 justify-content-lg-end">
-                    <div class="stat-item">
-                        <span class="stat-number h4 text-primary">@Model.Products.Count</span>
-                        <p class="stat-label text-muted mb-0 small">Products</p>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number h4 text-primary">@Model.Categories.Count</span>
-                        <p class="stat-label text-muted mb-0 small">Categories</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+    string ShopUrl(Dictionary<string, string> values) =>
+        Url.Action("Shop", new RouteValueDictionary(values.ToDictionary(k => k.Key, v => (object?)v.Value)))!;
+    string Without(params string[] keys)
+    {
+        var values = f.ToRouteValues(page: 1);
+        foreach (var key in keys) values.Remove(key);
+        return ShopUrl(values);
+    }
+    string WithoutBrand(string brand)
+    {
+        var values = f.ToRouteValues(page: 1);
+        foreach (var key in values.Keys.Where(k => k.StartsWith("brand[")).ToList()) values.Remove(key);
+        var remaining = f.Brand.Where(b => !string.Equals(b, brand, StringComparison.OrdinalIgnoreCase)).ToList();
+        for (var i = 0; i < remaining.Count; i++) values[$"brand[{i}]"] = remaining[i];
+        return ShopUrl(values);
+    }
+    var activeChips = new List<(string Label, string Url)>();
+    if (!string.IsNullOrEmpty(f.Q)) activeChips.Add(($"“{f.Q}”", Without("q")));
+    if (Model.CurrentCategory != null) activeChips.Add((Model.CurrentCategory.CatName ?? "Category", Without("category")));
+    if (f.MinPrice.HasValue || f.MaxPrice.HasValue)
+        activeChips.Add(($"{(f.MinPrice.HasValue ? store.FormatPrice(f.MinPrice.Value) : store.CurrencySymbol + "0")} – {(f.MaxPrice.HasValue ? store.FormatPrice(f.MaxPrice.Value) : "any")}", Without("minPrice", "maxPrice")));
+    foreach (var brand in f.Brand) activeChips.Add((brand, WithoutBrand(brand)));
+    if (!string.IsNullOrEmpty(f.Size)) activeChips.Add(($"Size {f.Size}", Without("size")));
+    if (!string.IsNullOrEmpty(f.Color)) activeChips.Add((f.Color!, Without("color")));
+    if (f.InStock) activeChips.Add(("In stock", Without("inStock")));
+    if (f.OnSale) activeChips.Add(("On sale", Without("onSale")));
+    if (f.Rating.HasValue) activeChips.Add(($"{f.Rating}★ & up", Without("rating")));
+    var first = (f.Page - 1) * CatalogFilter.DefaultPageSize + 1;
+    var last = Math.Min(f.Page * CatalogFilter.DefaultPageSize, Model.TotalCount);
+}
+
+<div class="container-hs">
+    <nav class="breadcrumb-bar" aria-label="Breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Home</a></li>
+            @if (Model.CurrentCategory != null)
+            {
+                <li class="breadcrumb-item"><a asp-action="Shop">Shop</a></li>
+                @if (Model.CurrentCategory.Parent != null)
+                {
+                    <li class="breadcrumb-item"><a asp-action="Shop" asp-route-category="@Model.CurrentCategory.Parent.CatId">@Model.CurrentCategory.Parent.CatName</a></li>
+                }
+                <li class="breadcrumb-item active" aria-current="page">@Model.CurrentCategory.CatName</li>
+            }
+            else
+            {
+                <li class="breadcrumb-item active" aria-current="page">@Model.Title</li>
+            }
+        </ol>
+    </nav>
+
+    <div class="shop-title">
+        <h1>@Model.Title</h1>
+        <span class="count">@Model.TotalCount @(Model.TotalCount == 1 ? "product" : "products")</span>
     </div>
-</section>
+    @if (!string.IsNullOrEmpty(Model.Description))
+    {
+        <p class="text-muted mb-4" style="max-width:720px">@Model.Description</p>
+    }
 
-
-<!-- Shop Content -->
-<section class="shop-content py-4">
-    <div class="container">
-        <div class="row">
-            <!-- Sidebar Filters -->
-            <div class="col-lg-3 col-md-4 mb-4">
-                <div class="card border-0 shadow-sm sticky-top" style="top: 20px;">
-                    <div class="card-header bg-white border-0 py-3">
-                        <h5 class="mb-0">
-                            <i class="fas fa-filter me-2 text-primary"></i>Filters
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <!-- Categories Filter -->
-                        <div class="mb-4">
-                            <h6 class="fw-semibold mb-3">Categories</h6>
-                            <div class="list-group list-group-flush">
-                                <a href="/Home/Product" class="list-group-item list-group-item-action border-0 px-0 py-2">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span>All Products</span>
-                                        <span class="badge bg-light text-dark">@Model.Products.Count</span>
-                                    </div>
-                                </a>
-                                @foreach (var category in Model.Categories)
-                                {
-                                    <a href="/Home/ProductCategory/@category.CatId"
-                                       class="list-group-item list-group-item-action border-0 px-0 py-2">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span>@category.CatName</span>
-                                            <span class="badge bg-light text-dark">
-                                                @Model.Products.Count(p => p.CatId == category.CatId)
-                                            </span>
-                                        </div>
-                                    </a>
-                                }
-                            </div>
-                        </div>
-
-                        <!-- Price Filter -->
-                        <div class="mb-4">
-                            <h6 class="fw-semibold mb-3">Price Range</h6>
-                            <div class="price-range">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="priceFilter" id="priceAll" checked>
-                                    <label class="form-check-label" for="priceAll">
-                                        All Prices
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="priceFilter" id="priceUnder50">
-                                    <label class="form-check-label" for="priceUnder50">
-                                        Under €50
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="priceFilter" id="price50to100">
-                                    <label class="form-check-label" for="price50to100">
-                                        €50 - €100
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="priceFilter" id="priceOver100">
-                                    <label class="form-check-label" for="priceOver100">
-                                        Over €100
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Quick Links -->
-                        <div class="mb-3">
-                            <h6 class="fw-semibold mb-3">Quick Links</h6>
-                            <div class="d-grid gap-2">
-                                <a href="/Home/Product" class="btn btn-outline-primary btn-sm">
-                                    <i class="fas fa-fire me-2"></i>New Arrivals
-                                </a>
-                                <a href="/Home/Product" class="btn btn-outline-primary btn-sm">
-                                    <i class="fas fa-star me-2"></i>Best Sellers
-                                </a>
-                                <a href="/Home/Product" class="btn btn-outline-primary btn-sm">
-                                    <i class="fas fa-percent me-2"></i>On Sale
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- Support Card -->
-                        <div class="card border-0 bg-light mt-4">
-                            <div class="card-body text-center p-3">
-                                <i class="fas fa-headset fa-2x text-primary mb-2"></i>
-                                <h6 class="mb-2">Need Help?</h6>
-                                <p class="text-muted small mb-2">Our experts are here to assist you</p>
-                                <a href="/Home/Contact" class="btn btn-primary btn-sm w-100">Contact Support</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <div class="shop-layout mt-3">
+        <aside class="filters-panel" aria-label="Filters">
+            <div class="filters">
+                <partial name="_ShopFilters" model="Model" view-data='new ViewDataDictionary(ViewData) { ["Prefix"] = "d" }' />
             </div>
+        </aside>
 
-            <!-- Products Grid -->
-            <div class="col-lg-9 col-md-8">
-                <!-- Products Header -->
-                <div class="products-header mb-4">
-                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
-                        <div class="mb-3 mb-md-0">
-                            <h3 class="h4 fw-bold mb-1">All Products</h3>
-                            <p class="text-muted small mb-0">Showing @Model.Products.Count products</p>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <div class="dropdown">
-                                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
-                                        data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="fas fa-sort me-2"></i>Sort by
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#">Featured</a></li>
-                                    <li><a class="dropdown-item" href="#">Price: Low to High</a></li>
-                                    <li><a class="dropdown-item" href="#">Price: High to Low</a></li>
-                                    <li><a class="dropdown-item" href="#">Newest First</a></li>
-                                </ul>
-                            </div>
-                            <div class="dropdown">
-                                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
-                                        data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="fas fa-eye me-2"></i>View
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#" data-view="grid"><i class="fas fa-th-large me-2"></i>Grid</a></li>
-                                    <li><a class="dropdown-item" href="#" data-view="list"><i class="fas fa-list me-2"></i>List</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Search Bar -->
-                    <div class="search-box mb-4">
-                        <div class="input-group">
-                            <input type="text" class="form-control" placeholder="Search products..." id="shopSearch">
-                            <button class="btn btn-primary" type="button" onclick="searchProducts()">
-                                <i class="fas fa-search"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Products Grid -->
-                <div class="row g-4" id="productsGrid">
-                    @foreach (var product in Model.Products)
+        <section aria-label="Products">
+            <div class="shop-toolbar">
+                <button class="btn btn-outline-secondary filter-btn-mobile" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterDrawer" aria-controls="filterDrawer">
+                    <i class="fa-solid fa-sliders me-2" aria-hidden="true"></i>Filters@(activeChips.Count > 0 ? $" ({activeChips.Count})" : "")
+                </button>
+                <span class="text-muted small d-none d-md-inline">
+                    @if (Model.TotalCount > 0)
                     {
-                        <div class="col-xl-4 col-lg-6 col-md-6">
-                            <div class="card product-card h-100 border-0">
+                        <text>Showing @first–@last of @Model.TotalCount</text>
+                    }
+                </span>
+                <form method="get" asp-action="Shop" class="d-flex align-items-center gap-2 ms-auto">
+                    @foreach (var kv in f.ToRouteValues(page: 1).Where(k => k.Key != "sort"))
+                    {
+                        <input type="hidden" name="@(kv.Key.StartsWith("brand[") ? "brand" : kv.Key)" value="@kv.Value" />
+                    }
+                    <label for="sort" class="small text-muted text-nowrap">Sort by</label>
+                    <select id="sort" name="sort" class="form-select form-select-sm" data-auto-submit>
+                        @foreach (var option in CatalogViewModel.SortOptions)
+                        {
+                            <option value="@option.Value" selected="@(f.Sort == option.Value)">@option.Label</option>
+                        }
+                    </select>
+                    <noscript><button class="btn btn-sm btn-primary" type="submit">Sort</button></noscript>
+                </form>
+            </div>
 
-                                <!-- Product Image -->
-                                <div class="product-image-container position-relative">
-                                    <a href="/Home/ProductDetailes/@product.ProId" class="text-decoration-none">
-                                        <img class="product-image"
-                                             src="~/Product/@product.ProImage"
-                                             alt="@product.ProName"
-                                             loading="lazy">
-                                        <div class="product-overlay"></div>
-                                    </a>
+            @if (activeChips.Count > 0)
+            {
+                <div class="active-filters" aria-label="Active filters">
+                    @foreach (var chip in activeChips)
+                    {
+                        <a class="chip chip-remove" href="@chip.Url" aria-label="Remove filter @chip.Label">@chip.Label <i class="fa-solid fa-xmark" aria-hidden="true"></i></a>
+                    }
+                    <a class="small ms-1" asp-action="Shop">Clear all</a>
+                </div>
+            }
 
-                                    <!-- Category Badge -->
-                                    <div class="position-absolute top-0 start-0 m-2">
-                                        @{
-                                            var category = Model.Categories.FirstOrDefault(c => c.CatId == product.CatId);
-                                        }
-                                        <span class="badge bg-primary bg-opacity-90 text-white">
-                                            @category?.CatName
-                                        </span>
-                                    </div>
-
-                                    <!-- Wishlist -->
-                                    <div class="product-actions position-absolute top-0 end-0 m-2">
-                                        <button class="btn btn-light btn-xs rounded-circle wishlist-btn"
-                                                data-product-id="@product.ProId"
-                                                data-bs-toggle="tooltip"
-                                                data-bs-title="Add to wishlist">
-                                            <i class="far fa-heart"></i>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- Product Body -->
-                                <div class="card-body d-flex flex-column p-3">
-
-                                    <h6 class="product-title mb-2">
-                                        <a href="/Home/ProductDetailes/@product.ProId"
-                                           class="text-dark text-decoration-none"
-                                           title="@product.ProName">
-                                            @product.ProName
-                                        </a>
-                                    </h6>
-
-                                    <p class="product-description text-muted small mb-3 flex-grow-1">
-                                        @{
-                                            var description = product.Descreption ?? "";
-                                            var truncatedDescription = description.Length > 80
-                                            ? description.Substring(0, 80) + "..."
-                                            : description;
-                                        }
-                                        @truncatedDescription
-                                    </p>
-
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <span class="h5 text-primary fw-bold mb-0">
-                                            €@product.Price.ToString("N2")
-                                        </span>
-                                        <div class="rating-stars small">
-                                            <i class="fas fa-star text-warning"></i>
-                                            <i class="fas fa-star text-warning"></i>
-                                            <i class="fas fa-star text-warning"></i>
-                                            <i class="fas fa-star text-warning"></i>
-                                            <i class="far fa-star text-warning"></i>
-                                        </div>
-                                    </div>
-
-                                    <div class="mt-auto d-grid gap-2">
-                                        <a href="/Home/ProductDetailes/@product.ProId"
-                                           class="btn btn-primary btn-sm">
-                                            <i class="fas fa-eye me-2"></i>View Details
-                                        </a>
-                                        <button class="btn btn-outline-primary btn-sm quick-add-btn"
-                                                data-product-id="@product.ProId">
-                                            <i class="fas fa-shopping-cart me-2"></i>Add to Cart
-                                        </button>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
+            @if (Model.Products.Count == 0)
+            {
+                <div class="empty-state">
+                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                    <h2>No products match</h2>
+                    <p>
+                        @if (f.HasActiveFilters)
+                        {
+                            <text>Try removing a filter or searching for something broader.</text>
+                        }
+                        else
+                        {
+                            <text>There are no products in this section yet. Check back soon.</text>
+                        }
+                    </p>
+                    <a class="btn btn-primary" asp-action="Shop">Browse all gear</a>
+                </div>
+            }
+            else
+            {
+                <div class="product-grid">
+                    @foreach (var card in Model.Products)
+                    {
+                        <partial name="_ProductCard" model="card" />
                     }
                 </div>
-
-
-<!-- Features Section -->
-<section class="features-section py-4 bg-light">
-    <div class="container">
-        <div class="row g-3">
-            <div class="col-md-3 col-6">
-                <div class="feature-card text-center p-3">
-                    <div class="feature-icon mb-2">
-                        <i class="fas fa-shipping-fast fa-2x text-primary"></i>
-                    </div>
-                    <h6 class="mb-1">Free Shipping</h6>
-                    <p class="text-muted small mb-0">On orders over €50</p>
-                </div>
-            </div>
-            <div class="col-md-3 col-6">
-                <div class="feature-card text-center p-3">
-                    <div class="feature-icon mb-2">
-                        <i class="fas fa-undo-alt fa-2x text-primary"></i>
-                    </div>
-                    <h6 class="mb-1">Easy Returns</h6>
-                    <p class="text-muted small mb-0">30-day return policy</p>
-                </div>
-            </div>
-            <div class="col-md-3 col-6">
-                <div class="feature-card text-center p-3">
-                    <div class="feature-icon mb-2">
-                        <i class="fas fa-shield-alt fa-2x text-primary"></i>
-                    </div>
-                    <h6 class="mb-1">Secure Payment</h6>
-                    <p class="text-muted small mb-0">100% secure transactions</p>
-                </div>
-            </div>
-            <div class="col-md-3 col-6">
-                <div class="feature-card text-center p-3">
-                    <div class="feature-icon mb-2">
-                        <i class="fas fa-headset fa-2x text-primary"></i>
-                    </div>
-                    <h6 class="mb-1">24/7 Support</h6>
-                    <p class="text-muted small mb-0">Expert customer service</p>
-                </div>
-            </div>
-        </div>
+                <partial name="_Pagination" model='new PaginationModel(f.Page, Model.PageCount, page => ShopUrl(f.ToRouteValues(page: page)))' />
+            }
+        </section>
     </div>
-</section>
-
-<style>
-    /* Hero Section */
-    .shop-hero-section {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border-bottom: 1px solid rgba(0,0,0,0.05);
-    }
-
-    .breadcrumb {
-        background: transparent;
-        padding: 0;
-        margin-bottom: 0.5rem;
-    }
-
-    .breadcrumb-item.active {
-        color: var(--primary-light);
-    }
-
-    .shop-stats {
-        flex-wrap: wrap;
-    }
-
-    .stat-item {
-        text-align: center;
-        padding: 0.5rem 1rem;
-        background: white;
-        border-radius: 8px;
-        min-width: 100px;
-    }
-
-    .stat-number {
-        font-weight: 700;
-        line-height: 1;
-    }
-
-    .stat-label {
-        font-size: 0.8rem;
-    }
-
-                    .product-card {
-                        border-radius: 16px;
-                        padding: 6px;
-                        transition: all 0.3s ease;
-                        background: #fff;
-                    }
-
-                        .product-card:hover {
-                            transform: translateY(-3px);
-                            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-                        }
-
-                    /* Image container keeps all cards aligned */
-                    .product-image-container {
-                        height: 180px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        border-radius: 12px;
-                        overflow: hidden;
-                    }
-
-                    /* Smaller centered product image */
-                    .product-image {
-                        height: 140px;
-                        max-width: 100%;
-                        object-fit: contain;
-                        transition: transform 0.4s ease;
-                    }
-
-                    .product-card:hover .product-image {
-                        transform: scale(1.04);
-                    }
-
-                    /* Titles */
-                    .product-title a {
-                        font-size: 0.95rem;
-                        font-weight: 600;
-                        line-height: 1.3;
-                        display: -webkit-box;
-                        -webkit-line-clamp: 2;
-                        -webkit-box-orient: vertical;
-                        overflow: hidden;
-                    }
-
-                    /* Mobile */
-                    @@media (max-width: 768px) {
-                        .product-image-container {
-                            height: 150px;
-                        }
-
-                        .product-image {
-                            height: 120px;
-                        }
-                    }
-
-    /* Price and Rating */
-    .product-price {
-        font-family: 'Inter', sans-serif;
-    }
-
-    .rating-stars {
-        display: inline-flex;
-        gap: 1px;
-    }
-
-    /* Action Buttons */
-    .product-actions-bottom .btn {
-        border-radius: 8px;
-        font-size: 0.85rem;
-        font-weight: 500;
-        transition: all 0.3s ease;
-    }
-
-    .quick-add-btn {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.8rem;
-    }
-
-        .quick-add-btn:hover {
-            background: var(--primary-light);
-            color: white;
-            transform: translateY(-1px);
-        }
-
-    /* Features Section */
-    .features-section {
-        border-top: 1px solid rgba(0,0,0,0.05);
-    }
-
-    .feature-card {
-        transition: transform 0.3s ease;
-        border-radius: 8px;
-        background: white;
-    }
-
-        .feature-card:hover {
-            transform: translateY(-3px);
-        }
-
-    .feature-icon {
-        color: var(--primary-light);
-    }
-
-    /* Filters */
-    .list-group-item {
-        border: none;
-        padding: 0.5rem 0;
-        background: transparent;
-    }
-
-        .list-group-item:hover, .list-group-item.active {
-            background: rgba(59, 93, 80, 0.05);
-            color: var(--primary-light);
-        }
-
-    /* Search Box */
-    .search-box .input-group {
-        border-radius: 8px;
-        overflow: hidden;
-    }
-
-    .search-box .form-control {
-        border-right: 0;
-    }
-
-    .search-box .btn {
-        border-left: 0;
-    }
-
-    /* Dropdowns */
-    .dropdown-menu {
-        border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        border-radius: 8px;
-    }
-
-    .dropdown-item {
-        padding: 0.5rem 1rem;
-        border-radius: 6px;
-        margin: 0.125rem 0.5rem;
-        width: auto;
-    }
-
-        .dropdown-item:hover {
-            background: rgba(59, 93, 80, 0.08);
-        }
-
-    /* Responsive Design */
-    @@media (max-width: 768px) {
-        .shop-hero-section {
-            padding: 2rem 0;
-        }
-
-        .display-5 {
-            font-size: 1.75rem;
-        }
-
-        .lead {
-            font-size: 1rem;
-        }
-
-        .stat-item {
-            min-width: 80px;
-            padding: 0.5rem;
-        }
-
-        .product-image {
-            height: 160px;
-        }
-
-        .product-card {
-            margin-bottom: 1rem;
-        }
-
-        .product-actions .btn-xs {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        .sticky-top {
-            position: static !important;
-        }
-    }
-
-    @@media (max-width: 576px) {
-        .col-6 {
-            margin-bottom: 1rem;
-        }
-
-        .product-image {
-            height: 140px;
-        }
-
-        .card-body {
-            padding: 1rem !important;
-        }
-
-        .product-title a {
-            font-size: 0.9rem;
-        }
-
-        .features-section .col-6 {
-            margin-bottom: 0.5rem;
-        }
-    }
-
-    /* Loading States */
-    .btn-load-more .fa-spinner {
-        display: inline-block !important;
-    }
-
-    .btn-load-more.loading .btn-text {
-        display: none;
-    }
-
-    /* Focus States for Accessibility */
-    .btn:focus,
-    .form-control:focus,
-    .dropdown-item:focus {
-        box-shadow: 0 0 0 3px rgba(59, 93, 80, 0.25);
-    }
-
-    .product-card:focus-within {
-        outline: 2px solid var(--primary-light);
-        outline-offset: 2px;
-    }
-</style>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize tooltips
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-
-        // Search functionality
-        const shopSearch = document.getElementById('shopSearch');
-        if (shopSearch) {
-            shopSearch.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    searchProducts();
-                }
-            });
-        }
-
-        // Wishlist functionality
-        const wishlistButtons = document.querySelectorAll('.wishlist-btn');
-        wishlistButtons.forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const productId = this.getAttribute('data-product-id');
-                const icon = this.querySelector('i');
-
-                if (icon.classList.contains('far')) {
-                    icon.classList.remove('far');
-                    icon.classList.add('fas', 'text-danger');
-                    this.setAttribute('data-bs-title', 'Remove from wishlist');
-                    addToWishlist(productId);
-                } else {
-                    icon.classList.remove('fas', 'text-danger');
-                    icon.classList.add('far');
-                    this.setAttribute('data-bs-title', 'Add to wishlist');
-                    removeFromWishlist(productId);
-                }
-
-                // Update tooltip
-                const tooltip = bootstrap.Tooltip.getInstance(this);
-                if (tooltip) {
-                    tooltip.hide();
-                    tooltip.setContent({ '.tooltip-inner': this.getAttribute('data-bs-title') });
-                }
-            });
-        });
-
-        // Quick add to cart functionality
-    const quickAddButtons = document.querySelectorAll('.quick-add-btn');
-    quickAddButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault(); // Prevent default
-            e.stopPropagation(); // Stop event bubbling
-
-            const productId = this.getAttribute('data-product-id');
-
-            // Show loading state
-            const originalText = this.innerHTML;
-            this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Adding...';
-            this.disabled = true;
-
-                // Simulate API call
-                setTimeout(() => {
-                    addToCart(productId, 1);
-                    this.innerHTML = '<i class="fas fa-check me-2"></i>Added!';
-                    setTimeout(() => {
-                        this.innerHTML = originalText;
-                        this.disabled = false;
-                    }, 2000);
-                }, 1000);
-            });
-        });
-
-        // Price filter functionality
-        const priceFilters = document.querySelectorAll('input[name="priceFilter"]');
-        priceFilters.forEach(filter => {
-            filter.addEventListener('change', function() {
-                filterProducts();
-            });
-        });
-
-        // View toggle functionality
-        const viewLinks = document.querySelectorAll('[data-view]');
-        const productsGrid = document.getElementById('productsGrid');
-
-        viewLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const view = this.getAttribute('data-view');
-
-                viewLinks.forEach(l => l.classList.remove('active'));
-                this.classList.add('active');
-
-                if (view === 'list') {
-                    productsGrid.classList.add('list-view');
-                    productsGrid.classList.remove('grid-view');
-                } else {
-                    productsGrid.classList.add('grid-view');
-                    productsGrid.classList.remove('list-view');
-                }
-            });
-        });
-
-        // Load more functionality
-        const loadMoreBtn = document.querySelector('.btn-load-more');
-        if (loadMoreBtn) {
-            loadMoreBtn.addEventListener('click', function() {
-                this.classList.add('loading');
-
-                // Simulate loading more products
-                setTimeout(() => {
-                    this.classList.remove('loading');
-                    // In a real app, you would fetch more products here
-                    console.log('Loading more products...');
-                }, 1500);
-            });
-        }
-
-        // Add hover effects to product cards
-        const productCards = document.querySelectorAll('.product-card');
-        productCards.forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.zIndex = '10';
-            });
-
-            card.addEventListener('mouseleave', function() {
-                this.style.zIndex = '1';
-            });
-        });
-
-        // Initialize filters
-        initializeFilters();
-    });
-
-    // Search function
-    function searchProducts() {
-        const searchTerm = document.getElementById('shopSearch').value;
-        if (searchTerm.trim() !== '') {
-            window.location.href = '/Home/SearchProduct?search=' + encodeURIComponent(searchTerm);
-        }
-    }
-
-    // Filter products based on selected filters
-    function filterProducts() {
-        const selectedPrice = document.querySelector('input[name="priceFilter"]:checked').id;
-        const productCards = document.querySelectorAll('.product-card');
-
-        productCards.forEach(card => {
-            const priceElement = card.querySelector('.product-price .h5');
-            if (priceElement) {
-                const priceText = priceElement.textContent.replace('€', '');
-                const price = parseFloat(priceText.replace(',', ''));
-
-                let showCard = true;
-
-                switch (selectedPrice) {
-                    case 'priceUnder50':
-                        showCard = price < 50;
-                        break;
-                    case 'price50to100':
-                        showCard = price >= 50 && price <= 100;
-                        break;
-                    case 'priceOver100':
-                        showCard = price > 100;
-                        break;
-                    default:
-                        showCard = true;
-                }
-
-                card.style.display = showCard ? 'block' : 'none';
-            }
-        });
-    }
-
-    // Initialize filters
-    function initializeFilters() {
-        // Set default price filter
-        document.getElementById('priceAll').checked = true;
-    }
-
-    // Add to cart function
-    const quickAddButtons = document.querySelectorAll('.quick-add-btn');
-    quickAddButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault(); // Prevent default
-            e.stopPropagation(); // Stop event bubbling
-
-            const productId = this.getAttribute('data-product-id');
-
-            // Show loading state
-            const originalText = this.innerHTML;
-            this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Adding...';
-            this.disabled = true;
-
-            // AJAX call to add to cart
-            fetch('/Carts/AddToCart?ProId=' + productId + '&qty=1', {
-                method: 'POST',
-                headers: {
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value,
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Update cart count immediately using global function
-                    if (data.cartItemCount !== undefined) {
-                        if (typeof window.updateCartCount === 'function') {
-                            window.updateCartCount(data.cartItemCount);
-                        } else {
-                            // Fallback if global function not available
-                            const cartLink = document.getElementById('topcartlink');
-                            const cartBadge = cartLink ? cartLink.querySelector('span.cart-qty:not(.qty-input)') : null;
-                            if (cartBadge) {
-                                cartBadge.textContent = data.cartItemCount;
-                                cartBadge.style.display = 'flex';
-                            }
-                        }
-                    }
-
-                    // Show success state
-                    this.innerHTML = '<i class="fas fa-check me-2"></i>Added!';
-                    showNotification('Product added to cart!', 'success');
-
-                    // Reset button after 2 seconds
-                    setTimeout(() => {
-                        this.innerHTML = originalText;
-                        this.disabled = false;
-                    }, 2000);
-                } else {
-                    showNotification('Failed to add product to cart', 'error');
-                    this.innerHTML = originalText;
-                    this.disabled = false;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showNotification('Error adding to cart', 'error');
-                this.innerHTML = originalText;
-                this.disabled = false;
-            });
-        });
-    });
-
-    // Wishlist functions
-    function addToWishlist(productId) {
-        fetch('/Wishlist/AddToWishlist', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-            },
-            body: `productId=${productId}`
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showNotification(data.message || 'Added to wishlist', 'success');
-                updateWishlistCount();
-            } else {
-                showNotification(data.message || 'Failed to add to wishlist', 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showNotification('Error adding to wishlist', 'error');
-        });
-    }
-
-    function removeFromWishlist(productId) {
-        fetch('/Wishlist/RemoveFromWishlist', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-            },
-            body: `productId=${productId}`
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showNotification(data.message || 'Removed from wishlist', 'info');
-                updateWishlistCount();
-            } else {
-                showNotification(data.message || 'Failed to remove from wishlist', 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showNotification('Error removing from wishlist', 'error');
-        });
-    }
-
-    function updateWishlistCount() {
-        fetch('/Wishlist/GetWishlistCount')
-            .then(response => response.json())
-            .then(data => {
-                const wishlistCountElements = document.querySelectorAll('.wishlist-count');
-                wishlistCountElements.forEach(element => {
-                    element.textContent = data.count || 0;
-                });
-            })
-            .catch(error => console.error('Error updating wishlist count:', error));
-    }
-
-    // Load wishlist status for products on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        const wishlistButtons = document.querySelectorAll('.wishlist-btn');
-        wishlistButtons.forEach(button => {
-            const productId = button.getAttribute('data-product-id');
-            if (productId) {
-                fetch(`/Wishlist/IsInWishlist?productId=${productId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.inWishlist) {
-                            const icon = button.querySelector('i');
-                            if (icon) {
-                                icon.classList.remove('far');
-                                icon.classList.add('fas', 'text-danger');
-                                button.setAttribute('data-bs-title', 'Remove from wishlist');
-                            }
-                        }
-                    })
-                    .catch(error => console.error('Error checking wishlist status:', error));
-            }
-        });
-    });
-
-    // Use global updateCartCount function
-    // No local function needed - use window.updateCartCount directly
-
-    // Show notification
-    function showNotification(message, type) {
-        // Create toast notification
-        const toast = document.createElement('div');
-        toast.className = `toast align-items-center text-white bg-${type} border-0 position-fixed bottom-0 end-0 m-3`;
-        toast.style.zIndex = '1060';
-        toast.innerHTML = `
-            <div class="d-flex">
-                <div class="toast-body">${message}</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        `;
-        document.body.appendChild(toast);
-
-        const bsToast = new bootstrap.Toast(toast);
-        bsToast.show();
-
-        // Remove toast after hiding
-        toast.addEventListener('hidden.bs.toast', () => {
-            toast.remove();
-        });
-    }
-</script>
+</div>
+
+<div class="offcanvas offcanvas-start" tabindex="-1" id="filterDrawer" aria-labelledby="filterDrawerLabel">
+    <div class="offcanvas-header border-bottom">
+        <h2 class="offcanvas-title h5 m-0" id="filterDrawerLabel">Filters</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close filters"></button>
+    </div>
+    <div class="offcanvas-body">
+        <partial name="_ShopFilters" model="Model" view-data='new ViewDataDictionary(ViewData) { ["Prefix"] = "m" }' />
+    </div>
+</div>

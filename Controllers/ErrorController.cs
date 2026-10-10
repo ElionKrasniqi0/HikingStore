@@ -17,24 +17,16 @@ namespace HikingStore.Controllers
         [Route("/Error/{statusCode}")]
         public IActionResult HttpStatusCodeHandler(int statusCode)
         {
-            // Log the original path that caused the error
-            var originalPath = "unknown";
-            if (HttpContext.Items.ContainsKey("originalPath"))
-            {
-                originalPath = HttpContext.Items["originalPath"]?.ToString() ?? "unknown";
-            }
-
-            // Get status code details
-            var statusCodeFeature = HttpContext.Features.Get<IStatusCodePagesFeature>();
+            var reExecute = HttpContext.Features.Get<IStatusCodeReExecuteFeature>();
+            var originalPath = reExecute == null ? "unknown" : reExecute.OriginalPath + reExecute.OriginalQueryString;
 
             switch (statusCode)
             {
                 case 404:
                     ViewBag.ErrorMessage = "Sorry, the page you're looking for cannot be found.";
                     ViewBag.ErrorCode = "404 - Page Not Found";
-                    ViewBag.OriginalPath = originalPath;
-                    _logger.LogWarning($"404 error occurred. Path: {originalPath}");
-                    break;
+                    _logger.LogWarning("404 error occurred. Path: {Path}", originalPath);
+                    return View("NotFound");
                 case 500:
                     ViewBag.ErrorMessage = "Sorry, something went wrong on our end. We're working to fix it.";
                     ViewBag.ErrorCode = "500 - Internal Server Error";

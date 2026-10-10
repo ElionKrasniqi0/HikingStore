@@ -1,3 +1,4 @@
+using HikingStore.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
@@ -13,12 +14,12 @@ namespace HikingStore.Services
     {
         private readonly ILogger<AdminAuditService> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public AdminAuditService(
             ILogger<AdminAuditService> logger,
             IHttpContextAccessor httpContextAccessor,
-            UserManager<IdentityUser> userManager)
+            UserManager<ApplicationUser> userManager)
         {
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;

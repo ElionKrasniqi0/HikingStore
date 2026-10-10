@@ -20,24 +20,27 @@ namespace HikingStore.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class RegisterModel : PageModel
     {
-        private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly HikingStore.Services.IEmailTemplateService _emailTemplates;
 
         public RegisterModel(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager,
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
             RoleManager<IdentityRole> roleManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            HikingStore.Services.IEmailTemplateService emailTemplates)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
             _logger = logger;
             _emailSender = emailSender;
+            _emailTemplates = emailTemplates;
         }
 
         [BindProperty]
@@ -68,8 +71,6 @@ namespace HikingStore.Areas.Identity.Pages.Account
             [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 8)]
             [DataType(DataType.Password)]
             [Display(Name = "Password")]
-            [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$", 
-                ErrorMessage = "Password must be at least 8 characters and contain uppercase, lowercase, number, and special character.")]
             public string Password { get; set; }
 
             [DataType(DataType.Password)]
@@ -87,10 +88,9 @@ namespace HikingStore.Areas.Identity.Pages.Account
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
-            
-            // ⚡ OPTIMIZATION: Skip ExternalLogins fetch on POST - not needed for registration
-            // ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-            
+            ReturnUrl = returnUrl;
+            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
             if (ModelState.IsValid)
             {
                 var user = new ApplicationUser 
@@ -101,89 +101,50 @@ namespace HikingStore.Areas.Identity.Pages.Account
                     LastName = Input.LastName
                 };
                 
-                // ⚡ OPTIMIZATION: CreateAsync is already async, but we use ConfigureAwait(false)
-                var result = await _userManager.CreateAsync(user, Input.Password).ConfigureAwait(false);
-                
+                var result = await _userManager.CreateAsync(user, Input.Password);
+
                 if (result.Succeeded)
                 {
-                    // SECURITY: Log user registration with IP address for audit trail
-                    var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-                    _logger.LogInformation("SECURITY: New user registered - Email: {Email}, IP: {IPAddress}", 
-                        Input.Email, ipAddress);
+                    _logger.LogInformation("SECURITY: New user {UserId} registered from IP {IPAddress}",
+                        user.Id, HttpContext.Connection.RemoteIpAddress?.ToString());
 
-                    // ⚡ OPTIMIZATION: Check and assign role asynchronously without blocking
-                    // Move role assignment to background task to improve perceived performance
-                    const string userRoleName = "User";
-                    var userId = user.Id; // Capture before background task
-                    
-                    // Fire and forget role assignment - don't block registration
-                    _ = Task.Run(async () =>
+                    if (await _roleManager.RoleExistsAsync(DbInitializer.UserRole))
                     {
-                        try
-                        {
-                            // Re-fetch user in background task to avoid disposed context issues
-                            var backgroundUser = await _userManager.FindByIdAsync(userId).ConfigureAwait(false);
-                            if (backgroundUser != null)
-                            {
-                                var roleExists = await _roleManager.RoleExistsAsync(userRoleName).ConfigureAwait(false);
-                                if (roleExists)
-                                {
-                                    await _userManager.AddToRoleAsync(backgroundUser, userRoleName).ConfigureAwait(false);
-                                }
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, "Failed to assign role to user {UserId}", userId);
-                        }
-                    });
+                        await _userManager.AddToRoleAsync(user, DbInitializer.UserRole);
+                    }
 
-                    // ⚡ OPTIMIZATION: Generate email confirmation token and send email in background
-                    // This prevents blocking the registration response
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
-                        // Capture values before background task
+                        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                        var callbackUrl = Url.Page(
+                            "/Account/ConfirmEmail",
+                            pageHandler: null,
+                            values: new { area = "Identity", userId = user.Id, code, returnUrl },
+                            protocol: Request.Scheme)!;
+
+                        var body = _emailTemplates.GenerateEmailConfirmationTemplate(
+                            HtmlEncoder.Default.Encode(callbackUrl), HtmlEncoder.Default.Encode(user.FirstName ?? user.Email!));
                         var userEmail = Input.Email;
-                        var emailUserId = user.Id;
-                        var scheme = Request.Scheme;
-                        var host = Request.Host.Value;
-                        
-                        // Fire and forget email sending - don't block registration
+
+                        // The sender has no request-scoped dependencies, so it is safe to finish after the response.
                         _ = Task.Run(async () =>
                         {
                             try
                             {
-                                // Re-fetch user in background task to avoid disposed context issues
-                                var backgroundUser = await _userManager.FindByIdAsync(emailUserId).ConfigureAwait(false);
-                                if (backgroundUser == null) return;
-
-                                var code = await _userManager.GenerateEmailConfirmationTokenAsync(backgroundUser).ConfigureAwait(false);
-                                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                                
-                                // Build URL manually to avoid HttpContext issues in background task
-                                var callbackUrl = $"{scheme}://{host}/Identity/Account/ConfirmEmail?userId={emailUserId}&code={code}&returnUrl={Uri.EscapeDataString(returnUrl)}";
-
-                                await _emailSender.SendEmailAsync(userEmail, "Confirm your email",
-                                    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.").ConfigureAwait(false);
-                                
-                                _logger.LogInformation("Confirmation email sent successfully to {Email}", userEmail);
+                                await _emailSender.SendEmailAsync(userEmail, "Confirm your HikingStore account", body);
                             }
                             catch (Exception ex)
                             {
-                                _logger.LogError(ex, "Failed to send confirmation email to {Email}", userEmail);
-                                // Don't block registration if email fails - user can request resend
+                                _logger.LogError(ex, "Failed to send confirmation email for new user {UserId}", user.Id);
                             }
                         });
-                        
-                        // ⚡ OPTIMIZATION: Redirect immediately, email sends in background
-                        return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
+
+                        return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl });
                     }
-                    else
-                    {
-                        // ⚡ OPTIMIZATION: Sign in immediately with ConfigureAwait(false)
-                        await _signInManager.SignInAsync(user, isPersistent: false).ConfigureAwait(false);
-                        return LocalRedirect(returnUrl);
-                    }
+
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    return LocalRedirect(returnUrl);
                 }
                 
                 foreach (var error in result.Errors)

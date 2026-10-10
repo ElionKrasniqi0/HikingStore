@@ -19,4 +19,11 @@
     <PackageReference Include="EPPlus" Version="7.5.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="HikingStore.Tests\**" />
+    <Content Remove="HikingStore.Tests\**" />
+    <EmbeddedResource Remove="HikingStore.Tests\**" />
+    <None Remove="HikingStore.Tests\**" />
+  </ItemGroup>
+
 </Project>

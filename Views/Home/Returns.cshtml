@@ -1,0 +1,50 @@
+@inject IOptions<StoreSettings> StoreOptions
+@{
+    var store = StoreOptions.Value;
+    ViewData["Title"] = "Returns & refunds";
+    ViewData["Description"] = $"Return unused gear within {store.ReturnDays} days of delivery. How to start a return and how refunds work at {store.Name}.";
+    ViewData["HelpSection"] = "Returns";
+}
+
+<div class="container-hs">
+    <nav class="breadcrumb-bar" aria-label="Breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Returns &amp; refunds</li>
+        </ol>
+    </nav>
+    <div class="page-head"><h1>Returns &amp; refunds</h1></div>
+    <div class="help-layout">
+        <partial name="_HelpNav" />
+        <article class="prose">
+            <p class="lead-muted">Changed your mind or the fit isn't right? You can return unused items within @store.ReturnDays days of delivery.</p>
+
+            <div class="fact-grid">
+                <div class="fact"><i class="fa-solid fa-calendar-check" aria-hidden="true"></i><h3>@store.ReturnDays days</h3><p>From the day you receive your order.</p></div>
+                <div class="fact"><i class="fa-solid fa-tag" aria-hidden="true"></i><h3>Unused, with tags</h3><p>Items must be in their original condition and packaging.</p></div>
+                <div class="fact"><i class="fa-solid fa-store" aria-hidden="true"></i><h3>Return in store or by courier</h3><p>Drop off in Prishtina or arrange a courier with us.</p></div>
+            </div>
+
+            <h2>How to return an item</h2>
+            <ol class="steps-list">
+                <li><strong>Send us a return request.</strong> Use the <a asp-action="Contact" asp-route-subject="Return request">contact form</a> and include your order number (for example ORD001010) and the items you want to return.</li>
+                <li><strong>Wait for our reply.</strong> We'll confirm the return and tell you how to send the items back or when to bring them to the store.</li>
+                <li><strong>Pack the items</strong> in their original packaging with all tags and accessories.</li>
+                <li><strong>Get your refund.</strong> Once we've received and checked the items, we refund the item price. Because orders are paid cash on delivery, we agree the refund method with you (bank transfer or cash in store).</li>
+            </ol>
+
+            <h2>What can't be returned</h2>
+            <ul>
+                <li>Items that have been used outdoors, washed, or damaged after delivery.</li>
+                <li>Socks, base layers and other hygiene items once the packaging is opened.</li>
+                <li>Gas canisters and other consumables.</li>
+            </ul>
+
+            <h2>Faulty or wrong items</h2>
+            <p>If something arrives damaged, faulty or isn't what you ordered, <a asp-action="Contact" asp-route-subject="Damaged or wrong item">tell us</a> as soon as possible with a photo. We'll replace it or refund it, including the shipping cost.</p>
+
+            <h2>Cancelling before delivery</h2>
+            <p>Orders that haven't shipped yet can be cancelled from <a asp-controller="Orders" asp-action="Index">My orders</a> — nothing has been paid yet, so there's nothing to refund.</p>
+        </article>
+    </div>
+</div>

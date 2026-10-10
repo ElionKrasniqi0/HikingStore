@@ -1,859 +1,93 @@
 @model List<Order>
-@using HikingStore.Enum
-@using Microsoft.AspNetCore.Mvc.TagHelpers
-@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
-
 @{
-    var orders = Model ?? new List<Order>();
+    ViewData["Title"] = "Orders";
+    var store = StoreOptions.Value;
+    string currentStatus = ViewBag.CurrentStatus ?? "";
+    string search = ViewBag.SearchQuery ?? "";
+    int total = ViewBag.Total;
+    var counts = ViewBag.StatusCounts as Dictionary<OrderStatus, int> ?? new();
+    var pagination = new PaginationModel((int)ViewBag.Page, (int)ViewBag.PageCount,
+        p => Url.Action("Index", new { status = currentStatus, search, page = p })!);
 }
 
-<style>
-    /* Hero Section */
-    .hero-section {
-        background: linear-gradient(135deg, #3b5d50 0%, #2d4a3f 100%);
-        color: white;
-        padding: 30px 0;
-        margin-bottom: 40px;
+<div class="admin-page-head">
+    <div>
+        <h1>Orders</h1>
+        <p>@total order@(total == 1 ? "" : "s")@(string.IsNullOrEmpty(search) ? "" : $" matching “{search}”"). Times are UTC.</p>
+    </div>
+    <a class="btn btn-outline-primary" asp-action="ExportToExcel" asp-route-status="@currentStatus" asp-route-search="@search">
+        <i class="fa-solid fa-file-excel me-1" aria-hidden="true"></i>Export to Excel
+    </a>
+</div>
+
+<nav class="status-tabs" aria-label="Filter by status">
+    <a class="@(string.IsNullOrEmpty(currentStatus) ? "active" : "")" asp-action="Index" asp-route-search="@search" aria-current="@(string.IsNullOrEmpty(currentStatus) ? "page" : null)">All<span class="n">@counts.Values.Sum()</span></a>
+    @foreach (var s in System.Enum.GetValues<OrderStatus>())
+    {
+        var active = currentStatus == s.ToString();
+        <a class="@(active ? "active" : "")" asp-action="Index" asp-route-status="@s" asp-route-search="@search" aria-current="@(active ? "page" : null)">@s<span class="n">@counts.GetValueOrDefault(s)</span></a>
     }
+</nav>
 
-    .hero-section h1 {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 10px;
-    }
-
-    .hero-section p {
-        font-size: 1.1rem;
-        opacity: 0.9;
-        margin-bottom: 0;
-    }
-
-    /* Statistics Cards */
-    .stat-card {
-        border-radius: 12px;
-        border: none;
-        transition: all 0.3s ease;
-        overflow: hidden;
-    }
-
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    }
-
-    .stat-card .card-body {
-        padding: 20px;
-    }
-
-    .stat-card h4 {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 5px;
-    }
-
-    .stat-card p {
-        font-size: 0.9rem;
-        opacity: 0.9;
-        margin-bottom: 0;
-        text-transform: capitalize;
-    }
-
-    /* Filter Card */
-    .filter-card {
-        border-radius: 12px;
-        border: 1px solid #e5e7eb;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        margin-bottom: 30px;
-    }
-
-    .filter-card .card-body {
-        padding: 25px;
-    }
-
-    /* Orders Table */
-    .orders-table-card {
-        border-radius: 12px;
-        border: 1px solid #e5e7eb;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        overflow: hidden;
-    }
-
-    .orders-table-card .card-header {
-        background: #f8fafc;
-        border-bottom: 1px solid #e5e7eb;
-        padding: 20px 25px;
-    }
-
-    .orders-table-card .table {
-        margin-bottom: 0;
-    }
-
-    .orders-table-card .table thead {
-        background: #f8fafc;
-    }
-
-    .orders-table-card .table th {
-        font-weight: 600;
-        font-size: 0.875rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: #6b7280;
-        padding: 15px;
-        border-bottom: 2px solid #e5e7eb;
-    }
-
-    .orders-table-card .table td {
-        padding: 15px;
-        vertical-align: middle;
-        border-bottom: 1px solid #f3f4f6;
-    }
-
-    .orders-table-card .table tbody tr {
-        transition: all 0.2s ease;
-    }
-
-    .orders-table-card .table tbody tr:hover {
-        background: #f9fafb;
-    }
-
-    /* Status Badges */
-    .status-badge {
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 0.75rem;
-        display: inline-block;
-    }
-
-    .status-received {
-        background: #dbeafe;
-        color: #1e40af;
-    }
-
-    .status-verified {
-        background: #cffafe;
-        color: #0e7490;
-    }
-
-    .status-processing {
-        background: #fef3c7;
-        color: #92400e;
-    }
-
-    .status-shipped {
-        background: #e9d5ff;
-        color: #6b21a8;
-    }
-
-    .status-completed {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .status-cancelled {
-        background: #fee2e2;
-        color: #991b1b;
-    }
-
-    /* Avatar */
-    .avatar-sm {
-        width: 40px;
-        height: 40px;
-        font-size: 0.875rem;
-        background: #f3f4f6;
-        color: #3b5d50;
-    }
-
-    /* Empty State */
-    .empty-state {
-        text-align: center;
-        padding: 60px 20px;
-    }
-
-    .empty-state i {
-        font-size: 4rem;
-        color: #d1d5db;
-        margin-bottom: 20px;
-    }
-
-    .empty-state h3 {
-        color: #6b7280;
-        margin-bottom: 10px;
-    }
-
-    .empty-state p {
-        color: #9ca3af;
-        margin-bottom: 0;
-    }
-
-    /* Action Buttons */
-    .btn-group .btn {
-        border-radius: 6px;
-    }
-
-    .btn-group .dropdown-toggle {
-        border-left: 1px solid rgba(0, 0, 0, 0.1);
-    }
-
-    /* Responsive */
-    @@media (max-width: 768px) {
-        .hero-section {
-            padding: 40px 0;
-        }
-
-        .hero-section h1 {
-            font-size: 2rem;
-        }
-
-        .stat-card {
-            margin-bottom: 15px;
-        }
-
-        .orders-table-card .table {
-            font-size: 0.875rem;
-        }
-
-        .orders-table-card .table th,
-        .orders-table-card .table td {
-            padding: 10px 8px;
-        }
-    }
-</style>
-<br />
-<br />
-<br />
-
-<!-- Hero Section -->
-<div class="hero-section">
-    <div class="row align-items-center">s
-        <div class="col-lg-8">
-            <h1>Order Management</h1>
-            <p>Manage and track all customer orders</p>
-        </div>
-        <div class="col-lg-4 text-end">
-            <button class="btn btn-light btn-lg" onclick="exportOrders()">
-                <i class="fas fa-download me-2"></i>Export Orders
-            </button>
-        </div>
+<div class="panel">
+    <div class="panel-body">
+        <form method="get" class="filter-bar" role="search">
+            <input type="hidden" name="status" value="@currentStatus" />
+            <div class="grow">
+                <label class="form-label small" for="search">Search</label>
+                <input id="search" name="search" value="@search" class="form-control" placeholder="Order number, name, email, phone or tracking number" />
+            </div>
+            <div class="btns">
+                <button class="btn btn-primary" type="submit">Search</button>
+                @if (!string.IsNullOrEmpty(search)) { <a class="btn btn-outline-secondary" asp-action="Index" asp-route-status="@currentStatus">Clear</a> }
+            </div>
+        </form>
     </div>
 </div>
 
-<div class="pb-5">
-    <!-- Statistics Cards -->
-    <div class="row mb-4">
-        @{
-            var statusList = Enum.GetValues(typeof(OrderStatus)).Cast<OrderStatus>();
-            var totalOrders = orders.Count;
-        }
-        @foreach (var status in statusList)
-        {
-            var count = orders.Count(o => o.Status == status);
-            var percentage = totalOrders > 0 ? (count * 100.0 / totalOrders) : 0;
-            var bgClass = status switch
-            {
-                OrderStatus.Received => "bg-primary",
-                OrderStatus.Verified => "bg-info",
-                OrderStatus.Processing => "bg-warning",
-                OrderStatus.Shipped => "bg-secondary",
-                OrderStatus.Completed => "bg-success",
-                OrderStatus.Cancelled => "bg-danger",
-                _ => "bg-primary"
-            };
-
-            <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
-                <div class="card stat-card @bgClass text-white" style="cursor: pointer;" onclick="filterByStatus('@status')">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="flex-grow-1">
-                                <h4 class="mb-0">@count</h4>
-                                <p class="mb-0">@status</p>
-                                <small class="opacity-75">@percentage.ToString("F1")%</small>
-                            </div>
-                            <div class="flex-shrink-0">
-                                <i class="fas fa-shopping-bag fa-2x opacity-50"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
-
-    <!-- Filters -->
-    <div class="card filter-card">
-        <div class="card-body">
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold">Filter by Status</label>
-                    <select class="form-select" id="statusFilter" onchange="filterOrders()">
-                        <option value="">All Orders</option>
-                        @foreach (var status in statusList)
-                        {
-                            if (ViewBag.CurrentStatus != null && ViewBag.CurrentStatus.ToString() == status.ToString())
-                            {
-                                <option value="@status" selected>@status</option>
-                            }
-                            else
-                            {
-                                <option value="@status">@status</option>
-                            }
-                        }
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold">Search Orders</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="searchInput" 
-                               placeholder="Search by order ID, customer, email, address..." 
-                               value="@ViewBag.SearchQuery"
-                               onkeypress="if(event.key === 'Enter') searchOrders()">
-                        <button class="btn btn-outline-secondary" type="button" onclick="searchOrders()">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
-                        <i class="fas fa-times me-2"></i>Clear
-                    </button>
-                </div>
-            </div>
+<div class="panel">
+    @if (Model.Count == 0)
+    {
+        <div class="empty-state">
+            <i class="fa-solid fa-receipt" aria-hidden="true"></i>
+            <h2>No orders found</h2>
+            <p>@(string.IsNullOrEmpty(search) && string.IsNullOrEmpty(currentStatus) ? "Orders will appear here once customers check out." : "Try a different status or search.")</p>
         </div>
-    </div>
-
-    <!-- Orders Table -->
-    <div class="card orders-table-card">
-        <div class="card-header">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <h5 class="mb-0 fw-semibold">All Orders</h5>
-                </div>
-                <div class="col-md-6 text-end">
-                    <span class="text-muted">Showing <strong>@orders.Count</strong> @(orders.Count == 1 ? "order" : "orders")</span>
-                </div>
-            </div>
-        </div>
-        <div class="card-body p-0">
-            @if (orders.Any())
-            {
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0" id="ordersTable">
-                        <thead>
-                            <tr>
-                                <th>Order #</th>
-                                <th>Customer</th>
-                                <th>Date</th>
-                                <th>Total</th>
-                                <th>Status</th>
-                                <th>Items</th>
-                                <th class="text-end">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var order in orders)
-                            {
-                                <tr id="order-row-@order.OrderId">
-                                    <td class="fw-semibold">#@order.OrderId</td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar-sm bg-light rounded-circle d-flex align-items-center justify-content-center me-2">
-                                                <i class="fas fa-user"></i>
-                                            </div>
-                                            <div>
-                                                <div class="fw-medium">@order.User?.UserName</div>
-                                                <small class="text-muted">@order.User?.Email</small>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div>@order.OrderDate.ToString("MMM dd, yyyy")</div>
-                                        <small class="text-muted">@order.OrderDate.ToString("hh:mm tt")</small>
-                                    </td>
-                                    <td class="fw-bold text-success">@order.TotalAmount.ToString("C")</td>
-                                    <td>
-                                        @{
-                                            var statusClass = order.Status switch
-                                            {
-                                                OrderStatus.Received => "status-badge status-received",
-                                                OrderStatus.Verified => "status-badge status-verified",
-                                                OrderStatus.Processing => "status-badge status-processing",
-                                                OrderStatus.Shipped => "status-badge status-shipped",
-                                                OrderStatus.Completed => "status-badge status-completed",
-                                                OrderStatus.Cancelled => "status-badge status-cancelled",
-                                                _ => "status-badge status-received"
-                                            };
-                                        }
-                                        <span class="@statusClass">@order.Status</span>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-light text-dark">
-                                            @(order.OrderDetails?.Sum(od => od.Quantity) ?? 0) items
-                                        </span>
-                                    </td>
-                                    <td class="text-end">
-                                        <div class="btn-group" role="group">
-                                            <a asp-action="Details" asp-route-id="@order.OrderId"
-                                               class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-eye me-1"></i>View
-                                            </a>
-                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
-                                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                                <i class="fas fa-cog"></i>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-end">
-                                                <li>
-                                                    <a class="dropdown-item" asp-action="Invoice" asp-route-id="@order.OrderId" target="_blank">
-                                                        <i class="fas fa-file-invoice me-2"></i>Download Invoice
-                                                    </a>
-                                                </li>
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li>
-                                                    <a class="dropdown-item" href="#"
-                                                       onclick="showStatusModal(@order.OrderId, '@order.Status', @order.TotalAmount, '@(order.Carrier ?? "Standard Shipping")', @((order.Status == OrderStatus.Received && !string.IsNullOrEmpty(order.Carrier)).ToString().ToLower()))">
-                                                        <i class="fas fa-sync me-2"></i>Update Status
-                                                    </a>
-                                                </li>
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li>
-                                                    <a class="dropdown-item text-danger" href="#"
-                                                       onclick="confirmDelete(@order.OrderId)">
-                                                        <i class="fas fa-trash me-2"></i>Delete Order
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
-            else
-            {
-                <div class="empty-state">
-                    <i class="fas fa-inbox"></i>
-                    <h3>No Orders Found</h3>
-                    <p>@(ViewBag.CurrentStatus != null || ViewBag.SearchQuery != null ? "Try adjusting your filters or search criteria." : "There are no orders in the system yet.")</p>
-                    @if (ViewBag.CurrentStatus != null || ViewBag.SearchQuery != null)
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table admin-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Order</th>
+                        <th scope="col">Customer</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Items</th>
+                        <th scope="col">Payment</th>
+                        <th scope="col">Status</th>
+                        <th scope="col" class="text-end">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var o in Model)
                     {
-                        <button class="btn btn-primary mt-3" onclick="clearFilters()">
-                            <i class="fas fa-times me-2"></i>Clear Filters
-                        </button>
+                        <tr>
+                            <td><a asp-action="Details" asp-route-id="@o.OrderId" class="fw-semibold">@o.OrderNumber</a></td>
+                            <td class="min-w-0" style="max-width:260px">
+                                <div class="text-truncate">@(o.FullName ?? o.User?.DisplayName)</div>
+                                <div class="small text-muted text-truncate">@(o.Email ?? o.User?.Email)</div>
+                            </td>
+                            <td class="text-nowrap">@o.OrderDate.ToString("d MMM yyyy")<div class="small text-muted">@o.OrderDate.ToString("HH:mm")</div></td>
+                            <td>@o.OrderDetails.Sum(d => d.Quantity)</td>
+                            <td class="text-nowrap small">@PaymentMethods.DisplayName(o.PaymentMethod)<div class="text-muted">@o.PaymentStatus</div></td>
+                            <td><partial name="_StatusBadge" model="o.Status" /></td>
+                            <td class="text-end text-nowrap fw-semibold">@store.FormatPrice(o.TotalAmount)</td>
+                        </tr>
                     }
-                </div>
-            }
+                </tbody>
+            </table>
         </div>
-    </div>
+        <partial name="_AdminPagination" model="pagination" />
+    }
 </div>
-
-<!-- Update Status Modal -->
-<div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="statusModalLabel">Update Order Status & Tracking</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="statusForm">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" id="orderId">
-                    <input type="hidden" id="orderTotalAmount">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Status</label>
-                                <select class="form-select" id="orderStatus" required onchange="toggleTrackingFields()">
-                                    @foreach (OrderStatus status in System.Enum.GetValues(typeof(OrderStatus)))
-                                    {
-                                        <option value="@status">@status</option>
-                                    }
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3" id="carrierSection" style="display: none;">
-                                <label class="form-label">Carrier</label>
-                                <input type="text" class="form-control" id="carrierInput" style="display: none;" readonly>
-                                <select class="form-select" id="carrierSelect">
-                                    <option value="Standard Shipping">Standard Shipping</option>
-                                    <option value="Express Shipping">Express Shipping</option>
-                                    <option value="DHL">DHL</option>
-                                    <option value="UPS">UPS</option>
-                                    <option value="FedEx">FedEx</option>
-                                    <option value="Custom">Custom Carrier</option>
-                                </select>
-                                <div class="form-text text-muted" id="carrierHelp">Select carrier for this order</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mb-3" id="trackingFields" style="display: none;">
-                        <label class="form-label">Tracking Number</label>
-                        <input type="text" class="form-control font-monospace" id="trackingNumber"
-                               readonly
-                               placeholder="Will be auto-generated when status is Processing/Shipped">
-                        <div class="form-text text-muted">Automatically generated by the system when order enters Processing status</div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Admin Notes (Internal)</label>
-                        <textarea class="form-control" id="adminNotes" rows="3"
-                                  placeholder="Add internal notes about this order..."></textarea>
-                        <div class="form-text">These notes are for internal use only and won't be sent to the customer.</div>
-                    </div>
-
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        <strong>Email Notification:</strong> Customer will receive an automatic email with status update and tracking information.
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="updateOrderStatus()">
-                    <i class="fas fa-paper-plane me-2"></i>Update Status & Notify Customer
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete order <strong id="deleteOrderId"></strong>?</p>
-                <p class="text-danger"><strong>This action cannot be undone. All order details will be permanently deleted.</strong></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" id="confirmDelete">Delete Order</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-@section Scripts {
-    <script>
-        // Store order ID for deletion
-        let currentOrderId = null;
-
-        // Initialize delete functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            // Confirm delete button
-            document.getElementById('confirmDelete').addEventListener('click', function() {
-                deleteOrder(currentOrderId);
-            });
-        });
-
-        function confirmDelete(orderId) {
-            currentOrderId = orderId;
-            document.getElementById('deleteOrderId').textContent = '#' + orderId;
-            const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-            deleteModal.show();
-        }
-
-        // Delete order function
-        function deleteOrder(orderId) {
-            if (!orderId) return;
-
-            const deleteButton = document.getElementById('confirmDelete');
-            const originalText = deleteButton.innerHTML;
-
-            // Show loading state
-            deleteButton.disabled = true;
-            deleteButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Deleting...';
-
-            // Get anti-forgery token
-            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
-
-            fetch('@Url.Action("DeleteOrder", "Orders", new { area = "Admin" })', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'RequestVerificationToken': token
-                },
-                body: `id=${orderId}&__RequestVerificationToken=${token}`
-            })
-            .then(response => {
-                if (response.redirected) {
-                    window.location.href = response.url;
-                    return;
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data && data.success) {
-                    showNotification('Order deleted successfully!', 'success');
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
-                    modal.hide();
-                    const orderRow = document.getElementById(`order-row-${orderId}`);
-                    if (orderRow) {
-                        orderRow.remove();
-                    }
-                    setTimeout(() => {
-                        location.reload();
-                    }, 1500);
-                } else if (data) {
-                    showNotification(data.message || 'Error deleting order', 'error');
-                    deleteButton.disabled = false;
-                    deleteButton.innerHTML = originalText;
-                }
-            })
-            .catch(error => {
-                showNotification('Error deleting order', 'error');
-                deleteButton.disabled = false;
-                deleteButton.innerHTML = originalText;
-            });
-        }
-
-        function toggleTrackingFields() {
-            const status = document.getElementById('orderStatus').value;
-            const trackingFields = document.getElementById('trackingFields');
-            const carrierSection = document.getElementById('carrierSection');
-            const trackingNumberField = document.getElementById('trackingNumber');
-            const carrierField = document.getElementById('carrier');
-
-            // Show tracking and carrier fields when order is Processing or Shipped
-            // Processing = order is being prepared (tracking assigned during preparation)
-            // Shipped = order is being shipped (tracking should already exist, but show for editing)
-            if (status === 'Processing' || status === 'Shipped') {
-                trackingFields.style.display = 'block';
-                carrierSection.style.display = 'block';
-                
-                // Generate tracking number if not already set
-                if (!trackingNumberField.value || trackingNumberField.value.trim() === '' || trackingNumberField.value === 'N/A') {
-                    trackingNumberField.value = generateTrackingNumber();
-                }
-                
-                // Check if carrier is read-only (user-selected)
-                const carrierInput = document.getElementById('carrierInput');
-                const carrierSelect = document.getElementById('carrierSelect');
-                if (carrierInput && carrierInput.style.display !== 'none') {
-                    // Carrier is read-only (user-selected), do nothing
-                } else if (carrierSelect) {
-                    // Carrier can be changed, but value is already set from modal initialization
-                }
-            } else {
-                trackingFields.style.display = 'none';
-                carrierSection.style.display = 'none';
-            }
-        }
-
-        function generateTrackingNumber() {
-            const orderId = document.getElementById('orderId').value;
-            const now = new Date();
-            const datePart = now.getFullYear() + 
-                            String(now.getMonth() + 1).padStart(2, '0') + 
-                            String(now.getDate()).padStart(2, '0');
-            const randomPart = Math.random().toString(36).substring(2, 10).toUpperCase();
-            const paddedOrderId = String(orderId).padStart(6, '0');
-            return `HS${paddedOrderId}${datePart}${randomPart}`;
-        }
-
-        function updateOrderStatus() {
-            const orderId = document.getElementById('orderId').value;
-            const status = document.getElementById('orderStatus').value;
-            const adminNotes = document.getElementById('adminNotes').value;
-            
-            // For Processing or Shipped status, let server auto-generate tracking number (send empty)
-            // Send selected carrier to server
-            let trackingNumber = '';
-            let carrier = '';
-            
-            if (status === 'Processing' || status === 'Shipped') {
-                // Let server auto-generate tracking number - send empty string to trigger auto-generation
-                trackingNumber = '';
-                // Get carrier from either input (read-only) or select (editable)
-                const carrierInput = document.getElementById('carrierInput');
-                const carrierSelect = document.getElementById('carrierSelect');
-                if (carrierInput && carrierInput.style.display !== 'none') {
-                    carrier = carrierInput.value || 'Standard Shipping';
-                } else if (carrierSelect) {
-                    carrier = carrierSelect.value || 'Standard Shipping';
-                } else {
-                    carrier = 'Standard Shipping';
-                }
-            } else {
-                // For other statuses, send empty values
-                trackingNumber = '';
-                carrier = 'Standard Shipping';
-            }
-
-            const updateButton = document.querySelector('#statusModal .btn-primary');
-            const originalText = updateButton.innerHTML;
-
-            // Show loading state
-            updateButton.disabled = true;
-            updateButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Updating...';
-
-            // Get anti-forgery token
-            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
-
-            fetch('@Url.Action("UpdateStatus", "Orders", new { area = "Admin" })', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'RequestVerificationToken': token
-                },
-                body: `id=${orderId}&status=${status}&trackingNumber=${encodeURIComponent(trackingNumber)}&adminNotes=${encodeURIComponent(adminNotes)}&carrier=${encodeURIComponent(carrier)}&__RequestVerificationToken=${token}`
-            })
-            .then(response => {
-                if (response.redirected) {
-                    window.location.href = response.url;
-                    return;
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data && data.success) {
-                    showNotification('Order status updated successfully! Tracking number and carrier set automatically. Email notification sent to customer.', 'success');
-                    setTimeout(() => {
-                        bootstrap.Modal.getInstance(document.getElementById('statusModal')).hide();
-                        location.reload();
-                    }, 1500);
-                } else if (data) {
-                    showNotification(data.message, 'error');
-                    updateButton.disabled = false;
-                    updateButton.innerHTML = originalText;
-                }
-            })
-            .catch(error => {
-                showNotification('Error updating order status', 'error');
-                updateButton.disabled = false;
-                updateButton.innerHTML = originalText;
-            });
-        }
-
-        function showNotification(message, type) {
-            // Create toast notification
-            const toast = document.createElement('div');
-            toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0 position-fixed top-0 end-0 m-3`;
-            toast.style.zIndex = '1060';
-            toast.innerHTML = `
-                <div class="d-flex">
-                    <div class="toast-body">${message}</div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                </div>
-            `;
-            document.body.appendChild(toast);
-
-            const bsToast = new bootstrap.Toast(toast);
-            bsToast.show();
-
-            // Remove toast after hiding
-            toast.addEventListener('hidden.bs.toast', () => {
-                toast.remove();
-            });
-        }
-
-        function filterOrders() {
-            const status = document.getElementById('statusFilter').value;
-            const url = new URL(window.location.href);
-
-            if (status) {
-                url.searchParams.set('status', status);
-            } else {
-                url.searchParams.delete('status');
-            }
-
-            // Preserve search query
-            const search = document.getElementById('searchInput').value;
-            if (search) {
-                url.searchParams.set('search', search);
-            }
-
-            window.location.href = url.toString();
-        }
-
-        function filterByStatus(status) {
-            document.getElementById('statusFilter').value = status;
-            filterOrders();
-        }
-
-        function searchOrders() {
-            const search = document.getElementById('searchInput').value;
-            const url = new URL(window.location.href);
-
-            if (search) {
-                url.searchParams.set('search', search);
-            } else {
-                url.searchParams.delete('search');
-            }
-
-            // Preserve status filter
-            const status = document.getElementById('statusFilter').value;
-            if (status) {
-                url.searchParams.set('status', status);
-            }
-
-            window.location.href = url.toString();
-        }
-
-        function clearFilters() {
-            window.location.href = '@Url.Action("Index", "Orders", new { area = "Admin" })';
-        }
-
-        function showStatusModal(orderId, currentStatus, totalAmount, carrier, isUserSelected) {
-            document.getElementById('orderId').value = orderId;
-            document.getElementById('orderStatus').value = currentStatus;
-            document.getElementById('orderTotalAmount').value = totalAmount || 0;
-            document.getElementById('trackingNumber').value = '';
-            document.getElementById('adminNotes').value = '';
-            
-            // Handle carrier field - read-only if user-selected, editable otherwise
-            const carrierInput = document.getElementById('carrierInput');
-            const carrierSelect = document.getElementById('carrierSelect');
-            const carrierHelp = document.getElementById('carrierHelp');
-            const carrierValue = carrier || 'Standard Shipping';
-            
-            if (isUserSelected && currentStatus === 'Received') {
-                // User selected carrier - make it read-only
-                carrierInput.value = carrierValue;
-                carrierInput.style.display = 'block';
-                carrierSelect.style.display = 'none';
-                carrierHelp.textContent = 'Selected by customer - cannot be changed';
-            } else {
-                // Admin can change carrier
-                carrierInput.style.display = 'none';
-                carrierSelect.style.display = 'block';
-                carrierSelect.value = carrierValue;
-                carrierHelp.textContent = carrierValue ? 'Current carrier (can be changed)' : 'Select carrier for this order';
-            }
-
-            const modal = new bootstrap.Modal(document.getElementById('statusModal'));
-            modal.show();
-
-            // Show/hide tracking number and carrier fields based on status
-            toggleTrackingFields();
-        }
-
-        function exportOrders() {
-            // Get current filter parameters
-            const urlParams = new URLSearchParams(window.location.search);
-            const status = urlParams.get('status') || '';
-            const search = urlParams.get('search') || '';
-            
-            // Build export URL
-            let exportUrl = '@Url.Action("ExportToExcel", "Orders", new { area = "Admin" })';
-            if (status) {
-                exportUrl += '?status=' + encodeURIComponent(status);
-                if (search) {
-                    exportUrl += '&search=' + encodeURIComponent(search);
-                }
-            } else if (search) {
-                exportUrl += '?search=' + encodeURIComponent(search);
-            }
-            
-            // Trigger download
-            window.location.href = exportUrl;
-        }
-    </script>
-}

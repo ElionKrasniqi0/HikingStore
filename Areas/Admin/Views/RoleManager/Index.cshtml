@@ -1,47 +1,54 @@
-﻿@{
-    ViewData["Title"] = "Create Role";
-    var roles = ViewBag.roles;
+﻿@using Microsoft.AspNetCore.Identity
+@{
+    ViewData["Title"] = "Roles";
+    var roles = ViewBag.roles as List<IdentityRole> ?? new();
+    var protectedRoles = ViewBag.ProtectedRoles as string[] ?? Array.Empty<string>();
 }
-<br />
-<br />
-<br />
-<br />
-<div class="container">
-    <div class="container" style="width:70%">
-        <h1 class="title text-md-center">CREATE A NEW ROLE</h1>
-        <form style="display:flex; flex-direction:column;  align-items:center" asp-action="CreateRole" method="post">
-            <div class="form-group">
-                <label style="font-size:20px" for="formGroupExampleInput">Role Name</label>
-                <input class="form-control" style="width:400px; height:50px; border: 1px solid #202528" type="text" name="roleName" />
-            </div>
-            <div class="form-group">
-                <input class="btn btn-secondary" type="submit" name="submit" value="Add" />
-            </div>
-        </form>
-        <hr style="margin:0; " />
 
+<div class="admin-page-head">
+    <div>
+        <h1>Roles</h1>
+        <p>Admin grants access to this dashboard. User is given to every customer at registration. Both are built in and can't be renamed or deleted.</p>
     </div>
-    <div class="container" style="width:70%">
-        <h1 class="title">MANAGE ROLES</h1>
-        <table class="table table-striped text-center">
-            <thead class="thead-dark">
-                <tr>
-                    <th scope="col">Name</th>
-                    <th scope="col">Remove</th>
-                </tr>
-            </thead>
-            <tbody>
+</div>
+
+<div class="row g-3">
+    <div class="col-12 col-lg-7">
+        <section class="panel" aria-labelledby="roles-h">
+            <div class="panel-head"><h2 id="roles-h">All roles</h2></div>
+            <ul class="list-group list-group-flush">
                 @foreach (var role in roles)
                 {
-                    <tr>
-                        <td>@role.Name</td>
-                        <td>
-                            <a class="btn btn-danger" asp-area="Admin" asp-controller="RoleManager" asp-action="RemoveRole" asp-route-Id="@role.Id">Remove</a>
-                            <a class="btn btn-primary" asp-area="Admin" asp-controller="RoleManager" asp-action="EditRole" asp-route-Id="@role.Id">Edit</a>
-                        </td>
-                    </tr>
+                    var isProtected = protectedRoles.Contains(role.Name);
+                    <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <span class="fw-semibold">@role.Name @if (isProtected) { <span class="badge text-bg-light border ms-1">Built in</span> }</span>
+                        <span class="d-flex gap-2">
+                            <a class="btn btn-sm btn-outline-primary" asp-action="EditRole" asp-route-id="@role.Id">@(isProtected ? "View members" : "Edit")</a>
+                            @if (!isProtected)
+                            {
+                                <form method="post" asp-action="RemoveRole" asp-route-id="@role.Id" data-confirm="Delete the role “@role.Name”? Members will lose it.">
+                                    <button class="btn btn-sm btn-outline-danger" type="submit" aria-label="Delete role @role.Name"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+                                </form>
+                            }
+                        </span>
+                    </li>
                 }
-            </tbody>
-        </table>
+            </ul>
+        </section>
+    </div>
+    <div class="col-12 col-lg-5">
+        <section class="panel" aria-labelledby="new-h">
+            <div class="panel-head"><h2 id="new-h">Create a role</h2></div>
+            <div class="panel-body">
+                <form method="post" asp-action="CreateRole" class="d-flex flex-wrap gap-2 align-items-end">
+                    <div class="flex-grow-1">
+                        <label class="form-label small" for="roleName">Role name</label>
+                        <input class="form-control" id="roleName" name="roleName" minlength="2" maxlength="50" required />
+                    </div>
+                    <button class="btn btn-primary" type="submit">Create</button>
+                </form>
+                <p class="small text-muted mt-2 mb-0">Assign roles to people from <a asp-controller="Home" asp-action="Users">Customers</a>.</p>
+            </div>
+        </section>
     </div>
 </div>

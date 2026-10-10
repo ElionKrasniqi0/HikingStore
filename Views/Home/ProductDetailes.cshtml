@@ -1,869 +1,431 @@
-@model Product
-
+@model ProductDetailsViewModel
+@inject IOptions<StoreSettings> StoreOptions
 @{
-    var vatRate = 0.18m; // 18% VAT
-    var priceWithVat = Model.Price;
-    var priceWithoutVat = priceWithVat / (1 + vatRate);
-    var monthlyInstallment24 = priceWithVat / 24;
-    var monthlyInstallment36 = priceWithVat / 36;
-    var protectionPlanPrice = priceWithVat * 0.0477m; // ~4.77% of price
+    var store = StoreOptions.Value;
+    var p = Model.Product;
+    var images = p.AllImagePaths;
+    var baseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
+    ViewData["Title"] = p.ProName;
+    var plainDescription = (p.Descreption ?? string.Empty).ReplaceLineEndings(" ");
+    ViewData["Description"] = plainDescription.Length > 155 ? plainDescription[..155] + "…" : (plainDescription.Length > 0 ? plainDescription : $"{p.ProName} at {store.Name}.");
+    ViewData["OgType"] = "product";
+    if (images.Count > 0) ViewData["OgImage"] = $"{baseUrl}/Product/{images[0]}";
+    ViewData["Canonical"] = $"{baseUrl}{Url.Action("ProductDetailes", new { id = p.ProId })}";
+    ViewData["BodyClass"] = "has-buy-bar";
+    var lowStock = p.IsInStock && p.StockQuantity <= 5;
+    var maxQty = Math.Min(p.StockQuantity, CartService.MaxQuantityPerLine);
+    var jsonLd = new Dictionary<string, object?>
+    {
+        ["@context"] = "https://schema.org",
+        ["@type"] = "Product",
+        ["name"] = p.ProName,
+        ["description"] = plainDescription,
+        ["sku"] = p.ProId.ToString(),
+        ["image"] = images.Select(i => $"{baseUrl}/Product/{i}").ToArray(),
+        ["brand"] = string.IsNullOrEmpty(p.Brand) ? null : new Dictionary<string, object> { ["@type"] = "Brand", ["name"] = p.Brand },
+        ["offers"] = new Dictionary<string, object>
+        {
+            ["@type"] = "Offer",
+            ["priceCurrency"] = store.Currency,
+            ["price"] = p.Price.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture),
+            ["availability"] = p.IsInStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            ["url"] = ViewData["Canonical"]!
+        }
+    };
+    if (Model.ReviewCount > 0 && Model.AverageRating.HasValue)
+    {
+        jsonLd["aggregateRating"] = new Dictionary<string, object>
+        {
+            ["@type"] = "AggregateRating",
+            ["ratingValue"] = Math.Round(Model.AverageRating.Value, 1),
+            ["reviewCount"] = Model.ReviewCount
+        };
+    }
+    var jsonLdText = System.Text.Json.JsonSerializer.Serialize(jsonLd, new System.Text.Json.JsonSerializerOptions
+    {
+        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+    }).Replace("</", "<\\/");
+}
+@section Head {
+    <script type="application/ld+json">@Html.Raw(jsonLdText)</script>
 }
 
-<!-- Breadcrumbs -->
-<section class="py-2 bg-light">
-    <div class="container">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0 small">
-                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
-                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Shop">Shop</a></li>
-                @if (Model.Category != null)
+<div class="container-hs">
+    <nav class="breadcrumb-bar" aria-label="Breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item"><a asp-action="Shop">Shop</a></li>
+            @foreach (var crumb in Model.Breadcrumb)
+            {
+                <li class="breadcrumb-item"><a asp-action="Shop" asp-route-category="@crumb.CatId">@crumb.CatName</a></li>
+            }
+            <li class="breadcrumb-item active text-truncate" style="max-width:280px" aria-current="page">@p.ProName</li>
+        </ol>
+    </nav>
+
+    <div class="pdp">
+        <section class="gallery" aria-label="Product images">
+            @if (images.Count > 1)
+            {
+                <div class="gallery-thumbs">
+                    @for (var i = 0; i < images.Count; i++)
+                    {
+                        <button type="button" data-gallery-thumb="@Url.Content($"~/Product/{images[i]}")" aria-current="@(i == 0 ? "true" : "false")" aria-label="Show image @(i + 1) of @images.Count">
+                            <img src="~/Product/@images[i]" alt="" loading="lazy" width="76" height="76" />
+                        </button>
+                    }
+                </div>
+            }
+            <div class="gallery-main" style="@(images.Count <= 1 ? "grid-column:1 / -1" : "")">
+                @if (images.Count > 0)
                 {
-                    <li class="breadcrumb-item"><a href="#">@Model.Category.CatName</a></li>
+                    <img id="gallery-main" src="~/Product/@images[0]" alt="@p.ProName" width="800" height="800" fetchpriority="high" />
+                    @if (images.Count > 1)
+                    {
+                        <button type="button" class="gallery-nav prev" data-gallery-step="-1" aria-label="Previous image"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button>
+                        <button type="button" class="gallery-nav next" data-gallery-step="1" aria-label="Next image"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>
+                        <span class="gallery-count" data-gallery-count aria-hidden="true">1 / @images.Count</span>
+                    }
                 }
-                <li class="breadcrumb-item active" aria-current="page">@Model.ProName</li>
-            </ol>
-        </nav>
-    </div>
-</section>
-
-<!-- Product Details -->
-<section class="py-3">
-    <div class="container">
-        <div class="row g-3">
-            <!-- Product Image Section -->
-            <div class="col-lg-6">
-                <!-- Best Price Guaranteed Banner -->
-                <div class="best-price-banner mb-2">
-                    <span class="badge bg-danger px-2 py-1" style="font-size: 0.8rem;">
-                        <i class="fas fa-tag me-1"></i>BEST PRICE GUARANTEED
-                    </span>
-                </div>
-
-                <!-- Main Product Image -->
-                <div class="product-image-container text-center mb-2">
-                    <img id="mainProductImage" src="~/Product/@Model.ProImage" alt="@Model.ProName"
-                         class="img-fluid rounded-3 product-main-image"
-                         style="max-height: 350px; object-fit: contain; padding: 15px;">
-                </div>
-
-                <!-- Thumbnail Gallery -->
-                <div class="thumbnail-gallery">
-                    <div class="d-flex gap-2 flex-wrap">
-                        <div class="thumbnail-item active" data-image="~/Product/@Model.ProImage">
-                            <img src="~/Product/@Model.ProImage" alt="Thumbnail 1" class="img-fluid rounded">
-                        </div>
-                        @for (int i = 2; i <= 6; i++)
-                        {
-                            <div class="thumbnail-item" data-image="~/Product/@Model.ProImage">
-                                <img src="~/Product/@Model.ProImage" alt="Thumbnail @i" class="img-fluid rounded">
-                            </div>
-                        }
-                    </div>
-                    <div class="text-center mt-2">
-                        <small class="text-muted">1/10</small>
-                    </div>
+                else
+                {
+                    <div class="d-grid h-100 text-muted" style="place-items:center"><i class="fa-solid fa-mountain fa-3x" aria-hidden="true"></i><span class="visually-hidden">No image available</span></div>
+                }
+                <div class="p-badges">
+                    @if (p.IsOnSale && p.IsInStock)
+                    {
+                        <span class="badge-hs badge-sale">−@p.DiscountPercent%</span>
+                    }
                 </div>
             </div>
+        </section>
 
-            <!-- Product Info Section -->
-            <div class="col-lg-6">
-                <div class="product-info">
-                    <!-- Product Title -->
-                    <h1 class="h4 fw-bold text-dark mb-1">@Model.ProName</h1>
+        <section class="pdp-info" aria-labelledby="product-title">
+            @if (!string.IsNullOrEmpty(p.Brand))
+            {
+                <a class="p-brand text-decoration-none" asp-action="Shop" asp-route-brand="@p.Brand">@p.Brand</a>
+            }
+            <h1 id="product-title">@p.ProName</h1>
+            @if (Model.ReviewCount > 0 && Model.AverageRating.HasValue)
+            {
+                <a href="#reviews" class="p-meta text-decoration-none mb-2 d-inline-flex">
+                    <partial name="_Stars" model="Model.AverageRating.Value" />
+                    <span>@Model.AverageRating.Value.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) · @Model.ReviewCount @(Model.ReviewCount == 1 ? "review" : "reviews")</span>
+                </a>
+            }
+            <div class="price my-2">
+                <span class="now @(p.IsOnSale ? "on-sale" : "")">@store.FormatPrice(p.Price)</span>
+                @if (p.IsOnSale)
+                {
+                    <span class="was"><span class="visually-hidden">Was </span>@store.FormatPrice(p.CompareAtPrice!.Value)</span>
+                    <span class="off">Save @store.FormatPrice(p.CompareAtPrice.Value - p.Price) (@p.DiscountPercent%)</span>
+                }
+            </div>
+            <p class="small text-muted">Price includes VAT. @(store.FreeShippingThreshold > 0 ? $"Free standard shipping over {store.FormatPrice(store.FreeShippingThreshold)}." : "")</p>
 
-                    <!-- Brand -->
-                    <div class="mb-2">
-                        <span class="text-muted small">Brand: </span>
-                        <span class="fw-semibold">@(Model.Category?.CatName ?? "HikingStore")</span>
-                        <span class="text-muted small ms-3">Code: @Model.ProId.ToString("D6")</span>
-                    </div>
+            <form method="post" asp-controller="Carts" asp-action="AddToCart" data-add-to-cart id="add-to-cart-form" class="mt-4">
+                <input type="hidden" name="proId" value="@p.ProId" />
+                <input type="hidden" name="returnUrl" value="@Url.Action("ProductDetailes", new { id = p.ProId })" />
 
-                    <!-- Rating -->
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="rating-stars me-2">
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="far fa-star text-warning"></i>
+                @if (p.ColorOptions.Count > 0)
+                {
+                    <fieldset class="mb-4">
+                        <legend class="opt-label">Colour <span data-selected-label="color">@(p.ColorOptions.Count == 1 ? p.ColorOptions[0] : "– choose one")</span></legend>
+                        <div class="opt-chips">
+                            @for (var i = 0; i < p.ColorOptions.Count; i++)
+                            {
+                                <input type="radio" name="color" id="color-@i" value="@p.ColorOptions[i]" required @(p.ColorOptions.Count == 1 ? "checked" : "") data-label-target="color" />
+                                <label for="color-@i">@p.ColorOptions[i]</label>
+                            }
                         </div>
-                        <a href="#reviews" class="text-muted small text-decoration-none">Rate</a>
-                        <span class="text-muted small ms-2">4.2 (128 reviews)</span>
-                    </div>
-
-                    <!-- Price Section -->
-                    <div class="price-section mb-3">
-                        <div class="d-flex align-items-baseline gap-2 mb-1">
-                            <span class="h3 fw-bold text-dark">€@priceWithVat.ToString("N2")</span>
+                    </fieldset>
+                }
+                @if (p.SizeOptions.Count > 0)
+                {
+                    <fieldset class="mb-4">
+                        <legend class="opt-label">Size <span data-selected-label="size">@(p.SizeOptions.Count == 1 ? p.SizeOptions[0] : "– choose one")</span></legend>
+                        <div class="opt-chips">
+                            @for (var i = 0; i < p.SizeOptions.Count; i++)
+                            {
+                                <input type="radio" name="size" id="size-@i" value="@p.SizeOptions[i]" required @(p.SizeOptions.Count == 1 ? "checked" : "") data-label-target="size" />
+                                <label for="size-@i">@p.SizeOptions[i]</label>
+                            }
                         </div>
-                        <div class="mb-1">
-                            <span class="text-muted small">Including VAT</span>
-                            <span class="text-muted small ms-2">Without VAT: €@priceWithoutVat.ToString("N2")</span>
-                        </div>
-                        @if (Model.IsInStock && Model.StockQuantity > 0)
-                        {
-                            <div class="mt-2">
-                                <a href="#" class="text-primary small text-decoration-none">Buy outlet product for €@((priceWithVat * 0.87m).ToString("N2"))</a>
-                            </div>
-                        }
-                    </div>
+                    </fieldset>
+                }
 
-                    <!-- Quantity Selector -->
-                    @if (Model.IsInStock)
+                <div class="stock-line mb-3 @(p.IsInStock ? (lowStock ? "low" : "") : "out")">
+                    <span class="dot" aria-hidden="true"></span>
+                    @if (!p.IsInStock)
                     {
-                        <form id="addToCartForm" method="post">
-                            <div class="quantity-section mb-3">
-                                <label class="form-label small fw-semibold mb-1">Quantity</label>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="quantity-controls d-flex border rounded-2" style="width: 120px;">
-                                        <button type="button" class="btn btn-light btn-quantity border-0">
-                                            <i class="fas fa-minus small"></i>
-                                        </button>
-                                        <input type="text" id="qtyInput" name="qty"
-                                               class="form-control border-0 text-center shadow-none quantity-input"
-                                               value="1" style="width: 60px;" max="@Model.StockQuantity">
-                                        <button type="button" class="btn btn-light btn-quantity border-0">
-                                            <i class="fas fa-plus small"></i>
-                                        </button>
-                                    </div>
-                                    <span class="text-muted small">More than 10 items available</span>
-                                </div>
-                            </div>
+                        <span>Out of stock</span>
+                    }
+                    else if (lowStock)
+                    {
+                        <span>Only @p.StockQuantity left in stock</span>
+                    }
+                    else
+                    {
+                        <span>In stock — ready to ship</span>
+                    }
+                </div>
 
-                            <!-- Shipping Information -->
-                            <div class="shipping-section mb-3">
-                                <h6 class="fw-semibold mb-1" style="font-size: 0.9rem;">Shipping</h6>
-                                <div class="mb-2">
-                                    <label class="form-label small fw-semibold mb-1">Select Shipping Method</label>
-                                    <select id="shippingOption" name="shippingOption" class="form-select form-select-sm" style="font-size: 0.85rem;">
-                                        <option value="Standard Shipping">Standard Shipping</option>
-                                        <option value="Express Shipping">Express Shipping</option>
-                                        <option value="DHL">DHL</option>
-                                        <option value="UPS">UPS</option>
-                                        <option value="FedEx">FedEx</option>
-                                        <option value="Custom">Custom Carrier</option>
-                                    </select>
-                                </div>
-                                <p class="text-muted small mb-1" style="font-size: 0.85rem;">
-                                    Delivery date for this product is uncertain. However, you can pre-order, and we will do our best to deliver it as soon as possible.
-                                </p>
-                                <a href="#" class="text-primary small text-decoration-none">More</a>
-                            </div>
+                @if (p.IsInStock)
+                {
+                    <div class="buy-row">
+                        <div class="qty-stepper">
+                            <button type="button" data-step="-1" aria-label="Decrease quantity"><i class="fa-solid fa-minus" aria-hidden="true"></i></button>
+                            <label for="qty" class="visually-hidden">Quantity</label>
+                            <input id="qty" type="number" name="qty" value="1" min="1" max="@maxQty" inputmode="numeric" required />
+                            <button type="button" data-step="1" aria-label="Increase quantity"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg" data-busy-text="Adding…">
+                            <i class="fa-solid fa-bag-shopping me-2" aria-hidden="true"></i>Add to cart
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-lg" data-wishlist-toggle data-product-id="@p.ProId"
+                                aria-pressed="@(Model.InWishlist ? "true" : "false")" aria-label="@(Model.InWishlist ? "Remove from" : "Add to") wishlist">
+                            <i class="@(Model.InWishlist ? "fa-solid" : "fa-regular") fa-heart" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-primary btn-lg flex-grow-1" disabled>Sold out</button>
+                        <button type="button" class="btn btn-outline-secondary btn-lg" data-wishlist-toggle data-product-id="@p.ProId"
+                                aria-pressed="@(Model.InWishlist ? "true" : "false")" aria-label="@(Model.InWishlist ? "Remove from" : "Add to") wishlist">
+                            <i class="@(Model.InWishlist ? "fa-solid" : "fa-regular") fa-heart me-1" aria-hidden="true"></i><span data-label>@(Model.InWishlist ? "Saved" : "Save")</span>
+                        </button>
+                    </div>
+                    <p class="small text-muted mt-2">Save it to your wishlist and check back — we restock popular items regularly.</p>
+                }
+            </form>
 
-                            <!-- Secure Payment Options -->
-                            <div class="payment-options mb-3">
-                                <h6 class="fw-semibold mb-1" style="font-size: 0.9rem;">Secure Payment</h6>
-                                <div class="d-flex gap-3 flex-wrap">
-                                    <div class="d-flex align-items-center text-muted small">
-                                        <i class="fas fa-money-bill-wave me-2"></i>
-                                        <span>Pay with cash on delivery</span>
-                                    </div>
-                                    <div class="d-flex align-items-center text-muted small">
-                                        <i class="fas fa-credit-card me-2"></i>
-                                        <span>Pay online</span>
-                                    </div>
-                                    <div class="d-flex align-items-center text-muted small">
-                                        <i class="fas fa-university me-2"></i>
-                                        <span>Pay with bank transfer</span>
-                                    </div>
-                                </div>
-                            </div>
+            <ul class="info-list mt-4">
+                <li><i class="fa-solid fa-truck-fast" aria-hidden="true"></i><div><strong>Delivery</strong><br />
+                    @foreach (var method in store.ShippingMethods)
+                    {
+                        <span class="d-block text-muted">@method.Name: @(method.Cost == 0 ? "free" : store.FormatPrice(method.Cost))@(method.FreeOverThreshold ? $" (free over {store.FormatPrice(store.FreeShippingThreshold)})" : "") · @method.EstimatedDays</span>
+                    }
+                </div></li>
+                <li><i class="fa-solid fa-rotate-left" aria-hidden="true"></i><div><strong>@store.ReturnDays-day returns</strong><br /><span class="text-muted">Unused items in original condition. <a asp-action="Returns">Returns policy</a></span></div></li>
+                <li><i class="fa-solid fa-money-bill-wave" aria-hidden="true"></i><div><strong>Cash on delivery</strong><br /><span class="text-muted">Pay the courier when your order arrives.</span></div></li>
+            </ul>
 
-                            <!-- Action Buttons -->
-                            <div class="action-buttons mb-3">
-                                <div class="d-flex gap-2 flex-wrap">
-                                    <button type="submit" class="btn btn-warning flex-grow-1 buy-now-btn" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
-                                        <i class="fas fa-check me-1"></i>BUY NOW
-                                    </button>
-                                    <button type="button" class="btn btn-outline-primary add-to-cart-btn-action" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
-                                        <i class="fas fa-shopping-cart me-1"></i>ADD TO CART
-                                    </button>
-                                    <button type="button" class="btn btn-outline-secondary wishlist-btn-action" style="width: 42px; height: 42px; padding: 0;">
-                                        <i class="far fa-heart"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-outline-secondary share-btn" style="width: 42px; height: 42px; padding: 0;">
-                                        <i class="fas fa-share-alt"></i>
-                                    </button>
-                                </div>
+            <div class="accordion pdp-accordion mt-4" id="pdp-details">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#pdp-desc" aria-expanded="true" aria-controls="pdp-desc">Description</button>
+                    </h2>
+                    <div id="pdp-desc" class="accordion-collapse collapse show">
+                        <div class="accordion-body" style="white-space:pre-line">@(string.IsNullOrWhiteSpace(p.Descreption) ? "No description available." : p.Descreption)</div>
+                    </div>
+                </div>
+                @if (p.SpecificationList.Count > 0 || !string.IsNullOrEmpty(p.Material))
+                {
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#pdp-specs" aria-expanded="false" aria-controls="pdp-specs">Specifications</button>
+                        </h2>
+                        <div id="pdp-specs" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <table class="spec-table">
+                                    <tbody>
+                                        @if (!string.IsNullOrEmpty(p.Brand))
+                                        {
+                                            <tr><th scope="row">Brand</th><td>@p.Brand</td></tr>
+                                        }
+                                        @if (!string.IsNullOrEmpty(p.Material))
+                                        {
+                                            <tr><th scope="row">Material</th><td>@p.Material</td></tr>
+                                        }
+                                        @foreach (var spec in p.SpecificationList)
+                                        {
+                                            <tr><th scope="row">@spec.Key</th><td>@spec.Value</td></tr>
+                                        }
+                                    </tbody>
+                                </table>
                             </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+    </div>
+
+    <section id="reviews" class="section" aria-labelledby="reviews-title">
+        <h2 id="reviews-title">Customer reviews</h2>
+        @if (Model.ReviewCount > 0 && Model.AverageRating.HasValue)
+        {
+            <div class="review-summary my-4">
+                <div class="review-score">
+                    <div class="big">@Model.AverageRating.Value.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)</div>
+                    <partial name="_Stars" model="Model.AverageRating.Value" />
+                    <div class="small text-muted mt-1">@Model.ReviewCount @(Model.ReviewCount == 1 ? "review" : "reviews")</div>
+                </div>
+                <ul class="rating-bars list-unstyled m-0">
+                    @for (var star = 5; star >= 1; star--)
+                    {
+                        var count = Model.RatingBreakdown[star - 1];
+                        var pct = Model.ReviewCount == 0 ? 0 : (int)Math.Round(100.0 * count / Model.ReviewCount);
+                        <li><span>@star star</span><span class="bar" role="img" aria-label="@pct percent"><span style="width:@pct%"></span></span><span class="text-muted">@count</span></li>
+                    }
+                </ul>
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">No reviews yet.</p>
+        }
+
+        <div class="row gy-4 gx-lg-5">
+            <div class="col-lg-7 order-2 order-lg-1">
+                @foreach (var review in Model.Reviews)
+                {
+                    <article class="review-item">
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                            <partial name="_Stars" model="(double)review.Rating" />
+                            @if (review.IsVerifiedPurchase)
+                            {
+                                <span class="verified"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Verified purchase</span>
+                            }
+                        </div>
+                        <h3>@review.Title</h3>
+                        <p class="mb-2" style="white-space:pre-line">@review.Comment</p>
+                        <p class="small text-muted m-0">@(review.User?.FirstName ?? "Customer") · <time datetime="@review.CreatedAt.ToString("yyyy-MM-dd")">@review.CreatedAt.ToString("d MMM yyyy")</time></p>
+                    </article>
+                }
+            </div>
+            <div class="col-lg-5 order-1 order-lg-2">
+                <div class="card-hs beige">
+                    <h3 class="h5">Write a review</h3>
+                    @if (Model.CanReview)
+                    {
+                        <form method="post" asp-controller="Reviews" asp-action="Create" data-once>
+                            <input type="hidden" name="ProId" value="@p.ProId" />
+                            <fieldset class="mb-3">
+                                <legend class="form-label">Your rating</legend>
+                                <div class="star-input">
+                                    @for (var s = 5; s >= 1; s--)
+                                    {
+                                        <input type="radio" name="Rating" id="rate-@s" value="@s" required />
+                                        <label for="rate-@s" title="@s star@(s > 1 ? "s" : "")"><i class="fa-solid fa-star" aria-hidden="true"></i><span class="visually-hidden">@s star@(s > 1 ? "s" : "")</span></label>
+                                    }
+                                </div>
+                            </fieldset>
+                            <div class="mb-3">
+                                <label class="form-label" for="review-title">Title</label>
+                                <input class="form-control" id="review-title" name="Title" required minlength="3" maxlength="100" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="review-comment">Review</label>
+                                <textarea class="form-control" id="review-comment" name="Comment" rows="4" required minlength="10" maxlength="2000"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100" data-busy-text="Submitting…">Submit review</button>
+                            <p class="small text-muted mt-2 mb-0">Reviews are checked by our team before they appear.</p>
                         </form>
                     }
                     else
                     {
-                        <div class="alert alert-warning mb-4">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            This product is currently out of stock. Check back later!
-                        </div>
+                        <p class="m-0">@Model.ReviewBlockedReason</p>
+                        @if (!User.Identity!.IsAuthenticated)
+                        {
+                            <a class="btn btn-outline-primary mt-3" asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Url.Action("ProductDetailes", new { id = p.ProId })#reviews">Sign in</a>
+                        }
                     }
-
-                    <!-- Success Message -->
-                    <div id="successMessage" class="alert alert-success mt-3 py-2 small" style="display: none;">
-                        <i class="fas fa-check-circle me-2"></i>
-                        <span>Item added to cart!</span>
-                        <a href="/Carts/Index" class="alert-link ms-2">View Cart</a>
-                    </div>
-
-                    <!-- Error Message -->
-                    <div id="errorMessage" class="alert alert-danger mt-3 py-2 small" style="display: none;">
-                        <i class="fas fa-exclamation-circle me-2"></i>
-                        <span id="errorText"></span>
-                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- Delimiter -->
-<div class="container">
-    <hr class="my-0" style="border-top: 2px solid #dee2e6;">
+    @if (Model.Related.Count > 0)
+    {
+        <section class="section pt-0" aria-labelledby="related-title">
+            <div class="section-head"><h2 id="related-title">You may also like</h2></div>
+            <div class="product-rail" tabindex="0" aria-label="Related products, scroll horizontally">
+                @foreach (var card in Model.Related)
+                {
+                    <partial name="_ProductCard" model="card" />
+                }
+            </div>
+        </section>
+    }
+
+    @if (Model.RecentlyViewed.Count > 0)
+    {
+        <section class="section pt-0" aria-labelledby="recent-title">
+            <div class="section-head"><h2 id="recent-title">Recently viewed</h2></div>
+            <div class="product-rail" tabindex="0" aria-label="Recently viewed products, scroll horizontally">
+                @foreach (var card in Model.RecentlyViewed)
+                {
+                    <partial name="_ProductCard" model="card" />
+                }
+            </div>
+        </section>
+    }
 </div>
 
-<!-- Product Description Tabs -->
-<section class="py-3 bg-light">
-    <div class="container">
-        <div class="row">
-            <div class="col-12">
-                <div class="bg-white rounded-3 shadow-sm">
-                    <ul class="nav nav-tabs border-0 px-3 pt-2" id="productTabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active border-0 fw-semibold" id="description-tab" data-bs-toggle="tab"
-                                    data-bs-target="#description" type="button" role="tab">
-                                Description
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link border-0 fw-semibold" id="details-tab" data-bs-toggle="tab"
-                                    data-bs-target="#details" type="button" role="tab">
-                                Details
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link border-0 fw-semibold" id="reviews-tab" data-bs-toggle="tab"
-                                    data-bs-target="#reviews" type="button" role="tab">
-                                Reviews
-                            </button>
-                        </li>
-                    </ul>
-
-                    <div class="tab-content p-3" id="productTabsContent">
-                        <div class="tab-pane fade show active" id="description" role="tabpanel">
-                            <div class="product-description">
-                                <p class="mb-3">@Model.Descreption</p>
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="details" role="tabpanel">
-                            <div class="product-details">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="border-bottom py-2">
-                                            <strong>Material:</strong>
-                                            <span class="text-muted float-end">Premium Quality</span>
-                                        </div>
-                                        <div class="border-bottom py-2">
-                                            <strong>Weight:</strong>
-                                            <span class="text-muted float-end">Lightweight</span>
-                                        </div>
-                                        <div class="border-bottom py-2">
-                                            <strong>Dimensions:</strong>
-                                            <span class="text-muted float-end">Standard</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="border-bottom py-2">
-                                            <strong>Warranty:</strong>
-                                            <span class="text-muted float-end">2 Years</span>
-                                        </div>
-                                        <div class="border-bottom py-2">
-                                            <strong>SKU:</strong>
-                                            <span class="text-muted float-end">HS-@Model.ProId.ToString("D4")</span>
-                                        </div>
-                                        <div class="border-bottom py-2">
-                                            <strong>Brand:</strong>
-                                            <span class="text-muted float-end">@(Model.Category?.CatName ?? "HikingStore")</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="reviews" role="tabpanel">
-                            <div class="product-reviews">
-                                <h5 class="mb-3">Customer Reviews</h5>
-                                <div class="review-summary mb-4 p-3 bg-light rounded">
-                                    <div class="d-flex align-items-center mb-2">
-                                        <span class="h3 fw-bold me-2">4.2</span>
-                                        <div class="rating-stars me-2">
-                                            <i class="fas fa-star text-warning"></i>
-                                            <i class="fas fa-star text-warning"></i>
-                                            <i class="fas fa-star text-warning"></i>
-                                            <i class="fas fa-star text-warning"></i>
-                                            <i class="far fa-star text-warning"></i>
-                                        </div>
-                                        <span class="text-muted">(128 reviews)</span>
-                                    </div>
-                                </div>
-                                <div class="reviews-list">
-                                    <p class="text-muted">No reviews yet. Be the first to review this product!</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="mobile-buy-bar d-lg-none" aria-hidden="false">
+    <div class="price">
+        <span class="now @(p.IsOnSale ? "on-sale" : "")">@store.FormatPrice(p.Price)</span>
     </div>
-</section>
-
-<style>
-    /* Breadcrumbs */
-    .breadcrumb {
-        background: transparent;
-        padding: 0;
+    @if (p.IsInStock)
+    {
+        <button type="submit" form="add-to-cart-form" class="btn btn-primary" data-busy-text="Adding…">Add to cart</button>
     }
-
-    .breadcrumb-item a {
-        color: #6c757d;
-        text-decoration: none;
+    else
+    {
+        <button type="button" class="btn btn-primary" disabled>Sold out</button>
     }
+</div>
 
-    .breadcrumb-item a:hover {
-        color: #3b5d50;
-    }
-
-    /* Best Price Banner */
-    .best-price-banner {
-        text-align: center;
-    }
-
-    .best-price-banner .badge {
-        font-size: 0.9rem;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-    }
-
-    /* Product Image Styling */
-    .product-image-container {
-        background: #f8f9fa;
-        border-radius: 12px;
-        padding: 15px;
-        margin-bottom: 15px;
-    }
-
-    .product-main-image {
-        max-height: 350px;
-        width: auto;
-        object-fit: contain;
-        transition: transform 0.3s ease;
-    }
-
-    .product-image-container:hover .product-main-image {
-        transform: scale(1.02);
-    }
-
-    /* Thumbnail Gallery */
-    .thumbnail-gallery .thumbnail-item {
-        width: 60px;
-        height: 60px;
-        border: 2px solid transparent;
-        border-radius: 8px;
-        cursor: pointer;
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
-
-    .thumbnail-gallery .thumbnail-item:hover {
-        border-color: #3b5d50;
-        transform: scale(1.05);
-    }
-
-    .thumbnail-gallery .thumbnail-item.active {
-        border-color: #ff6b35;
-    }
-
-    .thumbnail-gallery .thumbnail-item img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    /* Quantity Controls */
-    .quantity-controls {
-        background: white;
-    }
-
-    .btn-quantity {
-        width: 36px;
-        height: 36px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0;
-        transition: all 0.2s ease;
-    }
-
-    .btn-quantity:hover {
-        background: #f8f9fa;
-    }
-
-    .quantity-input {
-        height: 36px;
-        font-weight: 600;
-        font-size: 0.9rem;
-        background: transparent;
-        border: none;
-    }
-
-    /* Action Buttons */
-    .buy-now-btn {
-        background-color: #ff6b35;
-        border-color: #ff6b35;
-        color: white;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
-
-    .buy-now-btn:hover {
-        background-color: #e55a2b;
-        border-color: #e55a2b;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
-    }
-
-    .add-to-cart-btn-action {
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
-
-    .add-to-cart-btn-action:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(59, 93, 80, 0.2);
-    }
-
-    .wishlist-btn-action,
-    .share-btn {
-        transition: all 0.3s ease;
-    }
-
-    .wishlist-btn-action:hover,
-    .share-btn:hover {
-        background: #3b5d50;
-        color: white;
-        border-color: #3b5d50;
-    }
-
-    /* Installment Section */
-    .installment-option {
-        background: #f8f9fa;
-        transition: all 0.2s ease;
-    }
-
-    .installment-option:hover {
-        background: #e9ecef;
-        border-color: #3b5d50;
-    }
-
-    /* Protection Plan */
-    .protection-plan-section .form-check {
-        padding: 8px 16px;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        transition: all 0.2s ease;
-    }
-
-    .protection-plan-section .form-check:hover {
-        border-color: #3b5d50;
-        background: #f8f9fa;
-    }
-
-    .protection-plan-section .form-check-input:checked {
-        background-color: #3b5d50;
-        border-color: #3b5d50;
-    }
-
-    /* Tabs */
-    .nav-tabs .nav-link {
-        color: #6c757d;
-        padding: 10px 16px;
-        margin-right: 8px;
-        font-size: 0.9rem;
-    }
-
-    .nav-tabs .nav-link.active {
-        color: #3b5d50;
-        border-bottom: 3px solid #3b5d50;
-    }
-
-    .nav-tabs .nav-link:hover {
-        color: #3b5d50;
-        border-color: transparent;
-    }
-
-    /* Responsive adjustments */
-    @@media (max-width: 768px) {
-        .product-image-container {
-            padding: 12px;
-        }
-
-        .product-main-image {
-            max-height: 250px;
-        }
-
-        .thumbnail-gallery .thumbnail-item {
-            width: 50px;
-            height: 50px;
-        }
-
-        .action-buttons .btn {
-            width: 100%;
-            margin-bottom: 10px;
-        }
-
-        .quantity-controls {
-            width: 100%;
-            max-width: 200px;
-        }
-    }
-
-    @@media (max-width: 576px) {
-        .product-image-container {
-            padding: 10px;
-        }
-
-        .product-main-image {
-            max-height: 200px;
-        }
-
-        .h4 {
-            font-size: 1.25rem;
-        }
-
-        .h3 {
-            font-size: 1.5rem;
-        }
-    }
-
-    /* Success and Error Messages */
-    .alert {
-        border-radius: 8px;
-        border: none;
-        animation: fadeIn 0.3s ease;
-    }
-
-    @@keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-</style>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Thumbnail gallery functionality
-        const thumbnailItems = document.querySelectorAll('.thumbnail-item');
-        const mainImage = document.getElementById('mainProductImage');
-
-        thumbnailItems.forEach(item => {
-            item.addEventListener('click', function() {
-                // Remove active class from all thumbnails
-                thumbnailItems.forEach(t => t.classList.remove('active'));
-                // Add active class to clicked thumbnail
-                this.classList.add('active');
-                // Update main image
-                const imageSrc = this.getAttribute('data-image');
-                if (mainImage && imageSrc) {
-                    mainImage.src = imageSrc;
+@section Scripts {
+    <script>
+        (function () {
+            const main = document.getElementById('gallery-main');
+            const thumbs = [...document.querySelectorAll('[data-gallery-thumb]')];
+            const counter = document.querySelector('[data-gallery-count]');
+            let current = 0;
+            function show(index) {
+                if (!main || thumbs.length === 0) return;
+                current = (index + thumbs.length) % thumbs.length;
+                main.src = thumbs[current].dataset.galleryThumb;
+                thumbs.forEach((b, i) => b.setAttribute('aria-current', i === current ? 'true' : 'false'));
+                const strip = thumbs[current].parentElement;
+                if (strip.scrollWidth > strip.clientWidth) {
+                    strip.scrollTo({ left: thumbs[current].offsetLeft - strip.offsetLeft - 8, behavior: 'smooth' });
                 }
+                if (counter) counter.textContent = (current + 1) + ' / ' + thumbs.length;
+            }
+            thumbs.forEach((btn, i) => btn.addEventListener('click', () => show(i)));
+            document.querySelectorAll('[data-gallery-step]').forEach(btn => {
+                btn.addEventListener('click', () => show(current + Number(btn.dataset.galleryStep)));
             });
-        });
-
-        // Quantity controls
-        const qtyInput = document.getElementById('qtyInput');
-        const quantityButtons = document.querySelectorAll('.btn-quantity');
-        const minusButton = Array.from(quantityButtons).find(btn => btn.querySelector('.fa-minus'));
-        const plusButton = Array.from(quantityButtons).find(btn => btn.querySelector('.fa-plus'));
-
-        minusButton?.addEventListener('click', function() {
-            let currentValue = parseInt(qtyInput.value) || 1;
-            if (currentValue > 1) {
-                qtyInput.value = currentValue - 1;
-            }
-        });
-
-        plusButton?.addEventListener('click', function() {
-            let currentValue = parseInt(qtyInput.value) || 1;
-            const maxStock = @Model.StockQuantity;
-            if (currentValue < maxStock) {
-                qtyInput.value = currentValue + 1;
-            }
-        });
-
-        // Wishlist functionality
-        const wishlistBtn = document.querySelector('.wishlist-btn-action');
-        const productId = @Model.ProId;
-
-        // Check if product is in wishlist on load
-        fetch(`/Wishlist/IsInWishlist?productId=${productId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.inWishlist && wishlistBtn) {
-                    const icon = wishlistBtn.querySelector('i');
-                    if (icon) {
-                        icon.classList.remove('far');
-                        icon.classList.add('fas', 'text-danger');
-                    }
-                }
-            })
-            .catch(error => console.error('Error checking wishlist status:', error));
-
-        wishlistBtn?.addEventListener('click', function() {
-            const icon = this.querySelector('i');
-            const isInWishlist = icon.classList.contains('fas');
-
-            if (isInWishlist) {
-                // Remove from wishlist
-                fetch('/Wishlist/RemoveFromWishlist', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-                    },
-                    body: `productId=${productId}`
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        icon.classList.remove('fas', 'text-danger');
-                        icon.classList.add('far');
-                        showNotification(data.message || 'Removed from wishlist', 'info');
-                        updateWishlistCount();
-                    } else {
-                        showNotification(data.message || 'Failed to remove from wishlist', 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showNotification('Error removing from wishlist', 'error');
-                });
-            } else {
-                // Add to wishlist
-                fetch('/Wishlist/AddToWishlist', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-                    },
-                    body: `productId=${productId}`
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        icon.classList.remove('far');
-                        icon.classList.add('fas', 'text-danger');
-                        showNotification(data.message || 'Added to wishlist', 'success');
-                        updateWishlistCount();
-                    } else {
-                        showNotification(data.message || 'Failed to add to wishlist', 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showNotification('Error adding to wishlist', 'error');
+            const stage = main?.closest('.gallery-main');
+            if (stage && thumbs.length > 1) {
+                let startX = null, startY = 0;
+                stage.addEventListener('touchstart', e => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; }, { passive: true });
+                stage.addEventListener('touchend', e => {
+                    if (startX === null) return;
+                    const dx = e.changedTouches[0].clientX - startX;
+                    const dy = e.changedTouches[0].clientY - startY;
+                    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) show(current + (dx < 0 ? 1 : -1));
+                    startX = null;
                 });
             }
-        });
-
-        function updateWishlistCount() {
-            fetch('/Wishlist/GetWishlistCount')
-                .then(response => response.json())
-                .then(data => {
-                    const wishlistCountElements = document.querySelectorAll('.wishlist-count');
-                    wishlistCountElements.forEach(element => {
-                        element.textContent = data.count || 0;
-                    });
-                })
-                .catch(error => console.error('Error updating wishlist count:', error));
-        }
-
-        function showNotification(message, type) {
-            const toast = document.createElement('div');
-            toast.className = `toast align-items-center text-white bg-${type} border-0 position-fixed bottom-0 end-0 m-3`;
-            toast.style.zIndex = '1060';
-            toast.innerHTML = `
-                <div class="d-flex">
-                    <div class="toast-body">${message}</div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                </div>
-            `;
-            document.body.appendChild(toast);
-            const bsToast = new bootstrap.Toast(toast);
-            bsToast.show();
-            toast.addEventListener('hidden.bs.toast', () => {
-                toast.remove();
-            });
-        }
-
-        // Share functionality
-        const shareBtn = document.querySelector('.share-btn');
-        shareBtn?.addEventListener('click', function() {
-            if (navigator.share) {
-                navigator.share({
-                    title: '@Model.ProName',
-                    text: 'Check out this product!',
-                    url: window.location.href
+            const buyForm = document.getElementById('add-to-cart-form');
+            const buyBar = document.querySelector('.mobile-buy-bar');
+            if (buyForm && buyBar && 'IntersectionObserver' in window) {
+                new IntersectionObserver(entries => {
+                    buyBar.classList.toggle('is-hidden', entries[0].isIntersecting);
+                }).observe(buyForm);
+            }
+            document.querySelectorAll('[data-label-target]').forEach(input => {
+                input.addEventListener('change', () => {
+                    const label = document.querySelector('[data-selected-label="' + input.dataset.labelTarget + '"]');
+                    if (label) label.textContent = input.value;
                 });
-            } else {
-                // Fallback: copy to clipboard
-                navigator.clipboard.writeText(window.location.href);
-                alert('Link copied to clipboard!');
-            }
-        });
-
-        // Add to cart functionality (both buttons)
-        const addToCartForm = document.getElementById('addToCartForm');
-        const addToCartBtn = document.querySelector('.add-to-cart-btn-action');
-        const buyNowBtn = document.querySelector('.buy-now-btn');
-        const successMessage = document.getElementById('successMessage');
-        const errorMessage = document.getElementById('errorMessage');
-        const errorText = document.getElementById('errorText');
-
-        function addToCart(redirect = false) {
-            if (!addToCartForm) return;
-
-            const quantity = parseInt(qtyInput.value) || 1;
-            const productId = @Model.ProId;
-            const maxStock = @Model.StockQuantity;
-            const shippingOption = document.getElementById('shippingOption')?.value || 'Standard Shipping';
-
-            // Validate quantity
-            if (quantity < 1) {
-                showError('Please enter a valid quantity.');
-                return;
-            }
-
-            if (quantity > maxStock) {
-                showError(`Only ${maxStock} items available in stock.`);
-                return;
-            }
-
-            // Show loading state
-            const submitBtn = redirect ? buyNowBtn : addToCartBtn;
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
-            submitBtn.disabled = true;
-
-            // Get anti-forgery token
-            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
-
-            // Submit via AJAX
-            fetch('/Carts/AddToCart?ProId=' + productId + '&qty=' + quantity + '&shippingOption=' + encodeURIComponent(shippingOption), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'RequestVerificationToken': token
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Show success message
-                    successMessage.style.display = 'block';
-                    errorMessage.style.display = 'none';
-
-                    // Update cart count in header immediately using global function
-                    if (data.cartItemCount !== undefined) {
-                        if (typeof window.updateCartCount === 'function') {
-                            window.updateCartCount(data.cartItemCount);
-                        } else {
-                            // Fallback if global function not available
-                            const cartLink = document.getElementById('topcartlink');
-                            const cartBadge = cartLink ? cartLink.querySelector('span.cart-qty:not(.qty-input)') : null;
-                            if (cartBadge) {
-                                cartBadge.textContent = data.cartItemCount;
-                                cartBadge.style.display = 'flex';
-                            }
-                        }
-                    }
-
-                    // Reset button after 1 second
-                    setTimeout(() => {
-                        submitBtn.innerHTML = originalText;
-                        submitBtn.disabled = false;
-
-                        // Redirect if buy now
-                        if (redirect) {
-                            window.location.href = '/Carts/Index';
-                        }
-                    }, 1000);
-
-                    // Hide success message after 5 seconds
-                    setTimeout(() => {
-                        successMessage.style.display = 'none';
-                    }, 5000);
-                } else {
-                    showError(data.message || 'Failed to add to cart');
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showError('Failed to add item to cart. Please try again.');
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
             });
-        }
-
-        // Add to cart button
-        addToCartBtn?.addEventListener('click', function(e) {
-            e.preventDefault();
-            addToCart(false);
-        });
-
-        // Buy now button
-        buyNowBtn?.addEventListener('click', function(e) {
-            e.preventDefault();
-            addToCart(true);
-        });
-
-        // Form submit
-        if (addToCartForm) {
-            addToCartForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                addToCart(false);
-            });
-        }
-
-        // Function to show error messages
-        function showError(message) {
-            errorText.textContent = message;
-            errorMessage.style.display = 'block';
-            successMessage.style.display = 'none';
-
-            // Hide error after 5 seconds
-            setTimeout(() => {
-                errorMessage.style.display = 'none';
-            }, 5000);
-        }
-
-        // Function to update cart count in header
-        // Use global updateCartCount function
-        // No local function needed - use window.updateCartCount directly
-
-        // Input validation
-        qtyInput?.addEventListener('change', function() {
-            let value = parseInt(this.value);
-            const maxStock = @Model.StockQuantity;
-            if (isNaN(value) || value < 1) {
-                this.value = 1;
-            } else if (value > maxStock) {
-                this.value = maxStock;
-            }
-        });
-    });
-</script>
+        })();
+    </script>
+}

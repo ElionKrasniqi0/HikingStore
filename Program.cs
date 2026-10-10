@@ -1,73 +1,42 @@
 using HikingStore.Data;
 using HikingStore.Services;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString,
-        sqlServerOptions => sqlServerOptions
-            .EnableRetryOnFailure(
-                maxRetryCount: 5,
-                maxRetryDelay: TimeSpan.FromSeconds(30),
-                errorNumbersToAdd: null)
-            .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
+    options.UseSqlServer(connectionString, sqlServerOptions => sqlServerOptions
+        .EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null)
+        .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-// Configure Identity with email confirmation REQUIRED
-builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
-    options.SignIn.RequireConfirmedAccount = true; // ✅ REQUIRES email confirmation
+    options.SignIn.RequireConfirmedAccount = true;
+    options.SignIn.RequireConfirmedEmail = true;
     options.User.RequireUniqueEmail = true;
 
-    // SECURITY: Strong password requirements
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
-    options.Password.RequireNonAlphanumeric = true; // SECURITY: Require special characters
+    options.Password.RequireNonAlphanumeric = true;
     options.Password.RequireUppercase = true;
-    options.Password.RequiredLength = 8; // SECURITY: Increased minimum length
-    options.Password.RequiredUniqueChars = 2; // SECURITY: Require more unique characters
+    options.Password.RequiredLength = 8;
+    options.Password.RequiredUniqueChars = 2;
 
-    // SECURITY: Enhanced lockout settings for brute force protection
-    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15); // SECURITY: Increased lockout time
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
     options.Lockout.MaxFailedAccessAttempts = 5;
     options.Lockout.AllowedForNewUsers = true;
-    
-    // SECURITY: User account settings
-    options.User.RequireUniqueEmail = true;
-    options.SignIn.RequireConfirmedEmail = true; // SECURITY: Email confirmation required
 })
 .AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
-// Configure Email Services
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddLogging();
-builder.Services.AddMemoryCache();
-
-// Configure Application Cookie
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.AccessDeniedPath = "/Error/AccessDenied";
@@ -75,12 +44,12 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LogoutPath = "/Identity/Account/Logout";
     options.ExpireTimeSpan = TimeSpan.FromDays(30);
     options.SlidingExpiration = true;
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
 });
 
-// Configure Google Authentication
 var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
 var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-
 if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
 {
     builder.Services.AddAuthentication().AddGoogle(googleOptions =>
@@ -91,80 +60,71 @@ if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientS
         googleOptions.Scope.Add("email");
     });
 }
-// Configure Email Services - Use real email sender for both development and production
-// To use DevelopmentEmailSender (logs only), uncomment the development check below
-if (builder.Environment.IsDevelopment())
+
+builder.Services.Configure<StoreSettings>(builder.Configuration.GetSection("Store"));
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddMemoryCache();
+
+// Email: set EmailSettings:SenderEmail/SenderPassword to send real mail. Only in Development are emails logged instead
+// when unconfigured; elsewhere the SMTP sender fails loudly so missing configuration is never mistaken for delivery.
+if (builder.Environment.IsDevelopment() && string.IsNullOrEmpty(builder.Configuration["EmailSettings:SenderPassword"]))
 {
-    // Uncomment the line below to use DevelopmentEmailSender (logs only, doesn't send)
-    // builder.Services.AddTransient<IEmailSender, DevelopmentEmailSender>();
-    
-    // Use real EmailSender to actually send emails
-    builder.Services.AddTransient<IEmailSender, EmailSender>();
+    builder.Services.AddTransient<IEmailSender, DevelopmentEmailSender>();
 }
 else
 {
     builder.Services.AddTransient<IEmailSender, EmailSender>();
 }
 builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
-builder.Services.AddScoped<HikingStore.Services.SessionCartService>();
-builder.Services.AddScoped<HikingStore.Services.AdminAuditService>(); // SECURITY: Admin audit logging
-// Session and caching
+builder.Services.AddScoped<SessionCartService>();
+builder.Services.AddScoped<CouponService>();
+builder.Services.AddScoped<CartService>();
+builder.Services.AddScoped<OrderService>();
+builder.Services.AddScoped<CatalogService>();
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<ImageUploadService>();
+builder.Services.AddSingleton<OrderEmailService>();
+builder.Services.AddScoped<AdminAuditService>();
+
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.IdleTimeout = TimeSpan.FromDays(7);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
     options.Cookie.Name = ".HikingStore.Session";
 });
 
-// Response compression
 builder.Services.AddResponseCompression(options =>
 {
     options.EnableForHttps = true;
-    options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.BrotliCompressionProvider>();
-    options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProvider>();
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
 });
 
-// SignalR with authentication - OPTIMIZED for real-time performance
 builder.Services.AddSignalR(options =>
 {
     options.EnableDetailedErrors = builder.Environment.IsDevelopment();
-    options.MaximumReceiveMessageSize = 1024 * 1024; // 1MB
-    // Real-time optimizations
-    options.KeepAliveInterval = TimeSpan.FromSeconds(15); // Keep connection alive
-    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30); // Client timeout
-    options.HandshakeTimeout = TimeSpan.FromSeconds(15); // Handshake timeout
-    // Enable compression for better performance
-    options.EnableDetailedErrors = builder.Environment.IsDevelopment();
+    options.MaximumReceiveMessageSize = 64 * 1024;
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+    options.HandshakeTimeout = TimeSpan.FromSeconds(15);
 });
 
-// Controllers and Razor Pages with response caching
 builder.Services.AddControllersWithViews(options =>
 {
-    // Enable response caching for better real-time performance
-    options.CacheProfiles.Add("Default30", new Microsoft.AspNetCore.Mvc.CacheProfile
-    {
-        Duration = 30,
-        Location = Microsoft.AspNetCore.Mvc.ResponseCacheLocation.Any,
-        VaryByQueryKeys = new[] { "*" }
-    });
+    // Every POST/PUT/DELETE must carry a valid antiforgery token (form field or X-CSRF-TOKEN header).
+    options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
 });
 builder.Services.AddRazorPages();
 
-// Response caching service
-builder.Services.AddResponseCaching();
-
-// Add Antiforgery for security
 builder.Services.AddAntiforgery(options =>
 {
     options.HeaderName = "X-CSRF-TOKEN";
-    options.SuppressXFrameOptionsHeader = false;
 });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -176,64 +136,38 @@ else
     app.UseHsts();
 }
 
-// Custom error handling middleware
 app.Use(async (context, next) =>
 {
-    await next();
-
-    if (context.Response.StatusCode == 404 && !context.Response.HasStarted)
-    {
-        // Store original path for logging
-        context.Items["originalPath"] = context.Request.Path;
-        // Re-execute to error controller
-        context.Request.Path = "/Error/NotFound";
-        await next();
-    }
-});
-
-// Security Headers
-app.Use(async (context, next) =>
-{
-    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
-    context.Response.Headers.Append("X-Frame-Options", "DENY");
-    context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
-    context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
-    context.Response.Headers.Append("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
-    
-    // SECURITY: HSTS should only be set for HTTPS requests in production
-    if (context.Request.IsHttps && !app.Environment.IsDevelopment())
-    {
-        context.Response.Headers.Append("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
-    }
-    
+    var headers = context.Response.Headers;
+    headers.Append("X-Content-Type-Options", "nosniff");
+    headers.Append("X-Frame-Options", "DENY");
+    headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+    headers.Append("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
     await next();
 });
 
+app.UseResponseCompression();
 app.UseHttpsRedirection();
 app.UseStaticFiles(new StaticFileOptions
 {
-    // Cache static files for better performance
     OnPrepareResponse = ctx =>
     {
-        ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=31536000");
+        // Versioned assets (?v=) can be cached for a year; everything else for a day.
+        var maxAge = ctx.Context.Request.Query.ContainsKey("v") ? 31536000 : 86400;
+        ctx.Context.Response.Headers.Append("Cache-Control", $"public,max-age={maxAge}");
     }
 });
+app.UseStatusCodePagesWithReExecute("/Error/{0}");
 app.UseRouting();
 
-// SECURITY: Rate limiting middleware (after routing to check paths correctly)
 app.UseMiddleware<HikingStore.Middleware.RateLimitingMiddleware>();
 
+app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseSession();
-app.UseResponseCompression();
 
-// Custom status code pages
-app.UseStatusCodePagesWithReExecute("/Error/{0}");
-
-// Map endpoints
 app.MapControllerRoute(
-    name: "Admin",
+    name: "areas",
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
 app.MapControllerRoute(
@@ -242,19 +176,18 @@ app.MapControllerRoute(
 
 app.MapRazorPages();
 
-// SignalR Hubs - Real-time communication
 app.MapHub<HikingStore.Hubs.ChatHub>("/chatHub");
 app.MapHub<HikingStore.Hubs.RealtimeHub>("/realtimeHub");
 
-// Seed database with initial data
 try
 {
     await DbInitializer.InitializeAsync(app.Services);
 }
 catch (Exception ex)
 {
-    var logger = app.Services.GetRequiredService<ILogger<Program>>();
-    logger.LogError(ex, "An error occurred while seeding the database.");
+    app.Services.GetRequiredService<ILogger<Program>>().LogError(ex, "An error occurred while migrating or seeding the database.");
 }
 
 app.Run();
+
+public partial class Program { }

@@ -34,14 +34,20 @@ namespace HikingStore.Controllers
                 return View("Index");
             }
 
+            if (_emailSender is DevelopmentEmailSender)
+            {
+                ViewBag.Error = "Email isn't configured, so nothing can be sent. In development, emails are written to the application log instead. Set the SMTP settings below and restart the app.";
+                return View("Index");
+            }
+
             try
             {
                 await _emailSender.SendEmailAsync(
                     testEmail,
                     "Test Email from HikingStore",
-                    "<h2>Email Test Successful!</h2><p>If you received this email, your email configuration is working correctly.</p>");
+                    "<h2>Email test</h2><p>If you received this email, the HikingStore email configuration is working.</p>");
 
-                ViewBag.Success = $"Test email sent successfully to {testEmail}. Please check your inbox.";
+                ViewBag.Success = $"The SMTP server accepted the message for {testEmail}. Check that inbox (and its spam folder) to confirm delivery.";
                 _logger.LogInformation("Test email sent successfully to {Email}", testEmail);
             }
             catch (Exception ex)

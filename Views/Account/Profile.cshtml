@@ -1,0 +1,45 @@
+@model HikingStore.Controllers.ProfileInput
+@{
+    ViewData["Title"] = "Profile";
+    ViewData["NoIndex"] = true;
+    ViewData["AccountSection"] = "profile";
+}
+
+<div class="container-hs">
+    <div class="page-head"><h1>Profile</h1></div>
+    <div class="account-layout">
+        <partial name="_AccountNav" />
+        <section class="card-hs" style="max-width:640px">
+            <form method="post" data-once>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <label asp-for="FirstName" class="form-label"></label>
+                        <input asp-for="FirstName" class="form-control" autocomplete="given-name" />
+                        <span asp-validation-for="FirstName"></span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label asp-for="LastName" class="form-label"></label>
+                        <input asp-for="LastName" class="form-control" autocomplete="family-name" />
+                        <span asp-validation-for="LastName"></span>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" for="email">Email</label>
+                        <input id="email" class="form-control" value="@Model.Email" disabled aria-describedby="email-help" />
+                        <div id="email-help" class="form-text">To change your email, use <a asp-area="Identity" asp-page="/Account/Manage/Email">email settings</a> — we'll ask you to confirm the new address.</div>
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="PhoneNumber" class="form-label"></label>
+                        <input asp-for="PhoneNumber" class="form-control" autocomplete="tel" inputmode="tel" />
+                        <span asp-validation-for="PhoneNumber"></span>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-4" data-busy-text="Saving…">Save changes</button>
+            </form>
+        </section>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

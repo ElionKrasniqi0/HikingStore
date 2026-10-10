@@ -1,57 +1,49 @@
 ﻿@page
 @model TwoFactorAuthenticationModel
 @{
-    ViewData["Title"] = "Two-factor authentication (2FA)";
+    ViewData["Title"] = "Two-factor authentication";
     ViewData["ActivePage"] = ManageNavPages.TwoFactorAuthentication;
 }
 
 <partial name="_StatusMessage" for="StatusMessage" />
-<h3>@ViewData["Title"]</h3>
+<h2>Two-factor authentication</h2>
+
 @if (Model.Is2faEnabled)
 {
+    <p><span class="badge text-bg-success me-2">On</span>We'll ask for a code from your authenticator app when you sign in.</p>
     if (Model.RecoveryCodesLeft == 0)
     {
-        <div class="alert alert-danger">
-            <strong>You have no recovery codes left.</strong>
-            <p>You must <a asp-page="./GenerateRecoveryCodes">generate a new set of recovery codes</a> before you can log in with a recovery code.</p>
-        </div>
-    }
-    else if (Model.RecoveryCodesLeft == 1)
-    {
-        <div class="alert alert-danger">
-            <strong>You have 1 recovery code left.</strong>
-            <p>You can <a asp-page="./GenerateRecoveryCodes">generate a new set of recovery codes</a>.</p>
-        </div>
+        <div class="alert alert-danger" role="alert">You have no recovery codes left. <a asp-page="./GenerateRecoveryCodes">Generate a new set</a> before you can sign in with a recovery code.</div>
     }
     else if (Model.RecoveryCodesLeft <= 3)
     {
-        <div class="alert alert-warning">
-            <strong>You have @Model.RecoveryCodesLeft recovery codes left.</strong>
-            <p>You should <a asp-page="./GenerateRecoveryCodes">generate a new set of recovery codes</a>.</p>
-        </div>
+        <div class="alert alert-warning" role="alert">You have @Model.RecoveryCodesLeft recovery code@(Model.RecoveryCodesLeft == 1 ? "" : "s") left. <a asp-page="./GenerateRecoveryCodes">Generate a new set</a>.</div>
     }
-
-    if (Model.IsMachineRemembered)
-    {
-        <form method="post" style="display: inline-block">
-            <button type="submit" class="btn btn-default">Forget this browser</button>
-        </form>
-    }
-    <a asp-page="./Disable2fa" class="btn btn-default">Disable 2FA</a>
-    <a asp-page="./GenerateRecoveryCodes" class="btn btn-default">Reset recovery codes</a>
-}
-
-<h4>Authenticator app</h4>
-@if (!Model.HasAuthenticator)
-{
-    <a id="enable-authenticator" asp-page="./EnableAuthenticator" class="btn btn-default">Add authenticator app</a>
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        @if (Model.IsMachineRemembered)
+        {
+            <form method="post">
+                <button type="submit" class="btn btn-outline-secondary">Forget this browser</button>
+            </form>
+        }
+        <a asp-page="./GenerateRecoveryCodes" class="btn btn-outline-secondary">New recovery codes</a>
+        <a asp-page="./Disable2fa" class="btn btn-outline-danger">Turn off</a>
+    </div>
 }
 else
 {
-    <a id="enable-authenticator" asp-page="./EnableAuthenticator" class="btn btn-default">Setup authenticator app</a>
-    <a id="reset-authenticator" asp-page="./ResetAuthenticator" class="btn btn-default">Reset authenticator app</a>
+    <p class="text-muted">Add a second step to sign-in: after your password, you'll enter a 6-digit code from an authenticator app on your phone.</p>
 }
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+<h3 class="h6">Authenticator app</h3>
+<div class="d-flex flex-wrap gap-2">
+    @if (!Model.HasAuthenticator)
+    {
+        <a id="enable-authenticator" asp-page="./EnableAuthenticator" class="btn btn-primary">Set up authenticator app</a>
+    }
+    else
+    {
+        <a id="enable-authenticator" asp-page="./EnableAuthenticator" class="btn btn-primary">Set up on another app</a>
+        <a id="reset-authenticator" asp-page="./ResetAuthenticator" class="btn btn-outline-secondary">Reset key</a>
+    }
+</div>

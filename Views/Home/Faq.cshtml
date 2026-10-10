@@ -1,0 +1,88 @@
+@inject IOptions<StoreSettings> StoreOptions
+@{
+    var store = StoreOptions.Value;
+    ViewData["Title"] = "Frequently asked questions";
+    ViewData["Description"] = $"Answers about ordering, payment, delivery, returns and accounts at {store.Name}.";
+    ViewData["HelpSection"] = "Faq";
+    var standard = store.ShippingMethods.FirstOrDefault(m => m.FreeOverThreshold) ?? store.ShippingMethods.FirstOrDefault();
+    var groups = new (string Title, (string Q, string A)[] Items)[]
+    {
+        ("Ordering & payment", new[]
+        {
+            ("How do I pay?", "All orders are paid cash on delivery. You pay the courier, or our staff if you pick up in store, when you receive your items. We don't ask for card details online."),
+            ("Do I need an account to order?", "You can fill your cart without an account. To check out you sign in or create a free account, so you can follow your order and see your order history. Anything in your cart is kept when you sign in."),
+            ("Can I use a discount code?", "Yes. Enter it in your cart and the discount is applied straight away. Each code has its own conditions, such as a minimum order amount or an expiry date."),
+            ("Are prices shown with VAT?", "Yes, all prices include VAT. Your invoice shows the VAT amount.")
+        }),
+        ("Delivery", new[]
+        {
+            ("Where do you deliver?", "Kosovo, Albania, North Macedonia and Montenegro. You can also collect your order from our store in Prishtina."),
+            ("How much does delivery cost?", standard == null
+                ? $"Standard shipping is free over {store.FormatPrice(store.FreeShippingThreshold)}."
+                : $"{standard.Name} costs {store.FormatPrice(standard.Cost)} and is free on orders over {store.FormatPrice(store.FreeShippingThreshold)}. All options are listed on the shipping page."),
+            ("How do I track my order?", "Go to My orders. Each order shows its current status, the full tracking history and the tracking number once shipped. We also email you when the status changes.")
+        }),
+        ("Returns & cancellations", new[]
+        {
+            ("Can I cancel my order?", "Yes, from My orders, as long as it hasn't shipped yet."),
+            ("What is your return policy?", $"Unused items in their original packaging can be returned within {store.ReturnDays} days of delivery. Send us a return request through the contact form with your order number.")
+        }),
+        ("Products & account", new[]
+        {
+            ("How do I choose the right size?", "Sizes and colours available for each product are shown on its page. If you're unsure, send us a message with the product name and we'll help."),
+            ("Can I write a review?", "Yes — once you've ordered a product you can review it from its page. Reviews are checked by our team before they're published."),
+            ("How do I change my details or addresses?", "Under My account you can update your name and phone number and save delivery addresses for faster checkout.")
+        })
+    };
+    var index = 0;
+}
+
+@section Head {
+    <script type="application/ld+json">
+        @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new Dictionary<string, object>
+        {
+            ["@context"] = "https://schema.org",
+            ["@type"] = "FAQPage",
+            ["mainEntity"] = groups.SelectMany(g => g.Items).Select(i => new Dictionary<string, object>
+            {
+                ["@type"] = "Question",
+                ["name"] = i.Q,
+                ["acceptedAnswer"] = new Dictionary<string, object> { ["@type"] = "Answer", ["text"] = i.A }
+            })
+        }))
+    </script>
+}
+
+<div class="container-hs">
+    <nav class="breadcrumb-bar" aria-label="Breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">FAQ</li>
+        </ol>
+    </nav>
+    <div class="page-head"><h1>Frequently asked questions</h1></div>
+    <div class="help-layout">
+        <partial name="_HelpNav" />
+        <div class="faq prose">
+            @foreach (var group in groups)
+            {
+                <h2>@group.Title</h2>
+                <div class="accordion" id="faq-@index">
+                    @foreach (var (q, a) in group.Items)
+                    {
+                        index++;
+                        <div class="accordion-item">
+                            <h3 class="accordion-header font-body">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-a-@index" aria-expanded="false" aria-controls="faq-a-@index">@q</button>
+                            </h3>
+                            <div id="faq-a-@index" class="accordion-collapse collapse">
+                                <div class="accordion-body">@a</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            <p class="mt-5">Didn't find your answer? <a asp-action="Contact">Contact us</a> — we reply by email.</p>
+        </div>
+    </div>
+</div>

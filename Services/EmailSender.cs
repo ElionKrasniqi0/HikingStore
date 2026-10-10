@@ -11,13 +11,11 @@ namespace HikingStore.Services
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger<EmailSender> _logger;
-        private readonly IEmailTemplateService _emailTemplateService;
 
-        public EmailSender(IConfiguration configuration, ILogger<EmailSender> logger, IEmailTemplateService emailTemplateService)
+        public EmailSender(IConfiguration configuration, ILogger<EmailSender> logger)
         {
             _configuration = configuration;
             _logger = logger;
-            _emailTemplateService = emailTemplateService;
         }
 
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
@@ -38,7 +36,7 @@ namespace HikingStore.Services
                     _logger.LogError("❌ Email configuration is missing. SenderEmail: {SenderEmail}, Password: {HasPassword}", 
                         string.IsNullOrEmpty(fromEmail) ? "MISSING" : "SET", 
                         string.IsNullOrEmpty(fromPassword) ? "MISSING" : "SET");
-                    throw new Exception("Email configuration is missing. Please check your appsettings.json file.");
+                    throw new InvalidOperationException("Email is not configured. Set EmailSettings:SenderEmail and EmailSettings:SenderPassword with user secrets or environment variables.");
                 }
 
                 _logger.LogInformation("📧 Preparing to send email from {FromEmail} to {ToEmail}", fromEmail, email);

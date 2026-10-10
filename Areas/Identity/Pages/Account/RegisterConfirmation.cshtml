@@ -1,57 +1,22 @@
 ﻿@page
 @model RegisterConfirmationModel
 @{
-    ViewData["Title"] = "Registration Confirmation";
+    ViewData["Title"] = "Confirm your email";
+    ViewData["NoIndex"] = true;
 }
 
-<div class="min-vh-100 d-flex align-items-center justify-content-center bg-light py-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-6 col-md-8">
-                <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
-                    <div class="card-header bg-gradient-primary text-white text-center py-4 border-0">
-                        <div class="icon-wrapper bg-opacity-20 rounded-circle p-3 mx-auto mb-3">
-                            <i class="fas fa-envelope fa-lg text-white"></i>
-                        </div>
-                        <h2 class="h4 fw-bold mb-2">Check Your Email</h2>
-                        <p class="mb-0 opacity-75">We've sent a confirmation link to your email</p>
-                    </div>
-                    <div class="card-body p-5 text-center">
-                        <div class="mb-4">
-                            <i class="fas fa-envelope-open-text fa-4x text-primary mb-4"></i>
-                            <h3 class="h5 fw-bold text-dark mb-3">Confirm Your Email Address</h3>
-                            <p class="text-muted mb-4">
-                                We've sent a confirmation email to <strong>@Model.Email</strong>.
-                                Please check your inbox and click the confirmation link to activate your account.
-                            </p>
-                        </div>
-
-                        <div class="alert alert-info border-0 rounded-2 mb-4">
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-info-circle me-3 text-primary"></i>
-                                <div class="text-start">
-                                    <small class="fw-semibold">Didn't receive the email?</small>
-                                    <br>
-                                    <small>Check your spam folder or</small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <form id="resend-confirmation-form" method="post">
-                            <input type="hidden" asp-for="Email" />
-                            <button type="submit" class="btn btn-outline-primary btn-lg px-4">
-                                <i class="fas fa-redo me-2"></i>Resend Confirmation Email
-                            </button>
-                        </form>
-
-                        <div class="mt-4 pt-3 border-top">
-                            <a asp-page="./Login" class="text-primary fw-semibold text-decoration-none">
-                                <i class="fas fa-arrow-left me-2"></i>Back to Login
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<div class="container-hs">
+    <div class="auth-wrap">
+        <div class="card-hs">
+            <div class="auth-icon"><i class="fa-regular fa-envelope" aria-hidden="true"></i></div>
+            <h1>Confirm your email</h1>
+            <p class="text-muted">We've sent a confirmation link to <strong>@Model.Email</strong>. Open it to activate your account, then sign in.</p>
+            <p class="small text-muted mb-0">Nothing after a few minutes? Check your spam folder, or ask for a new link.</p>
+            <form asp-page="./ResendEmailConfirmation" method="post" class="auth-actions" data-once>
+                <input type="hidden" name="Input.Email" value="@Model.Email" />
+                <button type="submit" class="btn btn-outline-secondary" data-busy-text="Sending…">Send a new link</button>
+                <a asp-page="./Login" class="btn btn-primary">Go to sign in</a>
+            </form>
         </div>
     </div>
 </div>

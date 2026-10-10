@@ -1,0 +1,150 @@
+@model CatalogViewModel
+@inject IOptions<StoreSettings> StoreOptions
+@{
+    var p = ViewData["Prefix"] as string ?? "f";
+    var f = Model.Filter;
+    var symbol = StoreOptions.Value.CurrencySymbol;
+}
+<form method="get" asp-action="Shop" aria-label="Filter products">
+    @if (!string.IsNullOrEmpty(f.Q))
+    {
+        <input type="hidden" name="q" value="@f.Q" />
+    }
+    @if (f.Category.HasValue)
+    {
+        <input type="hidden" name="category" value="@f.Category" />
+    }
+    @if (f.Sort != "newest")
+    {
+        <input type="hidden" name="sort" value="@f.Sort" />
+    }
+
+    @if (Model.Categories.Count > 0)
+    {
+        <details class="filter-group" open>
+            <summary>Category</summary>
+            <div class="opts">
+                @{
+                    var allValues = f.ToRouteValues(page: 1);
+                    allValues.Remove("category");
+                }
+                <a class="cat-link @(f.Category == null ? "active" : "")" href="@Url.Action("Shop", new RouteValueDictionary(allValues.ToDictionary(k => k.Key, v => (object?)v.Value)))">All categories</a>
+                @foreach (var cat in Model.Categories)
+                {
+                    var values = f.ToRouteValues(page: 1);
+                    values["category"] = cat.CatId.ToString();
+                    <a class="cat-link @(f.Category == cat.CatId ? "active" : "")" href="@Url.Action("Shop", new RouteValueDictionary(values.ToDictionary(k => k.Key, v => (object?)v.Value)))"
+                       aria-current="@(f.Category == cat.CatId ? "true" : null)">
+                        <span>@cat.Name</span><span class="n">@cat.Count</span>
+                    </a>
+                    @foreach (var child in cat.Children)
+                    {
+                        var childValues = f.ToRouteValues(page: 1);
+                        childValues["category"] = child.CatId.ToString();
+                        <a class="cat-link sub @(f.Category == child.CatId ? "active" : "")" href="@Url.Action("Shop", new RouteValueDictionary(childValues.ToDictionary(k => k.Key, v => (object?)v.Value)))"
+                           aria-current="@(f.Category == child.CatId ? "true" : null)">
+                            <span>@child.Name</span><span class="n">@child.Count</span>
+                        </a>
+                    }
+                }
+            </div>
+        </details>
+    }
+
+    <details class="filter-group" open>
+        <summary>Price (@symbol)</summary>
+        <div class="d-flex gap-2 align-items-end mt-3">
+            <div>
+                <label class="form-label small" for="@p-min">Min</label>
+                <input class="form-control form-control-sm" id="@p-min" type="number" name="minPrice" min="0" step="1" inputmode="decimal"
+                       value="@f.MinPrice?.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)" placeholder="@Math.Floor(Model.PriceFloor)" />
+            </div>
+            <span class="pb-2">–</span>
+            <div>
+                <label class="form-label small" for="@p-max">Max</label>
+                <input class="form-control form-control-sm" id="@p-max" type="number" name="maxPrice" min="0" step="1" inputmode="decimal"
+                       value="@f.MaxPrice?.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)" placeholder="@Math.Ceiling(Model.PriceCeiling)" />
+            </div>
+        </div>
+    </details>
+
+    <details class="filter-group" open>
+        <summary>Availability &amp; offers</summary>
+        <div class="opts">
+            <label class="opt"><input class="form-check-input m-0" type="checkbox" name="inStock" value="true" @(f.InStock ? "checked" : "") data-auto-submit /> In stock only</label>
+            <label class="opt"><input class="form-check-input m-0" type="checkbox" name="onSale" value="true" @(f.OnSale ? "checked" : "") data-auto-submit /> On sale</label>
+        </div>
+    </details>
+
+    @if (Model.Brands.Count > 0)
+    {
+        <details class="filter-group" open>
+            <summary>Brand</summary>
+            <div class="opts">
+                @foreach (var brand in Model.Brands)
+                {
+                    <label class="opt">
+                        <input class="form-check-input m-0" type="checkbox" name="brand" value="@brand.Value" @(f.Brand.Contains(brand.Value, StringComparer.OrdinalIgnoreCase) ? "checked" : "") data-auto-submit />
+                        @brand.Label <span class="n">@brand.Count</span>
+                    </label>
+                }
+            </div>
+        </details>
+    }
+
+    @if (Model.Sizes.Count > 0)
+    {
+        <details class="filter-group" @(string.IsNullOrEmpty(f.Size) ? "" : "open")>
+            <summary>Size</summary>
+            <div class="chip-row mt-3">
+                <input type="radio" class="btn-check" name="size" id="@p-size-any" value="" @(string.IsNullOrEmpty(f.Size) ? "checked" : "") data-auto-submit />
+                <label class="chip" for="@p-size-any">Any</label>
+                @for (var i = 0; i < Model.Sizes.Count; i++)
+                {
+                    var size = Model.Sizes[i];
+                    <input type="radio" class="btn-check" name="size" id="@p-size-@i" value="@size" @(string.Equals(f.Size, size, StringComparison.OrdinalIgnoreCase) ? "checked" : "") data-auto-submit />
+                    <label class="chip" for="@p-size-@i">@size</label>
+                }
+            </div>
+        </details>
+    }
+
+    @if (Model.Colors.Count > 0)
+    {
+        <details class="filter-group" @(string.IsNullOrEmpty(f.Color) ? "" : "open")>
+            <summary>Colour</summary>
+            <div class="chip-row mt-3">
+                <input type="radio" class="btn-check" name="color" id="@p-color-any" value="" @(string.IsNullOrEmpty(f.Color) ? "checked" : "") data-auto-submit />
+                <label class="chip" for="@p-color-any">Any</label>
+                @for (var i = 0; i < Model.Colors.Count; i++)
+                {
+                    var color = Model.Colors[i];
+                    <input type="radio" class="btn-check" name="color" id="@p-color-@i" value="@color" @(string.Equals(f.Color, color, StringComparison.OrdinalIgnoreCase) ? "checked" : "") data-auto-submit />
+                    <label class="chip" for="@p-color-@i">@color</label>
+                }
+            </div>
+        </details>
+    }
+
+    <details class="filter-group" @(f.Rating.HasValue ? "open" : "")>
+        <summary>Customer rating</summary>
+        <div class="opts">
+            <label class="opt"><input class="form-check-input m-0" type="radio" name="rating" value="" @(f.Rating == null ? "checked" : "") data-auto-submit /> Any rating</label>
+            @foreach (var stars in new[] { 4, 3 })
+            {
+                <label class="opt">
+                    <input class="form-check-input m-0" type="radio" name="rating" value="@stars" @(f.Rating == stars ? "checked" : "") data-auto-submit />
+                    <partial name="_Stars" model="(double)stars" /> &amp; up
+                </label>
+            }
+        </div>
+    </details>
+
+    <div class="d-grid gap-2 mt-4">
+        <button type="submit" class="btn btn-primary">Apply filters</button>
+        @if (f.HasActiveFilters)
+        {
+            <a class="btn btn-outline-secondary" asp-action="Shop" asp-route-q="@f.Q">Clear filters</a>
+        }
+    </div>
+</form>

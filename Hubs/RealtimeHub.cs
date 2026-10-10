@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using HikingStore.Data;
 using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
 
 namespace HikingStore.Hubs
 {
@@ -12,12 +13,14 @@ namespace HikingStore.Hubs
     [Authorize]
     public class RealtimeHub : Hub
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ApplicationDbContext _context;
         private readonly ILogger<RealtimeHub> _logger;
 
-        public RealtimeHub(UserManager<IdentityUser> userManager, ILogger<RealtimeHub> logger)
+        public RealtimeHub(UserManager<ApplicationUser> userManager, ApplicationDbContext context, ILogger<RealtimeHub> logger)
         {
             _userManager = userManager;
+            _context = context;
             _logger = logger;
         }
 
@@ -86,7 +89,15 @@ namespace HikingStore.Hubs
                 userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
             }
 
-            if (userId != null)
+            if (userId == null)
+            {
+                return;
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            var allowed = user != null && (await _userManager.IsInRoleAsync(user, "Admin")
+                || await _context.Orders.AnyAsync(o => o.OrderId == orderId && o.UserId == userId));
+            if (allowed)
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, $"Order_{orderId}");
             }

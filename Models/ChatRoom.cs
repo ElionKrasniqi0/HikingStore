@@ -1,3 +1,4 @@
+using HikingStore.Data;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -12,12 +13,12 @@ namespace HikingStore.Models
         public string UserId { get; set; } = string.Empty;
 
         [ForeignKey("UserId")]
-        public virtual Microsoft.AspNetCore.Identity.IdentityUser? User { get; set; }
+        public virtual HikingStore.Data.ApplicationUser? User { get; set; }
 
         public string? AgentId { get; set; }
 
         [ForeignKey("AgentId")]
-        public virtual Microsoft.AspNetCore.Identity.IdentityUser? Agent { get; set; }
+        public virtual HikingStore.Data.ApplicationUser? Agent { get; set; }
 
         [Required]
         public string Subject { get; set; } = "General Inquiry";

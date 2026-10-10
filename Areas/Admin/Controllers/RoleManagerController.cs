@@ -1,113 +1,127 @@
 ﻿using HikingStore.Areas.Admin.ViewModel;
 using HikingStore.Data;
+using HikingStore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
-[Area("Admin")]
-[Authorize(Roles = "Admin")]
-public class RoleManagerController : Controller
+namespace HikingStore.Areas.Admin.Controllers
 {
-    private readonly RoleManager<IdentityRole> _roleManager;
-    private readonly UserManager<IdentityUser> _userManager;
-    private readonly ApplicationDbContext _context;
-    public RoleManagerController(RoleManager<IdentityRole> roleManager, ApplicationDbContext context, UserManager<IdentityUser> userManager)
+    [Area("Admin")]
+    [Authorize(Roles = DbInitializer.AdminRole)]
+    public class RoleManagerController : Controller
     {
-        _roleManager = roleManager;
-        _userManager = userManager;
-        _context = context;
-    }
-    [HttpGet]
-    public IActionResult Index()
-    {
-        ViewBag.roles = _roleManager.Roles.ToList();
-        return View();
-    }
-    [ValidateAntiForgeryToken]
-    [HttpPost]
-    public async Task<IActionResult> CreateRole(string roleName)
-    {
-        if (!await _roleManager.RoleExistsAsync(roleName))
+        private static readonly string[] ProtectedRoles = { DbInitializer.AdminRole, DbInitializer.UserRole };
+        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly AdminAuditService _audit;
+
+        public RoleManagerController(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, AdminAuditService audit)
         {
-            if (!string.IsNullOrEmpty(roleName))
+            _roleManager = roleManager;
+            _userManager = userManager;
+            _audit = audit;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Index()
+        {
+            ViewBag.roles = await _roleManager.Roles.AsNoTracking().OrderBy(r => r.Name).ToListAsync();
+            ViewBag.ProtectedRoles = ProtectedRoles;
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateRole(string roleName)
+        {
+            roleName = roleName?.Trim() ?? string.Empty;
+            if (roleName.Length is < 2 or > 50)
+            {
+                TempData["Error"] = "Role names must be 2–50 characters.";
+            }
+            else if (await _roleManager.RoleExistsAsync(roleName))
+            {
+                TempData["Error"] = $"The role “{roleName}” already exists.";
+            }
+            else
             {
                 await _roleManager.CreateAsync(new IdentityRole(roleName));
+                await _audit.LogAdminModificationAsync("Role", roleName, "CREATE");
+                TempData["Success"] = $"Role “{roleName}” created.";
             }
+            return RedirectToAction(nameof(Index));
         }
-        return RedirectToAction(nameof(Index));
-    }
-    [HttpGet]
-    public async Task<IActionResult> EditRole(string Id)
-    {
-        var role = await _roleManager.FindByIdAsync(Id);
-        if (role == null)
-        {
-            ViewBag.ErrorMsage = $"Role with Id = {Id} Cannot be found!";
-            return View("NotFound");
-        }
-        var model = new EditRoleNameViewModel
-        {
-            Id = role.Id,
-            RoleName = role.Name,
-        };
-        foreach (var user in _userManager.Users.ToList())
-        {
-            if (await _userManager.IsInRoleAsync(user, role.Name))
-            {
-                model.Users.Add(user.UserName);
-            }
-        }
-        return View(model);
-    }
-    public async Task<IActionResult> EditRoleConfirmed(string RoleName, string Id)
-    {
-        try
-        {
-            IdentityRole newRole = await _roleManager.FindByIdAsync(Id);
-            newRole.Name = RoleName;
-            await _roleManager.UpdateAsync(newRole);
-            return RedirectToAction("Index");
-        }
-        catch (Exception ex)
-        {
-            return NotFound(ex);
-        }
-    }
-    [ActionName("RemoveUserRole")]
-    [ValidateAntiForgeryToken]
-    [HttpPost]
-    public async Task<IActionResult> RemoveUserRole(Guid UserId, string roleName)
-    {
-        if (!String.IsNullOrEmpty(roleName))
-        {
-            if (await _roleManager.RoleExistsAsync(roleName))
-            {
-                var role = await _roleManager.FindByNameAsync(roleName);
-                var user = await _userManager.FindByIdAsync(UserId.ToString());
 
-                await _userManager.RemoveFromRoleAsync(user, roleName);
-            }
-        }
-        return RedirectToAction("EditRole", "Home", new { UserId = UserId.ToString() });
-    }
+        [HttpGet]
+        public async Task<IActionResult> EditRole(string id)
+        {
+            var role = await _roleManager.FindByIdAsync(id);
+            if (role == null) return NotFound();
 
-    public async Task<IActionResult> RemoveRole(string Id)
-    {
-        var role = await _roleManager.FindByIdAsync(Id);
-        if (role == null)
-        {
-            ViewBag.ErrorMessage = $"Role With Id = {Id} cannot be found!";
-            return NotFound(ViewBag);
+            var model = new EditRoleNameViewModel { Id = role.Id, RoleName = role.Name };
+            foreach (var user in await _userManager.GetUsersInRoleAsync(role.Name!))
+            {
+                model.Users.Add(user.Email ?? user.UserName ?? user.Id);
+            }
+            ViewBag.IsProtected = ProtectedRoles.Contains(role.Name);
+            return View(model);
         }
-        else
+
+        [HttpPost]
+        public async Task<IActionResult> EditRoleConfirmed(string id, string roleName)
         {
+            var role = await _roleManager.FindByIdAsync(id);
+            if (role == null) return NotFound();
+
+            roleName = roleName?.Trim() ?? string.Empty;
+            if (ProtectedRoles.Contains(role.Name))
+            {
+                TempData["Error"] = "Built-in roles can't be renamed.";
+            }
+            else if (roleName.Length is < 2 or > 50)
+            {
+                TempData["Error"] = "Role names must be 2–50 characters.";
+            }
+            else
+            {
+                var old = role.Name;
+                role.Name = roleName;
+                var result = await _roleManager.UpdateAsync(role);
+                if (result.Succeeded)
+                {
+                    await _audit.LogAdminModificationAsync("Role", id, "RENAME", old, roleName);
+                    TempData["Success"] = "Role renamed.";
+                    return RedirectToAction(nameof(Index));
+                }
+                TempData["Error"] = string.Join(" ", result.Errors.Select(e => e.Description));
+            }
+            return RedirectToAction(nameof(EditRole), new { id });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RemoveRole(string id)
+        {
+            var role = await _roleManager.FindByIdAsync(id);
+            if (role == null) return NotFound();
+
+            if (ProtectedRoles.Contains(role.Name))
+            {
+                TempData["Error"] = "Built-in roles can't be deleted.";
+                return RedirectToAction(nameof(Index));
+            }
+
             var result = await _roleManager.DeleteAsync(role);
             if (result.Succeeded)
             {
-                return RedirectToAction("Index");
+                await _audit.LogAdminDeletionAsync("Role", id, role.Name);
+                TempData["Success"] = $"Role “{role.Name}” deleted.";
             }
+            else
+            {
+                TempData["Error"] = string.Join(" ", result.Errors.Select(e => e.Description));
+            }
+            return RedirectToAction(nameof(Index));
         }
-        return View("Index");
     }
 }
-

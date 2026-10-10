@@ -1,0 +1,81 @@
+@model HikingStore.Controllers.AccountDashboardViewModel
+@inject IOptions<StoreSettings> StoreOptions
+@{
+    var store = StoreOptions.Value;
+    ViewData["Title"] = "My account";
+    ViewData["NoIndex"] = true;
+    ViewData["AccountSection"] = "overview";
+}
+
+<div class="container-hs">
+    <div class="page-head">
+        <h1>Hi @(string.IsNullOrWhiteSpace(Model.User.FirstName) ? "there" : Model.User.FirstName)</h1>
+        <p class="text-muted m-0">Signed in as @Model.User.Email</p>
+    </div>
+    <div class="account-layout">
+        <partial name="_AccountNav" />
+        <div class="d-flex flex-column gap-4">
+            <div class="stat-tiles">
+                <a class="stat-tile" asp-controller="Orders" asp-action="Index"><div class="v">@Model.OrderCount</div><div class="l">Orders</div></a>
+                <a class="stat-tile" asp-controller="Wishlist" asp-action="Index"><div class="v">@Model.WishlistCount</div><div class="l">Saved items</div></a>
+                <a class="stat-tile" asp-action="Addresses"><div class="v">@Model.AddressCount</div><div class="l">Saved addresses</div></a>
+            </div>
+
+            <section class="card-hs" aria-labelledby="recent-title">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 id="recent-title" class="m-0">Recent orders</h2>
+                    @if (Model.OrderCount > 0)
+                    {
+                        <a asp-controller="Orders" asp-action="Index">All orders</a>
+                    }
+                </div>
+                @if (Model.RecentOrders.Count == 0)
+                {
+                    <p class="text-muted">You haven't placed any orders yet.</p>
+                    <a class="btn btn-primary" asp-controller="Home" asp-action="Shop">Start shopping</a>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hs align-middle m-0">
+                            <thead><tr><th scope="col">Order</th><th scope="col">Date</th><th scope="col">Status</th><th scope="col" class="text-end">Total</th></tr></thead>
+                            <tbody>
+                                @foreach (var order in Model.RecentOrders)
+                                {
+                                    <tr>
+                                        <td><a asp-controller="Orders" asp-action="Details" asp-route-id="@order.OrderId">#@order.OrderNumber</a></td>
+                                        <td>@order.OrderDate.ToString("d MMM yyyy")</td>
+                                        <td><span class="status-badge status-@order.Status">@OrderEmailService.StatusLabel(order.Status)</span></td>
+                                        <td class="text-end">@store.FormatPrice(order.TotalAmount)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </section>
+
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <section class="card-hs h-100">
+                        <h2 class="h5">Profile</h2>
+                        <p class="mb-1">@(string.IsNullOrWhiteSpace(Model.User.DisplayName) ? "Add your name" : Model.User.DisplayName)</p>
+                        <p class="text-muted small">@Model.User.Email@(string.IsNullOrEmpty(Model.User.PhoneNumber) ? "" : " · " + Model.User.PhoneNumber)</p>
+                        <a class="btn btn-sm btn-outline-primary" asp-action="Profile">Edit profile</a>
+                    </section>
+                </div>
+                <div class="col-md-6">
+                    <section class="card-hs h-100">
+                        <h2 class="h5">Sign-in &amp; security</h2>
+                        <p class="text-muted small">Change your password, email address or turn on two-factor authentication.</p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a class="btn btn-sm btn-outline-primary" asp-area="Identity" asp-page="/Account/Manage/ChangePassword">Password</a>
+                            <a class="btn btn-sm btn-outline-secondary" asp-area="Identity" asp-page="/Account/Manage/Email">Email</a>
+                            <a class="btn btn-sm btn-outline-secondary" asp-area="Identity" asp-page="/Account/Manage/TwoFactorAuthentication">Two-factor</a>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

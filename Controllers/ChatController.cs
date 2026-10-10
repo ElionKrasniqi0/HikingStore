@@ -11,9 +11,9 @@ namespace HikingStore.Controllers
     public class ChatController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public ChatController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public ChatController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _userManager = userManager;
@@ -34,6 +34,7 @@ namespace HikingStore.Controllers
                 .OrderByDescending(cr => cr.LastMessageAt)
                 .ToListAsync();
 
+            ViewData["AccountSection"] = "chat";
             return View(chatRooms);
         }
 
@@ -69,8 +70,12 @@ namespace HikingStore.Controllers
                 msg.IsRead = true;
                 msg.ReadAt = DateTime.UtcNow;
             }
-            await _context.SaveChangesAsync();
+            if (unreadMessages.Count > 0)
+            {
+                await _context.SaveChangesAsync();
+            }
 
+            ViewData["AccountSection"] = "chat";
             return View(chatRoom);
         }
 
@@ -83,10 +88,13 @@ namespace HikingStore.Controllers
                 return Unauthorized();
             }
 
+            subject = subject?.Trim() ?? string.Empty;
+            if (subject.Length > 150) subject = subject[..150];
+
             var chatRoom = new ChatRoom
             {
                 UserId = userId,
-                Subject = string.IsNullOrWhiteSpace(subject) ? "General Inquiry" : subject,
+                Subject = subject.Length == 0 ? "General question" : subject,
                 Status = ChatRoomStatus.Open,
                 CreatedAt = DateTime.UtcNow,
                 LastMessageAt = DateTime.UtcNow
